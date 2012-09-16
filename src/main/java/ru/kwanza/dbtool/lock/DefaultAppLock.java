@@ -6,9 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-/**
- * @author Vasily Varabyou
- */
+
 class DefaultAppLock extends AppLock {
 
     DefaultAppLock(DBTool dbTool, String lockName) throws SQLException {

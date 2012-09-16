@@ -5,9 +5,6 @@ import ru.kwanza.dbtool.DBTool;
 import java.sql.CallableStatement;
 import java.sql.SQLException;
 
-/**
- * @author Vasily Varabyou
- */
 class OracleAppLock extends AppLock {
 
     private String lockHandle;

@@ -4,9 +4,7 @@ import ru.kwanza.dbtool.DBTool;
 
 import java.sql.*;
 
-/**
- * @author Vasily Varabyou
- */
+
 class MSSQLAppLock extends AppLock {
 
     MSSQLAppLock(DBTool dbTool, String lockName) throws SQLException {
