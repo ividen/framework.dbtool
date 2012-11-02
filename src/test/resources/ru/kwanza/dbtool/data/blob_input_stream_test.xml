@@ -1,0 +1,4 @@
+<dataset>
+    <test_blob id="1" value="[blob1]"/>
+    <test_blob id="2" value="[null]"/>
+</dataset>
