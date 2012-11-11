@@ -1,12 +1,17 @@
 package ru.kwanza.dbtool;
 
-import ru.kwanza.dbtool.lock.AppLock;
-import ru.kwanza.toolbox.fieldhelper.FieldHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.support.JdbcDaoSupport;
+import ru.kwanza.dbtool.blob.BlobInputStream;
+import ru.kwanza.dbtool.blob.BlobOutputStream;
+import ru.kwanza.dbtool.lock.AppLock;
+import ru.kwanza.toolbox.fieldhelper.FieldHelper;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -29,11 +34,9 @@ public class DBTool extends JdbcDaoSupport {
     protected void initDao() throws Exception {
         try {
             Connection conn = getConnection();
-            if ("Microsoft SQL Server".equalsIgnoreCase(
-                    conn.getMetaData().getDatabaseProductName())) {
+            if ("Microsoft SQL Server".equalsIgnoreCase(conn.getMetaData().getDatabaseProductName())) {
                 dbType = DBType.MSSQL;
-            } else if ("Oracle".equalsIgnoreCase(
-                    conn.getMetaData().getDatabaseProductName())) {
+            } else if ("Oracle".equalsIgnoreCase(conn.getMetaData().getDatabaseProductName())) {
                 dbType = DBType.ORACLE;
             } else {
                 dbType = DBType.OTHER;
@@ -61,13 +64,12 @@ public class DBTool extends JdbcDaoSupport {
         return SelectUtil.selectSet(getJdbcTemplate(), selectSQL, cls, inValues);
     }
 
-    public <K, V> Map<K, List<V>> selectMapList(String selectSQL, RowMapper<KeyValue<K, V>> rowMapper,
-            Object... inValues) {
+    public <K, V> Map<K, List<V>> selectMapList(String selectSQL, RowMapper<KeyValue<K, V>> rowMapper, Object... inValues) {
         return SelectUtil.selectMapList(getJdbcTemplate(), selectSQL, rowMapper, inValues);
     }
 
     public <K0, K, V> Map<K0, Map<K, V>> selectMapOfMaps(String selectSQL, RowMapper<KeyValue<K0, KeyValue<K, V>>> rowMapper,
-            Object... inValues) {
+                                                         Object... inValues) {
         return SelectUtil.selectMapOfMaps(getJdbcTemplate(), selectSQL, rowMapper, inValues);
     }
 
@@ -80,15 +82,12 @@ public class DBTool extends JdbcDaoSupport {
         return UpdateUtil.batchUpdate(getJdbcTemplate(), updateSQL, objects, updateSetter);
     }
 
-    public <T, K extends Comparable, V> long update(String updateSQL,
-            Collection<T> objects,
-            UpdateSetterWithVersion<T, V> updateSetter,
-            String checkSQL,
-            RowMapper<KeyValue<K, V>> keyVersionMapper,
-            FieldHelper.Field<T, K> keyField,
-            FieldHelper.VersionField<T, V> versionField) throws UpdateException {
-        return UpdateUtil.batchUpdate(getJdbcTemplate(), updateSQL, objects, updateSetter, checkSQL,
-                keyVersionMapper, keyField, versionField);
+    public <T, K extends Comparable, V> long update(String updateSQL, Collection<T> objects, UpdateSetterWithVersion<T, V> updateSetter,
+                                                    String checkSQL, RowMapper<KeyValue<K, V>> keyVersionMapper,
+                                                    FieldHelper.Field<T, K> keyField, FieldHelper.VersionField<T, V> versionField)
+            throws UpdateException {
+        return UpdateUtil
+                .batchUpdate(getJdbcTemplate(), updateSQL, objects, updateSetter, checkSQL, keyVersionMapper, keyField, versionField);
     }
 
     public AppLock getLock(String lockName) {
@@ -105,6 +104,16 @@ public class DBTool extends JdbcDaoSupport {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public BlobInputStream getBlobInputStream(String tableName, String fieldName, Collection<KeyValue<String, Object>> conditions)
+            throws IOException {
+        return BlobInputStream.create(this, tableName, fieldName, conditions);
+    }
+
+    public BlobOutputStream getBlobOutputStream(String tableName, String fieldName, Collection<KeyValue<String, Object>> conditions)
+            throws IOException {
+        return BlobOutputStream.create(this, tableName, fieldName, conditions);
     }
 
     public DBType getDbType() {
@@ -131,9 +140,15 @@ public class DBTool extends JdbcDaoSupport {
                         ((Statement) o).close();
                     } else if (o instanceof AppLock) {
                         ((AppLock) o).close();
+                    } else if (o instanceof InputStream) {
+                        ((InputStream) o).close();
+                    } else if (o instanceof OutputStream) {
+                        ((OutputStream) o).close();
                     }
                 }
             } catch (SQLException e) {
+                logger.error(e.getMessage(), e);
+            } catch (IOException e) {
                 logger.error(e.getMessage(), e);
             }
         }
