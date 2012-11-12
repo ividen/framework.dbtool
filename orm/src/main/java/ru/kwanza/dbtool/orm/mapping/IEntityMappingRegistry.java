@@ -7,12 +7,6 @@ import java.util.Collection;
  */
 public interface IEntityMappingRegistry {
 
-    String getCreateSql(Class entityClass);
-
-    String getUpdateSql(Class entityClass);
-
-    String getDeleteSql(Class entityClass);
-
     String getTableName(Class entityClass);
 
     String getTableName(String entityName);
@@ -26,4 +20,16 @@ public interface IEntityMappingRegistry {
     Collection<FieldMapping> getFieldMapping(Class entityClass);
 
     Collection<FieldMapping> getFieldMapping(String entityName);
+
+    Collection<FieldMapping> getIDFields(Class entityClass);
+
+    Collection<FieldMapping> getIDFields(String entityName);
+
+    FieldMapping getVersionField(Class entityClass);
+
+    FieldMapping getVersionField(String entityName);
+
+    Collection<FetchMapping> getFetchMapping(Class entityClass);
+
+    Collection<FetchMapping> getFetchMapping(String entityName);
 }
