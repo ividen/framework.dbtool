@@ -1,7 +1,7 @@
 package ru.kwanza.dbtool.orm;
 
-import ru.kwanza.dbtool.orm.mapping.Entity;
-import ru.kwanza.dbtool.orm.mapping.Field;
+import ru.kwanza.dbtool.orm.annotations.Entity;
+import ru.kwanza.dbtool.orm.annotations.Field;
 
 /**
  * @author Alexander Guzanov

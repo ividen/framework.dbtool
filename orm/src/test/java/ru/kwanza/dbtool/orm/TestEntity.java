@@ -1,8 +1,8 @@
 package ru.kwanza.dbtool.orm;
 
-import ru.kwanza.dbtool.orm.mapping.Entity;
-import ru.kwanza.dbtool.orm.mapping.Field;
-import ru.kwanza.dbtool.orm.mapping.VersionField;
+import ru.kwanza.dbtool.orm.annotations.Entity;
+import ru.kwanza.dbtool.orm.annotations.Field;
+import ru.kwanza.dbtool.orm.annotations.VersionField;
 
 import java.sql.Types;
 

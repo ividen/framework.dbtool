@@ -1,9 +1,9 @@
-package ru.kwanza.dbtool.orm.mapping;
+package ru.kwanza.dbtool.orm.annotations;
 
 /**
  * @author Alexander Guzanov
  */
-public @interface IdField {
+public @interface Field {
 
     String columnName() default "";
 
