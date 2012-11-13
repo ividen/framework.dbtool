@@ -1,10 +1,11 @@
-package ru.kwanza.dbtool.core;
+package ru.kwanza.dbtool.core.util;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.PreparedStatementCallback;
 import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.support.SQLExceptionTranslator;
+import ru.kwanza.dbtool.core.UpdateSetter;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -14,7 +15,7 @@ import java.util.Iterator;
 /**
  * @author Guzanov Alexander
  */
-class BatchPreparedStatementCallable<T> implements PreparedStatementCallback, PreparedStatementCreator {
+public class BatchPreparedStatementCallable<T> implements PreparedStatementCallback, PreparedStatementCreator {
     private final UpdateSetter setter;
     private final SQLExceptionTranslator exeptionTranslator;
     private final Collection<T> objects;

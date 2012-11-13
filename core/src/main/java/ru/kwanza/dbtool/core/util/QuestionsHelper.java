@@ -1,10 +1,13 @@
-package ru.kwanza.dbtool.core;
+package ru.kwanza.dbtool.core.util;
 
 /**
  * @author Guzanov Alexander
  */
-abstract class QuestionsHelper {
+public final  class QuestionsHelper {
     static final int MAX_SELECT_IN = 1000;
+
+    private QuestionsHelper() {
+    }
 
     /**
      * 1,2,4,8,16,32,64,128,256,512,1000

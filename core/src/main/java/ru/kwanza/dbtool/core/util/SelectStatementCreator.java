@@ -1,8 +1,9 @@
-package ru.kwanza.dbtool.core;
+package ru.kwanza.dbtool.core.util;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.*;
+import ru.kwanza.dbtool.core.SqlCollectionParameterValue;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -12,7 +13,7 @@ import java.util.Collection;
 /**
  * @author Guzanov Alexander
  */
-class SelectStatementCreator implements PreparedStatementCreator, ParameterDisposer {
+public class SelectStatementCreator implements PreparedStatementCreator, ParameterDisposer {
     private String sql;
     private Object[] params;
 
@@ -64,14 +65,18 @@ class SelectStatementCreator implements PreparedStatementCreator, ParameterDispo
                 if (arg instanceof Collection) {
                     Collection entries = (Collection) arg;
                     int nullableCount = 0;
+                    int type = SqlTypeValue.TYPE_UNKNOWN;
+                    if (entries instanceof SqlCollectionParameterValue) {
+                        type = ((SqlCollectionParameterValue) entries).getSqlType();
+                    }
                     for (Object entry : entries) {
-                        doSetValue(ps, parameterPosition, entry);
+                        StatementCreatorUtils.setParameterValue(ps, parameterPosition, type, entry);
                         parameterPosition++;
                         nullableCount++;
                     }
 
                     for (int k = nullableCount; k < QuestionsHelper.getCountOfQuestions(entries.size()); k++) {
-                        doSetValue(ps, parameterPosition, null);
+                        StatementCreatorUtils.setParameterValue(ps, parameterPosition, type, null);
                         parameterPosition++;
 
                     }

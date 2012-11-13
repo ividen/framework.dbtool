@@ -2,6 +2,7 @@ package ru.kwanza.dbtool.core;
 
 import junit.framework.Assert;
 import junit.framework.TestCase;
+import ru.kwanza.dbtool.core.util.UpdateUtil;
 import ru.kwanza.toolbox.fieldhelper.FieldHelper;
 
 import java.util.HashSet;
@@ -9,7 +10,7 @@ import java.util.List;
 import java.util.Set;
 
 import static java.util.Arrays.asList;
-import static ru.kwanza.dbtool.core.UpdateUtil.getSortedList;
+import static ru.kwanza.dbtool.core.util.UpdateUtil.getSortedList;
 
 /**
  * @author Dmitry Zagorovsky

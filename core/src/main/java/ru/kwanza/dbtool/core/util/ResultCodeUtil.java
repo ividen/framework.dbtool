@@ -1,12 +1,12 @@
-package ru.kwanza.dbtool.core;
+package ru.kwanza.dbtool.core.util;
 
 import java.util.Arrays;
 
 /**
  * @author Guzanov Alexander
  */
-class ResultCodeUtil {
-    static Object processResult(int[] resultCode, Skip skip, int totalCount) {
+public class ResultCodeUtil {
+    public static Object processResult(int[] resultCode, Skip skip, int totalCount) {
         if (skip == null) {
             return resultCode;
         }

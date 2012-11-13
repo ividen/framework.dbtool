@@ -7,6 +7,8 @@ import org.springframework.jdbc.core.support.JdbcDaoSupport;
 import ru.kwanza.dbtool.core.blob.BlobInputStream;
 import ru.kwanza.dbtool.core.blob.BlobOutputStream;
 import ru.kwanza.dbtool.core.lock.AppLock;
+import ru.kwanza.dbtool.core.util.SelectUtil;
+import ru.kwanza.dbtool.core.util.UpdateUtil;
 import ru.kwanza.toolbox.fieldhelper.FieldHelper;
 
 import java.io.IOException;

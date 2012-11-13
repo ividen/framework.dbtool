@@ -25,7 +25,8 @@ public class UpdateException extends Exception {
         super(cause);
     }
 
-    public UpdateException(List constrainted, List optimistic, long updateCount) {
+    public UpdateException(String msg, List constrainted, List optimistic, long updateCount) {
+        this(msg);
         this.constrainted = constrainted;
         this.optimistic = optimistic;
         this.updateCount = updateCount;

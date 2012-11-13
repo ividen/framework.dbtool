@@ -1,10 +1,11 @@
-package ru.kwanza.dbtool.core;
+package ru.kwanza.dbtool.core.util;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.PreparedStatementCallback;
 import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.support.SQLExceptionTranslator;
+import ru.kwanza.dbtool.core.UpdateSetterWithVersion;
 import ru.kwanza.toolbox.fieldhelper.FieldHelper;
 
 import java.sql.*;
@@ -13,7 +14,7 @@ import java.util.*;
 /**
  * @author Guzanov Alexander
  */
-class BatchPreparedStatementCallableWithVersion<T, K, V> implements PreparedStatementCallback, PreparedStatementCreator {
+public class BatchPreparedStatementCallableWithVersion<T, K, V> implements PreparedStatementCallback, PreparedStatementCreator {
     private UpdateSetterWithVersion setter;
     private FieldHelper.VersionField versionField;
     private FieldHelper.Field<T, K> keyField;
@@ -163,7 +164,7 @@ class BatchPreparedStatementCallableWithVersion<T, K, V> implements PreparedStat
         return versions;
     }
 
-    static class VersionPair {
+    public static class VersionPair {
         Object newValue;
         Object oldValue;
     }

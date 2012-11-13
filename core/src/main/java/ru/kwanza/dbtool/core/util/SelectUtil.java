@@ -1,14 +1,15 @@
-package ru.kwanza.dbtool.core;
+package ru.kwanza.dbtool.core.util;
 
 import org.springframework.jdbc.core.*;
+import ru.kwanza.dbtool.core.KeyValue;
 
 import java.util.*;
 
 /**
  * @author Guzanov Alexander
  */
-class SelectUtil {
-    private interface Container<U> {
+public class SelectUtil {
+    public static interface Container<U> {
         public void add(U object);
     }
 
@@ -100,7 +101,7 @@ class SelectUtil {
         return result;
     }
 
-    private static void batchSelect(JdbcOperations template, String selectSQL, ResultSetExtractor extractor, Container result,
+    public static void batchSelect(JdbcOperations template, String selectSQL, ResultSetExtractor extractor, Container result,
                                     Object[] inValues) {
         int lastListParam = -1;
         int[] index = new int[inValues.length];
@@ -162,7 +163,7 @@ class SelectUtil {
         for (int i = 0; i < params.length; i++) {
             Object obj = params[i];
             if ((obj instanceof Collection) && !(obj instanceof List)) {
-                result[i] = new ArrayList((Collection) obj);
+                    result[i] = new ArrayList((Collection) obj);
             } else {
                 result[i] = obj;
             }

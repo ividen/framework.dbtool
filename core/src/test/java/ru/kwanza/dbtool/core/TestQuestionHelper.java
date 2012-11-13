@@ -1,6 +1,7 @@
 package ru.kwanza.dbtool.core;
 
 import junit.framework.TestCase;
+import ru.kwanza.dbtool.core.util.QuestionsHelper;
 
 /**
  * @author Guzanov Alexander

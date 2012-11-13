@@ -1,9 +1,9 @@
-package ru.kwanza.dbtool.core;
+package ru.kwanza.dbtool.core.util;
 
 /**
  * @author Guzanov Alexander
  */
-final class Skip {
+public final class Skip {
     public static final int SKIPPED = -4;
 
     int index;

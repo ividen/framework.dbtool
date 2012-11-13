@@ -1,9 +1,10 @@
-package ru.kwanza.dbtool.core;
+package ru.kwanza.dbtool.core.util;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import ru.kwanza.dbtool.core.*;
 import ru.kwanza.toolbox.fieldhelper.FieldHelper;
 
 import java.util.*;
@@ -11,7 +12,7 @@ import java.util.*;
 /**
  * @author Guzanov Alexander
  */
-class UpdateUtil {
+public class UpdateUtil {
     public static final Logger logger = LoggerFactory.getLogger(DBTool.class);
 
     public static <T> long batchUpdate(JdbcTemplate template, String updateSQL, final Collection<T> objects,
@@ -27,10 +28,9 @@ class UpdateUtil {
         }
 
         if (!action.getConstrained().isEmpty()) {
-            UpdateException ex = new UpdateException("Has some constrained violation!");
-            ex.setConstrainted(action.getConstrained());
-            ex.setUpdateCount(action.getResult());
-            throw ex;
+            throw new UpdateException("Has some constrained violation!",
+                    action.getConstrained(), null, action.getResult());
+
         }
 
         return action.getResult();
@@ -72,20 +72,17 @@ class UpdateUtil {
 
         UpdateException ex;
         if (!action.getConstrained().isEmpty() || !action.getOptimistic().isEmpty()) {
-            ex = new UpdateException("Has some violation!");
-            ex.setConstrainted(action.getConstrained());
-            ex.setOptimistic(action.getOptimistic());
-            ex.setUpdateCount(result);
-            throw ex;
+            throw new UpdateException("Has some constrained violation!",
+                    action.getConstrained(), action.getOptimistic(), action.getResult());
         }
 
         return result;
 
     }
 
-    static <T, F extends Comparable<F>> List<T> getSortedList(Collection<T> collection, FieldHelper.Field<T, F> keyField) {
+    public static <T, F extends Comparable<F>> List<T> getSortedList(Collection<T> collection, FieldHelper.Field<T, F> keyField) {
         List<T> list;
-        //TODO проверять или всегда перепаковывать?
+
         if (collection instanceof List) {
             list = (List<T>) collection;
         } else {
@@ -97,11 +94,11 @@ class UpdateUtil {
         return list;
     }
 
-    static class ObjectByKeyComparator<T, F extends Comparable<F>> implements Comparator<T> {
+    public static class ObjectByKeyComparator<T, F extends Comparable<F>> implements Comparator<T> {
 
         private FieldHelper.Field<T, F> keyField;
 
-        ObjectByKeyComparator(FieldHelper.Field<T, F> keyField) {
+        public ObjectByKeyComparator(FieldHelper.Field<T, F> keyField) {
             this.keyField = keyField;
         }
 
