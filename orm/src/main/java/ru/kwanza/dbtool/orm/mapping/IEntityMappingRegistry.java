@@ -32,4 +32,9 @@ public interface IEntityMappingRegistry {
     Collection<FetchMapping> getFetchMapping(Class entityClass);
 
     Collection<FetchMapping> getFetchMapping(String entityName);
+
+    FieldMapping getFieldByPropertyName(String entityName, String fieldName);
+
+    FieldMapping getFieldByPropertyName(Class entityClass, String fieldName);
+
 }

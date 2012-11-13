@@ -15,7 +15,7 @@ abstract class QuestionsHelper {
     static {
         int last = 1;
         int prev = 0;
-        StringBuffer question = new StringBuffer("");
+        StringBuilder question = new StringBuilder("");
         for (int i = 0; i < questions.length; i++) {
             for (int j = prev; j < last; j++) {
                 question.append("?,");

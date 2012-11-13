@@ -24,7 +24,7 @@ class SelectStatementCreator implements PreparedStatementCreator, ParameterDispo
     }
 
     public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
-        StringBuffer buffer = new StringBuffer(sql);
+        StringBuilder buffer = new StringBuilder(sql);
         int lastIndex = 0;
         for (int i = 0; i < params.length; i++) {
             Object o = params[i];
