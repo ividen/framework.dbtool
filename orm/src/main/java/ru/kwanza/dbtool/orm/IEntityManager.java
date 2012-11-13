@@ -28,4 +28,6 @@ public interface IEntityManager {
     <T> IQueryBuilder<T> queryBuilder(Class<T> clazz);
 
     IEntityBatcher newBatcher();
+
+    IFetcher getFetcher();
 }
