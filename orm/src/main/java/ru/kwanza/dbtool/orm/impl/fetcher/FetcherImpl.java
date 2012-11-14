@@ -35,8 +35,9 @@ public class FetcherImpl implements IFetcher {
         scan(chars, 0);
     }
 
-    private enum Status{
-        EXPECT_WORD
+    private enum Status {
+        EXPECT_WORD,
+        EXPECT_DELIM
     }
 
     public int scan(char[] chars, int from) {
@@ -44,18 +45,22 @@ public class FetcherImpl implements IFetcher {
         int marker = from - 1;
         int i;
         String propertyName = null;
-        Status status
+        Status status = Status.EXPECT_WORD;
         for (i = from; i < chars.length; i++) {
             char c = chars[i];
             if (c == ',') {
-                if (marker - prev <= 0) {
-                    throw new IllegalArgumentException("Path expression is not valid!");
+                if (status == Status.EXPECT_WORD) {
+                    if (marker - prev <= 0) {
+                        throw new IllegalArgumentException("Path expression is not valid!");
+                    }
+                    propertyName = new String(chars, prev + 1, marker - prev);
+                    System.out.println(propertyName);
+                } else {
+                    status = Status.EXPECT_WORD;
                 }
-                propertyName = new String(chars, prev + 1, marker - prev);
-                System.out.println(propertyName);
+
                 prev = i;
                 marker = i;
-
             } else if (c == '{') {
                 if (marker - prev <= 0) {
                     throw new IllegalArgumentException("Path expression is not valid!");
@@ -64,13 +69,19 @@ public class FetcherImpl implements IFetcher {
                 System.out.println(propertyName);
 
                 i = marker = prev = scan(chars, i + 1);
+                status = Status.EXPECT_DELIM;
             } else if (c == '}') {
-                if (marker - prev <= 0) {
+                if (status == Status.EXPECT_WORD) {
+                    if (marker - prev <= 0) {
+                        throw new IllegalArgumentException("Path expression is not valid!");
+                    }
+                    propertyName = new String(chars, prev + 1, marker - prev);
+                    System.out.println(propertyName);
+                }
+                if (from == 0) {
                     throw new IllegalArgumentException("Path expression is not valid!");
                 }
-                propertyName = new String(chars, prev + 1, marker - prev);
-                System.out.println(propertyName);
-               return i;
+                return i;
             } else if (c == ' ' || c == '\n' || c == '\t') {
                 if (marker == prev) {
                     prev++;
@@ -90,10 +101,30 @@ public class FetcherImpl implements IFetcher {
     }
 
     public static void main(String[] args) {
-//        System.out.println("----------------------------------------------------------");
-//        new FetcherImpl().scan("  a           ,  d   , d,dfddd                 ,   sd");
         System.out.println("----------------------------------------------------------");
-        new FetcherImpl().scan("a{b{c}},d");
-//        "([a-zA-Z0-9]+(\\{(.*)\\})?)";
+
+        System.out.println("----------------------------------------------------------");
+
+        System.out.println("----------------------------------------------------------");
+
+        System.out.println("----------------------------------------------------------");
+
+        System.out.println("----------------------------------------------------------");
+
+        System.out.println("----------------------------------------------------------");
+
+        System.out.println("----------------------------------------------------------");
+
+        System.out.println("----------------------------------------------------------");
+
+
+        System.out.println("----------------------------------------------------------");
+
+
+        System.out.println("----------------------------------------------------------");
+
+
+        System.out.println("----------------------------------------------------------");
+
     }
 }
