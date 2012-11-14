@@ -3,16 +3,20 @@ package ru.kwanza.dbtool.orm.impl.fetcher;
 import ru.kwanza.dbtool.orm.IQuery;
 import ru.kwanza.dbtool.orm.mapping.FetchMapping;
 import ru.kwanza.dbtool.orm.mapping.FieldMapping;
+import ru.kwanza.toolbox.fieldhelper.FieldHelper;
+
+import java.util.Collection;
+import java.util.Set;
 
 /**
-* @author Alexander Guzanov
-*/
+ * @author Alexander Guzanov
+ */
 class RelationValue {
     private FieldMapping idField;
     private FetchMapping fetchMapping;
     private IQuery fetchQuery;
 
-    RelationValue(FieldMapping idField,FetchMapping fetchMapping, IQuery fetchQuery) {
+    RelationValue(FieldMapping idField, FetchMapping fetchMapping, IQuery fetchQuery) {
         this.idField = idField;
         this.fetchMapping = fetchMapping;
         this.fetchQuery = fetchQuery;
@@ -28,5 +32,18 @@ class RelationValue {
 
     public IQuery getFetchQuery() {
         return fetchQuery;
+    }
+
+
+    public Set getRelationIds(Collection objs) {
+        return FieldHelper.getFieldSet(objs, new FieldHelper.Field() {
+            public Object value(Object object) {
+                return fetchMapping.getField().getValue(object);
+            }
+        });
+    }
+
+    public String getIDGroupingField() {
+        return idField.getFieldName();
     }
 }

@@ -9,6 +9,7 @@ import ru.kwanza.dbtool.orm.mapping.FieldMapping;
 import ru.kwanza.dbtool.orm.mapping.IEntityMappingRegistry;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -29,12 +30,51 @@ public class FetcherImpl implements IFetcher {
         PathValue value = pathCache.get(key);
 
         if (value != null) {
-            Map<String, Object> scan = new RelationPathScanner(relationPath).scan();
-            value = new PathValue();
-            constructPath(key.getEntityClass(), value, scan);
-        } else {
-
+            value = constructPathValue(relationPath, key);
         }
+
+        fillItems(items, value);
+    }
+
+
+    private <T> void fillItems(Collection<T> items, PathValue value) {
+        Map<RelationKey, Map> results = new HashMap<RelationKey, Map>(value.getRelationKeys().size());
+
+        for (RelationKey relationKey : value.getRelationKeys()) {
+            RelationValue relationValue = relationCache.get(relationKey);
+            Map<Object, Object> map = relationValue.getFetchQuery()
+                    .setParameter(1, relationValue.getRelationIds(items))
+                    .selectMap(relationValue.getIDGroupingField());
+            results.put(relationKey, map);
+        }
+
+        for (T object : items) {
+            for (Map.Entry<RelationKey, Map> entry : results.entrySet()) {
+                RelationKey key = entry.getKey();
+                Map realtion = entry.getValue();
+                RelationValue relationValue = relationCache.get(key);
+                FetchMapping fetchMapping = relationValue.getFetchMapping();
+                Object relationIDValue = fetchMapping.getField().getValue(object);
+                if (relationIDValue != null) {
+                    Object relationObjValue = realtion.get(relationIDValue);
+                    if (relationObjValue != null) {
+                        fetchMapping.getFetchField().setValue(object, relationObjValue);
+                    }
+                }
+            }
+        }
+    }
+
+    private PathValue constructPathValue(String relationPath, PathKey key) {
+        PathValue value;
+        Map<String, Object> scan = new RelationPathScanner(relationPath).scan();
+        value = new PathValue();
+        constructPath(key.getEntityClass(), value, scan);
+        PathValue pathValue = pathCache.putIfAbsent(key, value);
+        if (pathValue != null) {
+            value = pathValue;
+        }
+        return value;
     }
 
     private void constructPath(Class entityClass, PathValue pathValue, Map<String, Object> scan) {
@@ -65,7 +105,7 @@ public class FetcherImpl implements IFetcher {
             FieldMapping id = registry.getIDFields(fm.getFetchField().getType()).iterator().next();
             //todo aguzanov fetch relation by one of ids column, just for a while
             IQueryBuilder queryBuilder = em.queryBuilder(fm.getFetchField().getType())
-                    .where(Condition.isEqual(id.getFieldName()));
+                    .where(Condition.in(id.getFieldName()));
 
             relationValue = new RelationValue(id, fm, queryBuilder.create());
             relationCache.putIfAbsent(relationKey, relationValue);
