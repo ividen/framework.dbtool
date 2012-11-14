@@ -1,4 +1,4 @@
-package ru.kwanza.dbtool.orm;
+package ru.kwanza.dbtool.orm.entity;
 
 import ru.kwanza.dbtool.orm.annotations.Entity;
 import ru.kwanza.dbtool.orm.annotations.Field;
@@ -6,7 +6,7 @@ import ru.kwanza.dbtool.orm.annotations.Field;
 /**
  * @author Alexander Guzanov
  */
-@Entity
+@Entity(name = "TestEntityWithBlob", tableName = "test_entity")
 public class TestEntityWithBlob extends TestEntity {
 
     @Field(columnName = "entity_body")

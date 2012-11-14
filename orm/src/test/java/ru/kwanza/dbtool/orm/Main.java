@@ -1,6 +1,7 @@
 package ru.kwanza.dbtool.orm;
 
 import ru.kwanza.dbtool.core.UpdateException;
+import ru.kwanza.dbtool.orm.entity.TestEntity;
 
 import java.util.List;
 
@@ -64,9 +65,9 @@ public class Main {
         String desc = "desc*";
         query.setParameter(1, "name").setParameter(2, 100);
 
-        IQueryBuilder<TestEntityWithAgent> SELECT_ENTITY_QUERY = em.queryBuilder(TestEntityWithAgent.class);
+        IQueryBuilder<TestEntity> SELECT_ENTITY_QUERY = em.queryBuilder(TestEntity.class);
 
-        List<TestEntityWithAgent> description = SELECT_ENTITY_QUERY.setMaxSize(1000)
+        List<TestEntity> description = SELECT_ENTITY_QUERY.setMaxSize(1000)
                 .create().selectListWithFilter(new Filter(desc != null, like("description"), desc));
 
     }

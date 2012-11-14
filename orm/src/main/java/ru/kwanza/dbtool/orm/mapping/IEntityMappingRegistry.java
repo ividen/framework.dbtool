@@ -33,13 +33,11 @@ public interface IEntityMappingRegistry {
 
     Collection<FetchMapping> getFetchMapping(String entityName);
 
-    FieldMapping getFieldByPropertyName(String entityName, String fieldName);
+    FieldMapping getFieldMappingByPropertyName(Class entityClass, String propertyName);
 
-    FieldMapping getFieldByPropertyName(Class entityClass, String fieldName);
+    FieldMapping getFieldMappingByPropertyName(String entityName, String propertyName);
 
-    FetchMapping getFetchMappingByPropertyName(Class entityClass, String fieldName);
+    FetchMapping getFetchMappingByPropertyName(Class entityClass, String propertyName);
 
-    FetchMapping getFetchMappingByPropertyName(String entityName, String fieldName);
-
-
+    FetchMapping getFetchMappingByPropertyName(String entityName, String propertyName);
 }

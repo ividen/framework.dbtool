@@ -4,6 +4,7 @@ package ru.kwanza.dbtool.orm.mapping;
  * @author Kiryl Karatsetski
  */
 public class FetchMapping {
+
     private EntityField field;
     private EntityField fetchField;
 
