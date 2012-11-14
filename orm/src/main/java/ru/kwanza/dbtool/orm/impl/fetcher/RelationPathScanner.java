@@ -75,6 +75,8 @@ class RelationPathScanner {
         if (marker - prev > 0) {
             propertyName = new String(chars, prev + 1, marker - prev);
             scanResult.put(propertyName, null);
+        }else{
+            throw new IllegalArgumentException("Path expression is not valid!");
         }
 
         return i;

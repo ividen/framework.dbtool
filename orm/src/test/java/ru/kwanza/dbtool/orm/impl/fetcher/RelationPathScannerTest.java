@@ -10,6 +10,7 @@ import java.util.Map;
 
 public class RelationPathScannerTest extends TestCase {
 
+
     public void test() {
         Map<String,Object> scan = new RelationPathScanner("  a           ,  d   , dd,dfddd                 ,   sd").scan();
 
@@ -19,6 +20,17 @@ public class RelationPathScannerTest extends TestCase {
         assertTrue(scan.containsKey("sd"));
         assertEquals(scan.size(),5);
     }
+
+    public void test_1() {
+        Map<String,Object> scan = new RelationPathScanner("  \ta      \n\n     ,  d  \n , dd,dfddd                 ,   sd").scan();
+
+        assertTrue(scan.containsKey("a"));
+        assertTrue(scan.containsKey("d"));
+        assertTrue(scan.containsKey("dfddd"));
+        assertTrue(scan.containsKey("sd"));
+        assertEquals(scan.size(),5);
+    }
+
 
     public void test2() {
         Map<String, Object> scan = new RelationPathScanner("   a   {   b1,b2,b3 {b4  } }, d").scan();
@@ -133,5 +145,38 @@ public class RelationPathScannerTest extends TestCase {
         }
     }
 
+
+    public void test13() {
+        try {
+            new RelationPathScanner("a,").scan();
+            fail("Expected " + RuntimeException.class);
+        } catch (IllegalArgumentException e) {
+        }
+    }
+
+
+    public void test14() {
+        try {
+            new RelationPathScanner("a{").scan();
+            fail("Expected " + RuntimeException.class);
+        } catch (IllegalArgumentException e) {
+        }
+    }
+
+    public void test15() {
+        try {
+            new RelationPathScanner("a{").scan();
+            fail("Expected " + RuntimeException.class);
+        } catch (IllegalArgumentException e) {
+        }
+    }
+
+    public void test16() {
+        try {
+            new RelationPathScanner("a,{b}").scan();
+            fail("Expected " + RuntimeException.class);
+        } catch (IllegalArgumentException e) {
+        }
+    }
 
 }
