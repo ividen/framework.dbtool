@@ -1,4 +1,4 @@
-package ru.kwanza.dbtool.orm;
+package ru.kwanza.dbtool.orm.api;
 
 import java.util.Collection;
 

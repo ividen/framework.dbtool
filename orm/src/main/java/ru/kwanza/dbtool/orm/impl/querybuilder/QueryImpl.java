@@ -1,4 +1,4 @@
-package ru.kwanza.dbtool.orm.impl;
+package ru.kwanza.dbtool.orm.impl.querybuilder;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.ResultSetExtractor;
@@ -8,11 +8,11 @@ import ru.kwanza.dbtool.core.KeyValue;
 import ru.kwanza.dbtool.core.SqlCollectionParameterValue;
 import ru.kwanza.dbtool.core.util.FieldValueExtractor;
 import ru.kwanza.dbtool.core.util.SelectUtil;
-import ru.kwanza.dbtool.orm.Filter;
-import ru.kwanza.dbtool.orm.IQuery;
-import ru.kwanza.dbtool.orm.mapping.EntityField;
-import ru.kwanza.dbtool.orm.mapping.FieldMapping;
-import ru.kwanza.dbtool.orm.mapping.IEntityMappingRegistry;
+import ru.kwanza.dbtool.orm.api.Filter;
+import ru.kwanza.dbtool.orm.api.IQuery;
+import ru.kwanza.dbtool.orm.impl.mapping.EntityField;
+import ru.kwanza.dbtool.orm.impl.mapping.FieldMapping;
+import ru.kwanza.dbtool.orm.impl.mapping.IEntityMappingRegistry;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

@@ -1,7 +1,7 @@
 package ru.kwanza.dbtool.orm.impl.fetcher;
 
 import junit.framework.TestCase;
-import ru.kwanza.dbtool.orm.IEntityManager;
+import ru.kwanza.dbtool.orm.api.IEntityManager;
 
 import java.util.List;
 

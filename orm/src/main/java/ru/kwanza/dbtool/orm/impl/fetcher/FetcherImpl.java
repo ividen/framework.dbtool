@@ -1,12 +1,12 @@
 package ru.kwanza.dbtool.orm.impl.fetcher;
 
-import ru.kwanza.dbtool.orm.Condition;
-import ru.kwanza.dbtool.orm.IEntityManager;
-import ru.kwanza.dbtool.orm.IFetcher;
-import ru.kwanza.dbtool.orm.IQueryBuilder;
-import ru.kwanza.dbtool.orm.mapping.FetchMapping;
-import ru.kwanza.dbtool.orm.mapping.FieldMapping;
-import ru.kwanza.dbtool.orm.mapping.IEntityMappingRegistry;
+import ru.kwanza.dbtool.orm.api.Condition;
+import ru.kwanza.dbtool.orm.api.IEntityManager;
+import ru.kwanza.dbtool.orm.api.IFetcher;
+import ru.kwanza.dbtool.orm.api.IQueryBuilder;
+import ru.kwanza.dbtool.orm.impl.mapping.FetchMapping;
+import ru.kwanza.dbtool.orm.impl.mapping.FieldMapping;
+import ru.kwanza.dbtool.orm.impl.mapping.IEntityMappingRegistry;
 
 import java.util.Collection;
 import java.util.HashMap;

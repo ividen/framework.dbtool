@@ -1,12 +1,12 @@
-package ru.kwanza.dbtool.orm.impl;
+package ru.kwanza.dbtool.orm.impl.querybuilder;
 
 import ru.kwanza.dbtool.core.DBTool;
-import ru.kwanza.dbtool.orm.Condition;
-import ru.kwanza.dbtool.orm.IQuery;
-import ru.kwanza.dbtool.orm.IQueryBuilder;
-import ru.kwanza.dbtool.orm.OrderBy;
-import ru.kwanza.dbtool.orm.mapping.FieldMapping;
-import ru.kwanza.dbtool.orm.mapping.IEntityMappingRegistry;
+import ru.kwanza.dbtool.orm.api.Condition;
+import ru.kwanza.dbtool.orm.api.IQuery;
+import ru.kwanza.dbtool.orm.api.IQueryBuilder;
+import ru.kwanza.dbtool.orm.api.OrderBy;
+import ru.kwanza.dbtool.orm.impl.mapping.FieldMapping;
+import ru.kwanza.dbtool.orm.impl.mapping.IEntityMappingRegistry;
 
 import java.util.Collection;
 import java.util.Collections;

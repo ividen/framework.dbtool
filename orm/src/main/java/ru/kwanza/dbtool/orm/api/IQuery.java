@@ -1,6 +1,5 @@
-package ru.kwanza.dbtool.orm;
+package ru.kwanza.dbtool.orm.api;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 

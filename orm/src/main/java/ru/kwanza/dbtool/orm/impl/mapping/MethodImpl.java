@@ -1,8 +1,7 @@
-package ru.kwanza.dbtool.orm.mapping.impl;
+package ru.kwanza.dbtool.orm.impl.mapping;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.kwanza.dbtool.orm.mapping.EntityField;
 
 import java.lang.reflect.Method;
 
@@ -31,9 +30,8 @@ public class MethodImpl extends EntityField {
         try {
             return getMethod.invoke(object);
         } catch (Exception e) {
-            //TODO KK: throw RuntimeException
             log.error("Error while getting value for object " + object, e);
-            return null;
+            throw new RuntimeException(e);
         }
     }
 
@@ -42,8 +40,8 @@ public class MethodImpl extends EntityField {
         try {
             setMethod.invoke(object, value);
         } catch (Exception e) {
-            //TODO KK: throw RuntimeException
             log.error("Error while setting value " + value + " for object " + object, e);
+            throw new RuntimeException(e);
         }
     }
 

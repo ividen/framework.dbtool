@@ -1,4 +1,4 @@
-package ru.kwanza.dbtool.orm.mapping;
+package ru.kwanza.dbtool.orm.impl.mapping;
 
 /**
  * @author Kiryl Karatsetski

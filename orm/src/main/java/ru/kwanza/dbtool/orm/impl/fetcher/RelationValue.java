@@ -1,8 +1,8 @@
 package ru.kwanza.dbtool.orm.impl.fetcher;
 
-import ru.kwanza.dbtool.orm.IQuery;
-import ru.kwanza.dbtool.orm.mapping.FetchMapping;
-import ru.kwanza.dbtool.orm.mapping.FieldMapping;
+import ru.kwanza.dbtool.orm.api.IQuery;
+import ru.kwanza.dbtool.orm.impl.mapping.FetchMapping;
+import ru.kwanza.dbtool.orm.impl.mapping.FieldMapping;
 import ru.kwanza.toolbox.fieldhelper.FieldHelper;
 
 import java.util.Collection;

@@ -1,13 +1,14 @@
 package ru.kwanza.dbtool.orm;
 
 import ru.kwanza.dbtool.core.UpdateException;
+import ru.kwanza.dbtool.orm.api.*;
 import ru.kwanza.dbtool.orm.entity.TestEntity;
 
 import java.util.List;
 
-import static ru.kwanza.dbtool.orm.Condition.*;
-import static ru.kwanza.dbtool.orm.OrderBy.ASC;
-import static ru.kwanza.dbtool.orm.OrderBy.DESC;
+import static ru.kwanza.dbtool.orm.api.Condition.*;
+import static ru.kwanza.dbtool.orm.api.OrderBy.ASC;
+import static ru.kwanza.dbtool.orm.api.OrderBy.DESC;
 
 /**
  * @author Alexander Guzanov
@@ -40,35 +41,29 @@ public class Main {
             e.printStackTrace();
         }
 
-        TestEntity test = em.queryBuilder(TestEntity.class)
-                .where(isEqual("name")).create().setParameter(1, "my name").select();
+        TestEntity test = em.queryBuilder(TestEntity.class).where(isEqual("name")).create().setParameter(1, "my name").select();
 
-        IQuery<TestEntity> query = em.queryBuilder(TestEntity.class)
-                .where(or(and(isEqual("name"),
-                        in("counter")), like("description"))).setMaxSize(1000).create();
-
+        IQuery<TestEntity> query =
+                em.queryBuilder(TestEntity.class).where(or(and(isEqual("name"), in("counter")), like("description"))).setMaxSize(1000)
+                        .create();
 
         TestEntity sadfd = query.setParameter(1, "sadfd").select();
 
         List<TestEntity> testEntities = query.selectList();
 
+        em.queryBuilder(TestEntity.class).where(or(and(isEqual("name"), in("counter")), like("description"))).setMaxSize(1000).create()
+                .setParameter(1, 1).select();
 
-        em.queryBuilder(TestEntity.class)
-                .where(or(and(isEqual("name"),
-                        in("counter")), like("description"))).setMaxSize(1000).create().setParameter(1, 1).select();
-
-
-        query = em.queryBuilder(TestEntity.class)
-                .where(and(isEqual("name"), isEqual("counter")))
-                .orderBy(ASC("name"), DESC("description")).setMaxSize(1000).create();
+        query = em.queryBuilder(TestEntity.class).where(and(isEqual("name"), isEqual("counter"))).orderBy(ASC("name"), DESC("description"))
+                .setMaxSize(1000).create();
 
         String desc = "desc*";
         query.setParameter(1, "name").setParameter(2, 100);
 
         IQueryBuilder<TestEntity> SELECT_ENTITY_QUERY = em.queryBuilder(TestEntity.class);
 
-        List<TestEntity> description = SELECT_ENTITY_QUERY.setMaxSize(1000)
-                .create().selectListWithFilter(new Filter(desc != null, like("description"), desc));
+        List<TestEntity> description =
+                SELECT_ENTITY_QUERY.setMaxSize(1000).create().selectListWithFilter(new Filter(desc != null, like("description"), desc));
 
     }
 }

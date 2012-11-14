@@ -1,4 +1,6 @@
-package ru.kwanza.dbtool.orm;
+package ru.kwanza.dbtool.orm.api;
+
+import ru.kwanza.dbtool.orm.api.Condition;
 
 /**
  * @author Alexander Guzanov

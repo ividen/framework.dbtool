@@ -1,8 +1,7 @@
-package ru.kwanza.dbtool.orm.mapping.impl;
+package ru.kwanza.dbtool.orm.impl.mapping;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.kwanza.dbtool.orm.mapping.EntityField;
 
 import java.lang.reflect.Field;
 
@@ -29,9 +28,8 @@ public class FieldImpl extends EntityField {
         try {
             return field.get(object);
         } catch (IllegalAccessException e) {
-            //TODO KK: throw RuntimeException
             log.error("Error while getting value for object " + object, e);
-            return null;
+            throw new RuntimeException(e);
         }
     }
 
@@ -40,8 +38,8 @@ public class FieldImpl extends EntityField {
         try {
             field.set(object, value);
         } catch (IllegalAccessException e) {
-            //TODO KK: throw RuntimeException
             log.error("Error while setting value " + value + " for object " + object, e);
+            throw new RuntimeException(e);
         }
     }
 
