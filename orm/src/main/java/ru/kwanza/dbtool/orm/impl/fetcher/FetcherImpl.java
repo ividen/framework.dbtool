@@ -35,19 +35,27 @@ public class FetcherImpl implements IFetcher {
         int prev = -1;
         int marker = -1;
         int i;
-        String propertyName
+        String propertyName = null;
         for (i = 0; i < chars.length; i++) {
             char c = chars[i];
             if (c == ',') {
                 if (marker - prev <= 0) {
                     throw new IllegalArgumentException("Path expression is not valid!");
                 }
-                String propertyName = new String(chars, prev + 1, marker - prev);
+                propertyName = new String(chars, prev + 1, marker - prev);
                 System.out.println(propertyName);
                 prev = i;
                 marker = i;
 
             } else if (c == '{') {
+                if (marker - prev <= 0) {
+                    throw new IllegalArgumentException("Path expression is not valid!");
+                }
+                propertyName = new String(chars, prev + 1, marker - prev);
+                System.out.println(propertyName);
+                prev = i;
+                marker = i;
+
 
             } else if (c == '}') {
 
@@ -62,9 +70,9 @@ public class FetcherImpl implements IFetcher {
         }
 
         if (marker - prev > 0) {
-            String propertyName = new String(chars, prev+1, marker - prev);
+            propertyName = new String(chars, prev + 1, marker - prev);
+            System.out.println(propertyName);
         }
-
 
     }
 
