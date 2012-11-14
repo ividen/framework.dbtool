@@ -4,6 +4,7 @@ import ru.kwanza.dbtool.orm.IFetcher;
 import ru.kwanza.dbtool.orm.mapping.IEntityMappingRegistry;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -23,108 +24,17 @@ public class FetcherImpl implements IFetcher {
         PathValue value = pathCache.get(key);
 
         if (value != null) {
-
+            Map<String, Object> scan = new RelationPathScanner(relationPath).scan();
+            createElements(key, scan);
         } else {
 
         }
     }
 
-
-    public void scan(String relationPath) {
-        char[] chars = relationPath.toCharArray();
-        scan(chars, 0);
-    }
-
-    private enum Status {
-        EXPECT_WORD,
-        EXPECT_DELIM
-    }
-
-    public int scan(char[] chars, int from) {
-        int prev = from - 1;
-        int marker = from - 1;
-        int i;
-        String propertyName = null;
-        Status status = Status.EXPECT_WORD;
-        for (i = from; i < chars.length; i++) {
-            char c = chars[i];
-            if (c == ',') {
-                if (status == Status.EXPECT_WORD) {
-                    if (marker - prev <= 0) {
-                        throw new IllegalArgumentException("Path expression is not valid!");
-                    }
-                    propertyName = new String(chars, prev + 1, marker - prev);
-                    System.out.println(propertyName);
-                } else {
-                    status = Status.EXPECT_WORD;
-                }
-
-                prev = i;
-                marker = i;
-            } else if (c == '{') {
-                if (marker - prev <= 0) {
-                    throw new IllegalArgumentException("Path expression is not valid!");
-                }
-                propertyName = new String(chars, prev + 1, marker - prev);
-                System.out.println(propertyName);
-
-                i = marker = prev = scan(chars, i + 1);
-                status = Status.EXPECT_DELIM;
-            } else if (c == '}') {
-                if (status == Status.EXPECT_WORD) {
-                    if (marker - prev <= 0) {
-                        throw new IllegalArgumentException("Path expression is not valid!");
-                    }
-                    propertyName = new String(chars, prev + 1, marker - prev);
-                    System.out.println(propertyName);
-                }
-                if (from == 0) {
-                    throw new IllegalArgumentException("Path expression is not valid!");
-                }
-                return i;
-            } else if (c == ' ' || c == '\n' || c == '\t') {
-                if (marker == prev) {
-                    prev++;
-                    marker = prev;
-                }
-            } else {
-                marker = i;
-            }
+    private void createElements(PathKey key, Map<String, Object> scan) {
+        for (Map.Entry<String, Object> e:scan.entrySet()){
+            String propertyName = e.getKey();
+//            registry.getF(key.getEntityClass(), propertyName)
         }
-
-        if (marker - prev > 0) {
-            propertyName = new String(chars, prev + 1, marker - prev);
-            System.out.println(propertyName);
-        }
-
-        return i;
-    }
-
-    public static void main(String[] args) {
-        System.out.println("----------------------------------------------------------");
-
-        System.out.println("----------------------------------------------------------");
-
-        System.out.println("----------------------------------------------------------");
-
-        System.out.println("----------------------------------------------------------");
-
-        System.out.println("----------------------------------------------------------");
-
-        System.out.println("----------------------------------------------------------");
-
-        System.out.println("----------------------------------------------------------");
-
-        System.out.println("----------------------------------------------------------");
-
-
-        System.out.println("----------------------------------------------------------");
-
-
-        System.out.println("----------------------------------------------------------");
-
-
-        System.out.println("----------------------------------------------------------");
-
     }
 }

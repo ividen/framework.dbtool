@@ -37,4 +37,9 @@ public interface IEntityMappingRegistry {
 
     FieldMapping getFieldByPropertyName(Class entityClass, String fieldName);
 
+    FetchMapping getFetchMappingByPropertyName(Class entityClass, String fieldName);
+
+    FetchMapping getFetchMappingByPropertyName(String entityName, String fieldName);
+
+
 }
