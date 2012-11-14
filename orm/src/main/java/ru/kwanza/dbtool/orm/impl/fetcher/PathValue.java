@@ -1,17 +1,16 @@
 package ru.kwanza.dbtool.orm.impl.fetcher;
 
+import java.util.LinkedList;
 import java.util.List;
 
 /**
 * @author Alexander Guzanov
 */
 class PathValue {
-    private List<RelationKey> relationKeys;
+    private List<RelationKey> relationKeys = new LinkedList<RelationKey>();
     private PathValue next;
 
-    PathValue(List<RelationKey> relationKeys, PathValue next) {
-        this.relationKeys = relationKeys;
-        this.next = next;
+    PathValue() {
     }
 
     public List<RelationKey> getRelationKeys() {
@@ -20,5 +19,9 @@ class PathValue {
 
     public PathValue getNext() {
         return next;
+    }
+
+    public void setNext(PathValue next) {
+        this.next = next;
     }
 }

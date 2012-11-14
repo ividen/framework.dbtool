@@ -9,6 +9,7 @@ import ru.kwanza.dbtool.orm.mapping.FieldMapping;
 import ru.kwanza.dbtool.orm.mapping.IEntityMappingRegistry;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -23,35 +24,53 @@ public class FetcherImpl implements IFetcher {
     // this cache contains all relations for all entities and queries used to read this relations
     private ConcurrentHashMap<RelationKey, RelationValue> relationCache = new ConcurrentHashMap<RelationKey, RelationValue>();
 
-    private static final String MAIN_CLASS_WITH_INNER_REGEXP = "([a-zA-Z0-9])+";
-
     public <T> void fetch(Class<T> entityClass, Collection<T> items, String relationPath) {
         PathKey key = new PathKey(entityClass, relationPath);
         PathValue value = pathCache.get(key);
 
         if (value != null) {
             Map<String, Object> scan = new RelationPathScanner(relationPath).scan();
-            createElements(key, scan);
+            value = new PathValue();
+            constructPath(key.getEntityClass(), value, scan);
         } else {
 
         }
     }
 
-    private void createElements(PathKey key, Map<String, Object> scan) {
+    private void constructPath(Class entityClass, PathValue pathValue, Map<String, Object> scan) {
+        List<RelationKey> relationKeys = pathValue.getRelationKeys();
         for (Map.Entry<String, Object> e : scan.entrySet()) {
             String propertyName = e.getKey();
-            FetchMapping fm = registry.getFetchMappingByPropertyName(key.getEntityClass(), propertyName);
+
+            FetchMapping fm = registry.getFetchMappingByPropertyName(entityClass, propertyName);
             if (fm == null) {
                 throw new IllegalArgumentException("Wrong relation name! Fetch field mapping not found!");
             }
 
+            relationKeys.add(constructRelation(entityClass, propertyName, fm));
+
+            if (e.getValue() != null) {
+                Map<String, Object> subScan = (Map<String, Object>) e.getValue();
+                PathValue nextValue = new PathValue();
+                pathValue.setNext(nextValue);
+                constructPath(fm.getFetchField().getType(), nextValue, subScan);
+            }
+        }
+    }
+
+    private RelationKey constructRelation(Class entityClass, String propertyName, FetchMapping fm) {
+        RelationKey relationKey = new RelationKey(entityClass, propertyName);
+        RelationValue relationValue = relationCache.get(relationKey);
+        if (relationValue == null) {
             FieldMapping id = registry.getIDFields(fm.getFetchField().getType()).iterator().next();
-            //todo aguzanov relation by one ids column, just for a while
-            IQueryBuilder queryBuilder= em.queryBuilder(fm.getFetchField().getType())
+            //todo aguzanov fetch relation by one of ids column, just for a while
+            IQueryBuilder queryBuilder = em.queryBuilder(fm.getFetchField().getType())
                     .where(Condition.isEqual(id.getFieldName()));
 
-            relationCache.putIfAbsent(new RelationKey(key.getEntityClass(),propertyName),
-                    new RelationValue(id,fm,queryBuilder.create()));
+            relationValue = new RelationValue(id, fm, queryBuilder.create());
+            relationCache.putIfAbsent(relationKey, relationValue);
         }
+
+        return relationKey;
     }
 }
