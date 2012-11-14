@@ -2,7 +2,6 @@ package ru.kwanza.dbtool.orm.impl.fetcher;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.logging.Logger;
 
 /**
  * @author Alexander Guzanov
@@ -57,7 +56,7 @@ class RelationPathScanner {
                         throw new IllegalArgumentException("Path expression is not valid!");
                     }
                     propertyName = new String(chars, prev + 1, marker - prev);
-                    scanResult.put(propertyName,null);
+                    scanResult.put(propertyName, null);
                 }
                 if (from == 0) {
                     throw new IllegalArgumentException("Path expression is not valid!");

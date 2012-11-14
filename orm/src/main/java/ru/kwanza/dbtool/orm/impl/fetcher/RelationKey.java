@@ -1,8 +1,8 @@
 package ru.kwanza.dbtool.orm.impl.fetcher;
 
 /**
-* @author Alexander Guzanov
-*/
+ * @author Alexander Guzanov
+ */
 class RelationKey {
     private Class entityClass;
     private String relationPropertyName;

@@ -1,8 +1,8 @@
 package ru.kwanza.dbtool.orm.impl.fetcher;
 
 /**
-* @author Alexander Guzanov
-*/
+ * @author Alexander Guzanov
+ */
 class PathKey {
     private Class entityClass;
     private String path;
