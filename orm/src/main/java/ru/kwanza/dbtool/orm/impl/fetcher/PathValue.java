@@ -1,27 +1,20 @@
 package ru.kwanza.dbtool.orm.impl.fetcher;
 
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 /**
 * @author Alexander Guzanov
 */
 class PathValue {
-    private List<RelationKey> relationKeys = new LinkedList<RelationKey>();
-    private PathValue next;
+    private Map<RelationKey,PathValue> relationKeys = new LinkedHashMap<RelationKey,PathValue>();
 
     PathValue() {
     }
 
-    public List<RelationKey> getRelationKeys() {
+    public Map<RelationKey, PathValue> getRelationKeys() {
         return relationKeys;
-    }
-
-    public PathValue getNext() {
-        return next;
-    }
-
-    public void setNext(PathValue next) {
-        this.next = next;
     }
 }

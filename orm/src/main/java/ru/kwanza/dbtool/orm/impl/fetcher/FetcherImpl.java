@@ -10,7 +10,6 @@ import ru.kwanza.dbtool.orm.mapping.IEntityMappingRegistry;
 
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -40,12 +39,16 @@ public class FetcherImpl implements IFetcher {
     private <T> void fillItems(Collection<T> items, PathValue value) {
         Map<RelationKey, Map> results = new HashMap<RelationKey, Map>(value.getRelationKeys().size());
 
-        for (RelationKey relationKey : value.getRelationKeys()) {
+        for (Map.Entry<RelationKey, PathValue> entry : value.getRelationKeys().entrySet()) {
+            RelationKey relationKey = entry.getKey();
             RelationValue relationValue = relationCache.get(relationKey);
             Map<Object, Object> map = relationValue.getFetchQuery()
                     .setParameter(1, relationValue.getRelationIds(items))
                     .selectMap(relationValue.getIDGroupingField());
             results.put(relationKey, map);
+            if (entry.getValue() != null) {
+                fillItems(map.values(), entry.getValue());
+            }
         }
 
         for (T object : items) {
@@ -78,7 +81,7 @@ public class FetcherImpl implements IFetcher {
     }
 
     private void constructPath(Class entityClass, PathValue pathValue, Map<String, Object> scan) {
-        List<RelationKey> relationKeys = pathValue.getRelationKeys();
+        Map<RelationKey, PathValue> relationKeys = pathValue.getRelationKeys();
         for (Map.Entry<String, Object> e : scan.entrySet()) {
             String propertyName = e.getKey();
 
@@ -87,13 +90,15 @@ public class FetcherImpl implements IFetcher {
                 throw new IllegalArgumentException("Wrong relation name! Fetch field mapping not found!");
             }
 
-            relationKeys.add(constructRelation(entityClass, propertyName, fm));
+            RelationKey relationKey = constructRelation(entityClass, propertyName, fm);
 
             if (e.getValue() != null) {
                 Map<String, Object> subScan = (Map<String, Object>) e.getValue();
                 PathValue nextValue = new PathValue();
-                pathValue.setNext(nextValue);
                 constructPath(fm.getFetchField().getType(), nextValue, subScan);
+                relationKeys.put(relationKey, pathValue);
+            } else {
+                relationKeys.put(relationKey, null);
             }
         }
     }

@@ -1,5 +1,6 @@
 package ru.kwanza.dbtool.orm;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -18,5 +19,8 @@ public interface IQuery<T> {
 
     IQuery<T> setParameter(int index, Object value);
 
-    Map<Object, T> selectMap(String groupingField);
+    Map<Object, List<T>> selectMapList(String field);
+
+    Map<Object, T> selectMap(String field);
+
 }

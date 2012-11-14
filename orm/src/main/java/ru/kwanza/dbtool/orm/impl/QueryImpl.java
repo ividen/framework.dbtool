@@ -4,20 +4,19 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.SqlParameterValue;
 import ru.kwanza.dbtool.core.DBTool;
+import ru.kwanza.dbtool.core.KeyValue;
 import ru.kwanza.dbtool.core.SqlCollectionParameterValue;
 import ru.kwanza.dbtool.core.util.FieldValueExtractor;
 import ru.kwanza.dbtool.core.util.SelectUtil;
 import ru.kwanza.dbtool.orm.Filter;
 import ru.kwanza.dbtool.orm.IQuery;
+import ru.kwanza.dbtool.orm.mapping.EntityField;
 import ru.kwanza.dbtool.orm.mapping.FieldMapping;
 import ru.kwanza.dbtool.orm.mapping.IEntityMappingRegistry;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author Alexander Guzanov
@@ -68,7 +67,7 @@ public class QueryImpl<T> implements IQuery<T> {
 
     public List<T> selectList() {
         final LinkedList<T> result = new LinkedList<T>();
-        SelectUtil.batchSelect(dbTool.getJdbcTemplate(), sql, new Extractor<T>(), new SelectUtil.Container<Collection<T>>() {
+        SelectUtil.batchSelect(dbTool.getJdbcTemplate(), sql, new ObjectExtractor<T>(), new SelectUtil.Container<Collection<T>>() {
             public void add(Collection<T> objects) {
                 if (objects != null) {
                     result.addAll(objects);
@@ -78,6 +77,49 @@ public class QueryImpl<T> implements IQuery<T> {
 
         return result;
     }
+
+    public Map<Object, T> selectMap(String field) {
+        final Map<Object, T> result = new HashMap<Object, T>();
+        FieldMapping fieldMapping = registry.getFieldByPropertyName(entityClass, field);
+        if (fieldMapping == null) {
+            throw new IllegalArgumentException("Unknown field name!");
+        }
+
+        SelectUtil.batchSelect(dbTool.getJdbcTemplate(), sql, new MapExtractor(fieldMapping),
+                new SelectUtil.Container<Collection<KeyValue<Object, T>>>() {
+                    public void add(Collection<KeyValue<Object, T>> objects) {
+                        for (KeyValue<Object, T> kv : objects) {
+                            result.put(kv.getKey(), kv.getValue());
+                        }
+                    }
+                }, params);
+
+        return result;
+    }
+
+    public Map<Object, List<T>> selectMapList(String field) {
+        final Map<Object, List<T>> result = new HashMap<Object, List<T>>();
+        FieldMapping fieldMapping = registry.getFieldByPropertyName(entityClass, field);
+        if (fieldMapping == null) {
+            throw new IllegalArgumentException("Unknown field name!");
+        }
+
+        SelectUtil.batchSelect(dbTool.getJdbcTemplate(), sql, new MapExtractor(fieldMapping),
+                new SelectUtil.Container<Collection<KeyValue<Object, T>>>() {
+                    public void add(Collection<KeyValue<Object, T>> objects) {
+                        for (KeyValue<Object, T> kv : objects) {
+                            List<T> vs = result.get(kv.getKey());
+                            if (vs == null) {
+                                vs = new ArrayList<T>();
+                                result.put(kv.getKey(), vs);
+                            }
+                            vs.add(kv.getValue());
+                        }
+                    }
+                }, params);
+        return result;
+    }
+
 
     public List<T> selectListWithFilter(Filter... filters) {
         return null;
@@ -106,6 +148,7 @@ public class QueryImpl<T> implements IQuery<T> {
         return this;
     }
 
+
     @Override
     public String toString() {
         return "QueryImpl{" +
@@ -113,8 +156,30 @@ public class QueryImpl<T> implements IQuery<T> {
                 '}';
     }
 
-    private class Extractor<T> implements ResultSetExtractor {
-        public Collection<T> extractData(ResultSet rs) throws SQLException, DataAccessException {
+
+    private class ObjectExtractor<T> extends BaseExtractor<T> {
+        @Override
+        public T getValue(Object e) {
+            return (T) e;
+        }
+    }
+
+    private class MapExtractor extends BaseExtractor<KeyValue<Object, T>> {
+        private EntityField field;
+
+        private MapExtractor(FieldMapping mapping) {
+            this.field = mapping.getEntityFiled();
+        }
+
+        @Override
+        public KeyValue<Object, T> getValue(Object e) {
+            return new KeyValue<Object, T>(field.getValue(e), (T) e);
+        }
+    }
+
+
+    private abstract class BaseExtractor<TYPE> implements ResultSetExtractor {
+        public Collection<TYPE> extractData(ResultSet rs) throws SQLException, DataAccessException {
             if (QueryImpl.this.offset != null && QueryImpl.this.offset > 1) {
                 if (rs.next()) {
                     rs.absolute(QueryImpl.this.offset - 1);
@@ -122,7 +187,7 @@ public class QueryImpl<T> implements IQuery<T> {
                     return null;
                 }
             }
-            LinkedList<T> objects = new LinkedList<T>();
+            LinkedList<TYPE> objects = new LinkedList<TYPE>();
 
             Collection<FieldMapping> idFields = registry.getIDFields(entityClass);
             Collection<FieldMapping> fieldMapping = registry.getFieldMapping(entityClass);
@@ -140,11 +205,13 @@ public class QueryImpl<T> implements IQuery<T> {
                 readAndFill(rs, fieldMapping, obj);
                 readAndFill(rs, versionField, obj);
 
-                objects.add(obj);
+                objects.add(getValue(obj));
             }
 
             return objects;
         }
+
+        public abstract TYPE getValue(Object e);
 
         private void readAndFill(ResultSet rs, Collection<FieldMapping> fields, T obj) throws SQLException {
             for (FieldMapping idf : fields) {
