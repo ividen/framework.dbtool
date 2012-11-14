@@ -1,6 +1,11 @@
 package ru.kwanza.dbtool.orm.impl.fetcher;
 
+import ru.kwanza.dbtool.orm.Condition;
+import ru.kwanza.dbtool.orm.IEntityManager;
 import ru.kwanza.dbtool.orm.IFetcher;
+import ru.kwanza.dbtool.orm.IQueryBuilder;
+import ru.kwanza.dbtool.orm.mapping.FetchMapping;
+import ru.kwanza.dbtool.orm.mapping.FieldMapping;
 import ru.kwanza.dbtool.orm.mapping.IEntityMappingRegistry;
 
 import java.util.Collection;
@@ -12,6 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class FetcherImpl implements IFetcher {
     private IEntityMappingRegistry registry;
+    private IEntityManager em;
     // this cache contains all paths, with is used to get relational fields
     private ConcurrentHashMap<PathKey, PathValue> pathCache = new ConcurrentHashMap<PathKey, PathValue>();
     // this cache contains all relations for all entities and queries used to read this relations
@@ -32,9 +38,20 @@ public class FetcherImpl implements IFetcher {
     }
 
     private void createElements(PathKey key, Map<String, Object> scan) {
-        for (Map.Entry<String, Object> e:scan.entrySet()){
+        for (Map.Entry<String, Object> e : scan.entrySet()) {
             String propertyName = e.getKey();
-//            registry.getF(key.getEntityClass(), propertyName)
+            FetchMapping fm = registry.getFetchMappingByPropertyName(key.getEntityClass(), propertyName);
+            if (fm == null) {
+                throw new IllegalArgumentException("Wrong relation name! Fetch field mapping not found!");
+            }
+
+            FieldMapping id = registry.getIDFields(fm.getFetchField().getType()).iterator().next();
+            //todo aguzanov relation by one ids column, just for a while
+            IQueryBuilder queryBuilder= em.queryBuilder(fm.getFetchField().getType())
+                    .where(Condition.isEqual(id.getFieldName()));
+
+            relationCache.putIfAbsent(new RelationKey(key.getEntityClass(),propertyName),
+                    new RelationValue(id,fm,queryBuilder.create()));
         }
     }
 }
