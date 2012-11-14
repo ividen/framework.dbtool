@@ -32,11 +32,20 @@ public class FetcherImpl implements IFetcher {
 
     public void scan(String relationPath) {
         char[] chars = relationPath.toCharArray();
-        int prev = -1;
-        int marker = -1;
+        scan(chars, 0);
+    }
+
+    private enum Status{
+        EXPECT_WORD
+    }
+
+    public int scan(char[] chars, int from) {
+        int prev = from - 1;
+        int marker = from - 1;
         int i;
         String propertyName = null;
-        for (i = 0; i < chars.length; i++) {
+        Status status
+        for (i = from; i < chars.length; i++) {
             char c = chars[i];
             if (c == ',') {
                 if (marker - prev <= 0) {
@@ -53,12 +62,15 @@ public class FetcherImpl implements IFetcher {
                 }
                 propertyName = new String(chars, prev + 1, marker - prev);
                 System.out.println(propertyName);
-                prev = i;
-                marker = i;
 
-
+                i = marker = prev = scan(chars, i + 1);
             } else if (c == '}') {
-
+                if (marker - prev <= 0) {
+                    throw new IllegalArgumentException("Path expression is not valid!");
+                }
+                propertyName = new String(chars, prev + 1, marker - prev);
+                System.out.println(propertyName);
+               return i;
             } else if (c == ' ' || c == '\n' || c == '\t') {
                 if (marker == prev) {
                     prev++;
@@ -74,9 +86,14 @@ public class FetcherImpl implements IFetcher {
             System.out.println(propertyName);
         }
 
+        return i;
     }
 
     public static void main(String[] args) {
-        new FetcherImpl().scan("  a           ,  d   , d,dfddd                 ,   sd");
+//        System.out.println("----------------------------------------------------------");
+//        new FetcherImpl().scan("  a           ,  d   , d,dfddd                 ,   sd");
+        System.out.println("----------------------------------------------------------");
+        new FetcherImpl().scan("a{b{c}},d");
+//        "([a-zA-Z0-9]+(\\{(.*)\\})?)";
     }
 }
