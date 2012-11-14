@@ -5,7 +5,7 @@ import java.util.Collection;
 /**
  * @author Alexander Guzanov
  */
-public interface IFetcher<T> {
+public interface IFetcher {
 
     /**
      * Fetch relations for items. <br>
@@ -25,6 +25,6 @@ public interface IFetcher<T> {
      * @param relationPath - relationPath of relations, example: "terminal{agent, subAgent{agent}}"
      *
      */
-    public void fetch(Class<T> entityClass, Collection<T> items, String relationPath);
+    public <T> void fetch(Class<T> entityClass, Collection<T> items, String relationPath);
 
 }
