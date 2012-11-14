@@ -47,7 +47,7 @@ public class QueryBuilderImpl<T> implements IQueryBuilder<T> {
         if (this.orderBy != null && this.orderBy.length > 0) {
             orderBy.append("ORDER BY ");
             for (OrderBy ob : this.orderBy) {
-                orderBy.append(registry.getFieldByPropertyName(entityClass, ob.getPropertyName()).getColumnName())
+                orderBy.append(registry.getFieldMappingByPropertyName(entityClass, ob.getPropertyName()).getColumnName())
                         .append(' ')
                         .append(ob.getType())
                         .append(',');
@@ -111,7 +111,7 @@ public class QueryBuilderImpl<T> implements IQueryBuilder<T> {
             }
         } else {
             FieldMapping fieldMapping =
-                    registry.getFieldByPropertyName(entityClass, condition.getPropertyName());
+                    registry.getFieldMappingByPropertyName(entityClass, condition.getPropertyName());
             where.append(fieldMapping.getColumnName());
             if (type == Condition.Type.IS_EQUAL) {
                 paramsTypes.add(fieldMapping.getType());

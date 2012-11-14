@@ -1,4 +1,4 @@
-package ru.kwanza.dbtool.orm;
+package ru.kwanza.dbtool.orm.entity;
 
 import ru.kwanza.dbtool.orm.annotations.Entity;
 import ru.kwanza.dbtool.orm.annotations.Field;
@@ -6,14 +6,16 @@ import ru.kwanza.dbtool.orm.annotations.Field;
 /**
  * @author Alexander Guzanov
  */
-@Entity(name="Agent", tableName = "agent")
+@Entity(name = "Agent", tableName = "agent")
 public class Agent {
 
-    @Field
+    @Field(columnName = "id")
     private Long id;
-    @Field
+
+    @Field(columnName = "name")
     private String name;
-    @Field
+
+    @Field(columnName = "address")
     private String address;
 
     public Long getId() {

@@ -80,7 +80,7 @@ public class QueryImpl<T> implements IQuery<T> {
 
     public Map<Object, T> selectMap(String field) {
         final Map<Object, T> result = new HashMap<Object, T>();
-        FieldMapping fieldMapping = registry.getFieldByPropertyName(entityClass, field);
+        FieldMapping fieldMapping = registry.getFieldMappingByPropertyName(entityClass, field);
         if (fieldMapping == null) {
             throw new IllegalArgumentException("Unknown field name!");
         }
@@ -99,7 +99,7 @@ public class QueryImpl<T> implements IQuery<T> {
 
     public Map<Object, List<T>> selectMapList(String field) {
         final Map<Object, List<T>> result = new HashMap<Object, List<T>>();
-        FieldMapping fieldMapping = registry.getFieldByPropertyName(entityClass, field);
+        FieldMapping fieldMapping = registry.getFieldMappingByPropertyName(entityClass, field);
         if (fieldMapping == null) {
             throw new IllegalArgumentException("Unknown field name!");
         }

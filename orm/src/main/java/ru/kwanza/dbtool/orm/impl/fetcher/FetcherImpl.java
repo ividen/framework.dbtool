@@ -110,7 +110,7 @@ public class FetcherImpl implements IFetcher {
             FieldMapping id = registry.getIDFields(fm.getFetchField().getType()).iterator().next();
             //todo aguzanov fetch relation by one of ids column, just for a while
             IQueryBuilder queryBuilder = em.queryBuilder(fm.getFetchField().getType())
-                    .where(Condition.in(id.getFieldName()));
+                    .where(Condition.in(id.getPropertyName()));
 
             relationValue = new RelationValue(id, fm, queryBuilder.create());
             relationCache.putIfAbsent(relationKey, relationValue);

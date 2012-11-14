@@ -1,8 +1,6 @@
-package ru.kwanza.dbtool.orm;
+package ru.kwanza.dbtool.orm.entity;
 
-import ru.kwanza.dbtool.orm.annotations.Entity;
-import ru.kwanza.dbtool.orm.annotations.Field;
-import ru.kwanza.dbtool.orm.annotations.VersionField;
+import ru.kwanza.dbtool.orm.annotations.*;
 
 import java.sql.Types;
 
@@ -12,22 +10,29 @@ import java.sql.Types;
 @Entity(name = "TestEntity", tableName = "test_entity")
 public class TestEntity {
 
-    @Field(columnName = "id")
+    @IdField(columnName = "id")
     private Long id;
 
-    @Field
+    @Field(columnName = "name")
     private String name;
 
     @Field(columnName = "desc", type = Types.NVARCHAR)
     private String description;
 
-    @VersionField
+    @VersionField(columnName = "version")
     private Long version = 0l;
 
     private Long counter;
 
     @Field(columnName = "agent_id")
     private Long agentId;
+
+    @Fetch(propertyName = "agentId")
+    private Agent agent;
+
+    public Agent getAgent() {
+        return agent;
+    }
 
     @Field(columnName = "counter")
     public Long getCounter() {
