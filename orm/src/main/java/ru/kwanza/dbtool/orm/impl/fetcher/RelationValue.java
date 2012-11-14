@@ -38,12 +38,12 @@ class RelationValue {
     public Set getRelationIds(Collection objs) {
         return FieldHelper.getFieldSet(objs, new FieldHelper.Field() {
             public Object value(Object object) {
-                return fetchMapping.getField().getValue(object);
+                return fetchMapping.getPropertyField().getValue(object);
             }
         });
     }
 
     public String getIDGroupingField() {
-        return idField.getFieldName();
+        return idField.getPropertyName();
     }
 }

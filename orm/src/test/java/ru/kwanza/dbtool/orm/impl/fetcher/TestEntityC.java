@@ -21,9 +21,9 @@ public class TestEntityC {
     private Long entityBID;
 
 
-    @Fetch(fieldName = "entityEID")
+    @Fetch(propertyName = "entityEID")
     private TestEntityE entityE;
-    @Fetch(fieldName = "entityFID")
+    @Fetch(propertyName = "entityFID")
     private TestEntityF entityF;
 
     public Long getId() {

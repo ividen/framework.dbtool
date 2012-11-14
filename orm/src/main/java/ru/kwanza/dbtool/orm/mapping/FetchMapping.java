@@ -5,16 +5,16 @@ package ru.kwanza.dbtool.orm.mapping;
  */
 public class FetchMapping {
 
-    private EntityField field;
+    private EntityField propertyField;
     private EntityField fetchField;
 
     public FetchMapping(EntityField mappedField, EntityField fetchField) {
-        this.field = mappedField;
+        this.propertyField = mappedField;
         this.fetchField = fetchField;
     }
 
-    public EntityField getField() {
-        return field;
+    public EntityField getPropertyField() {
+        return propertyField;
     }
 
     public EntityField getFetchField() {

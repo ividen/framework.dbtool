@@ -57,7 +57,7 @@ public class FetcherImpl implements IFetcher {
                 Map realtion = entry.getValue();
                 RelationValue relationValue = relationCache.get(key);
                 FetchMapping fetchMapping = relationValue.getFetchMapping();
-                Object relationIDValue = fetchMapping.getField().getValue(object);
+                Object relationIDValue = fetchMapping.getPropertyField().getValue(object);
                 if (relationIDValue != null) {
                     Object relationObjValue = realtion.get(relationIDValue);
                     if (relationObjValue != null) {

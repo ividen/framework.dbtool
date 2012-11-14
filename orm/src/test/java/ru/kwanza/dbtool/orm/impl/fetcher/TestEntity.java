@@ -32,13 +32,13 @@ public class TestEntity {
     private Long entityDID;
 
 
-    @Fetch(fieldName = "entityAID")
+    @Fetch(propertyName = "entityAID")
     private TestEntityA entityA;
-    @Fetch(fieldName = "entityBID")
+    @Fetch(propertyName = "entityBID")
     private TestEntityB entityB;
-    @Fetch(fieldName = "entityCID")
+    @Fetch(propertyName = "entityCID")
     private TestEntityC entityC;
-    @Fetch(fieldName = "entityDID")
+    @Fetch(propertyName = "entityDID")
     private TestEntityD entityD;
 
     public TestEntity() {

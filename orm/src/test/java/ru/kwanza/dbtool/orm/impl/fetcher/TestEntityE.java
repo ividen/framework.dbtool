@@ -17,7 +17,7 @@ public class TestEntityE {
     @Field(columnName = "entity_gid")
     private Long entityGID;
 
-    @Fetch(fieldName = "entityGID")
+    @Fetch(propertyName = "entityGID")
     private TestEntityG entityG;
 
     public Long getId() {
