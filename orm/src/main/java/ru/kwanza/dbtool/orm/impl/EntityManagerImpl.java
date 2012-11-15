@@ -7,6 +7,7 @@ import ru.kwanza.dbtool.orm.api.IEntityManager;
 import ru.kwanza.dbtool.orm.api.IFetcher;
 import ru.kwanza.dbtool.orm.api.IQueryBuilder;
 import ru.kwanza.dbtool.orm.impl.mapping.IEntityMappingRegistry;
+import ru.kwanza.dbtool.orm.impl.querybuilder.QueryBuilderImpl;
 
 import java.util.Collection;
 
@@ -45,7 +46,7 @@ public class EntityManagerImpl implements IEntityManager {
     }
 
     public <T> IQueryBuilder<T> queryBuilder(Class<T> clazz) {
-        return null;
+        return new QueryBuilderImpl<T>(dbTool, mappingRegistry, clazz);
     }
 
     public IEntityBatcher newBatcher() {
@@ -54,5 +55,13 @@ public class EntityManagerImpl implements IEntityManager {
 
     public IFetcher getFetcher() {
         return null;
+    }
+
+    public void setMappingRegistry(IEntityMappingRegistry mappingRegistry) {
+        this.mappingRegistry = mappingRegistry;
+    }
+
+    public void setDbTool(DBTool dbTool) {
+        this.dbTool = dbTool;
     }
 }

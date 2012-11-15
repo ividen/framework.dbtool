@@ -1,7 +1,18 @@
 package ru.kwanza.dbtool.orm.impl.fetcher;
 
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit38.AbstractJUnit38SpringContextTests;
+import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
 import ru.kwanza.dbtool.orm.api.IEntityManager;
+import ru.kwanza.dbtool.orm.entity.TestEntity1;
+import ru.kwanza.dbtool.orm.impl.mapping.EntityMappingRegistryImpl;
+import ru.kwanza.dbtool.orm.impl.mapping.IEntityMappingRegistry;
 
+import javax.annotation.Resource;
 import java.util.List;
 
 /**
@@ -9,33 +20,55 @@ import java.util.List;
  *
  * @author Alexander Guzanov
  */
-public class TestFetcherIml /*extends *TestCase*/{
-    IEntityManager em;
+@ContextConfiguration(locations = "mssql-config.xml")
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+public class TestFetcherIml extends AbstractJUnit4SpringContextTests {
 
-    public void testFetch1(){
-        List<TestEntity> testEntities = em.queryBuilder(TestEntity.class).create().selectList();
-        em.getFetcher().fetch(TestEntity.class,testEntities,"testEntityA,testEntityB,testEntityC{testEntityF,testEntityE{testEntityG}},testEntityD");
+    @Resource(name = "dbtool.IEntityManager")
+    private IEntityManager em;
+    @Resource(name = "dbtool.IEntityMappingRegistry")
+    private EntityMappingRegistryImpl registry;
+
+    @Before
+    public void init() {
+        registry.registerEntityClass(TestEntity1.class);
+        registry.registerEntityClass(TestEntity.class);
+        registry.registerEntityClass(TestEntityA.class);
+        registry.registerEntityClass(TestEntityB.class);
+        registry.registerEntityClass(TestEntityC.class);
+        registry.registerEntityClass(TestEntityD.class);
+        registry.registerEntityClass(TestEntityF.class);
+        registry.registerEntityClass(TestEntityG.class);
     }
 
-    public void testFetch2(){
+    @Test
+    public void testFetch1() {
         List<TestEntity> testEntities = em.queryBuilder(TestEntity.class).create().selectList();
-        em.getFetcher().fetch(TestEntity.class,testEntities,"testEntityA,testEntityB,testEntityC{testEntityF,testEntityE},testEntityD");
+        em.getFetcher().fetch(TestEntity.class, testEntities, "testEntityA,testEntityB,testEntityC{testEntityF,testEntityE{testEntityG}},testEntityD");
     }
 
-    public void testFetch3(){
+    @Test
+    public void testFetch2() {
         List<TestEntity> testEntities = em.queryBuilder(TestEntity.class).create().selectList();
-        em.getFetcher().fetch(TestEntity.class,testEntities,"testEntityA,testEntityB,testEntityC,testEntityD");
+        em.getFetcher().fetch(TestEntity.class, testEntities, "testEntityA,testEntityB,testEntityC{testEntityF,testEntityE},testEntityD");
     }
 
-
-    public void testFetch4(){
+    @Test
+    public void testFetch3() {
         List<TestEntity> testEntities = em.queryBuilder(TestEntity.class).create().selectList();
-        em.getFetcher().fetch(TestEntity.class,testEntities,"testEntityC{testEntityF,testEntityE}");
+        em.getFetcher().fetch(TestEntity.class, testEntities, "testEntityA,testEntityB,testEntityC,testEntityD");
     }
 
-    public void testFetch5(){
+    @Test
+    public void testFetch4() {
+        List<TestEntity> testEntities = em.queryBuilder(TestEntity.class).create().selectList();
+        em.getFetcher().fetch(TestEntity.class, testEntities, "testEntityC{testEntityF,testEntityE}");
+    }
+
+    @Test
+    public void testFetch5() {
         List<TestEntityC> testEntities = em.queryBuilder(TestEntityC.class).create().selectList();
-        em.getFetcher().fetch(TestEntityC.class,testEntities,"testEntityF,testEntityE{testEntityG}}");
+        em.getFetcher().fetch(TestEntityC.class, testEntities, "testEntityF,testEntityE{testEntityG}}");
     }
 
 }

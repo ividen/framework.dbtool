@@ -1,16 +1,19 @@
 package ru.kwanza.dbtool.orm.impl.fetcher;
 
 import junit.framework.TestCase;
+import org.junit.Test;
 
 import java.util.Map;
+
+import static junit.framework.Assert.*;
 
 /**
  * @author Alexander Guzanov
  */
 
-public class RelationPathScannerTest extends TestCase {
+public class RelationPathScannerTest  {
 
-
+    @Test
     public void test() {
         Map<String,Object> scan = new RelationPathScanner("  a           ,  d   , dd,dfddd                 ,   sd").scan();
 
@@ -21,6 +24,7 @@ public class RelationPathScannerTest extends TestCase {
         assertEquals(scan.size(),5);
     }
 
+    @Test
     public void test_1() {
         Map<String,Object> scan = new RelationPathScanner("  \ta      \n\n     ,  d  \n , dd,dfddd                 ,   sd").scan();
 
@@ -31,7 +35,7 @@ public class RelationPathScannerTest extends TestCase {
         assertEquals(scan.size(),5);
     }
 
-
+    @Test
     public void test2() {
         Map<String, Object> scan = new RelationPathScanner("   a   {   b1,b2,b3 {b4  } }, d").scan();
         assertTrue(scan.containsKey("a"));
@@ -73,18 +77,21 @@ public class RelationPathScannerTest extends TestCase {
 
     }
 
+    @Test
     public void test4() {
         Map<String, Object> scan = new RelationPathScanner("   sdfsdf    ").scan();
         assertTrue(scan.containsKey("sdfsdf"));
         assertEquals(scan.size(),1);
     }
 
+    @Test
     public void test5() {
         Map<String, Object> scan = new RelationPathScanner("asd").scan();
         assertTrue(scan.containsKey("asd"));
         assertEquals(scan.size(),1);
     }
 
+    @Test
     public void test6() {
         try {
             new RelationPathScanner("a{b,}").scan();
@@ -94,6 +101,7 @@ public class RelationPathScannerTest extends TestCase {
         }
     }
 
+    @Test
     public void test7() {
         try {
             new RelationPathScanner("a{b,}").scan();
@@ -103,6 +111,7 @@ public class RelationPathScannerTest extends TestCase {
         }
     }
 
+    @Test
     public void test8() {
 
         try {
@@ -113,6 +122,7 @@ public class RelationPathScannerTest extends TestCase {
 
     }
 
+    @Test
     public void test9() {
         try {
             new RelationPathScanner("a{b},d{},s").scan();
@@ -121,6 +131,7 @@ public class RelationPathScannerTest extends TestCase {
         }
     }
 
+    @Test
     public void test10() {
         try {
             new RelationPathScanner("a{,}").scan();
@@ -129,6 +140,7 @@ public class RelationPathScannerTest extends TestCase {
         }
     }
 
+    @Test
     public void test11() {
         try {
             new RelationPathScanner("a{,b,c}").scan();
@@ -137,6 +149,7 @@ public class RelationPathScannerTest extends TestCase {
         }
     }
 
+    @Test
     public void test12() {
         try {
             new RelationPathScanner("a{b,c}{}").scan();
@@ -145,7 +158,7 @@ public class RelationPathScannerTest extends TestCase {
         }
     }
 
-
+    @Test
     public void test13() {
         try {
             new RelationPathScanner("a,").scan();
@@ -154,7 +167,7 @@ public class RelationPathScannerTest extends TestCase {
         }
     }
 
-
+    @Test
     public void test14() {
         try {
             new RelationPathScanner("a{").scan();
@@ -163,14 +176,16 @@ public class RelationPathScannerTest extends TestCase {
         }
     }
 
+    @Test
     public void test15() {
         try {
-            new RelationPathScanner("a{").scan();
+            new RelationPathScanner("a{}").scan();
             fail("Expected " + RuntimeException.class);
         } catch (IllegalArgumentException e) {
         }
     }
 
+    @Test
     public void test16() {
         try {
             new RelationPathScanner("a,{b}").scan();

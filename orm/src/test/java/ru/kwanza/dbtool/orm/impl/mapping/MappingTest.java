@@ -10,8 +10,8 @@ public class MappingTest {
 
     public static void main(String[] args) {
         EntityMappingRegistryImpl mappingRegistry = new EntityMappingRegistryImpl();
-        mappingRegistry.registerEntityClass(TestEntity1.class);
 
+        mappingRegistry.registerEntityClass(TestEntity1.class);
         mappingRegistry.registerEntityClass(TestEntity.class);
         mappingRegistry.registerEntityClass(TestEntityA.class);
         mappingRegistry.registerEntityClass(TestEntityB.class);

@@ -36,14 +36,15 @@ public class QueryBuilderImpl<T> implements IQueryBuilder<T> {
         StringBuilder selectFields = new StringBuilder("");
         StringBuilder orderBy = new StringBuilder();
         StringBuilder where = new StringBuilder();
-        addFields(sql, registry.getIdFields(entityClass));
-        addFields(sql, registry.getFieldMapping(entityClass));
-        addFields(sql, Collections.singleton(registry.getVersionField(entityClass)));
+        addFields(selectFields, registry.getIdFields(entityClass));
+        addFields(selectFields, registry.getFieldMapping(entityClass));
+        addFields(selectFields, Collections.singleton(registry.getVersionField(entityClass)));
+        selectFields.deleteCharAt(selectFields.length() - 1);
 
         List<Integer> paramsTypes = new LinkedList<Integer>();
         createConditionString(this.condition, paramsTypes, where);
 
-        sql.deleteCharAt(sql.length() - 1);
+
         if (this.orderBy != null && this.orderBy.length > 0) {
             orderBy.append("ORDER BY ");
             for (OrderBy ob : this.orderBy) {
@@ -97,6 +98,10 @@ public class QueryBuilderImpl<T> implements IQueryBuilder<T> {
     }
 
     private void createConditionString(Condition condition, List<Integer> paramsTypes, StringBuilder where) {
+        if (condition == null) {
+            return;
+        }
+
         Condition[] childs = condition.getChilds();
         Condition.Type type = condition.getType();
         if (childs != null && childs.length > 0) {
@@ -152,8 +157,10 @@ public class QueryBuilderImpl<T> implements IQueryBuilder<T> {
     }
 
     private void addFields(StringBuilder select, Collection<FieldMapping> fields) {
-        for (FieldMapping fm : fields) {
-            select.append(fm.getColumnName()).append(" ,");
+        if (fields != null) {
+            for (FieldMapping fm : fields) {
+                select.append(fm.getColumnName()).append(" ,");
+            }
         }
     }
 
