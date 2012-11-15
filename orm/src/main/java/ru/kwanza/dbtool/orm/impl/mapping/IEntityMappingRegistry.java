@@ -7,6 +7,8 @@ import java.util.Collection;
  */
 public interface IEntityMappingRegistry {
 
+    void registerEntityClass(Class entityClass);
+
     String getTableName(Class entityClass);
 
     String getTableName(String entityName);
