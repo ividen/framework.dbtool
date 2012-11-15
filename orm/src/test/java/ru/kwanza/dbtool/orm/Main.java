@@ -62,8 +62,6 @@ public class Main {
 
         IQueryBuilder<TestEntity1> SELECT_ENTITY_QUERY = em.queryBuilder(TestEntity1.class);
 
-        List<TestEntity1> description =
-                SELECT_ENTITY_QUERY.setMaxSize(1000).create().selectListWithFilter(new Filter(desc != null, like("description"), desc));
 
     }
 }

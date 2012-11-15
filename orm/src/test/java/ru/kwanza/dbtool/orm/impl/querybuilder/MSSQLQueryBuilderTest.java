@@ -134,7 +134,7 @@ public class MSSQLQueryBuilderTest extends AbstractJUnit4SpringContextTests {
                 )).orderBy(OrderBy.ASC("id"), OrderBy.DESC("stringField")).create();
 
         assertEquals(query1.getSql(),
-                "SELECT TOP ? id, int_field, string_field, date_field, short_field, version, entity_aid, entity_bid, entity_cid, entity_did " +
+                "SELECT TOP 1000 id, int_field, string_field, date_field, short_field, version, entity_aid, entity_bid, entity_cid, entity_did " +
                         "FROM test_entity " +
                         "WHERE (id IN (?)) AND (id LIKE ?) AND (id = ?) AND (id > ?) AND (id >= ?) AND (id < ?)" +
                         " AND (id <= ?) AND (id IS NOT NULL) AND (id IS NULL) AND (id BETWEEN ? AND ?) AND (id <> ?)" +
@@ -160,7 +160,7 @@ public class MSSQLQueryBuilderTest extends AbstractJUnit4SpringContextTests {
 
 
         assertEquals(query2.getSql(),
-                "SELECT TOP ? id, int_field, string_field, date_field, short_field, " +
+                "SELECT TOP 1000 id, int_field, string_field, date_field, short_field, " +
                         "version, entity_aid, entity_bid, entity_cid, entity_did FROM test_entity " +
                         "WHERE (id IN (?)) OR (id LIKE ?) OR (id = ?) OR (id > ?) " +
                         "OR (id >= ?) OR (id < ?) OR (id <= ?) OR (id IS NOT NULL) OR (id IS NULL) " +
@@ -186,7 +186,7 @@ public class MSSQLQueryBuilderTest extends AbstractJUnit4SpringContextTests {
                                 Condition.notEqual("id"))
                 )).orderBy(OrderBy.ASC("id"), OrderBy.DESC("stringField")).create();
         assertEquals(query3.getSql(),
-                "SELECT TOP ? id, int_field, string_field, date_field, short_field, " +
+                "SELECT TOP 1000 id, int_field, string_field, date_field, short_field, " +
                         "version, entity_aid, entity_bid, entity_cid, entity_did " +
                         "FROM test_entity " +
                         "WHERE " +

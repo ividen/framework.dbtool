@@ -30,7 +30,7 @@ public class FetcherImpl implements IFetcher {
     }
 
     public <T> void fetch(Class<T> entityClass, Collection<T> items, String relationPath) {
-        if (items == null) {
+        if (items == null || items.isEmpty()) {
             return;
         }
         PathKey key = new PathKey(entityClass, relationPath);
@@ -53,9 +53,11 @@ public class FetcherImpl implements IFetcher {
             Map<Object, Object> map = relationValue.getFetchQuery()
                     .setParameter(1, relationValue.getRelationIds(items))
                     .selectMap(relationValue.getIDGroupingField());
-            results.put(relationKey, map);
-            if (entry.getValue() != null) {
-                fillItems(map.values(), entry.getValue());
+            if (!map.isEmpty()) {
+                results.put(relationKey, map);
+                if (entry.getValue() != null) {
+                    fillItems(map.values(), entry.getValue());
+                }
             }
         }
 
@@ -115,15 +117,15 @@ public class FetcherImpl implements IFetcher {
         RelationKey relationKey = new RelationKey(entityClass, propertyName);
         RelationValue relationValue = relationCache.get(relationKey);
         if (relationValue == null) {
-            try{
-            FieldMapping id = registry.getIdFields(fm.getFetchField().getType()).iterator().next();
-            //todo aguzanov fetch relation by one of ids column, just for a while
-            IQueryBuilder queryBuilder = em.queryBuilder(fm.getFetchField().getType())
-                    .where(Condition.in(id.getPropertyName()));
+            try {
+                FieldMapping id = registry.getIdFields(fm.getFetchField().getType()).iterator().next();
+                //todo aguzanov fetch relation by one of ids column, just for a while
+                IQueryBuilder queryBuilder = em.queryBuilder(fm.getFetchField().getType())
+                        .where(Condition.in(id.getPropertyName()));
 
-            relationValue = new RelationValue(id, fm, queryBuilder.create());
-            relationCache.putIfAbsent(relationKey, relationValue);
-            }catch (NullPointerException e){
+                relationValue = new RelationValue(id, fm, queryBuilder.create());
+                relationCache.putIfAbsent(relationKey, relationValue);
+            } catch (NullPointerException e) {
                 e.printStackTrace();
             }
         }

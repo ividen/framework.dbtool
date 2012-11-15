@@ -43,18 +43,14 @@ public class QueryImpl<T> implements IQuery<T> {
         this.registry = registry;
         this.entityClass = entityClass;
 
-        int pc = this.paramsCount = paramTypes.size();
-        if (this.maxSize != null) {
-            pc++;
-        }
+        this.paramsCount = paramTypes.size();
 
-        this.params = new Object[pc];
-        if (maxSize != null) {
-            if (dbTool.getDbType() == DBTool.DBType.ORACLE) {
-                this.params[this.paramsCount] = this.maxSize;
-            } else {
-                this.params[0] = this.maxSize;
-            }
+
+        if (dbTool.getDbType() == DBTool.DBType.ORACLE && this.maxSize != null) {
+            this.params = new Object[this.paramsCount + 1];
+            this.params[this.paramsCount] = this.maxSize;
+        } else {
+            this.params = new Object[this.paramsCount];
         }
     }
 
@@ -67,10 +63,6 @@ public class QueryImpl<T> implements IQuery<T> {
     }
 
     public T select() {
-        return null;
-    }
-
-    public T selectWithFilter(Filter... filters) {
         return null;
     }
 
@@ -88,7 +80,7 @@ public class QueryImpl<T> implements IQuery<T> {
     }
 
     public Map<Object, T> selectMap(String field) {
-        final Map<Object, T> result = new HashMap<Object, T>();
+        final Map<Object, T> result = new LinkedHashMap<Object, T>();
         FieldMapping fieldMapping = registry.getFieldMappingByPropertyName(entityClass, field);
         if (fieldMapping == null) {
             throw new IllegalArgumentException("Unknown field name!");
@@ -107,7 +99,7 @@ public class QueryImpl<T> implements IQuery<T> {
     }
 
     public Map<Object, List<T>> selectMapList(String field) {
-        final Map<Object, List<T>> result = new HashMap<Object, List<T>>();
+        final Map<Object, List<T>> result = new LinkedHashMap<Object, List<T>>();
         FieldMapping fieldMapping = registry.getFieldMappingByPropertyName(entityClass, field);
         if (fieldMapping == null) {
             throw new IllegalArgumentException("Unknown field name!");
@@ -130,28 +122,14 @@ public class QueryImpl<T> implements IQuery<T> {
     }
 
 
-    public List<T> selectListWithFilter(Filter... filters) {
-        return null;
-    }
-
     public IQuery<T> setParameter(int index, Object value) {
         if (index <= 0 || index > getParamsCount()) {
             throw new IllegalArgumentException("Index of parameter is wrong");
         }
 
-        int i;
-        if (maxSize != null) {
-            if (dbTool.getDbType() == DBTool.DBType.ORACLE) {
-                i = index - 1;
-            } else {
-                i = index;
-            }
-        } else {
-            i = index - 1;
-        }
 
         int type = paramTypes.get(index - 1);
-        this.params[i] = type == Integer.MAX_VALUE ? value : ((value instanceof Collection) ?
+        this.params[index - 1] = type == Integer.MAX_VALUE ? value : ((value instanceof Collection) ?
                 new SqlCollectionParameterValue(type, (Collection) value) : new SqlParameterValue(type, value));
 
         return this;

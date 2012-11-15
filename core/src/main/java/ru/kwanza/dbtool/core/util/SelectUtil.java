@@ -1,6 +1,9 @@
 package ru.kwanza.dbtool.core.util;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.*;
+import ru.kwanza.dbtool.core.DBTool;
 import ru.kwanza.dbtool.core.KeyValue;
 
 import java.util.*;
@@ -9,6 +12,8 @@ import java.util.*;
  * @author Guzanov Alexander
  */
 public class SelectUtil {
+    private static final Logger logger = LoggerFactory.getLogger(DBTool.class);
+
     public static interface Container<U> {
         public void add(U object);
     }
@@ -101,8 +106,38 @@ public class SelectUtil {
         return result;
     }
 
+    private static String traceParams(Object[] inValues) {
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < inValues.length; i++) {
+            Object value = inValues[i];
+            builder.append('\n').append(i).append("=");
+            if (value instanceof Collection) {
+                builder.append('[');
+                for (Object vi : (Collection) value) {
+                    builder.append(vi).append(',');
+                }
+
+                builder.append(']');
+            } else {
+                builder.append(value);
+            }
+
+        }
+
+        return builder.toString();
+    }
+
     public static void batchSelect(JdbcOperations template, String selectSQL, ResultSetExtractor extractor, Container result,
                                    Object[] inValues) {
+
+        if (logger.isDebugEnabled()) {
+            if (logger.isTraceEnabled()) {
+                logger.trace("Executing query \n{} \nwith params:{} ", selectSQL, traceParams(inValues));
+            } else {
+                logger.debug("Executing query \n{}", selectSQL);
+            }
+        }
+
         int lastListParam = -1;
         int[] index = new int[inValues.length];
         Object[] mappingParams = new Object[inValues.length];

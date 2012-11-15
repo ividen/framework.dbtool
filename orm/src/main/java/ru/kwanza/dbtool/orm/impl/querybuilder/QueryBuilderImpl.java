@@ -1,5 +1,7 @@
 package ru.kwanza.dbtool.orm.impl.querybuilder;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ru.kwanza.dbtool.core.DBTool;
 import ru.kwanza.dbtool.orm.api.Condition;
 import ru.kwanza.dbtool.orm.api.IQuery;
@@ -16,6 +18,8 @@ import java.util.List;
  * @author Alexander Guzanov
  */
 public class QueryBuilderImpl<T> implements IQueryBuilder<T> {
+    private static final Logger logger = LoggerFactory.getLogger(QueryImpl.class);
+
     private IEntityMappingRegistry registry;
     private DBTool dbTool;
     private Class entityClass;
@@ -45,7 +49,11 @@ public class QueryBuilderImpl<T> implements IQueryBuilder<T> {
         if (this.orderBy != null && this.orderBy.length > 0) {
             orderBy.append(" ORDER BY ");
             for (OrderBy ob : this.orderBy) {
-                orderBy.append(registry.getFieldMappingByPropertyName(entityClass, ob.getPropertyName()).getColumnName())
+                FieldMapping fieldMapping = registry.getFieldMappingByPropertyName(entityClass, ob.getPropertyName());
+                if(fieldMapping==null){
+                    throw new IllegalArgumentException("Unknown field!");
+                }
+                orderBy.append(fieldMapping.getColumnName())
                         .append(' ')
                         .append(ob.getType())
                         .append(", ");
@@ -56,7 +64,7 @@ public class QueryBuilderImpl<T> implements IQueryBuilder<T> {
 
         if (maxSize != null) {
             if (dbTool.getDbType() == DBTool.DBType.MSSQL) {
-                sql = new StringBuilder("SELECT TOP ? ")
+                sql = new StringBuilder("SELECT TOP ").append(maxSize).append(' ')
                         .append(selectFields)
                         .append("FROM ")
                         .append(registry.getTableName(entityClass));
@@ -98,8 +106,9 @@ public class QueryBuilderImpl<T> implements IQueryBuilder<T> {
             }
         }
 
-
-        return new QueryImpl<T>(dbTool, registry, entityClass, sql.toString(), maxSize, offset, paramsTypes);
+        String sqlString = sql.toString();
+        logger.debug("Creating query {}", sqlString);
+        return new QueryImpl<T>(dbTool, registry, entityClass, sqlString, maxSize, offset, paramsTypes);
     }
 
     private void createConditionString(Condition condition, List<Integer> paramsTypes, StringBuilder where) {
@@ -123,6 +132,9 @@ public class QueryBuilderImpl<T> implements IQueryBuilder<T> {
         } else {
             FieldMapping fieldMapping =
                     registry.getFieldMappingByPropertyName(entityClass, condition.getPropertyName());
+            if(fieldMapping==null){
+                     throw new IllegalArgumentException("Unknown field!");
+            }
             where.append(fieldMapping.getColumnName());
             if (type == Condition.Type.IS_EQUAL) {
                 paramsTypes.add(fieldMapping.getType());

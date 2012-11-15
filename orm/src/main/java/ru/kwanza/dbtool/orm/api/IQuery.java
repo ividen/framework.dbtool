@@ -10,16 +10,12 @@ public interface IQuery<T> {
 
     T select();
 
-    T selectWithFilter(Filter... filters);
-
     List<T> selectList();
-
-    List<T> selectListWithFilter(Filter... filters);
 
     IQuery<T> setParameter(int index, Object value);
 
-    Map<Object, List<T>> selectMapList(String field);
+    <F> Map<F, List<T>> selectMapList(String field);
 
-    Map<Object, T> selectMap(String field);
+    <F> Map<F, T> selectMap(String field);
 
 }
