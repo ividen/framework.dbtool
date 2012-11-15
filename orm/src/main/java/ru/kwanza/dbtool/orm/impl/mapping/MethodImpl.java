@@ -47,6 +47,6 @@ public class MethodImpl extends EntityField {
 
     @Override
     public Class getType() {
-        return null;
+        return getMethod.getReturnType();
     }
 }

@@ -27,4 +27,15 @@ public class FetchMapping {
     public String getPropertyName() {
         return propertyName;
     }
+
+    @Override
+    public String toString() {
+        final StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("FetchMapping{");
+        stringBuilder.append("propertyName='").append(propertyName).append('\'');
+        stringBuilder.append(", propertyField=").append(propertyField != null ? propertyField.getClass() : null);
+        stringBuilder.append(", fetchField=").append(fetchField != null ? fetchField.getClass() : null);
+        stringBuilder.append('}');
+        return stringBuilder.toString();
+    }
 }

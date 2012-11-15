@@ -1,5 +1,7 @@
 package ru.kwanza.dbtool.orm.impl.mapping;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ru.kwanza.dbtool.orm.annotations.*;
 
 import java.lang.reflect.AnnotatedElement;
@@ -8,11 +10,14 @@ import java.lang.reflect.Modifier;
 import java.util.*;
 
 import static ru.kwanza.dbtool.orm.impl.mapping.EntityMappingHelper.*;
+import static ru.kwanza.dbtool.orm.impl.mapping.EntityMappingLogger.*;
 
 /**
  * @author Kiryl Karatsetski
  */
 public class EntityMappingRegistryImpl implements IEntityMappingRegistry {
+
+    private static final Logger log = LoggerFactory.getLogger(EntityMappingRegistryImpl.class);
 
     private Map<Class, String> tableNameByEntityClass = new HashMap<Class, String>();
     private Map<String, String> tableNameByEntityName = new HashMap<String, String>();
@@ -52,7 +57,7 @@ public class EntityMappingRegistryImpl implements IEntityMappingRegistry {
         }
 
         if (entityClass == targetClass) {
-            addEntity(entityClass);
+            registerEntity(entityClass);
         }
 
         processRegisterEntityClass(entityClass, targetClass.getSuperclass());
@@ -114,7 +119,7 @@ public class EntityMappingRegistryImpl implements IEntityMappingRegistry {
     }
 
     @SuppressWarnings("unchecked")
-    private void addEntity(Class entityClass) {
+    private void registerEntity(Class entityClass) {
         if (!entityClass.isAnnotationPresent(Entity.class)) {
             throw new RuntimeException("Entity class must be annotated by @Entity: " + entityClass);
         }
@@ -126,12 +131,15 @@ public class EntityMappingRegistryImpl implements IEntityMappingRegistry {
             entityClassByEntityName.put(entityName, entityClass);
             tableNameByEntityClass.put(entityClass, tableName);
             tableNameByEntityName.put(entityNameByEntityClass.get(entityClass), tableName);
+
+            logRegisterEntity(log, entityClass, entityName, tableName);
+
         } else {
             throw new RuntimeException("Duplicate entity class " + entityClass + " or entity name class " + entityName);
         }
     }
 
-    private void addColumnName(Class entityClass, String columnName) {
+    private void registerColumnName(Class entityClass, String columnName) {
         Collection<String> columnNames = columnNamesByEntityClass.get(entityClass);
         if (columnNames == null) {
             columnNames = new LinkedHashSet<String>();
@@ -144,6 +152,8 @@ public class EntityMappingRegistryImpl implements IEntityMappingRegistry {
         }
 
         columnNames.add(columnName);
+
+        logRegisterColumn(log, entityClass, columnName);
     }
 
     private void addFieldMapping(Class entityClass, FieldMapping fieldMapping) {
@@ -153,10 +163,13 @@ public class EntityMappingRegistryImpl implements IEntityMappingRegistry {
             fieldMappingsByEntityClass.put(entityClass, fieldMappings);
             fieldMappingsByEntityName.put(entityNameByEntityClass.get(entityClass), fieldMappings);
         }
+
+        registerColumnName(entityClass, fieldMapping.getColumnName());
+        addFieldMappingByPropertyName(entityClass, fieldMapping);
+
         fieldMappings.add(fieldMapping);
 
-        addColumnName(entityClass, fieldMapping.getColumnName());
-        addFieldMappingByPropertyName(entityClass, fieldMapping);
+        logRegisterFieldMapping(log, entityClass, fieldMapping);
     }
 
     private void addIdFieldMapping(Class entityClass, FieldMapping fieldMapping) {
@@ -185,9 +198,12 @@ public class EntityMappingRegistryImpl implements IEntityMappingRegistry {
             fetchMappingByEntityClass.put(entityClass, fetchMappings);
             fetchMappingByEntityName.put(entityNameByEntityClass.get(entityClass), fetchMappings);
         }
-        fetchMappings.add(fetchMapping);
 
         addFetchMappingByPropertyName(entityClass, fetchMapping);
+
+        fetchMappings.add(fetchMapping);
+
+        logRegisterFetchMapping(log, entityClass, fetchMapping);
     }
 
     private void addFieldMappingByPropertyName(Class entityClass, FieldMapping fieldMapping) {
