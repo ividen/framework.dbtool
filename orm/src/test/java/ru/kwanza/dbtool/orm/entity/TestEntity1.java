@@ -43,7 +43,6 @@ public class TestEntity1 extends Agent {
     @Field(columnName = "agent_id")
     private Long agentId;
 
-
     public String getDescription() {
         return description;
     }

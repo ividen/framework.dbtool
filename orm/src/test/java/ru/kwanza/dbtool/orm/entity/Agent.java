@@ -14,7 +14,7 @@ public class Agent {
     private Long id1;
 
     @Field(columnName = "name1")
-    private String name;
+    private String name1;
 
     @Field(columnName = "address")
     private String address;
@@ -27,12 +27,8 @@ public class Agent {
 //        this.id = id;
 //    }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
+    public String getName1() {
+        return name1;
     }
 
     public String getAddress() {

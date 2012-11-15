@@ -7,7 +7,6 @@ import ru.kwanza.dbtool.orm.annotations.VersionField;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
-import java.lang.reflect.Method;
 import java.sql.Types;
 
 /**
@@ -56,8 +55,8 @@ public class EntityMappingHelper {
         EntityField entityField;
         if (annotatedElement instanceof java.lang.reflect.Field) {
             entityField = FieldImpl.create((java.lang.reflect.Field) annotatedElement);
-        } else if (annotatedElement instanceof Method) {
-            final Method getMethod = (Method) annotatedElement;
+        } else if (annotatedElement instanceof java.lang.reflect.Method) {
+            final java.lang.reflect.Method getMethod = (java.lang.reflect.Method) annotatedElement;
             entityField = MethodImpl.create(getMethod, getSetMethod(getMethod));
         } else {
             throw new RuntimeException("Unknown AnnotatedElement: " + annotatedElement);
@@ -108,8 +107,8 @@ public class EntityMappingHelper {
     private static String getPropertyName(AnnotatedElement annotatedElement) {
         if (annotatedElement instanceof java.lang.reflect.Field) {
             return getFieldPropertyName((java.lang.reflect.Field) annotatedElement);
-        } else if (annotatedElement instanceof Method) {
-            return getMethodPropertyName((Method) annotatedElement);
+        } else if (annotatedElement instanceof java.lang.reflect.Method) {
+            return getMethodPropertyName((java.lang.reflect.Method) annotatedElement);
         } else {
             throw new RuntimeException("Unknown AnnotatedElement: " + annotatedElement);
         }
@@ -128,7 +127,7 @@ public class EntityMappingHelper {
         }
     }
 
-    private static Method getSetMethod(Method getMethod) {
+    private static java.lang.reflect.Method getSetMethod(java.lang.reflect.Method getMethod) {
         final String setMethodName = getMethod.getName().replaceFirst("get", "set");
         final Class declaringClass = getMethod.getDeclaringClass();
         try {

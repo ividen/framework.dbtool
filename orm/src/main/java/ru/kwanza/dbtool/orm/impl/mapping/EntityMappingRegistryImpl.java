@@ -1,9 +1,10 @@
 package ru.kwanza.dbtool.orm.impl.mapping;
 
 import ru.kwanza.dbtool.orm.annotations.*;
-import ru.kwanza.dbtool.orm.annotations.Field;
 
-import java.lang.reflect.*;
+import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Member;
+import java.lang.reflect.Modifier;
 import java.util.*;
 
 import static ru.kwanza.dbtool.orm.impl.mapping.EntityMappingHelper.*;
@@ -50,10 +51,6 @@ public class EntityMappingRegistryImpl implements IEntityMappingRegistry {
             return;
         }
 
-        if (!entityClass.isAnnotationPresent(Entity.class)) {
-            throw new RuntimeException("Entity class must be annotated with @Entity: " + entityClass);
-        }
-
         if (entityClass == targetClass) {
             addEntity(entityClass);
         }
@@ -61,7 +58,7 @@ public class EntityMappingRegistryImpl implements IEntityMappingRegistry {
         processRegisterEntityClass(entityClass, targetClass.getSuperclass());
 
         final java.lang.reflect.Field[] declaredFields = targetClass.getDeclaredFields();
-        final Method[] methods = targetClass.getMethods();
+        final java.lang.reflect.Method[] methods = targetClass.getMethods();
 
         processFields(entityClass, declaredFields);
         processFields(entityClass, methods);
@@ -118,13 +115,20 @@ public class EntityMappingRegistryImpl implements IEntityMappingRegistry {
 
     @SuppressWarnings("unchecked")
     private void addEntity(Class entityClass) {
+        if (!entityClass.isAnnotationPresent(Entity.class)) {
+            throw new RuntimeException("Entity class must be annotated by @Entity: " + entityClass);
+        }
         final Entity entity = (Entity) entityClass.getAnnotation(Entity.class);
         final String entityName = getEntityName(entity, entityClass);
         final String tableName = getEntityTableName(entity, entityClass);
-        entityNameByEntityClass.put(entityClass, entityName);
-        entityClassByEntityName.put(entityName, entityClass);
-        tableNameByEntityClass.put(entityClass, tableName);
-        tableNameByEntityName.put(entityNameByEntityClass.get(entityClass), tableName);
+        if (!entityNameByEntityClass.containsKey(entityClass) && !entityClassByEntityName.containsKey(entityName)) {
+            entityNameByEntityClass.put(entityClass, entityName);
+            entityClassByEntityName.put(entityName, entityClass);
+            tableNameByEntityClass.put(entityClass, tableName);
+            tableNameByEntityName.put(entityNameByEntityClass.get(entityClass), tableName);
+        } else {
+            throw new RuntimeException("Duplicate entity class " + entityClass + " or entity name class " + entityName);
+        }
     }
 
     private void addColumnName(Class entityClass, String columnName) {
@@ -134,6 +138,11 @@ public class EntityMappingRegistryImpl implements IEntityMappingRegistry {
             columnNamesByEntityClass.put(entityClass, columnNames);
             columnNamesByEntityName.put(entityNameByEntityClass.get(entityClass), columnNames);
         }
+
+        if (columnNames.contains(columnName)) {
+            throw new RuntimeException("Duplicate column name " + columnName + " in class " + entityClass);
+        }
+
         columnNames.add(columnName);
     }
 
@@ -188,7 +197,14 @@ public class EntityMappingRegistryImpl implements IEntityMappingRegistry {
             fieldMappingByPropertyNameEntityClass.put(entityClass, fieldMappingByPropertyName);
             fieldMappingByPropertyNameEntityName.put(entityNameByEntityClass.get(entityClass), fieldMappingByPropertyName);
         }
-        fieldMappingByPropertyName.put(fieldMapping.getPropertyName(), fieldMapping);
+
+        final String propertyName = fieldMapping.getPropertyName();
+
+        if (fieldMappingByPropertyName.containsKey(propertyName)) {
+            throw new RuntimeException("Duplicate property name " + propertyName + " in class " + entityClass);
+        }
+
+        fieldMappingByPropertyName.put(propertyName, fieldMapping);
     }
 
     private void addFetchMappingByPropertyName(Class entityClass, FetchMapping fetchMapping) {
@@ -198,7 +214,14 @@ public class EntityMappingRegistryImpl implements IEntityMappingRegistry {
             fetchMappingByPropertyNameEntityClass.put(entityClass, fetchMappingByPropertyName);
             fetchMappingByPropertyNameEntityName.put(entityNameByEntityClass.get(entityClass), fetchMappingByPropertyName);
         }
-        fetchMappingByPropertyName.put(fetchMapping.getPropertyName(), fetchMapping);
+
+        final String propertyName = fetchMapping.getPropertyName();
+
+        if (fetchMappingByPropertyName.containsKey(propertyName)) {
+            throw new RuntimeException("Duplicate property name " + propertyName + " in class " + entityClass);
+        }
+
+        fetchMappingByPropertyName.put(propertyName, fetchMapping);
     }
 
     public String getTableName(Class entityClass) {
