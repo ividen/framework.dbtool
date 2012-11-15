@@ -7,6 +7,7 @@ import ru.kwanza.dbtool.core.SqlCollectionParameterValue;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 
@@ -16,12 +17,15 @@ import java.util.Collection;
 public class SelectStatementCreator implements PreparedStatementCreator, ParameterDisposer {
     private String sql;
     private Object[] params;
+    private int resultSetType;
 
     private static final Logger logger = LoggerFactory.getLogger(SelectStatementCreator.class);
 
-    public SelectStatementCreator(String sql, Object[] params) {
+
+    public SelectStatementCreator(String sql, Object[] params, int resultSetType) {
         this.sql = sql;
         this.params = params;
+        this.resultSetType = resultSetType;
     }
 
     public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
@@ -48,7 +52,7 @@ public class SelectStatementCreator implements PreparedStatementCreator, Paramet
         if (logger.isTraceEnabled()) {
             logger.trace("Construct select statement : {}", sql);
         }
-        PreparedStatement result = con.prepareStatement(sql);
+        PreparedStatement result = con.prepareStatement(sql, resultSetType, ResultSet.CONCUR_READ_ONLY);
         try {
             setValues(result);
         } catch (SQLException e) {

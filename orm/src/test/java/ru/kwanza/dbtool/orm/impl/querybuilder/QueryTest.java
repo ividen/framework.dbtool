@@ -169,7 +169,6 @@ public class QueryTest extends AbstractJUnit4SpringContextTests {
     }
 
     @Test
-    @ExpectedException(java.lang.IllegalArgumentException.class)
     public void testSelect_offset() {
         IQuery<TestEntity> query = em.queryBuilder(TestEntity.class)
                 .setMaxSize(100)
@@ -182,7 +181,46 @@ public class QueryTest extends AbstractJUnit4SpringContextTests {
 
         Map<Long, TestEntity> map = query.selectMap("id");
         assertEquals(map.size(), 1);
-        Assert.assertEquals(map.get(99).getId().longValue(), 99l);
+        Assert.assertEquals(map.get(99l).getId().longValue(), 99l);
+    }
+
+    @Test
+    public void testSelect_offset_noteixts() {
+        IQuery<TestEntity> query = em.queryBuilder(TestEntity.class)
+                .setMaxSize(100)
+                .where(Condition.isNull("id"))
+                .setOffset(99)
+                .orderBy(OrderBy.ASC("id")).create();
+
+        List<TestEntity> testEntities = query.selectList();
+        assertEquals(testEntities.size(), 0);
+        Map<Long, TestEntity> map = query.selectMap("id");
+        assertEquals(map.size(), 0);
+    }
+
+    @Test
+    public void testSelect_offset_greater() {
+        IQuery<TestEntity> query = em.queryBuilder(TestEntity.class)
+                .setMaxSize(100)
+                .where(Condition.isEqual("id"))
+                .setOffset(99)
+                .orderBy(OrderBy.ASC("id")).create();
+
+        List<TestEntity> testEntities = query.setParameter(1, 100).selectList();
+        assertEquals(testEntities.size(), 0);
+        Map<Long, TestEntity> map = query.setParameter(1, 100).selectMap("id");
+        assertEquals(map.size(), 0);
+    }
+
+
+    @Test
+    public void testSelect_single() {
+        IQuery<TestEntity> query = em.queryBuilder(TestEntity.class)
+                .where(Condition.isEqual("id"))
+                .orderBy(OrderBy.ASC("id")).create();
+
+        TestEntity select = query.setParameter(1, 100l).select();
+        assertEquals(select.getId().longValue(), 100l);
     }
 
 

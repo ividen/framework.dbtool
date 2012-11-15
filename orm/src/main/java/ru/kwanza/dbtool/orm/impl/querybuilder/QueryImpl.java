@@ -8,7 +8,6 @@ import ru.kwanza.dbtool.core.KeyValue;
 import ru.kwanza.dbtool.core.SqlCollectionParameterValue;
 import ru.kwanza.dbtool.core.util.FieldValueExtractor;
 import ru.kwanza.dbtool.core.util.SelectUtil;
-import ru.kwanza.dbtool.orm.api.Filter;
 import ru.kwanza.dbtool.orm.api.IQuery;
 import ru.kwanza.dbtool.orm.impl.mapping.EntityField;
 import ru.kwanza.dbtool.orm.impl.mapping.FieldMapping;
@@ -63,7 +62,19 @@ public class QueryImpl<T> implements IQuery<T> {
     }
 
     public T select() {
-        return null;
+        final Object[] result = new Object[1];
+
+        SelectUtil.batchSelect(dbTool.getJdbcTemplate(), sql, new SingleObjectObjectExtractor<T>(),
+                new SelectUtil.Container<Collection<T>>() {
+                    public void add(Collection<T> objects) {
+                        if (objects != null && !objects.isEmpty()) {
+                            result[0] = objects.iterator().next();
+                        }
+                    }
+                }, params, getResultSetType()
+        );
+
+        return (T) result[0];
     }
 
     public List<T> selectList() {
@@ -74,7 +85,7 @@ public class QueryImpl<T> implements IQuery<T> {
                     result.addAll(objects);
                 }
             }
-        }, params);
+        }, params, getResultSetType());
 
         return result;
     }
@@ -93,7 +104,7 @@ public class QueryImpl<T> implements IQuery<T> {
                             result.put(kv.getKey(), kv.getValue());
                         }
                     }
-                }, params);
+                }, params, getResultSetType());
 
         return result;
     }
@@ -117,7 +128,7 @@ public class QueryImpl<T> implements IQuery<T> {
                             vs.add(kv.getValue());
                         }
                     }
-                }, params);
+                }, params, getResultSetType());
         return result;
     }
 
@@ -141,6 +152,10 @@ public class QueryImpl<T> implements IQuery<T> {
         return "QueryImpl{" +
                 "query='" + sql + '\'' +
                 '}';
+    }
+
+    private int getResultSetType() {
+        return this.offset == null ? ResultSet.TYPE_FORWARD_ONLY : ResultSet.TYPE_SCROLL_INSENSITIVE;
     }
 
 
@@ -169,13 +184,12 @@ public class QueryImpl<T> implements IQuery<T> {
         public Collection<TYPE> extractData(ResultSet rs) throws SQLException, DataAccessException {
             if (QueryImpl.this.offset != null && QueryImpl.this.offset > 1) {
                 if (rs.next()) {
-                    rs.absolute(QueryImpl.this.offset - 1);
+                    rs.absolute(QueryImpl.this.offset);
                 } else {
                     return null;
                 }
             }
             LinkedList<TYPE> objects = new LinkedList<TYPE>();
-
             Collection<FieldMapping> fieldMapping = registry.getFieldMapping(entityClass);
 
             while (rs.next()) {
@@ -185,9 +199,7 @@ public class QueryImpl<T> implements IQuery<T> {
                 } catch (Exception e) {
                     throw new RuntimeException();
                 }
-
                 readAndFill(rs, fieldMapping, obj);
-
                 objects.add(getValue(obj));
             }
 
@@ -201,6 +213,19 @@ public class QueryImpl<T> implements IQuery<T> {
                 Object value = FieldValueExtractor.getValue(rs, idf.getColumnName(), idf.getEntityFiled().getType());
                 idf.getEntityFiled().setValue(obj, value);
             }
+        }
+    }
+
+    private class SingleObjectObjectExtractor<T> extends ObjectExtractor<T> {
+        private boolean getted = false;
+
+        @Override
+        public T getValue(Object e) {
+            if (getted) {
+                throw new RuntimeException("Getted already!");
+            }
+            getted=true;
+            return super.getValue(e);
         }
     }
 }

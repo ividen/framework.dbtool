@@ -6,6 +6,7 @@ import org.springframework.jdbc.core.*;
 import ru.kwanza.dbtool.core.DBTool;
 import ru.kwanza.dbtool.core.KeyValue;
 
+import java.sql.ResultSet;
 import java.util.*;
 
 /**
@@ -118,7 +119,9 @@ public class SelectUtil {
                 }
 
                 builder.append(']');
-            } else {
+            } else if(value instanceof SqlParameterValue){
+                builder.append(((SqlParameterValue)value).getValue());
+            }else {
                 builder.append(value);
             }
 
@@ -129,6 +132,12 @@ public class SelectUtil {
 
     public static void batchSelect(JdbcOperations template, String selectSQL, ResultSetExtractor extractor, Container result,
                                    Object[] inValues) {
+
+        batchSelect(template, selectSQL, extractor, result, inValues, ResultSet.TYPE_FORWARD_ONLY);
+    }
+
+    public static void batchSelect(JdbcOperations template, String selectSQL, ResultSetExtractor extractor, Container result,
+                                   Object[] inValues, int resultSetType) {
 
         if (logger.isDebugEnabled()) {
             if (logger.isTraceEnabled()) {
@@ -161,10 +170,11 @@ public class SelectUtil {
                 mustContinue = mapListParam(index, mappingParams, j, inValues[j]);
             }
 
-            SelectStatementCreator selectStatement = new SelectStatementCreator(selectSQL, mappingParams);
+            SelectStatementCreator selectStatement = new SelectStatementCreator(selectSQL, mappingParams, resultSetType);
             Object res = template.query(selectStatement, extractor);
-
-            result.add(res);
+            if (res != null) {
+                result.add(res);
+            }
             if (!mustContinue) {
                 mustContinue = false;
                 for (int j = lastListParam + 1; j < index.length; j++) {
