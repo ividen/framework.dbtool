@@ -81,6 +81,10 @@ public class EntityMappingRegistryImpl implements IEntityMappingRegistry {
         processFetches(entityClass, methods);
     }
 
+    public void validateEntityMapping() {
+        //TODO KK: Реализация проверки целостности связей между сущностями в реестре
+    }
+
     private void processFields(Class entityClass, AnnotatedElement[] annotatedElements) {
         for (AnnotatedElement annotatedElement : annotatedElements) {
 

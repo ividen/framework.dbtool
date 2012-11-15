@@ -9,6 +9,8 @@ public interface IEntityMappingRegistry {
 
     void registerEntityClass(Class entityClass);
 
+    void validateEntityMapping();
+
     String getTableName(Class entityClass);
 
     String getTableName(String entityName);
