@@ -9,7 +9,6 @@ import ru.kwanza.dbtool.orm.impl.mapping.FieldMapping;
 import ru.kwanza.dbtool.orm.impl.mapping.IEntityMappingRegistry;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -32,38 +31,32 @@ public class QueryBuilderImpl<T> implements IQueryBuilder<T> {
     }
 
     public IQuery<T> create() {
-        StringBuilder sql = new StringBuilder("");
+        StringBuilder sql;
         StringBuilder selectFields = new StringBuilder("");
         StringBuilder orderBy = new StringBuilder();
         StringBuilder where = new StringBuilder();
         addFields(selectFields, registry.getFieldMapping(entityClass));
-        selectFields.deleteCharAt(selectFields.length() - 1);
+        selectFields.deleteCharAt(selectFields.length() - 2);
 
         List<Integer> paramsTypes = new LinkedList<Integer>();
         createConditionString(this.condition, paramsTypes, where);
 
 
         if (this.orderBy != null && this.orderBy.length > 0) {
-            orderBy.append("ORDER BY ");
+            orderBy.append(" ORDER BY ");
             for (OrderBy ob : this.orderBy) {
                 orderBy.append(registry.getFieldMappingByPropertyName(entityClass, ob.getPropertyName()).getColumnName())
                         .append(' ')
                         .append(ob.getType())
-                        .append(',');
+                        .append(", ");
             }
 
-            orderBy.deleteCharAt(sql.length() - 1);
+            orderBy.deleteCharAt(orderBy.length() - 2);
         }
 
         if (maxSize != null) {
-            if (dbTool.getDbType() == DBTool.DBType.ORACLE) {
+            if (dbTool.getDbType() == DBTool.DBType.MSSQL) {
                 sql = new StringBuilder("SELECT TOP ? ")
-                        .append(selectFields)
-                        .append("FROM ")
-                        .append(registry.getTableName(entityClass));
-
-            } else {
-                sql = new StringBuilder("SELECT  * FROM (")
                         .append(selectFields)
                         .append("FROM ")
                         .append(registry.getTableName(entityClass));
@@ -72,7 +65,21 @@ public class QueryBuilderImpl<T> implements IQueryBuilder<T> {
                 }
 
                 if (orderBy.length() > 0) {
-                    sql.append(" ORDER BY ").append(orderBy);
+                    sql.append(orderBy);
+                }
+
+            } else {
+                sql = new StringBuilder("SELECT  * FROM (")
+                        .append(selectFields)
+                        .append("FROM ")
+                        .append(registry.getTableName(entityClass));
+
+                if (where.length() > 0) {
+                    sql.append(" WHERE ").append(where);
+                }
+
+                if (orderBy.length() > 0) {
+                    sql.append(orderBy);
                 }
 
                 sql.append(") WHERE rownum < ?");
@@ -87,7 +94,7 @@ public class QueryBuilderImpl<T> implements IQueryBuilder<T> {
             }
 
             if (orderBy.length() > 0) {
-                sql.append(" ORDER BY ").append(orderBy);
+                sql.append(orderBy);
             }
         }
 
@@ -107,8 +114,9 @@ public class QueryBuilderImpl<T> implements IQueryBuilder<T> {
             createConditionString(childs[0], paramsTypes, where);
             where.append(')');
 
-            for (Condition c : childs) {
-                where.append(type.name()).append('(');
+            for (int i = 1; i < childs.length; i++) {
+                Condition c = childs[i];
+                where.append(' ').append(type.name()).append(" (");
                 createConditionString(c, paramsTypes, where);
                 where.append(')');
             }
@@ -157,7 +165,7 @@ public class QueryBuilderImpl<T> implements IQueryBuilder<T> {
     private void addFields(StringBuilder select, Collection<FieldMapping> fields) {
         if (fields != null) {
             for (FieldMapping fm : fields) {
-                select.append(fm.getColumnName()).append(" ,");
+                select.append(fm.getColumnName()).append(", ");
             }
         }
     }

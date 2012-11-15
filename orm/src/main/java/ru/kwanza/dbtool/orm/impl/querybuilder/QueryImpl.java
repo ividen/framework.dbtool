@@ -30,6 +30,7 @@ public class QueryImpl<T> implements IQuery<T> {
     private Integer offset;
     private IEntityMappingRegistry registry;
     private Class<T> entityClass;
+    private int paramsCount;
 
 
     public QueryImpl(DBTool dbTool, IEntityMappingRegistry registry, Class<T> entityClass, String sql, Integer maxSize, Integer offset,
@@ -42,19 +43,27 @@ public class QueryImpl<T> implements IQuery<T> {
         this.registry = registry;
         this.entityClass = entityClass;
 
-        int paramsCount = paramTypes.size();
-        if (maxSize != null) {
-            paramsCount++;
+        int pc = this.paramsCount = paramTypes.size();
+        if (this.maxSize != null) {
+            pc++;
         }
 
-        this.params = new Object[paramsCount];
+        this.params = new Object[pc];
         if (maxSize != null) {
             if (dbTool.getDbType() == DBTool.DBType.ORACLE) {
-                this.params[paramsCount] = this.maxSize;
+                this.params[this.paramsCount] = this.maxSize;
             } else {
                 this.params[0] = this.maxSize;
             }
         }
+    }
+
+    public String getSql() {
+        return sql;
+    }
+
+    public int getParamsCount() {
+        return paramsCount;
     }
 
     public T select() {
@@ -126,7 +135,7 @@ public class QueryImpl<T> implements IQuery<T> {
     }
 
     public IQuery<T> setParameter(int index, Object value) {
-        if (index <= 0 || ((this.maxSize != null && index > params.length - 1) || index > params.length)) {
+        if (index <= 0 || index > getParamsCount()) {
             throw new IllegalArgumentException("Index of parameter is wrong");
         }
 
