@@ -69,7 +69,7 @@ public class QueryBuilderImpl<T> implements IQueryBuilder<T> {
                 }
 
             } else {
-                sql = new StringBuilder("SELECT  * FROM (")
+                sql = new StringBuilder("SELECT  * FROM (SELECT ")
                         .append(selectFields)
                         .append("FROM ")
                         .append(registry.getTableName(entityClass));
