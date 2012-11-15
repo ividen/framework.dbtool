@@ -7,7 +7,7 @@
 
     <bean id="dbtool.EntityMappingRegistryImpl" class="ru.kwanza.dbtool.orm.impl.mapping.EntityMappingRegistryImpl"/>
 
-    <bean id="dbtool.IEntityManager" class="ru.kwanza.dbtool.orm.impl.EntityManagerImpl">
+    <bean id="dbtool.IEntityManager" class="ru.kwanza.dbtool.orm.impl.EntityManagerImpl" init-method="init">
         <property name="dbTool" ref="dbtool.DBTool"/>
         <property name="mappingRegistry" ref="dbtool.IEntityMappingRegistry"/>
     </bean>

@@ -102,7 +102,7 @@ public class SelectUtil {
     }
 
     public static void batchSelect(JdbcOperations template, String selectSQL, ResultSetExtractor extractor, Container result,
-                                    Object[] inValues) {
+                                   Object[] inValues) {
         int lastListParam = -1;
         int[] index = new int[inValues.length];
         Object[] mappingParams = new Object[inValues.length];
@@ -150,7 +150,7 @@ public class SelectUtil {
         if (nextIndex >= list.size()) {
             nextIndex = list.size();
         }
-        mappingParams[j] = list.subList(index[j], nextIndex);
+        mappingParams[j] = !list.isEmpty() ? list.subList(index[j], nextIndex) : null;
         index[j] = nextIndex;
         if (nextIndex < list.size()) {
             mustContinue = true;
@@ -163,7 +163,7 @@ public class SelectUtil {
         for (int i = 0; i < params.length; i++) {
             Object obj = params[i];
             if ((obj instanceof Collection) && !(obj instanceof List)) {
-                    result[i] = new ArrayList((Collection) obj);
+                result[i] = new ArrayList((Collection) obj);
             } else {
                 result[i] = obj;
             }

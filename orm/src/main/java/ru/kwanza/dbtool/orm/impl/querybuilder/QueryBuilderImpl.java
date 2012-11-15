@@ -36,9 +36,7 @@ public class QueryBuilderImpl<T> implements IQueryBuilder<T> {
         StringBuilder selectFields = new StringBuilder("");
         StringBuilder orderBy = new StringBuilder();
         StringBuilder where = new StringBuilder();
-        addFields(selectFields, registry.getIdFields(entityClass));
         addFields(selectFields, registry.getFieldMapping(entityClass));
-        addFields(selectFields, Collections.singleton(registry.getVersionField(entityClass)));
         selectFields.deleteCharAt(selectFields.length() - 1);
 
         List<Integer> paramsTypes = new LinkedList<Integer>();

@@ -24,11 +24,19 @@ public class FetcherImpl implements IFetcher {
     // this cache contains all relations for all entities and queries used to read this relations
     private ConcurrentHashMap<RelationKey, RelationValue> relationCache = new ConcurrentHashMap<RelationKey, RelationValue>();
 
+    public FetcherImpl(IEntityMappingRegistry registry, IEntityManager em) {
+        this.registry = registry;
+        this.em = em;
+    }
+
     public <T> void fetch(Class<T> entityClass, Collection<T> items, String relationPath) {
+        if (items == null) {
+            return;
+        }
         PathKey key = new PathKey(entityClass, relationPath);
         PathValue value = pathCache.get(key);
 
-        if (value != null) {
+        if (value == null) {
             value = constructPathValue(relationPath, key);
         }
 
@@ -96,7 +104,7 @@ public class FetcherImpl implements IFetcher {
                 Map<String, Object> subScan = (Map<String, Object>) e.getValue();
                 PathValue nextValue = new PathValue();
                 constructPath(fm.getFetchField().getType(), nextValue, subScan);
-                relationKeys.put(relationKey, pathValue);
+                relationKeys.put(relationKey, nextValue);
             } else {
                 relationKeys.put(relationKey, null);
             }
@@ -107,6 +115,7 @@ public class FetcherImpl implements IFetcher {
         RelationKey relationKey = new RelationKey(entityClass, propertyName);
         RelationValue relationValue = relationCache.get(relationKey);
         if (relationValue == null) {
+            try{
             FieldMapping id = registry.getIdFields(fm.getFetchField().getType()).iterator().next();
             //todo aguzanov fetch relation by one of ids column, just for a while
             IQueryBuilder queryBuilder = em.queryBuilder(fm.getFetchField().getType())
@@ -114,6 +123,9 @@ public class FetcherImpl implements IFetcher {
 
             relationValue = new RelationValue(id, fm, queryBuilder.create());
             relationCache.putIfAbsent(relationKey, relationValue);
+            }catch (NullPointerException e){
+                e.printStackTrace();
+            }
         }
 
         return relationKey;

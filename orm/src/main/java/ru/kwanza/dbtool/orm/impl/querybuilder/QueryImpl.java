@@ -126,7 +126,7 @@ public class QueryImpl<T> implements IQuery<T> {
     }
 
     public IQuery<T> setParameter(int index, Object value) {
-        if (index <= 0 || index > params.length - 1) {
+        if (index <= 0 || ((this.maxSize != null && index > params.length - 1) || index > params.length)) {
             throw new IllegalArgumentException("Index of parameter is wrong");
         }
 
@@ -189,9 +189,7 @@ public class QueryImpl<T> implements IQuery<T> {
             }
             LinkedList<TYPE> objects = new LinkedList<TYPE>();
 
-            Collection<FieldMapping> idFields = registry.getIdFields(entityClass);
             Collection<FieldMapping> fieldMapping = registry.getFieldMapping(entityClass);
-            Collection<FieldMapping> versionField = Collections.singletonList(registry.getVersionField(entityClass));
 
             while (rs.next()) {
                 T obj;
@@ -201,9 +199,7 @@ public class QueryImpl<T> implements IQuery<T> {
                     throw new RuntimeException();
                 }
 
-                readAndFill(rs, idFields, obj);
                 readAndFill(rs, fieldMapping, obj);
-                readAndFill(rs, versionField, obj);
 
                 objects.add(getValue(obj));
             }
