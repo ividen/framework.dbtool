@@ -5,8 +5,6 @@ import ru.kwanza.dbtool.orm.annotations.Field;
 import ru.kwanza.dbtool.orm.annotations.IdField;
 import ru.kwanza.dbtool.orm.annotations.VersionField;
 
-import java.util.Date;
-
 /**
  * @author Alexander Guzanov
  */

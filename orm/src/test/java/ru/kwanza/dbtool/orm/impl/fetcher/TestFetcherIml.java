@@ -1,16 +1,15 @@
 package ru.kwanza.dbtool.orm.impl.fetcher;
 
-import junit.framework.TestCase;
 import ru.kwanza.dbtool.orm.api.IEntityManager;
 
 import java.util.List;
 
 /**
- * Test fetching in hierarchy:  TestEntity{TestEntityA,TestEntityB,TestEntityC{TestEntityF{TestEntityG},TestEntityC},TestEntityD}
+ * Test fetching in hierarchy:  TestEntity1{TestEntityA,TestEntityB,TestEntityC{TestEntityF{TestEntityG},TestEntityC},TestEntityD}
  *
  * @author Alexander Guzanov
  */
-public class TestFetcherIml extends TestCase{
+public class TestFetcherIml /*extends *TestCase*/{
     IEntityManager em;
 
     public void testFetch1(){

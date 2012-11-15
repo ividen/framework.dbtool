@@ -3,10 +3,8 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-    <bean id="dbtool.DBTool" class="ru.kwanza.dbtool.core.DBTool">
-        <property name="dataSource" ref="dataSource"/>
-    </bean>
+    <alias alias="dbtool.IEntityMappingRegistry" name="dbtool.EntityMappingRegistryImpl"/>
 
-    <bean id="dbtool.VersionGenerator" class="ru.kwanza.dbtool.core.VersionGenerator"/>
+    <bean id="dbtool.EntityMappingRegistryImpl" class="ru.kwanza.dbtool.orm.impl.mapping.EntityMappingRegistryImpl"/>
 
 </beans>

@@ -5,11 +5,14 @@ package ru.kwanza.dbtool.orm.impl.mapping;
  */
 public class FetchMapping {
 
+    private String propertyName;
+
     private EntityField propertyField;
     private EntityField fetchField;
 
-    public FetchMapping(EntityField mappedField, EntityField fetchField) {
-        this.propertyField = mappedField;
+    public FetchMapping(String propertyName, EntityField propertyField, EntityField fetchField) {
+        this.propertyName = propertyName;
+        this.propertyField = propertyField;
         this.fetchField = fetchField;
     }
 
@@ -19,5 +22,9 @@ public class FetchMapping {
 
     public EntityField getFetchField() {
         return fetchField;
+    }
+
+    public String getPropertyName() {
+        return propertyName;
     }
 }

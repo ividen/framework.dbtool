@@ -36,7 +36,7 @@ public class QueryBuilderImpl<T> implements IQueryBuilder<T> {
         StringBuilder selectFields = new StringBuilder("");
         StringBuilder orderBy = new StringBuilder();
         StringBuilder where = new StringBuilder();
-        addFields(sql, registry.getIDFields(entityClass));
+        addFields(sql, registry.getIdFields(entityClass));
         addFields(sql, registry.getFieldMapping(entityClass));
         addFields(sql, Collections.singleton(registry.getVersionField(entityClass)));
 

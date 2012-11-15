@@ -189,7 +189,7 @@ public class QueryImpl<T> implements IQuery<T> {
             }
             LinkedList<TYPE> objects = new LinkedList<TYPE>();
 
-            Collection<FieldMapping> idFields = registry.getIDFields(entityClass);
+            Collection<FieldMapping> idFields = registry.getIdFields(entityClass);
             Collection<FieldMapping> fieldMapping = registry.getFieldMapping(entityClass);
             Collection<FieldMapping> versionField = Collections.singletonList(registry.getVersionField(entityClass));
 

@@ -21,9 +21,9 @@ public interface IEntityMappingRegistry {
 
     Collection<FieldMapping> getFieldMapping(String entityName);
 
-    Collection<FieldMapping> getIDFields(Class entityClass);
+    Collection<FieldMapping> getIdFields(Class entityClass);
 
-    Collection<FieldMapping> getIDFields(String entityName);
+    Collection<FieldMapping> getIdFields(String entityName);
 
     FieldMapping getVersionField(Class entityClass);
 
