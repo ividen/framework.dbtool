@@ -8,6 +8,8 @@ import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Member;
 import java.lang.reflect.Modifier;
 import java.util.*;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import static ru.kwanza.dbtool.orm.impl.mapping.EntityMappingHelper.*;
 import static ru.kwanza.dbtool.orm.impl.mapping.EntityMappingLogger.*;
@@ -18,6 +20,8 @@ import static ru.kwanza.dbtool.orm.impl.mapping.EntityMappingLogger.*;
 public class EntityMappingRegistryImpl implements IEntityMappingRegistry {
 
     private static final Logger log = LoggerFactory.getLogger(EntityMappingRegistryImpl.class);
+
+    private Lock registerLock = new ReentrantLock();
 
     private Map<Class, String> tableNameByEntityClass = new HashMap<Class, String>();
     private Map<String, String> tableNameByEntityName = new HashMap<String, String>();
@@ -47,7 +51,12 @@ public class EntityMappingRegistryImpl implements IEntityMappingRegistry {
     private Map<String, Map<String, FetchMapping>> fetchMappingByPropertyNameEntityName = new HashMap<String, Map<String, FetchMapping>>();
 
     public void registerEntityClass(Class entityClass) {
-        processRegisterEntityClass(entityClass, entityClass);
+        registerLock.lock();
+        try {
+            processRegisterEntityClass(entityClass, entityClass);
+        } finally {
+            registerLock.unlock();
+        }
     }
 
     public void processRegisterEntityClass(Class entityClass, Class targetClass) {
