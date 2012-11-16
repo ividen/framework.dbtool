@@ -27,7 +27,7 @@ public class FieldImpl extends EntityField {
     public Object getValue(Object object) {
         try {
             return field.get(object);
-        } catch (IllegalAccessException e) {
+        } catch (Exception e) {
             log.error("Error while getting value for object " + object, e);
             throw new RuntimeException(e);
         }
@@ -37,7 +37,7 @@ public class FieldImpl extends EntityField {
     public void setValue(Object object, Object value) {
         try {
             field.set(object, value);
-        } catch (IllegalAccessException e) {
+        } catch (Exception e) {
             log.error("Error while setting value " + value + " for object " + object, e);
             throw new RuntimeException(e);
         }

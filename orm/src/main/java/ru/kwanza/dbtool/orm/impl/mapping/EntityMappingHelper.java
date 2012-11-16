@@ -7,6 +7,8 @@ import ru.kwanza.dbtool.orm.annotations.VersionField;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.sql.Types;
 
 /**
@@ -57,6 +59,7 @@ public class EntityMappingHelper {
             entityField = FieldImpl.create((java.lang.reflect.Field) annotatedElement);
         } else if (annotatedElement instanceof java.lang.reflect.Method) {
             final java.lang.reflect.Method getMethod = (java.lang.reflect.Method) annotatedElement;
+            isPublicMethod(getMethod);
             entityField = MethodImpl.create(getMethod, getSetMethod(getMethod));
         } else {
             throw new RuntimeException("Unknown AnnotatedElement: " + annotatedElement);
@@ -72,7 +75,7 @@ public class EntityMappingHelper {
         return tableName;
     }
 
-    public static String getEntityName(Entity entity, Class entityClass) {
+    public static String getEntityNameFromAnnotation(Entity entity, Class entityClass) {
         final String entityName = entity.name();
         if (entityName.trim().isEmpty()) {
             return entityClass.getSimpleName();
@@ -131,9 +134,17 @@ public class EntityMappingHelper {
         final String setMethodName = getMethod.getName().replaceFirst("get", "set");
         final Class declaringClass = getMethod.getDeclaringClass();
         try {
-            return declaringClass.getMethod(setMethodName, getMethod.getReturnType());
+            final Method setMethod = declaringClass.getDeclaredMethod(setMethodName, getMethod.getReturnType());
+            isPublicMethod(setMethod);
+            return setMethod;
         } catch (NoSuchMethodException e) {
             throw new RuntimeException("Method " + setMethodName + " not found for Class: " + declaringClass);
+        }
+    }
+
+    private static void isPublicMethod(Method method) {
+        if (!Modifier.isPublic(method.getModifiers())) {
+            throw new RuntimeException("Method is not public: " + method);
         }
     }
 
