@@ -15,6 +15,8 @@ public interface IEntityMappingRegistry {
 
     String getTableName(String entityName);
 
+    String getEntityName(Class entityClass);
+
     Class getEntityClass(String entityName);
 
     Collection<String> getColumnNames(Class entityClass);
