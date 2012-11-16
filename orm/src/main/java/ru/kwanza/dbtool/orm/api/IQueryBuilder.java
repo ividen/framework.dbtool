@@ -9,7 +9,7 @@ public interface IQueryBuilder<T> {
 
     IQueryBuilder<T> setMaxSize(int maxSize);
 
-    IQueryBuilder<T> setOffset(int maxSize);
+    IQueryBuilder<T> setOffset(int offset);
 
     IQueryBuilder<T> where(Condition condition);
 

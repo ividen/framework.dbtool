@@ -27,6 +27,8 @@ public interface IEntityManager {
 
     <T> IQueryBuilder<T> queryBuilder(Class<T> clazz);
 
+    <T> IFiltering<T> filtering(Class<T> clazz);
+
     IEntityBatcher newBatcher();
 
     IFetcher getFetcher();

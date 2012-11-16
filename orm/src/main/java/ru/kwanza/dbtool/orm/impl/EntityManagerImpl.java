@@ -2,11 +2,9 @@ package ru.kwanza.dbtool.orm.impl;
 
 import ru.kwanza.dbtool.core.DBTool;
 import ru.kwanza.dbtool.core.UpdateException;
-import ru.kwanza.dbtool.orm.api.IEntityBatcher;
-import ru.kwanza.dbtool.orm.api.IEntityManager;
-import ru.kwanza.dbtool.orm.api.IFetcher;
-import ru.kwanza.dbtool.orm.api.IQueryBuilder;
+import ru.kwanza.dbtool.orm.api.*;
 import ru.kwanza.dbtool.orm.impl.fetcher.FetcherImpl;
+import ru.kwanza.dbtool.orm.impl.filtering.FilteringImpl;
 import ru.kwanza.dbtool.orm.impl.mapping.IEntityMappingRegistry;
 import ru.kwanza.dbtool.orm.impl.querybuilder.QueryBuilderImpl;
 
@@ -51,9 +49,13 @@ public class EntityManagerImpl implements IEntityManager {
         return new QueryBuilderImpl<T>(dbTool, mappingRegistry, clazz);
     }
 
-     public void init(){
-         this.fetcher = new FetcherImpl(mappingRegistry,this);
-     }
+    public <T> IFiltering filtering(Class<T> clazz) {
+        return new FilteringImpl(this, clazz);
+    }
+
+    public void init() {
+        this.fetcher = new FetcherImpl(mappingRegistry, this);
+    }
 
     public IEntityBatcher newBatcher() {
         return null;
