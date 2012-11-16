@@ -90,7 +90,7 @@ public class QueryBuilderImpl<T> implements IQueryBuilder<T> {
                     sql.append(orderBy);
                 }
 
-                sql.append(") WHERE rownum < ?");
+                sql.append(") WHERE rownum <= ?");
             }
         } else {
             sql = new StringBuilder("SELECT ")

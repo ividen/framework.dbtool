@@ -138,7 +138,7 @@ public class OracleQueryBuilderTest extends AbstractJUnit4SpringContextTests {
                         "FROM test_entity " +
                         "WHERE (id IN (?)) AND (id LIKE ?) AND (id = ?) AND (id > ?) AND (id >= ?) AND (id < ?)" +
                         " AND (id <= ?) AND (id IS NOT NULL) AND (id IS NULL) AND (id BETWEEN ? AND ?) AND (id <> ?)" +
-                        " AND (id <> ?) ORDER BY id ASC, string_field DESC ) WHERE rownum < ?");
+                        " AND (id <> ?) ORDER BY id ASC, string_field DESC ) WHERE rownum <= ?");
 
         assertEquals(query1.getParamsCount(), 11);
 
@@ -164,7 +164,7 @@ public class OracleQueryBuilderTest extends AbstractJUnit4SpringContextTests {
                         "version, entity_aid, entity_bid, entity_cid, entity_did FROM test_entity " +
                         "WHERE (id IN (?)) OR (id LIKE ?) OR (id = ?) OR (id > ?) " +
                         "OR (id >= ?) OR (id < ?) OR (id <= ?) OR (id IS NOT NULL) OR (id IS NULL) " +
-                        "OR (id BETWEEN ? AND ?) OR (id <> ?) OR (id <> ?) ORDER BY id ASC, string_field DESC ) WHERE rownum < ?");
+                        "OR (id BETWEEN ? AND ?) OR (id <> ?) OR (id <> ?) ORDER BY id ASC, string_field DESC ) WHERE rownum <= ?");
         assertEquals(query1.getParamsCount(), 11);
 
         QueryImpl<TestEntity> query3 = (QueryImpl<TestEntity>) em.queryBuilder(TestEntity.class)
@@ -197,7 +197,7 @@ public class OracleQueryBuilderTest extends AbstractJUnit4SpringContextTests {
                         " (id BETWEEN ? AND ?) " +
                         "AND" +
                         " ((id <> ?) OR (id <> ?)) " +
-                        "ORDER BY id ASC, string_field DESC ) WHERE rownum < ?");
+                        "ORDER BY id ASC, string_field DESC ) WHERE rownum <= ?");
         assertEquals(query1.getParamsCount(), 11);
     }
 

@@ -9,3 +9,27 @@ CREATE TABLE TEST_TABLE
   )
   ENABLE
 );
+
+-- Unable to render TABLE DDL for object KWANZA.TEST_BLOB with DBMS_METADATA attempting internal generator.
+CREATE TABLE TEST_BLOB
+(
+  VALUE BLOB
+, ID NUMBER
+) ;
+-- Unable to render TABLE DDL for object KWANZA.TEST_TABLE1 with DBMS_METADATA attempting internal generator.
+CREATE TABLE TEST_TABLE1
+(
+  BOOL CHAR(1 BYTE)
+, INT NUMBER(*, 0)
+, BIGINT NUMBER
+, STRING VARCHAR2(256 BYTE)
+, TS1 TIMESTAMP(6)
+, TS2 TIMESTAMP(6)
+, BLOB BLOB
+, BIGDECIMAL NUMBER(*, 0)
+);
+
+
+
+
+
