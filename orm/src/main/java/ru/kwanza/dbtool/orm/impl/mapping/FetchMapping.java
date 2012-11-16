@@ -10,7 +10,7 @@ public class FetchMapping {
     private EntityField propertyField;
     private EntityField fetchField;
 
-    public FetchMapping(String propertyName, EntityField propertyField, EntityField fetchField) {
+    FetchMapping(String propertyName, EntityField propertyField, EntityField fetchField) {
         this.propertyName = propertyName;
         this.propertyField = propertyField;
         this.fetchField = fetchField;

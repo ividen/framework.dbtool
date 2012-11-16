@@ -83,7 +83,7 @@ public class EntityMappingTest extends AbstractJUnit4SpringContextTests {
     }
 
     @Test
-    //TODO KK: Handle Exception
+    @ExpectedException(RuntimeException.class)
     public void validateIncorrectEntityMappingTest() throws Exception {
         entityMappingRegistry.validateEntityMapping();
     }

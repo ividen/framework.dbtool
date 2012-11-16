@@ -81,7 +81,16 @@ public class EntityMappingRegistryImpl implements IEntityMappingRegistry {
     }
 
     public void validateEntityMapping() {
-        //TODO KK: Реализация проверки целостности связей между сущностями в реестре
+        final Collection<FetchMapping> fetchMappings = new LinkedHashSet<FetchMapping>();
+        for (Collection<FetchMapping> fetchMappingCollection : fetchMappingByEntityClass.values()) {
+            fetchMappings.addAll(fetchMappingCollection);
+        }
+        for (FetchMapping fetchMapping : fetchMappings) {
+            final Class fetchFieldClass = fetchMapping.getFetchField().getType();
+            if (!entityNameByEntityClass.containsKey(fetchFieldClass)) {
+                throw new RuntimeException("Unknown class relation in mapping registry: " + fetchFieldClass);
+            }
+        }
     }
 
     private void processFields(Class entityClass, AnnotatedElement[] annotatedElements) {

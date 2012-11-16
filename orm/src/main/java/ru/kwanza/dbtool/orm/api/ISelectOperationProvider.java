@@ -6,7 +6,7 @@ import java.util.Map;
 /**
  * @author Alexander Guzanov
  */
-public interface ISelectOperationProfiler<T> {
+public interface ISelectOperationProvider<T> {
     T select();
 
     List<T> selectList();
