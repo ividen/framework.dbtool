@@ -35,9 +35,7 @@ import static junit.framework.Assert.assertEquals;
 /**
  * @author Alexander Guzanov
  */
-@ContextConfiguration(locations = "mssql-config.xml")
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-public class QueryTest extends AbstractJUnit4SpringContextTests {
+public abstract class QueryTest extends AbstractJUnit4SpringContextTests {
     @Resource(name = "dbtool.IEntityManager")
     private IEntityManager em;
     @Resource(name = "dbtool.IEntityMappingRegistry")

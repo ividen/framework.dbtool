@@ -63,8 +63,6 @@ public class EntityManagerImpl implements IEntityManager {
         return fetcher;
     }
 
-
-
     public void setMappingRegistry(IEntityMappingRegistry mappingRegistry) {
         this.mappingRegistry = mappingRegistry;
     }
