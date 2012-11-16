@@ -11,9 +11,8 @@ import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
 import org.dbunit.operation.DatabaseOperation;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.test.annotation.ExpectedException;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
 import ru.kwanza.dbtool.orm.api.Condition;
 import ru.kwanza.dbtool.orm.api.IEntityManager;
@@ -73,7 +72,7 @@ public abstract class QueryTest extends AbstractJUnit4SpringContextTests {
 
         IQuery<TestEntity> query = em.queryBuilder(TestEntity.class)
                 .orderBy(OrderBy.ASC("id")).create();
-
+        System.out.println(query);
         List<TestEntity> testEntities = query.selectList();
         assertEquals(testEntities.size(), 200);
         Map<Long, TestEntity> mapById = query.selectMap("id");
@@ -90,7 +89,7 @@ public abstract class QueryTest extends AbstractJUnit4SpringContextTests {
                 .setMaxSize(100)
                 .where(Condition.in("id"))
                 .orderBy(OrderBy.ASC("id")).create();
-
+        System.out.println(query);
         query.setParameter(1, Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
         List<TestEntity> testEntities = query.selectList();
         assertEquals(testEntities.size(), 10);
@@ -218,6 +217,18 @@ public abstract class QueryTest extends AbstractJUnit4SpringContextTests {
                 .orderBy(OrderBy.ASC("id")).create();
 
         TestEntity select = query.setParameter(1, 100l).select();
+        assertEquals(select.getId().longValue(), 100l);
+    }
+
+
+    @Test
+    @ExpectedException(IncorrectResultSizeDataAccessException.class)
+    public void testSelect_single_wrong() {
+        IQuery<TestEntity> query = em.queryBuilder(TestEntity.class)
+                .where(Condition.isGreater("id"))
+                .orderBy(OrderBy.ASC("id")).create();
+
+        TestEntity select = query.setParameter(1, 1).select();
         assertEquals(select.getId().longValue(), 100l);
     }
 

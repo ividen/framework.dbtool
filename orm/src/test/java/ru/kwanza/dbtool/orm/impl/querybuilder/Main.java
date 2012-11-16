@@ -39,9 +39,9 @@ public class Main {
                     "entity_gid=\"" + (i - 1500) + "\"/>");
         }
 
-        for (i = 7500; i < 9000; i++) {
+        for (i = 9000; i < 10500; i++) {
             writer.println("<test_entity_c id=\"" + i + "\" title=\"" + "test_entity_c" + i + "\" version=\"0\" " +
-                    "entity_eid=\"" + (i - 1500) + "\"  entity_fid=\"" + (i - 3000) + "\" />");
+                    "entity_eid=\"" + (i - 1500) + "\"  entity_fid=\"" + (i - 4500) + "\" />");
         }
 
 
@@ -54,7 +54,7 @@ public class Main {
                     "version=\"0\" " +
                     "entity_aid=\"" + j + "\" " +
                     "entity_bid=\"" + (j + 1500) + "\" " +
-                    "entity_cid=\"" + (j + 7500) + "\" " +
+                    "entity_cid=\"" + (j + 9000) + "\" " +
                     "entity_did=\"" + (j + 3000) + "\"/>");
         }
 
@@ -67,7 +67,7 @@ public class Main {
                     "version=\"0\" " +
                     "entity_aid=\"" + j + "\" " +
                     "entity_bid=\"" + (j + 1500) + "\" " +
-                    "entity_cid=\"" + (j + 7500) + "\" " +
+                    "entity_cid=\"" + (j + 9000) + "\" " +
                     "entity_did=\"" + (j + 3000) + "\"/>");
         }
 

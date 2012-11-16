@@ -1,6 +1,7 @@
 package ru.kwanza.dbtool.orm.impl.querybuilder;
 
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.SqlParameterValue;
 import ru.kwanza.dbtool.core.DBTool;
@@ -222,9 +223,9 @@ public class QueryImpl<T> implements IQuery<T> {
         @Override
         public T getValue(Object e) {
             if (getted) {
-                throw new RuntimeException("Getted already!");
+                throw new IncorrectResultSizeDataAccessException(1);
             }
-            getted=true;
+            getted = true;
             return super.getValue(e);
         }
     }
