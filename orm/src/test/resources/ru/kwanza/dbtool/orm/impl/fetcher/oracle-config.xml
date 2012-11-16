@@ -10,13 +10,13 @@
           class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
         <property name="locations">
             <list>
-                <value>classpath:db_mssql.properties</value>
+                <value>classpath:db_oracle.properties</value>
             </list>
         </property>
     </bean>
 
-    <bean id="initTests" class="ru.kwanza.dbtool.orm.impl.fetcher.InitRegistryAndDB" init-method="init">
 
+    <bean id="initTests" class="ru.kwanza.dbtool.orm.impl.fetcher.InitRegistryAndDB" init-method="init">
     </bean>
 
     <bean id="dataSource" destroy-method="close" class="org.apache.commons.dbcp.BasicDataSource">

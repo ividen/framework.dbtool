@@ -45,6 +45,35 @@ public class Main {
         }
 
 
+        for (int j = 0; j < 1500; j++) {
+            writer.println("<test_entity id=\"" + j + "\" " +
+                    "int_field=\"10\" " +
+                    "string_field=\"" + "title" + j + "\" " +
+                    "date_field=\"2012-01-01 10:00:00.0\"" +
+                    " short_field=\"1\" " +
+                    "version=\"0\" " +
+                    "entity_aid=\"" + j + "\" " +
+                    "entity_bid=\"" + (j + 1500) + "\" " +
+                    "entity_cid=\"" + (j + 7500) + "\" " +
+                    "entity_did=\"" + (j + 3000) + "\"/>");
+        }
+
+        for (int j = 0; j < 1500; j++) {
+            writer.println("<test_entity id=\"" + (j + 1500) + "\" " +
+                    "int_field=\"10\" " +
+                    "string_field=\"" + "title" + j + "\" " +
+                    "date_field=\"2012-01-02 20:00:00.0\"" +
+                    " short_field=\"1\" " +
+                    "version=\"0\" " +
+                    "entity_aid=\"" + j + "\" " +
+                    "entity_bid=\"" + (j + 1500) + "\" " +
+                    "entity_cid=\"" + (j + 7500) + "\" " +
+                    "entity_did=\"" + (j + 3000) + "\"/>");
+        }
+
+
         writer.println("</dataset>");
+        writer.flush();
+        writer.close();
     }
 }

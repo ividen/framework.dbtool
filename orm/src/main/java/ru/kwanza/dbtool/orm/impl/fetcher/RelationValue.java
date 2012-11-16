@@ -38,7 +38,12 @@ class RelationValue {
     public Set getRelationIds(Collection objs) {
         return FieldHelper.getFieldSet(objs, new FieldHelper.Field() {
             public Object value(Object object) {
-                return fetchMapping.getPropertyField().getValue(object);
+                try{
+                  return fetchMapping.getPropertyField().getValue(object);
+                }catch(NullPointerException e){
+                    e.printStackTrace();
+                    return null;
+                }
             }
         });
     }

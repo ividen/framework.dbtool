@@ -16,9 +16,9 @@ public class TestEntityC {
 
 
     @Field(columnName = "entity_eid")
-    private Long entityAID;
+    private Long entityEID;
     @Field(columnName = "entity_fid")
-    private Long entityBID;
+    private Long entityFID;
 
 
     @Fetch(propertyName = "entityEID")
@@ -38,12 +38,12 @@ public class TestEntityC {
         return version;
     }
 
-    public Long getEntityAID() {
-        return entityAID;
+    public Long getEntityEID() {
+        return entityEID;
     }
 
-    public Long getEntityBID() {
-        return entityBID;
+    public Long getEntityFID() {
+        return entityFID;
     }
 
     public TestEntityE getEntityE() {
