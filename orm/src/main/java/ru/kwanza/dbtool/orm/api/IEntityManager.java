@@ -21,15 +21,17 @@ public interface IEntityManager {
 
     <T> Collection<T> delete(Class<T> clazz, Collection<T> obj) throws UpdateException;
 
-    void deleteById(Class cls, Object key) throws UpdateException;
+    void deleteByKey(Class entityClass, Object key) throws UpdateException;
 
-    <T> T readById(Class<T> cls, Object key);
+    void deleteByKey(Class entityClass, Collection keys) throws UpdateException;
 
-    <T> IQueryBuilder<T> queryBuilder(Class<T> clazz);
+    <T> T readByKey(Class<T> entityClass, Object key);
 
-    <T> IFiltering<T> filtering(Class<T> clazz);
+    <T> IQueryBuilder<T> queryBuilder(Class<T> entityClass);
 
-    IEntityBatcher newBatcher();
+    <T> IFiltering<T> filtering(Class<T> entityClass);
+
+    IEntityBatcher createEntityBatcher();
 
     IFetcher getFetcher();
 }

@@ -1,6 +1,7 @@
 package ru.kwanza.dbtool.orm.impl.mapping;
 
 import org.junit.Test;
+import org.springframework.test.context.ContextConfiguration;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -10,6 +11,7 @@ import static org.junit.Assert.assertEquals;
 /**
  * @author Kiryl Karatsetski
  */
+@ContextConfiguration(locations = "dbtool-orm-mapping-test-config.xml")
 public abstract class EntityFieldTest {
 
     protected abstract EntityField getEntityField() throws Exception;

@@ -9,6 +9,10 @@ public interface IEntityMappingRegistry {
 
     void registerEntityClass(Class entityClass);
 
+    boolean isRegisteredEntityClass(Class entityClass);
+
+    boolean isRegisteredEntityName(String entityName);
+
     void validateEntityMapping();
 
     String getTableName(Class entityClass);
@@ -23,9 +27,9 @@ public interface IEntityMappingRegistry {
 
     Collection<String> getColumnNames(String entityName);
 
-    Collection<FieldMapping> getFieldMapping(Class entityClass);
+    Collection<FieldMapping> getFieldMappings(Class entityClass);
 
-    Collection<FieldMapping> getFieldMapping(String entityName);
+    Collection<FieldMapping> getFieldMappings(String entityName);
 
     Collection<FieldMapping> getIdFields(Class entityClass);
 

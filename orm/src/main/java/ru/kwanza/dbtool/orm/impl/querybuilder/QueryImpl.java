@@ -191,7 +191,7 @@ public class QueryImpl<T> implements IQuery<T> {
                 }
             }
             LinkedList<TYPE> objects = new LinkedList<TYPE>();
-            Collection<FieldMapping> fieldMapping = registry.getFieldMapping(entityClass);
+            Collection<FieldMapping> fieldMapping = registry.getFieldMappings(entityClass);
 
             while (rs.next()) {
                 T obj;

@@ -20,7 +20,7 @@ import static junit.framework.Assert.assertNotNull;
 /**
  * @author Kiryl Karatsetski
  */
-@ContextConfiguration(locations = "dbtool-orm-test-config.xml")
+@ContextConfiguration(locations = "dbtool-orm-mapping-test-config.xml")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class EntityMappingTest extends AbstractJUnit4SpringContextTests {
 
@@ -31,12 +31,12 @@ public class EntityMappingTest extends AbstractJUnit4SpringContextTests {
     private static final Collection<String> PAYMENT_TRX_COLUMNS = new LinkedHashSet<String>() {{
         add("id");
         add("pcid");
+        add("version");
         add("parent_trx_id");
         add("started_at");
         add("finished_at");
         add("result_code");
         add("extended_code");
-        add("version");
         add("amount");
         add("agent_id");
         add("description");
@@ -45,12 +45,12 @@ public class EntityMappingTest extends AbstractJUnit4SpringContextTests {
     private static final Collection<String> PAYMENT_TRX_FIELD_PROPERTY_NAMES = new LinkedHashSet<String>() {{
         add("id");
         add("pcid");
+        add("version");
         add("parentTrxId");
         add("startedAt");
         add("finishedAt");
         add("resultCode");
         add("extendedCode");
-        add("version");
         add("amount");
         add("agentId");
         add("description");
@@ -83,7 +83,7 @@ public class EntityMappingTest extends AbstractJUnit4SpringContextTests {
     }
 
     @Test
-    //TODO KK: Handle Exception
+    @ExpectedException(RuntimeException.class)
     public void validateIncorrectEntityMappingTest() throws Exception {
         entityMappingRegistry.validateEntityMapping();
     }
@@ -140,8 +140,8 @@ public class EntityMappingTest extends AbstractJUnit4SpringContextTests {
 
     @Test
     public void getFieldMappingTest() throws Exception {
-        final Collection<FieldMapping> fieldMappingByEntityClass = entityMappingRegistry.getFieldMapping(PAYMENT_TRX_CLASS);
-        final Collection<FieldMapping> fieldMappingByEntityName = entityMappingRegistry.getFieldMapping(PAYMENT_TRX_NAME);
+        final Collection<FieldMapping> fieldMappingByEntityClass = entityMappingRegistry.getFieldMappings(PAYMENT_TRX_CLASS);
+        final Collection<FieldMapping> fieldMappingByEntityName = entityMappingRegistry.getFieldMappings(PAYMENT_TRX_NAME);
 
         assertNotNull(fieldMappingByEntityClass);
         assertNotNull(fieldMappingByEntityName);
@@ -193,8 +193,8 @@ public class EntityMappingTest extends AbstractJUnit4SpringContextTests {
 
     @Test
     public void getFieldMappingByPropertyNameTest() throws Exception {
-        final Collection<FieldMapping> fieldMappingByEntityClass = entityMappingRegistry.getFieldMapping(PAYMENT_TRX_CLASS);
-        final Collection<FieldMapping> fieldMappingByEntityName = entityMappingRegistry.getFieldMapping(PAYMENT_TRX_NAME);
+        final Collection<FieldMapping> fieldMappingByEntityClass = entityMappingRegistry.getFieldMappings(PAYMENT_TRX_CLASS);
+        final Collection<FieldMapping> fieldMappingByEntityName = entityMappingRegistry.getFieldMappings(PAYMENT_TRX_NAME);
 
         assertNotNull(fieldMappingByEntityClass);
         assertNotNull(fieldMappingByEntityName);

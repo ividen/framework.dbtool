@@ -1,15 +1,57 @@
 package ru.kwanza.dbtool.core;
 
 import java.math.BigDecimal;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.sql.Types;
+import java.sql.*;
 
 /**
  * @author Ivan Baluk
  */
 public class FieldSetter {
+
+    public static void setValue(PreparedStatement preparedStatement, int index, Object value) throws SQLException {
+        final Class requiredType = value.getClass();
+        if (String.class.equals(requiredType)) {
+            setString(preparedStatement, index, (String) value);
+        } else if (boolean.class.equals(requiredType) || Boolean.class.equals(requiredType)) {
+            setBoolean(preparedStatement, index, (Boolean) value);
+        } else if (byte.class.equals(requiredType) || Byte.class.equals(requiredType)) {
+            setInt(preparedStatement, index, ((Byte) value).intValue());
+        } else if (short.class.equals(requiredType) || Short.class.equals(requiredType)) {
+            setInt(preparedStatement, index, ((Short) value).intValue());
+        } else if (int.class.equals(requiredType) || Integer.class.equals(requiredType)) {
+            setInt(preparedStatement, index, (Integer) value);
+        } else if (long.class.equals(requiredType) || Long.class.equals(requiredType)) {
+            setLong(preparedStatement, index, (Long) value);
+        } else if (float.class.equals(requiredType) || Float.class.equals(requiredType)) {
+            //TODO
+            throw new UnsupportedOperationException("Temporary");
+        } else if (double.class.equals(requiredType) || Double.class.equals(requiredType) || Number.class.equals(requiredType)) {
+            //TODO
+            throw new UnsupportedOperationException("Temporary");
+        } else if (byte[].class.equals(requiredType)) {
+            setBlob(preparedStatement, index, (byte[]) value);
+        } else if (java.sql.Date.class.equals(requiredType)) {
+            //TODO
+            throw new UnsupportedOperationException("Temporary");
+        } else if (java.sql.Time.class.equals(requiredType)) {
+            //TODO
+            throw new UnsupportedOperationException("Temporary");
+        } else if (java.sql.Timestamp.class.equals(requiredType) || java.util.Date.class.equals(requiredType)) {
+            //TODO
+            throw new UnsupportedOperationException("Temporary");
+        } else if (BigDecimal.class.equals(requiredType)) {
+            setBigDecimal(preparedStatement, index, (BigDecimal) value);
+        } else if (Blob.class.equals(requiredType)) {
+            //TODO
+            throw new UnsupportedOperationException("Temporary");
+        } else if (Clob.class.equals(requiredType)) {
+            //TODO
+            throw new UnsupportedOperationException("Temporary");
+        } else {
+            preparedStatement.setObject(index, value);
+        }
+    }
+
     public static void setInt(PreparedStatement pst, int index, Integer value) throws SQLException {
         if (value == null) {
             pst.setNull(index, Types.INTEGER);

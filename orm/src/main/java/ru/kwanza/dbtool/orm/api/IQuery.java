@@ -1,8 +1,5 @@
 package ru.kwanza.dbtool.orm.api;
 
-import java.util.List;
-import java.util.Map;
-
 /**
  * @author Alexander Guzanov
  */

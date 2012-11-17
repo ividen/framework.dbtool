@@ -2,10 +2,12 @@ package ru.kwanza.dbtool.orm.impl;
 
 import ru.kwanza.dbtool.core.DBTool;
 import ru.kwanza.dbtool.core.UpdateException;
+import ru.kwanza.dbtool.core.VersionGenerator;
 import ru.kwanza.dbtool.orm.api.*;
 import ru.kwanza.dbtool.orm.impl.fetcher.FetcherImpl;
 import ru.kwanza.dbtool.orm.impl.filtering.FilteringImpl;
 import ru.kwanza.dbtool.orm.impl.mapping.IEntityMappingRegistry;
+import ru.kwanza.dbtool.orm.impl.operation.OperationFactory;
 import ru.kwanza.dbtool.orm.impl.querybuilder.QueryBuilderImpl;
 
 import java.util.Collection;
@@ -15,69 +17,92 @@ import java.util.Collection;
  */
 public class EntityManagerImpl implements IEntityManager {
 
-    private IEntityMappingRegistry mappingRegistry;
-    private IFetcher fetcher;
-
     private DBTool dbTool;
 
-    public <T> T create(T obj) throws UpdateException {
-        return obj;
-    }
+    private VersionGenerator versionGenerator;
 
-    public <T> Collection<T> create(Class<T> clazz, Collection<T> obj) throws UpdateException {
-        return obj;
-    }
+    private IEntityMappingRegistry mappingRegistry;
 
-    public <T> T update(T obj) throws UpdateException {
-        return null;
-    }
+    private OperationFactory operationFactory;
 
-    public <T> Collection<T> update(Class<T> clazz, Collection<T> obj) throws UpdateException {
-        return obj;
-    }
-
-    public <T> T delete(T obj) throws UpdateException {
-        return obj;
-    }
-
-    public <T> Collection<T> delete(Class<T> clazz, Collection<T> obj) throws UpdateException {
-        return obj;
-    }
-
-    public void deleteById(Class cls, Object key) throws UpdateException {
-    }
-
-    public <T> T readById(Class<T> cls, Object key) {
-        return null;
-    }
-
-    public <T> IQueryBuilder<T> queryBuilder(Class<T> clazz) {
-        return new QueryBuilderImpl<T>(dbTool, mappingRegistry, clazz);
-    }
-
-    public <T> IFiltering filtering(Class<T> clazz) {
-        return new FilteringImpl(this, clazz);
-    }
+    private IFetcher fetcher;
 
     public void init() {
+        this.operationFactory = new OperationFactory(mappingRegistry, dbTool.getJdbcTemplate());
         this.fetcher = new FetcherImpl(mappingRegistry, this);
     }
 
-    public IEntityBatcher newBatcher() {
-        return null;
+    public <T> T create(T object) throws UpdateException {
+        final Class entityClass = object.getClass();
+        operationFactory.getCreateOperation(entityClass).execute(object);
+        return object;
+    }
+
+    public <T> Collection<T> create(Class<T> clazz, Collection<T> objects) throws UpdateException {
+       operationFactory.getCreateOperation(clazz).execute(objects);
+       return objects;
+    }
+
+    public <T> T update(T object) throws UpdateException {
+        final Class entityClass = object.getClass();
+        operationFactory.getUpdateOperation(entityClass, versionGenerator).execute(object);
+        return object;
+    }
+
+    public <T> Collection<T> update(Class<T> clazz, Collection<T> objects) throws UpdateException {
+        operationFactory.getUpdateOperation(clazz, versionGenerator).execute(objects);
+        return objects;
+    }
+
+    public <T> T delete(T object) throws UpdateException {
+        final Class entityClass = object.getClass();
+        operationFactory.getDeleteOperation(entityClass).execute(object);
+        return object;
+    }
+
+    public <T> Collection<T> delete(Class<T> clazz, Collection<T> objects) throws UpdateException {
+        operationFactory.getDeleteOperation(clazz).execute(objects);
+        return objects;
+    }
+
+    public void deleteByKey(Class entityClass, Object key) throws UpdateException {
+        operationFactory.getDeleteOperation(entityClass).executeByKey(key);
+    }
+
+    public void deleteByKey(Class entityClass, Collection keys) throws UpdateException {
+        operationFactory.getDeleteOperation(entityClass).executeByKeys(keys);
+    }
+
+    public <T> T readByKey(Class<T> entityClass, Object key) {
+        final IQuery<T> query = new QueryBuilderImpl<T>(dbTool, mappingRegistry, entityClass).where(Condition.isEqual("id")).create();
+        return query.select();
+    }
+
+    public <T> IQueryBuilder<T> queryBuilder(Class<T> entityClass) {
+        return new QueryBuilderImpl<T>(dbTool, mappingRegistry, entityClass);
+    }
+
+    public <T> IFiltering<T> filtering(Class<T> entityClass) {
+        return new FilteringImpl<T>(this, entityClass);
+    }
+
+    public IEntityBatcher createEntityBatcher() {
+        return new EntityBatcherImpl(this);
     }
 
     public IFetcher getFetcher() {
         return fetcher;
     }
 
-    public void setMappingRegistry(IEntityMappingRegistry mappingRegistry) {
-        this.mappingRegistry = mappingRegistry;
-    }
-
     public void setDbTool(DBTool dbTool) {
         this.dbTool = dbTool;
     }
 
+    public void setVersionGenerator(VersionGenerator versionGenerator) {
+        this.versionGenerator = versionGenerator;
+    }
 
+    public void setMappingRegistry(IEntityMappingRegistry mappingRegistry) {
+        this.mappingRegistry = mappingRegistry;
+    }
 }

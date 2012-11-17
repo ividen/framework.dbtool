@@ -80,8 +80,25 @@ public class EntityMappingRegistryImpl implements IEntityMappingRegistry {
         processFetches(entityClass, methods);
     }
 
+    public boolean isRegisteredEntityClass(Class entityClass) {
+        return entityNameByEntityClass.containsKey(entityClass);
+    }
+
+    public boolean isRegisteredEntityName(String entityName) {
+        return entityClassByEntityName.containsKey(entityName);
+    }
+
     public void validateEntityMapping() {
-        //TODO KK: Реализация проверки целостности связей между сущностями в реестре
+        final Collection<FetchMapping> fetchMappings = new LinkedHashSet<FetchMapping>();
+        for (Collection<FetchMapping> fetchMappingCollection : fetchMappingByEntityClass.values()) {
+            fetchMappings.addAll(fetchMappingCollection);
+        }
+        for (FetchMapping fetchMapping : fetchMappings) {
+            final Class fetchFieldClass = fetchMapping.getFetchField().getType();
+            if (!entityNameByEntityClass.containsKey(fetchFieldClass)) {
+                throw new RuntimeException("Unknown class relation in mapping registry: " + fetchFieldClass);
+            }
+        }
     }
 
     private void processFields(Class entityClass, AnnotatedElement[] annotatedElements) {
@@ -276,11 +293,11 @@ public class EntityMappingRegistryImpl implements IEntityMappingRegistry {
         return columnNamesByEntityName.get(entityName);
     }
 
-    public Collection<FieldMapping> getFieldMapping(Class entityClass) {
+    public Collection<FieldMapping> getFieldMappings(Class entityClass) {
         return fieldMappingsByEntityClass.get(entityClass);
     }
 
-    public Collection<FieldMapping> getFieldMapping(String entityName) {
+    public Collection<FieldMapping> getFieldMappings(String entityName) {
         return fieldMappingsByEntityName.get(entityName);
     }
 
