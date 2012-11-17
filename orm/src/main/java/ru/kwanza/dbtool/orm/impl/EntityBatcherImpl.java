@@ -81,11 +81,17 @@ public class EntityBatcherImpl implements IEntityBatcher {
 
     @SuppressWarnings("unchecked")
     public void flush() throws EntityUpdateException {
+
+        final Map<Class, UpdateException> createExceptionMap = new HashMap<Class, UpdateException>();
+        final Map<Class, UpdateException> updateExceptionMap = new HashMap<Class, UpdateException>();
+        final Map<Class, UpdateException> deleteByObjectExceptionMap = new HashMap<Class, UpdateException>();
+        final Map<Class, UpdateException> deleteByKeyExceptionMap = new HashMap<Class, UpdateException>();
+
         for (Class entityClass : createObjectStore.keySet()) {
             try {
                 entityManager.create(entityClass, createObjectStore.get(entityClass));
             } catch (UpdateException e) {
-                //TODO KK
+                createExceptionMap.put(entityClass, e);
             }
         }
 
@@ -93,7 +99,7 @@ public class EntityBatcherImpl implements IEntityBatcher {
             try {
                 entityManager.update(entityClass, updateObjectStore.get(entityClass));
             } catch (UpdateException e) {
-                //TODO KK
+                updateExceptionMap.put(entityClass, e);
             }
         }
 
@@ -101,7 +107,7 @@ public class EntityBatcherImpl implements IEntityBatcher {
             try {
                 entityManager.delete(entityClass, deleteObjectStore.get(entityClass));
             } catch (UpdateException e) {
-                //TODO KK
+                deleteByObjectExceptionMap.put(entityClass, e);
             }
         }
 
@@ -109,7 +115,7 @@ public class EntityBatcherImpl implements IEntityBatcher {
             try {
                 entityManager.deleteByKey(entityClass, deleteObjectStore.get(entityClass));
             } catch (UpdateException e) {
-                //TODO KK
+                deleteByKeyExceptionMap.put(entityClass, e);
             }
         }
 
@@ -117,5 +123,10 @@ public class EntityBatcherImpl implements IEntityBatcher {
         updateObjectStore.clear();
         deleteObjectStore.clear();
         deleteKeyStore.clear();
+
+        if (!createExceptionMap.isEmpty() || !updateExceptionMap.isEmpty() || !deleteByObjectExceptionMap.isEmpty()
+                || !deleteByKeyExceptionMap.isEmpty()) {
+            throw new EntityUpdateException(createExceptionMap, updateExceptionMap, deleteByObjectExceptionMap, deleteByKeyExceptionMap);
+        }
     }
 }
