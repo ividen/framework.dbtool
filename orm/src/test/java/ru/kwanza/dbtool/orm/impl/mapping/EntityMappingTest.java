@@ -20,7 +20,7 @@ import static junit.framework.Assert.assertNotNull;
 /**
  * @author Kiryl Karatsetski
  */
-@ContextConfiguration(locations = "dbtool-orm-test-config.xml")
+@ContextConfiguration(locations = "dbtool-orm-mapping-test-config.xml")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class EntityMappingTest extends AbstractJUnit4SpringContextTests {
 
@@ -140,8 +140,8 @@ public class EntityMappingTest extends AbstractJUnit4SpringContextTests {
 
     @Test
     public void getFieldMappingTest() throws Exception {
-        final Collection<FieldMapping> fieldMappingByEntityClass = entityMappingRegistry.getFieldMapping(PAYMENT_TRX_CLASS);
-        final Collection<FieldMapping> fieldMappingByEntityName = entityMappingRegistry.getFieldMapping(PAYMENT_TRX_NAME);
+        final Collection<FieldMapping> fieldMappingByEntityClass = entityMappingRegistry.getFieldMappings(PAYMENT_TRX_CLASS);
+        final Collection<FieldMapping> fieldMappingByEntityName = entityMappingRegistry.getFieldMappings(PAYMENT_TRX_NAME);
 
         assertNotNull(fieldMappingByEntityClass);
         assertNotNull(fieldMappingByEntityName);
@@ -193,8 +193,8 @@ public class EntityMappingTest extends AbstractJUnit4SpringContextTests {
 
     @Test
     public void getFieldMappingByPropertyNameTest() throws Exception {
-        final Collection<FieldMapping> fieldMappingByEntityClass = entityMappingRegistry.getFieldMapping(PAYMENT_TRX_CLASS);
-        final Collection<FieldMapping> fieldMappingByEntityName = entityMappingRegistry.getFieldMapping(PAYMENT_TRX_NAME);
+        final Collection<FieldMapping> fieldMappingByEntityClass = entityMappingRegistry.getFieldMappings(PAYMENT_TRX_CLASS);
+        final Collection<FieldMapping> fieldMappingByEntityName = entityMappingRegistry.getFieldMappings(PAYMENT_TRX_NAME);
 
         assertNotNull(fieldMappingByEntityClass);
         assertNotNull(fieldMappingByEntityName);

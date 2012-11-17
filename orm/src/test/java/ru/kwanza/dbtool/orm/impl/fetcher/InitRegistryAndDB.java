@@ -8,7 +8,6 @@ import org.dbunit.dataset.IDataSet;
 import org.dbunit.dataset.SortedDataSet;
 import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
 import org.dbunit.operation.DatabaseOperation;
-import ru.kwanza.dbtool.orm.entity.TestEntity1;
 import ru.kwanza.dbtool.orm.impl.mapping.EntityMappingRegistryImpl;
 
 import javax.annotation.Resource;

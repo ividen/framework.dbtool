@@ -7,8 +7,8 @@ import ru.kwanza.dbtool.orm.annotations.IdField;
 /**
  * @author Alexander Guzanov
  */
-@Entity(name = "Agent", tableName = "agent")
-public class Agent {
+@Entity(name = "OldAgent", tableName = "agent")
+public class OldAgent {
 
     @IdField(columnName = "id1")
     private Long id1;

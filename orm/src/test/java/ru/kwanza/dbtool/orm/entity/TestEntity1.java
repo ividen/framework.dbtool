@@ -8,7 +8,7 @@ import java.sql.Types;
  * @author Alexander Guzanov
  */
 @Entity(name = "TestEntity1", tableName = "test_entity")
-public class TestEntity1 extends Agent {
+public class TestEntity1 extends OldAgent {
 
     @IdField(columnName = "id")
     private Long id;
@@ -25,14 +25,14 @@ public class TestEntity1 extends Agent {
     private Long counter;
 
     @Fetch(propertyName = "agentId")
-    private Agent agent;
+    private OldAgent oldAgent;
 
-    public Agent getAgent() {
-        return agent;
+    public OldAgent getOldAgent() {
+        return oldAgent;
     }
 
-    public void setAgent(Agent agent) {
-        this.agent = agent;
+    public void setOldAgent(OldAgent oldAgent) {
+        this.oldAgent = oldAgent;
     }
 
     @Field(columnName = "counter")

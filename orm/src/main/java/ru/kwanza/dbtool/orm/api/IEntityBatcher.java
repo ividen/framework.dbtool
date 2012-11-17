@@ -1,7 +1,5 @@
 package ru.kwanza.dbtool.orm.api;
 
-import ru.kwanza.dbtool.core.UpdateException;
-
 import java.util.Collection;
 
 /**
@@ -9,19 +7,21 @@ import java.util.Collection;
  */
 public interface IEntityBatcher {
 
-    void create(Object obj);
+    void create(Object object);
 
-    <T> void create(Class<T> clazz, Collection obj);
+    <T> void create(Class<T> entityClass, Collection objects);
 
-    void update(Object obj) throws UpdateException;
+    void update(Object object);
 
-    <T> void update(Class<T> clazz, Collection obj);
+    <T> void update(Class<T> entityClass, Collection objects);
 
-    void delete(Object obj) throws UpdateException;
+    void delete(Object object);
 
-    <T> void delete(Class<T> clazz, Collection obj);
+    <T> void delete(Class<T> entityClass, Collection objects);
 
-    void deleteById(Class cls, Object key);
+    void deleteByKey(Class entityClass, Object key);
+
+    void deleteByKeys(Class entityClass, Collection keys);
 
     void flush() throws EntityUpdateException;
 }

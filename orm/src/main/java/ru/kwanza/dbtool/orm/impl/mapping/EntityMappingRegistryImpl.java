@@ -80,6 +80,14 @@ public class EntityMappingRegistryImpl implements IEntityMappingRegistry {
         processFetches(entityClass, methods);
     }
 
+    public boolean isRegisteredEntityClass(Class entityClass) {
+        return entityNameByEntityClass.containsKey(entityClass);
+    }
+
+    public boolean isRegisteredEntityName(String entityName) {
+        return entityClassByEntityName.containsKey(entityName);
+    }
+
     public void validateEntityMapping() {
         final Collection<FetchMapping> fetchMappings = new LinkedHashSet<FetchMapping>();
         for (Collection<FetchMapping> fetchMappingCollection : fetchMappingByEntityClass.values()) {
@@ -285,11 +293,11 @@ public class EntityMappingRegistryImpl implements IEntityMappingRegistry {
         return columnNamesByEntityName.get(entityName);
     }
 
-    public Collection<FieldMapping> getFieldMapping(Class entityClass) {
+    public Collection<FieldMapping> getFieldMappings(Class entityClass) {
         return fieldMappingsByEntityClass.get(entityClass);
     }
 
-    public Collection<FieldMapping> getFieldMapping(String entityName) {
+    public Collection<FieldMapping> getFieldMappings(String entityName) {
         return fieldMappingsByEntityName.get(entityName);
     }
 

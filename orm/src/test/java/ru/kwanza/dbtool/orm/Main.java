@@ -27,7 +27,7 @@ public class Main {
             e.printStackTrace();
         }
 
-        IEntityBatcher batcher = em.newBatcher();
+        IEntityBatcher batcher = em.createEntityBatcher();
 
         for (TestEntity1 e : entities) {
             batcher.create(e);

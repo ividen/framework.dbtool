@@ -23,6 +23,13 @@ public class PaymentTrx extends Trx {
 
     private Agent agent;
 
+    public PaymentTrx() {
+    }
+
+    public PaymentTrx(Long id, String pcid) {
+        super(id, pcid);
+    }
+
     @Fetch(propertyName = "agentId")
     public Agent getAgent() {
         return agent;
