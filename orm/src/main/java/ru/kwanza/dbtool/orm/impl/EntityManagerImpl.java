@@ -74,6 +74,7 @@ public class EntityManagerImpl implements IEntityManager {
     }
 
     public <T> T readByKey(Class<T> entityClass, Object key) {
+        //TODO Under construction
         final IQuery<T> query = new QueryBuilderImpl<T>(dbTool, mappingRegistry, entityClass).where(Condition.isEqual("id")).create();
         return query.select();
     }
