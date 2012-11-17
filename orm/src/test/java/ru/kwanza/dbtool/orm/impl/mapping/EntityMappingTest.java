@@ -31,12 +31,12 @@ public class EntityMappingTest extends AbstractJUnit4SpringContextTests {
     private static final Collection<String> PAYMENT_TRX_COLUMNS = new LinkedHashSet<String>() {{
         add("id");
         add("pcid");
+        add("version");
         add("parent_trx_id");
         add("started_at");
         add("finished_at");
         add("result_code");
         add("extended_code");
-        add("version");
         add("amount");
         add("agent_id");
         add("description");
@@ -45,12 +45,12 @@ public class EntityMappingTest extends AbstractJUnit4SpringContextTests {
     private static final Collection<String> PAYMENT_TRX_FIELD_PROPERTY_NAMES = new LinkedHashSet<String>() {{
         add("id");
         add("pcid");
+        add("version");
         add("parentTrxId");
         add("startedAt");
         add("finishedAt");
         add("resultCode");
         add("extendedCode");
-        add("version");
         add("amount");
         add("agentId");
         add("description");

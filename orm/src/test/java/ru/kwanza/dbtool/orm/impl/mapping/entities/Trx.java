@@ -1,7 +1,6 @@
 package ru.kwanza.dbtool.orm.impl.mapping.entities;
 
 import ru.kwanza.dbtool.orm.annotations.Field;
-import ru.kwanza.dbtool.orm.annotations.VersionField;
 
 import java.util.Date;
 
@@ -24,9 +23,6 @@ public abstract class Trx extends AbstractEntity {
 
     @Field(columnName = "extended_code")
     private Integer extendedCode;
-
-    @VersionField(columnName = "version")
-    private Long version;
 
     protected Trx() {
     }
@@ -73,13 +69,5 @@ public abstract class Trx extends AbstractEntity {
 
     public void setExtendedCode(Integer extendedCode) {
         this.extendedCode = extendedCode;
-    }
-
-    public Long getVersion() {
-        return version;
-    }
-
-    public void setVersion(Long version) {
-        this.version = version;
     }
 }

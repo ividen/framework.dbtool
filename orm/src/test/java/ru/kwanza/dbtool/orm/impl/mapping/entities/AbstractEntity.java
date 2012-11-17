@@ -41,4 +41,12 @@ public abstract class AbstractEntity {
     public void setPcid(String pcid) {
         this.pcid = pcid;
     }
+
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
+    }
 }
