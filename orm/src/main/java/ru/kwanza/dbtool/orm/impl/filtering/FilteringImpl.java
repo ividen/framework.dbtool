@@ -51,12 +51,12 @@ public class FilteringImpl<T> implements IFiltering<T> {
         return createQuery().selectList();
     }
 
-    public <F> Map selectMapList(String field) {
-        return createQuery().selectMapList(field);
+    public <F> Map selectMapList(String propertyName) {
+        return createQuery().selectMapList(propertyName);
     }
 
-    public <F> Map selectMap(String field) {
-        return createQuery().selectMap(field);
+    public <F> Map selectMap(String propertyName) {
+        return createQuery().selectMap(propertyName);
     }
 
     protected IQuery<T> createQuery() {

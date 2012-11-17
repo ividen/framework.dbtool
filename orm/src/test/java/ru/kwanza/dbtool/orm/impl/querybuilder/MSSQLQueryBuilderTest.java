@@ -36,20 +36,21 @@ public class MSSQLQueryBuilderTest extends AbstractJUnit4SpringContextTests {
     @Test
     public void testBuildConditions() {
         QueryImpl<TestEntity> query1 = (QueryImpl<TestEntity>) em.queryBuilder(TestEntity.class)
-                .where(Condition.and(
-                        Condition.in("id"),
-                        Condition.like("id"),
-                        Condition.isEqual("id"),
-                        Condition.isGreater("id"),
-                        Condition.isGreaterOrEqual("id"),
-                        Condition.isLess("id"),
-                        Condition.isLessOrEqual("id"),
-                        Condition.isNotNull("id"),
-                        Condition.isNull("id"),
-                        Condition.between("id"),
-                        Condition.notEqual("id"),
-                        Condition.notEqual("id")
-                )).orderBy(OrderBy.ASC("id"), OrderBy.DESC("stringField")).create();
+                .where(
+                        Condition.and(
+                                Condition.in("id"),
+                                Condition.like("id"),
+                                Condition.isEqual("id"),
+                                Condition.isGreater("id"),
+                                Condition.isGreaterOrEqual("id"),
+                                Condition.isLess("id"),
+                                Condition.isLessOrEqual("id"),
+                                Condition.isNotNull("id"),
+                                Condition.isNull("id"),
+                                Condition.between("id"),
+                                Condition.notEqual("id"),
+                                Condition.notEqual("id")
+                        )).orderBy(OrderBy.ASC("id"), OrderBy.DESC("stringField")).create();
 
         assertEquals(query1.getSql(),
                 "SELECT id, int_field, string_field, date_field, short_field, version, entity_aid, entity_bid, entity_cid, entity_did " +
@@ -60,19 +61,20 @@ public class MSSQLQueryBuilderTest extends AbstractJUnit4SpringContextTests {
 
         assertEquals(query1.getParamsCount(), 11);
         QueryImpl<TestEntity> query2 = (QueryImpl<TestEntity>) em.queryBuilder(TestEntity.class)
-                .where(Condition.or(Condition.in("id"),
-                        Condition.like("id"),
-                        Condition.isEqual("id"),
-                        Condition.isGreater("id"),
-                        Condition.isGreaterOrEqual("id"),
-                        Condition.isLess("id"),
-                        Condition.isLessOrEqual("id"),
-                        Condition.isNotNull("id"),
-                        Condition.isNull("id"),
-                        Condition.between("id"),
-                        Condition.notEqual("id"),
-                        Condition.notEqual("id")
-                )).orderBy(OrderBy.ASC("id"), OrderBy.DESC("stringField")).create();
+                .where(
+                        Condition.or(Condition.in("id"),
+                                Condition.like("id"),
+                                Condition.isEqual("id"),
+                                Condition.isGreater("id"),
+                                Condition.isGreaterOrEqual("id"),
+                                Condition.isLess("id"),
+                                Condition.isLessOrEqual("id"),
+                                Condition.isNotNull("id"),
+                                Condition.isNull("id"),
+                                Condition.between("id"),
+                                Condition.notEqual("id"),
+                                Condition.notEqual("id")
+                        )).orderBy(OrderBy.ASC("id"), OrderBy.DESC("stringField")).create();
 
         assertEquals(query2.getSql(),
                 "SELECT id, int_field, string_field, date_field, short_field, " +

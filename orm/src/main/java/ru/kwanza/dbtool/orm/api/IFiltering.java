@@ -3,7 +3,7 @@ package ru.kwanza.dbtool.orm.api;
 /**
  * @author Alexander Guzanov
  */
-public interface IFiltering<T> extends ISelectOperationProfiler<T> {
+public interface IFiltering<T> extends ISelectOperationProvider<T> {
 
     IFiltering<T> setOffset(int offset);
 

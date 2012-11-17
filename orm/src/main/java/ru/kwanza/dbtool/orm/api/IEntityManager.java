@@ -9,17 +9,17 @@ import java.util.Collection;
  */
 public interface IEntityManager {
 
-    void create(Object obj) throws UpdateException;
+    <T> T create(T obj) throws UpdateException;
 
-    <T> void create(Class<T> clazz, Collection obj) throws UpdateException;
+    <T>  Collection<T> create(Class<T> clazz, Collection<T> obj) throws UpdateException;
 
-    void update(Object obj) throws UpdateException;
+    <T> T update(T obj) throws UpdateException;
 
-    <T> void update(Class<T> clazz, Collection obj) throws UpdateException;
+    <T> Collection<T> update(Class<T> clazz, Collection<T> obj) throws UpdateException;
 
-    void delete(Object obj) throws UpdateException;
+    <T> T delete(T obj) throws UpdateException;
 
-    <T> void delete(Class<T> clazz, Collection obj) throws UpdateException;
+    <T> Collection<T> delete(Class<T> clazz, Collection<T> obj) throws UpdateException;
 
     void deleteById(Class cls, Object key) throws UpdateException;
 

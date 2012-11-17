@@ -91,9 +91,9 @@ public class QueryImpl<T> implements IQuery<T> {
         return result;
     }
 
-    public Map<Object, T> selectMap(String field) {
+    public Map<Object, T> selectMap(String propertyName) {
         final Map<Object, T> result = new LinkedHashMap<Object, T>();
-        FieldMapping fieldMapping = registry.getFieldMappingByPropertyName(entityClass, field);
+        FieldMapping fieldMapping = registry.getFieldMappingByPropertyName(entityClass, propertyName);
         if (fieldMapping == null) {
             throw new IllegalArgumentException("Unknown field name!");
         }
@@ -110,9 +110,9 @@ public class QueryImpl<T> implements IQuery<T> {
         return result;
     }
 
-    public Map<Object, List<T>> selectMapList(String field) {
+    public Map<Object, List<T>> selectMapList(String propertyName) {
         final Map<Object, List<T>> result = new LinkedHashMap<Object, List<T>>();
-        FieldMapping fieldMapping = registry.getFieldMappingByPropertyName(entityClass, field);
+        FieldMapping fieldMapping = registry.getFieldMappingByPropertyName(entityClass, propertyName);
         if (fieldMapping == null) {
             throw new IllegalArgumentException("Unknown field name!");
         }

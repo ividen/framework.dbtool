@@ -20,22 +20,28 @@ public class EntityManagerImpl implements IEntityManager {
 
     private DBTool dbTool;
 
-    public void create(Object obj) throws UpdateException {
+    public <T> T create(T obj) throws UpdateException {
+        return obj;
     }
 
-    public <T> void create(Class<T> clazz, Collection obj) throws UpdateException {
+    public <T> Collection<T> create(Class<T> clazz, Collection<T> obj) throws UpdateException {
+        return obj;
     }
 
-    public void update(Object obj) throws UpdateException {
+    public <T> T update(T obj) throws UpdateException {
+        return null;
     }
 
-    public <T> void update(Class<T> clazz, Collection obj) throws UpdateException {
+    public <T> Collection<T> update(Class<T> clazz, Collection<T> obj) throws UpdateException {
+        return obj;
     }
 
-    public void delete(Object obj) throws UpdateException {
+    public <T> T delete(T obj) throws UpdateException {
+        return obj;
     }
 
-    public <T> void delete(Class<T> clazz, Collection obj) throws UpdateException {
+    public <T> Collection<T> delete(Class<T> clazz, Collection<T> obj) throws UpdateException {
+        return obj;
     }
 
     public void deleteById(Class cls, Object key) throws UpdateException {
