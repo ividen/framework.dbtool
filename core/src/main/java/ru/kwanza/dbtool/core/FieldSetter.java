@@ -9,7 +9,7 @@ import java.sql.*;
 public class FieldSetter {
 
     public static void setValue(PreparedStatement preparedStatement, int index, Object value) throws SQLException {
-        final Class requiredType = value.getClass();
+        final Class requiredType = value != null ? value.getClass() : null;
         if (String.class.equals(requiredType)) {
             setString(preparedStatement, index, (String) value);
         } else if (boolean.class.equals(requiredType) || Boolean.class.equals(requiredType)) {
@@ -31,13 +31,13 @@ public class FieldSetter {
         } else if (byte[].class.equals(requiredType)) {
             setBlob(preparedStatement, index, (byte[]) value);
         } else if (java.sql.Date.class.equals(requiredType)) {
-            //TODO
+            setTimestamp(preparedStatement, index, (java.sql.Date) value);
             throw new UnsupportedOperationException("Temporary");
         } else if (java.sql.Time.class.equals(requiredType)) {
-            //TODO
+            setTimestamp(preparedStatement, index, (java.sql.Time) value);
             throw new UnsupportedOperationException("Temporary");
         } else if (java.sql.Timestamp.class.equals(requiredType) || java.util.Date.class.equals(requiredType)) {
-            //TODO
+            setTimestamp(preparedStatement, index, (java.sql.Timestamp) value);
             throw new UnsupportedOperationException("Temporary");
         } else if (BigDecimal.class.equals(requiredType)) {
             setBigDecimal(preparedStatement, index, (BigDecimal) value);

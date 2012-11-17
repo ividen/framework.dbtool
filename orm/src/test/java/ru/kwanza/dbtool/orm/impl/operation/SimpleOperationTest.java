@@ -9,7 +9,6 @@ import org.dbunit.operation.DatabaseOperation;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
 import ru.kwanza.dbtool.orm.api.IEntityManager;
 import ru.kwanza.dbtool.orm.impl.mapping.IEntityMappingRegistry;
@@ -23,9 +22,8 @@ import java.util.Arrays;
 /**
  * @author Kiryl Karatsetski
  */
-@ContextConfiguration(locations = "dbtool-orm-operation-test-config.xml")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-public class SimpleOperationTest extends AbstractJUnit4SpringContextTests {
+public abstract class SimpleOperationTest extends AbstractJUnit4SpringContextTests {
 
     @Resource(name = "dbtool.IEntityManager")
     private IEntityManager entityManager;

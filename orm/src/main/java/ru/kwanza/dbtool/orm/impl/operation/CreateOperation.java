@@ -69,7 +69,7 @@ public class CreateOperation extends Operation {
                 int index = 0;
                 for (FieldMapping fieldMapping : fieldMappings) {
                     final EntityField entityFiled = fieldMapping.getEntityFiled();
-                    if (fieldMapping.getColumnName().equals(versionFieldMapping.getColumnName())) {
+                    if (versionFieldMapping != null && fieldMapping.getColumnName().equals(versionFieldMapping.getColumnName())) {
                         entityFiled.setValue(object, 1L);
                     }
                     FieldSetter.setValue(pst, ++index, entityFiled.getValue(object));

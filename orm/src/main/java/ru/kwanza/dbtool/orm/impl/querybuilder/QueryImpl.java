@@ -196,9 +196,9 @@ public class QueryImpl<T> implements IQuery<T> {
             while (rs.next()) {
                 T obj;
                 try {
-                    obj = (T) entityClass.newInstance();
+                    obj = entityClass.newInstance();
                 } catch (Exception e) {
-                    throw new RuntimeException();
+                    throw new RuntimeException(e);
                 }
                 readAndFill(rs, fieldMapping, obj);
                 objects.add(getValue(obj));
