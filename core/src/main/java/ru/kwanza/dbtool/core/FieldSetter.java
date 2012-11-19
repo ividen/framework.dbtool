@@ -8,47 +8,57 @@ import java.sql.*;
  */
 public class FieldSetter {
 
-    public static void setValue(PreparedStatement preparedStatement, int index, Object value) throws SQLException {
-        final Class requiredType = value != null ? value.getClass() : null;
-        if (String.class.equals(requiredType)) {
+    public static void setValue(PreparedStatement preparedStatement, int index, Class type, Object value) throws SQLException {
+        if (String.class.equals(type)) {
             setString(preparedStatement, index, (String) value);
-        } else if (boolean.class.equals(requiredType) || Boolean.class.equals(requiredType)) {
+        } else if (boolean.class.equals(type) || Boolean.class.equals(type)) {
             setBoolean(preparedStatement, index, (Boolean) value);
-        } else if (byte.class.equals(requiredType) || Byte.class.equals(requiredType)) {
-            setInt(preparedStatement, index, ((Byte) value).intValue());
-        } else if (short.class.equals(requiredType) || Short.class.equals(requiredType)) {
-            setInt(preparedStatement, index, ((Short) value).intValue());
-        } else if (int.class.equals(requiredType) || Integer.class.equals(requiredType)) {
+        } else if (byte.class.equals(type) || Byte.class.equals(type)) {
+            setByte(preparedStatement, index, ((Byte) value));
+        } else if (short.class.equals(type) || Short.class.equals(type)) {
+            setShort(preparedStatement, index, ((Short) value));
+        } else if (int.class.equals(type) || Integer.class.equals(type)) {
             setInt(preparedStatement, index, (Integer) value);
-        } else if (long.class.equals(requiredType) || Long.class.equals(requiredType)) {
+        } else if (long.class.equals(type) || Long.class.equals(type)) {
             setLong(preparedStatement, index, (Long) value);
-        } else if (float.class.equals(requiredType) || Float.class.equals(requiredType)) {
-            //TODO
-            throw new UnsupportedOperationException("Temporary");
-        } else if (double.class.equals(requiredType) || Double.class.equals(requiredType) || Number.class.equals(requiredType)) {
-            //TODO
-            throw new UnsupportedOperationException("Temporary");
-        } else if (byte[].class.equals(requiredType)) {
+        } else if (float.class.equals(type) || Float.class.equals(type)) {
+            setFloat(preparedStatement, index, (Float) value);
+        } else if (double.class.equals(type) || Double.class.equals(type)) {
+            setDouble(preparedStatement, index, (Double) value);
+        } else if (byte[].class.equals(type)) {
             setBlob(preparedStatement, index, (byte[]) value);
-        } else if (java.sql.Date.class.equals(requiredType)) {
+        } else if (java.util.Date.class.equals(type)) {
+            setTimestamp(preparedStatement, index, (java.util.Date) value);
+        } else if (java.sql.Date.class.equals(type)) {
             setTimestamp(preparedStatement, index, (java.sql.Date) value);
-            throw new UnsupportedOperationException("Temporary");
-        } else if (java.sql.Time.class.equals(requiredType)) {
+        } else if (java.sql.Time.class.equals(type)) {
             setTimestamp(preparedStatement, index, (java.sql.Time) value);
-            throw new UnsupportedOperationException("Temporary");
-        } else if (java.sql.Timestamp.class.equals(requiredType) || java.util.Date.class.equals(requiredType)) {
+        } else if (java.sql.Timestamp.class.equals(type)) {
             setTimestamp(preparedStatement, index, (java.sql.Timestamp) value);
-            throw new UnsupportedOperationException("Temporary");
-        } else if (BigDecimal.class.equals(requiredType)) {
+        } else if (BigDecimal.class.equals(type)) {
             setBigDecimal(preparedStatement, index, (BigDecimal) value);
-        } else if (Blob.class.equals(requiredType)) {
-            //TODO
-            throw new UnsupportedOperationException("Temporary");
-        } else if (Clob.class.equals(requiredType)) {
-            //TODO
-            throw new UnsupportedOperationException("Temporary");
+        } else if (Blob.class.equals(type)) {
+            setBlob(preparedStatement, index, (Blob) value);
+        } else if (Clob.class.equals(type)) {
+            setClob(preparedStatement, index, (Clob) value);
         } else {
-            preparedStatement.setObject(index, value);
+            throw new IllegalArgumentException("Unsupported class " + type.getName());
+        }
+    }
+
+    public static void setByte(PreparedStatement pst, int index, Byte value) throws SQLException {
+        if (value == null) {
+            pst.setNull(index, Types.TINYINT);
+        } else {
+            pst.setByte(index, value);
+        }
+    }
+
+    public static void setShort(PreparedStatement pst, int index, Short value) throws SQLException {
+        if (value == null) {
+            pst.setNull(index, Types.SMALLINT);
+        } else {
+            pst.setShort(index, value);
         }
     }
 
@@ -65,6 +75,22 @@ public class FieldSetter {
             pst.setNull(index, Types.BIGINT);
         } else {
             pst.setLong(index, value);
+        }
+    }
+
+    public static void setFloat(PreparedStatement pst, int index, Float value) throws SQLException {
+        if (value == null) {
+            pst.setNull(index, Types.FLOAT);
+        } else {
+            pst.setFloat(index, value);
+        }
+    }
+
+    public static void setDouble(PreparedStatement pst, int index, Double value) throws SQLException {
+        if (value == null) {
+            pst.setNull(index, Types.DOUBLE);
+        } else {
+            pst.setDouble(index, value);
         }
     }
 
@@ -105,6 +131,22 @@ public class FieldSetter {
             pst.setNull(index, Types.BINARY);
         } else {
             pst.setBytes(index, value);
+        }
+    }
+
+    public static void setBlob(PreparedStatement pst, int index, Blob value) throws SQLException {
+        if (value == null) {
+            pst.setNull(index, Types.BLOB);
+        } else {
+            pst.setBlob(index, value);
+        }
+    }
+
+    public static void setClob(PreparedStatement pst, int index, Clob value) throws SQLException {
+        if (value == null) {
+            pst.setNull(index, Types.CLOB);
+        } else {
+            pst.setClob(index, value);
         }
     }
 

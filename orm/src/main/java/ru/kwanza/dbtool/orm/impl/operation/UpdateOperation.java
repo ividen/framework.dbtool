@@ -1,6 +1,7 @@
 package ru.kwanza.dbtool.orm.impl.operation;
 
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.RowMapper;
 import ru.kwanza.dbtool.core.*;
 import ru.kwanza.dbtool.core.util.FieldValueExtractor;
@@ -13,12 +14,15 @@ import ru.kwanza.toolbox.fieldhelper.FieldHelper;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.Collection;
 
 /**
  * @author Kiryl Karatsetski
  */
-public class UpdateOperation extends Operation {
+public class UpdateOperation extends Operation implements IUpdateOperation {
+
+    private static final Logger log = LoggerFactory.getLogger(UpdateOperation.class);
 
     private Collection<FieldMapping> fieldMappings;
 
@@ -42,9 +46,9 @@ public class UpdateOperation extends Operation {
 
     private VersionGenerator versionGenerator;
 
-    public UpdateOperation(IEntityMappingRegistry entityMappingRegistry, JdbcTemplate jdbcTemplate, Class entityClass,
+    public UpdateOperation(IEntityMappingRegistry entityMappingRegistry, DBTool dbTool, Class entityClass,
                            VersionGenerator versionGenerator) {
-        super(entityMappingRegistry, jdbcTemplate, entityClass);
+        super(entityMappingRegistry, dbTool, entityClass);
         this.versionGenerator = versionGenerator;
     }
 
@@ -72,6 +76,11 @@ public class UpdateOperation extends Operation {
 
         this.updateQuery = buildUpdateQuery(tableName, columnNames, idColumnName, versionColumnName);
         this.checkQuery = buildCheckQuery(tableName, idColumnName, versionColumnName);
+
+        if (log.isTraceEnabled()) {
+            log.trace("Build UpdateOperation update query for EntityClass {}: {}", entityClass, updateQuery);
+            log.trace("Build UpdateOperation check for EntityClass {}: {}", entityClass, checkQuery);
+        }
     }
 
     private String buildUpdateQuery(String tableName, Collection<String> columnNames, String idColumnName, String versionColumnName) {
@@ -103,13 +112,17 @@ public class UpdateOperation extends Operation {
         return stringBuilder.toString();
     }
 
+    public void executeUpdate(Object object) throws UpdateException {
+        executeUpdate(Arrays.asList(object));
+    }
+
     @SuppressWarnings("unchecked")
-    public void execute(Collection objects) throws UpdateException {
+    public void executeUpdate(Collection objects) throws UpdateException {
         if (versionSupport) {
-            UpdateUtil.batchUpdate(jdbcTemplate, updateQuery, objects, updateOperationSetter, checkQuery, keyVersionRowMapper, keyField,
+            UpdateUtil.batchUpdate(getJdbcTemplate(), updateQuery, objects, updateOperationSetter, checkQuery, keyVersionRowMapper, keyField,
                     versionField);
         } else {
-            UpdateUtil.batchUpdate(jdbcTemplate, updateQuery, objects, updateSetter);
+            UpdateUtil.batchUpdate(getJdbcTemplate(), updateQuery, objects, updateSetter);
         }
     }
 
@@ -120,9 +133,9 @@ public class UpdateOperation extends Operation {
                 int index = 0;
                 for (FieldMapping fieldMapping : fieldMappings) {
                     final EntityField entityFiled = fieldMapping.getEntityFiled();
-                    FieldSetter.setValue(pst, ++index, entityFiled.getValue(object));
+                    FieldSetter.setValue(pst, ++index, entityFiled.getType(), entityFiled.getValue(object));
                 }
-                FieldSetter.setValue(pst, ++index, idEntityField.getValue(object));
+                FieldSetter.setValue(pst, ++index, idEntityField.getType(), idEntityField.getValue(object));
             } catch (SQLException e) {
                 throw e;
             } catch (Exception e) {
@@ -137,13 +150,13 @@ public class UpdateOperation extends Operation {
                 for (FieldMapping fieldMapping : fieldMappings) {
                     final EntityField entityFiled = fieldMapping.getEntityFiled();
                     if (fieldMapping.getColumnName().equals(versionFieldMapping.getColumnName())) {
-                        FieldSetter.setValue(pst, ++index, newVersion);
+                        FieldSetter.setLong(pst, ++index, newVersion);
                     } else {
-                        FieldSetter.setValue(pst, ++index, entityFiled.getValue(object));
+                        FieldSetter.setValue(pst, ++index, entityFiled.getType(), entityFiled.getValue(object));
                     }
                 }
-                FieldSetter.setValue(pst, ++index, idEntityField.getValue(object));
-                FieldSetter.setValue(pst, ++index, oldVersion);
+                FieldSetter.setValue(pst, ++index, idEntityField.getType(), idEntityField.getValue(object));
+                FieldSetter.setLong(pst, ++index, oldVersion);
             } catch (SQLException e) {
                 throw e;
             } catch (Exception e) {

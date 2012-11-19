@@ -11,6 +11,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
+import ru.kwanza.dbtool.core.DBTool;
 import ru.kwanza.dbtool.orm.api.IEntityManager;
 import ru.kwanza.dbtool.orm.impl.mapping.IEntityMappingRegistry;
 
@@ -31,6 +32,7 @@ public abstract class AbstractOperationTest extends DBTestCase {
         applicationContext = new ClassPathXmlApplicationContext(getSpringConfigFile(), AbstractOperationTest.class);
         DatabaseOperation.CLEAN_INSERT.execute(getConnection(), getDataSet());
         getEntityMappingRegistry().registerEntityClass(TestEntity.class);
+        getEntityMappingRegistry().registerEntityClass(TestEntityVersion.class);
     }
 
     protected abstract String getSpringConfigFile();
@@ -60,6 +62,10 @@ public abstract class AbstractOperationTest extends DBTestCase {
 
     protected IEntityManager getEntityManager() {
         return applicationContext.getBean(IEntityManager.class);
+    }
+
+    protected DBTool getDBTool() {
+        return applicationContext.getBean(DBTool.class);
     }
 }
 

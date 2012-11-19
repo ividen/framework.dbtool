@@ -1,6 +1,8 @@
 package ru.kwanza.dbtool.orm.impl.operation;
 
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import ru.kwanza.dbtool.core.DBTool;
 import ru.kwanza.dbtool.core.FieldSetter;
 import ru.kwanza.dbtool.core.UpdateException;
 import ru.kwanza.dbtool.core.UpdateSetter;
@@ -11,12 +13,15 @@ import ru.kwanza.dbtool.orm.impl.mapping.IEntityMappingRegistry;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.Collection;
 
 /**
  * @author Kiryl Karatsetski
  */
-public class CreateOperation extends Operation {
+public class CreateOperation extends Operation implements ICreateOperation {
+
+    private static final Logger log = LoggerFactory.getLogger(CreateOperation.class);
 
     private Collection<FieldMapping> fieldMappings;
 
@@ -26,8 +31,8 @@ public class CreateOperation extends Operation {
 
     private UpdateSetter updateSetter = new CreateOperationSetter();
 
-    public CreateOperation(IEntityMappingRegistry registry, JdbcTemplate jdbcTemplate, Class entityClass) {
-        super(registry, jdbcTemplate, entityClass);
+    public CreateOperation(IEntityMappingRegistry registry, DBTool dbTool, Class entityClass) {
+        super(registry, dbTool, entityClass);
     }
 
     @Override
@@ -39,11 +44,19 @@ public class CreateOperation extends Operation {
         final Collection<String> columnNames = entityMappingRegistry.getColumnNames(entityClass);
 
         this.createQuery = buildQuery(tableName, columnNames);
+
+        if (log.isTraceEnabled()) {
+            log.trace("Build CreateOperation query for EntityClass {}: {}", entityClass, createQuery);
+        }
+    }
+
+    public void executeCreate(Object object) throws UpdateException {
+        executeCreate(Arrays.asList(object));
     }
 
     @SuppressWarnings("unchecked")
-    public void execute(Collection objects) throws UpdateException {
-        UpdateUtil.batchUpdate(jdbcTemplate, createQuery, objects, updateSetter);
+    public void executeCreate(Collection objects) throws UpdateException {
+        UpdateUtil.batchUpdate(getJdbcTemplate(), createQuery, objects, updateSetter);
     }
 
     private String buildQuery(String tableName, Collection<String> columnNames) {
@@ -72,7 +85,7 @@ public class CreateOperation extends Operation {
                     if (versionFieldMapping != null && fieldMapping.getColumnName().equals(versionFieldMapping.getColumnName())) {
                         entityFiled.setValue(object, 1L);
                     }
-                    FieldSetter.setValue(pst, ++index, entityFiled.getValue(object));
+                    FieldSetter.setValue(pst, ++index, entityFiled.getType(), entityFiled.getValue(object));
                 }
             } catch (SQLException e) {
                 throw e;

@@ -1,6 +1,8 @@
 package ru.kwanza.dbtool.orm.impl.operation;
 
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import ru.kwanza.dbtool.core.DBTool;
 import ru.kwanza.dbtool.core.FieldSetter;
 import ru.kwanza.dbtool.core.UpdateException;
 import ru.kwanza.dbtool.core.UpdateSetter;
@@ -17,7 +19,9 @@ import java.util.Collection;
 /**
  * @author Kiryl Karatsetski
  */
-public class DeleteOperation extends Operation {
+public class DeleteOperation extends Operation implements IDeleteOperation {
+
+    private static final Logger log = LoggerFactory.getLogger(UpdateOperation.class);
 
     private EntityField idEntityFiled;
 
@@ -26,8 +30,8 @@ public class DeleteOperation extends Operation {
     private UpdateSetter updateSetterByObject = new UpdateSetterByObject();
     private UpdateSetter updateSetterByKey = new UpdateSetterByKey();
 
-    public DeleteOperation(IEntityMappingRegistry registry, JdbcTemplate jdbcTemplate, Class entityClass) {
-        super(registry, jdbcTemplate, entityClass);
+    public DeleteOperation(IEntityMappingRegistry registry, DBTool dbTool, Class entityClass) {
+        super(registry, dbTool, entityClass);
     }
 
     @Override
@@ -45,6 +49,10 @@ public class DeleteOperation extends Operation {
         final String idColumnName = idFieldMapping.getColumnName();
 
         this.deleteQuery = buildQuery(tableName, idColumnName);
+
+        if (log.isTraceEnabled()) {
+            log.trace("Build DeleteOperation query for EntityClass {}: {}", entityClass, deleteQuery);
+        }
     }
 
     private String buildQuery(String tableName, String idColumnName) {
@@ -56,24 +64,28 @@ public class DeleteOperation extends Operation {
         return stringBuilder.toString();
     }
 
-    @SuppressWarnings("unchecked")
-    public void execute(Collection objects) throws UpdateException {
-        UpdateUtil.batchUpdate(jdbcTemplate, deleteQuery, objects, updateSetterByObject);
+    public void executeDelete(Object object) throws UpdateException {
+        executeDelete(Arrays.asList(object));
     }
 
     @SuppressWarnings("unchecked")
-    public void executeByKeys(Collection keys) throws UpdateException {
-        UpdateUtil.batchUpdate(jdbcTemplate, deleteQuery, keys, updateSetterByKey);
+    public void executeDelete(Collection objects) throws UpdateException {
+        UpdateUtil.batchUpdate(getJdbcTemplate(), deleteQuery, objects, updateSetterByObject);
     }
 
-    public void executeByKey(Object key) throws UpdateException {
-        executeByKeys(Arrays.asList(key));
+    public void executeDeleteByKey(Object key) throws UpdateException {
+        executeDeleteByKeys(Arrays.asList(key));
+    }
+
+    @SuppressWarnings("unchecked")
+    public void executeDeleteByKeys(Collection keys) throws UpdateException {
+        UpdateUtil.batchUpdate(getJdbcTemplate(), deleteQuery, keys, updateSetterByKey);
     }
 
     private class UpdateSetterByObject implements UpdateSetter {
         public boolean setValues(PreparedStatement pst, Object object) throws SQLException {
             try {
-                FieldSetter.setValue(pst, 1, idEntityFiled.getValue(object));
+                FieldSetter.setValue(pst, 1, idEntityFiled.getType(), idEntityFiled.getValue(object));
             } catch (SQLException e) {
                 throw e;
             } catch (Exception e) {
@@ -86,7 +98,7 @@ public class DeleteOperation extends Operation {
 
     private class UpdateSetterByKey implements UpdateSetter {
         public boolean setValues(PreparedStatement pst, Object object) throws SQLException {
-            FieldSetter.setValue(pst, 1, object);
+            FieldSetter.setValue(pst, 1, idEntityFiled.getType(), object);
             return true;
         }
     }

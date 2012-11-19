@@ -9,23 +9,25 @@ import java.util.Collection;
  */
 public interface IEntityManager {
 
-    <T> T create(T obj) throws UpdateException;
+    <T> T create(T object) throws UpdateException;
 
-    <T>  Collection<T> create(Class<T> clazz, Collection<T> obj) throws UpdateException;
+    <T> Collection<T> create(Class<T> entityClass, Collection<T> objects) throws UpdateException;
 
-    <T> T update(T obj) throws UpdateException;
+    <T> T update(T object) throws UpdateException;
 
-    <T> Collection<T> update(Class<T> clazz, Collection<T> obj) throws UpdateException;
+    <T> Collection<T> update(Class<T> entityClass, Collection<T> objects) throws UpdateException;
 
-    <T> T delete(T obj) throws UpdateException;
+    <T> T delete(T object) throws UpdateException;
 
-    <T> Collection<T> delete(Class<T> clazz, Collection<T> obj) throws UpdateException;
+    <T> Collection<T> delete(Class<T> entityClass, Collection<T> objects) throws UpdateException;
 
     void deleteByKey(Class entityClass, Object key) throws UpdateException;
 
-    void deleteByKey(Class entityClass, Collection keys) throws UpdateException;
+    void deleteByKeys(Class entityClass, Collection keys) throws UpdateException;
 
     <T> T readByKey(Class<T> entityClass, Object key);
+
+    <T> Collection<T> readByKeys(Class<T> entityClass, Collection keys);
 
     <T> IQueryBuilder<T> queryBuilder(Class<T> entityClass);
 

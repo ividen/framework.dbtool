@@ -22,7 +22,7 @@ public @interface Field {
     String columnName();
 
     /**
-     * Тим колонки в таблице. Это должна быть одна из констант в  of java.sql.Types
+     * Тип колонки в таблице. Это должна быть одна из констант в  of java.sql.Types
      *
      */
     int type() default Integer.MAX_VALUE;

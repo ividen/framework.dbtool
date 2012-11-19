@@ -1,6 +1,6 @@
 package ru.kwanza.dbtool.orm.impl.operation;
 
-import org.springframework.jdbc.core.JdbcTemplate;
+import ru.kwanza.dbtool.core.DBTool;
 import ru.kwanza.dbtool.core.VersionGenerator;
 import ru.kwanza.dbtool.orm.impl.mapping.IEntityMappingRegistry;
 
@@ -12,37 +12,45 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public final class OperationFactory {
 
-    private Map<Class, Operation> createOperationCache = new ConcurrentHashMap<Class, Operation>();
-    private Map<Class, Operation> updateOperationCache = new ConcurrentHashMap<Class, Operation>();
-    private Map<Class, Operation> deleteOperationCache = new ConcurrentHashMap<Class, Operation>();
+    private Map<Class, ICreateOperation> createOperationCache = new ConcurrentHashMap<Class, ICreateOperation>();
+    private Map<Class, IReadOperation> readOperationCache = new ConcurrentHashMap<Class, IReadOperation>();
+    private Map<Class, IUpdateOperation> updateOperationCache = new ConcurrentHashMap<Class, IUpdateOperation>();
+    private Map<Class, IDeleteOperation> deleteOperationCache = new ConcurrentHashMap<Class, IDeleteOperation>();
 
     private IEntityMappingRegistry entityMappingRegistry;
 
-    private JdbcTemplate jdbcTemplate;
+    private DBTool dbTool;
 
-    public OperationFactory(IEntityMappingRegistry entityMappingRegistry, JdbcTemplate jdbcTemplate) {
+    public OperationFactory(IEntityMappingRegistry entityMappingRegistry, DBTool dbTool) {
         this.entityMappingRegistry = entityMappingRegistry;
-        this.jdbcTemplate = jdbcTemplate;
+        this.dbTool = dbTool;
     }
 
-    public Operation getCreateOperation(Class entityClass) {
+    public ICreateOperation getCreateOperation(Class entityClass) {
         if (!createOperationCache.containsKey(entityClass)) {
-            createOperationCache.put(entityClass, new CreateOperation(entityMappingRegistry, jdbcTemplate, entityClass));
+            createOperationCache.put(entityClass, new CreateOperation(entityMappingRegistry, dbTool, entityClass));
         }
         return createOperationCache.get(entityClass);
     }
 
-    public Operation getUpdateOperation(Class entityClass, VersionGenerator versionGenerator) {
+    public IReadOperation getReadOperation(Class entityClass) {
+        if (!readOperationCache.containsKey(entityClass)) {
+            readOperationCache.put(entityClass, new ReadOperation(entityMappingRegistry, dbTool, entityClass));
+        }
+        return readOperationCache.get(entityClass);
+    }
+
+    public IUpdateOperation getUpdateOperation(Class entityClass, VersionGenerator versionGenerator) {
         if (!updateOperationCache.containsKey(entityClass)) {
-            updateOperationCache.put(entityClass, new UpdateOperation(entityMappingRegistry, jdbcTemplate, entityClass, versionGenerator));
+            updateOperationCache.put(entityClass, new UpdateOperation(entityMappingRegistry, dbTool, entityClass, versionGenerator));
         }
         return updateOperationCache.get(entityClass);
     }
 
-    public DeleteOperation getDeleteOperation(Class entityClass) {
+    public IDeleteOperation getDeleteOperation(Class entityClass) {
         if (!deleteOperationCache.containsKey(entityClass)) {
-            deleteOperationCache.put(entityClass, new DeleteOperation(entityMappingRegistry, jdbcTemplate, entityClass));
+            deleteOperationCache.put(entityClass, new DeleteOperation(entityMappingRegistry, dbTool, entityClass));
         }
-        return (DeleteOperation) deleteOperationCache.get(entityClass);
+        return deleteOperationCache.get(entityClass);
     }
 }

@@ -3,7 +3,6 @@ package ru.kwanza.dbtool.orm.impl.operation;
 import ru.kwanza.dbtool.orm.annotations.Entity;
 import ru.kwanza.dbtool.orm.annotations.Field;
 import ru.kwanza.dbtool.orm.annotations.IdField;
-import ru.kwanza.toolbox.fieldhelper.FieldHelper;
 
 /**
  * @author Kiryl Karatsetski
@@ -19,17 +18,6 @@ public final class TestEntity {
 
     @Field(columnName = "version")
     private Long version;
-
-    public static final FieldHelper.Field<TestEntity, Long> KEY = new FieldHelper.Field<TestEntity, Long>() {
-        public Long value(TestEntity object) {
-            return object.key;
-        }
-    };
-    public static final FieldHelper.Field<TestEntity, String> NAME = new FieldHelper.Field<TestEntity, String>() {
-        public String value(TestEntity object) {
-            return object.name;
-        }
-    };
 
     public TestEntity() {
     }

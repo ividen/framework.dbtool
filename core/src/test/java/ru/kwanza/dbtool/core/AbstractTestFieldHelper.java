@@ -74,7 +74,7 @@ public abstract class AbstractTestFieldHelper extends TestCase {
                 FieldSetter.setString(pst, 4, null);
                 FieldSetter.setTimestamp(pst, 5, (Timestamp) null);
                 FieldSetter.setTimestamp(pst, 6, (Date) null);
-                FieldSetter.setBlob(pst, 7, null);
+                FieldSetter.setBlob(pst, 7, (byte[]) null);
                 FieldSetter.setBigDecimal(pst, 8, null);
                 return true;
             }

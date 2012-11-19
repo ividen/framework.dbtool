@@ -113,7 +113,7 @@ public class EntityBatcherImpl implements IEntityBatcher {
 
         for (Class entityClass : deleteObjectStore.keySet()) {
             try {
-                entityManager.deleteByKey(entityClass, deleteObjectStore.get(entityClass));
+                entityManager.deleteByKeys(entityClass, deleteObjectStore.get(entityClass));
             } catch (UpdateException e) {
                 deleteByKeyExceptionMap.put(entityClass, e);
             }

@@ -28,55 +28,59 @@ public class EntityManagerImpl implements IEntityManager {
     private IFetcher fetcher;
 
     public void init() {
-        this.operationFactory = new OperationFactory(mappingRegistry, dbTool.getJdbcTemplate());
+        this.operationFactory = new OperationFactory(mappingRegistry, dbTool);
         this.fetcher = new FetcherImpl(mappingRegistry, this);
     }
 
     public <T> T create(T object) throws UpdateException {
         final Class entityClass = object.getClass();
-        operationFactory.getCreateOperation(entityClass).execute(object);
+        operationFactory.getCreateOperation(entityClass).executeCreate(object);
         return object;
     }
 
-    public <T> Collection<T> create(Class<T> clazz, Collection<T> objects) throws UpdateException {
-       operationFactory.getCreateOperation(clazz).execute(objects);
-       return objects;
+    public <T> Collection<T> create(Class<T> entityClass, Collection<T> objects) throws UpdateException {
+        operationFactory.getCreateOperation(entityClass).executeCreate(objects);
+        return objects;
     }
 
     public <T> T update(T object) throws UpdateException {
         final Class entityClass = object.getClass();
-        operationFactory.getUpdateOperation(entityClass, versionGenerator).execute(object);
+        operationFactory.getUpdateOperation(entityClass, versionGenerator).executeUpdate(object);
         return object;
     }
 
-    public <T> Collection<T> update(Class<T> clazz, Collection<T> objects) throws UpdateException {
-        operationFactory.getUpdateOperation(clazz, versionGenerator).execute(objects);
+    public <T> Collection<T> update(Class<T> entityClass, Collection<T> objects) throws UpdateException {
+        operationFactory.getUpdateOperation(entityClass, versionGenerator).executeUpdate(objects);
         return objects;
     }
 
     public <T> T delete(T object) throws UpdateException {
         final Class entityClass = object.getClass();
-        operationFactory.getDeleteOperation(entityClass).execute(object);
+        operationFactory.getDeleteOperation(entityClass).executeDelete(object);
         return object;
     }
 
-    public <T> Collection<T> delete(Class<T> clazz, Collection<T> objects) throws UpdateException {
-        operationFactory.getDeleteOperation(clazz).execute(objects);
+    public <T> Collection<T> delete(Class<T> entityClass, Collection<T> objects) throws UpdateException {
+        operationFactory.getDeleteOperation(entityClass).executeDelete(objects);
         return objects;
     }
 
     public void deleteByKey(Class entityClass, Object key) throws UpdateException {
-        operationFactory.getDeleteOperation(entityClass).executeByKey(key);
+        operationFactory.getDeleteOperation(entityClass).executeDeleteByKey(key);
     }
 
-    public void deleteByKey(Class entityClass, Collection keys) throws UpdateException {
-        operationFactory.getDeleteOperation(entityClass).executeByKeys(keys);
+    public void deleteByKeys(Class entityClass, Collection keys) throws UpdateException {
+        operationFactory.getDeleteOperation(entityClass).executeDeleteByKeys(keys);
     }
 
+    @SuppressWarnings("unchecked")
     public <T> T readByKey(Class<T> entityClass, Object key) {
-        //TODO Under construction
-        final IQuery<T> query = new QueryBuilderImpl<T>(dbTool, mappingRegistry, entityClass).where(Condition.isEqual("id")).create();
-        return query.select();
+        return (T) operationFactory.getReadOperation(entityClass).selectByKey(key);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> Collection<T> readByKeys(Class<T> entityClass, Collection keys) {
+        return (Collection<T>) operationFactory.getReadOperation(entityClass).selectByKeys(keys);
     }
 
     public <T> IQueryBuilder<T> queryBuilder(Class<T> entityClass) {
