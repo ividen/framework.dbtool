@@ -49,8 +49,8 @@ public class SpringEntityMappingRegistryImpl implements IEntityMappingRegistry {
                     try {
                         final MetadataReader metadataReader = metadataReaderFactory.getMetadataReader(resource);
                         final ClassMetadata classMetadata = metadataReader.getClassMetadata();
-                        if (!classMetadata.isAbstract()) {
-                            final String className = classMetadata.getClassName();
+                        final String className = classMetadata.getClassName();
+                        if (!classMetadata.isAbstract() && !Enum.class.getName().equals(classMetadata.getSuperClassName())) {
                             delegate.registerEntityClass(Class.forName(className));
                             log.debug(className);
                         }
