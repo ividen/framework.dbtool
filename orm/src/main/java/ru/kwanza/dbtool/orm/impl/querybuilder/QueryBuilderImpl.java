@@ -32,6 +32,10 @@ public class QueryBuilderImpl<T> implements IQueryBuilder<T> {
         this.dbTool = dbTool;
         this.registry = registry;
         this.entityClass = entityClass;
+
+        if (!registry.isRegisteredEntityClass(entityClass)) {
+            throw new RuntimeException("Not registered entity class: " + entityClass);
+        }
     }
 
     public IQuery<T> create() {
