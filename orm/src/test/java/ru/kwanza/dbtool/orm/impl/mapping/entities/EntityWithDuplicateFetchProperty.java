@@ -6,7 +6,7 @@ import ru.kwanza.dbtool.orm.annotations.Fetch;
 /**
  * @author Kiryl Karatsetski
  */
-@Entity(name = "EntityWithDuplicateFieldProperty", tableName = "entity_with_duplicate_field_property")
+@Entity(name = "EntityWithDuplicateFetchProperty", tableName = "entity_with_duplicate_fetch_property")
 public class EntityWithDuplicateFetchProperty extends PaymentTrx {
 
     @Fetch(propertyName = "subAgentId")
