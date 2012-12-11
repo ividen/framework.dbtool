@@ -60,8 +60,11 @@ public class EntityMappingRegistryParser implements BeanDefinitionParser {
         beanDefinitionBuilder.addConstructorArgReference(ENTITY_MAPPING_REGISTRY);
         beanDefinitionBuilder.addConstructorArgValue(getBasePackages(element));
         final BeanDefinition beanDefinition = beanDefinitionBuilder.getBeanDefinition();
-        final String beanName = BeanDefinitionReaderUtils.generateBeanName(beanDefinition, beanDefinitionRegistry, true);
-        beanDefinitionRegistry.registerBeanDefinition(beanName, beanDefinition);
+        String beanId = element.getAttribute("id");
+        if (beanId == null || beanId.isEmpty()) {
+            beanId = BeanDefinitionReaderUtils.generateBeanName(beanDefinition, beanDefinitionRegistry, false);
+        }
+        beanDefinitionRegistry.registerBeanDefinition(beanId, beanDefinition);
 
         return beanDefinition;
     }
