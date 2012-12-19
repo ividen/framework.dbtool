@@ -23,7 +23,7 @@
         <oracle.jdbc.version>11.2.0.2.0</oracle.jdbc.version>
         <jtds.version>1.2.1</jtds.version>
         <dbunit.version>2.4.8</dbunit.version>
-        <springframework.version>3.0.5.RELEASE</springframework.version>
+        <springframework.version>3.2.0.RELEASE</springframework.version>
         <commons.dbcp.version>1.4</commons.dbcp.version>
         <toolbox.version>1.0-SNAPSHOT</toolbox.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
