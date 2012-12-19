@@ -51,8 +51,9 @@ public class SpringEntityMappingRegistryImpl implements IEntityMappingRegistry {
                         final ClassMetadata classMetadata = metadataReader.getClassMetadata();
                         final String className = classMetadata.getClassName();
                         if (!classMetadata.isAbstract() && !Enum.class.getName().equals(classMetadata.getSuperClassName())) {
-                            log.debug(className);
-                            delegate.registerEntityClass(Class.forName(className));
+                            log.trace(className);
+                            final ClassLoader classLoader = resourcePatternResolver.getClassLoader();
+                            delegate.registerEntityClass(classLoader.loadClass(className));
                         }
                     } catch (Throwable e) {
                         throw new RuntimeException("Error while registering entity mapping: " + resource, e);

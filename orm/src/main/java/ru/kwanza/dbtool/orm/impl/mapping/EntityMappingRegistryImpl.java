@@ -346,18 +346,18 @@ public class EntityMappingRegistryImpl implements IEntityMappingRegistry {
     }
 
     private static void logRegisterEntity(Class entityClass, String entityName, String tableName) {
-        log.debug("Register entity '{}' with '{}' name and '{}' table name", new Object[]{entityClass, entityName, tableName});
+        log.trace("Register entity '{}' with '{}' name and '{}' table name", new Object[]{entityClass, entityName, tableName});
     }
 
     private static void logRegisterColumn(Class entityClass, String columnName) {
-        log.debug("{}: Register column '{}'", new Object[]{entityClass, columnName});
+        log.trace("{}: Register column '{}'", new Object[]{entityClass, columnName});
     }
 
     private static void logRegisterFieldMapping(Class entityClass, FieldMapping fieldMapping) {
-        log.debug("{}: Register Field Mapping {}", new Object[]{entityClass, fieldMapping});
+        log.trace("{}: Register Field Mapping {}", new Object[]{entityClass, fieldMapping});
     }
 
     private static void logRegisterFetchMapping(Class entityClass, FetchMapping fetchMapping) {
-        log.debug("{}: Register Fetch Mapping {}", new Object[]{entityClass, fetchMapping});
+        log.trace("{}: Register Fetch Mapping {}", new Object[]{entityClass, fetchMapping});
     }
 }
