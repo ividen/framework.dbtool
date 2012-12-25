@@ -26,7 +26,7 @@ public abstract class BlobInputStream extends InputStream implements Closeable {
     private final String fieldName;
     private final KeyValueCondition condition;
 
-    protected final  Connection connection;
+    protected final Connection connection;
     protected ResultSet resultSet;
     protected InputStream inputStream;
 
@@ -34,7 +34,7 @@ public abstract class BlobInputStream extends InputStream implements Closeable {
             throws IOException {
         this.dbTool = dbTool;
         try {
-            this.connection = dbTool.getDataSource().getConnection();
+            this.connection = dbTool == null ? null : dbTool.getDataSource().getConnection();
         } catch (SQLException e) {
             throw new IOException(e);
         }
@@ -92,7 +92,7 @@ public abstract class BlobInputStream extends InputStream implements Closeable {
     @Override
     public void close() throws IOException {
         try {
-            dbTool.closeResources(inputStream, resultSet,connection);
+            dbTool.closeResources(inputStream, resultSet, connection);
         } finally {
             try {
                 super.close();

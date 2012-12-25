@@ -30,7 +30,7 @@ public abstract class BlobOutputStream extends OutputStream implements Closeable
             throws IOException {
         this.dbTool = dbTool;
         try {
-            this.connection = dbTool.getDataSource().getConnection();
+            this.connection = dbTool == null ? null : dbTool.getDataSource().getConnection();
         } catch (SQLException e) {
             throw new IOException(e);
         }

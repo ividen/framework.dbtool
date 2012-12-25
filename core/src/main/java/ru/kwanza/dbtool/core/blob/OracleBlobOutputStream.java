@@ -1,7 +1,7 @@
 package ru.kwanza.dbtool.core.blob;
 
+import oracle.jdbc.driver.OracleConnection;
 import oracle.sql.BLOB;
-import org.apache.commons.dbcp.DelegatingConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.kwanza.dbtool.core.DBTool;
@@ -23,7 +23,6 @@ class OracleBlobOutputStream extends BlobOutputStream {
 
     private BLOB tempBlob;
     private OutputStream tempOutputStream;
-    private Connection connection;
 
     public OracleBlobOutputStream(final DBTool dbTool, String tableName, String fieldName, Collection<KeyValue<String, Object>> keyValues)
             throws IOException, StreamException.RecordNotFoundException {
@@ -32,13 +31,15 @@ class OracleBlobOutputStream extends BlobOutputStream {
         final String whereCondition = getWhereCondition();
         final String sqlQueryClear = "UPDATE " + tableName + " SET " + fieldName + "=null WHERE " + whereCondition;
         try {
-            final int count = connection.prepareCall(sqlQueryClear).executeUpdate();
+            final int count = connection.prepareStatement(sqlQueryClear).executeUpdate();
 
             if (count != 1) {
                 throw new StreamException.RecordNotFoundException("Message with " + whereCondition + " not updated [" + count + "]");
             }
 
-            tempBlob = BLOB.createTemporary(connection, true, BLOB.DURATION_SESSION);
+
+            tempBlob = BLOB.createTemporary(connection.isWrapperFor(Connection.class) ?
+                    connection.unwrap(OracleConnection.class) : connection, true, BLOB.DURATION_SESSION);
             tempOutputStream = tempBlob.setBinaryStream(1);
 
             if (tempOutputStream == null) {
