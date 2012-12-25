@@ -8,7 +8,9 @@ import ru.kwanza.dbtool.core.KeyValue;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.Connection;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Collection;
 
 /**
@@ -24,12 +26,18 @@ public abstract class BlobInputStream extends InputStream implements Closeable {
     private final String fieldName;
     private final KeyValueCondition condition;
 
+    protected final  Connection connection;
     protected ResultSet resultSet;
     protected InputStream inputStream;
 
     protected BlobInputStream(DBTool dbTool, String tableName, String fieldName, Collection<KeyValue<String, Object>> keyValues)
             throws IOException {
         this.dbTool = dbTool;
+        try {
+            this.connection = dbTool.getDataSource().getConnection();
+        } catch (SQLException e) {
+            throw new IOException(e);
+        }
         this.fieldName = fieldName;
         this.tableName = tableName;
         this.condition = new KeyValueCondition(keyValues);
@@ -84,7 +92,7 @@ public abstract class BlobInputStream extends InputStream implements Closeable {
     @Override
     public void close() throws IOException {
         try {
-            dbTool.closeResources(inputStream, resultSet);
+            dbTool.closeResources(inputStream, resultSet,connection);
         } finally {
             try {
                 super.close();

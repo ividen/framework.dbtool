@@ -8,6 +8,8 @@ import ru.kwanza.dbtool.core.KeyValue;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Collection;
 
 /**
@@ -22,9 +24,16 @@ public abstract class BlobOutputStream extends OutputStream implements Closeable
     private final String tableName;
     private final String fieldName;
     private final KeyValueCondition condition;
+    protected final Connection connection;
 
-    public BlobOutputStream(DBTool dbTool, String tableName, String fieldName, Collection<KeyValue<String, Object>> keyValues) {
+    public BlobOutputStream(DBTool dbTool, String tableName, String fieldName, Collection<KeyValue<String, Object>> keyValues)
+            throws IOException {
         this.dbTool = dbTool;
+        try {
+            this.connection = dbTool.getDataSource().getConnection();
+        } catch (SQLException e) {
+            throw new IOException(e);
+        }
         this.tableName = tableName;
         this.fieldName = fieldName;
         this.condition = new KeyValueCondition(keyValues);
@@ -60,6 +69,13 @@ public abstract class BlobOutputStream extends OutputStream implements Closeable
 
     protected String getWhereCondition() {
         return condition.getStringCondition();
+    }
+
+
+    @Override
+    public void close() throws IOException {
+        dbTool.closeResources(connection);
+        super.close();
     }
 
     @Override

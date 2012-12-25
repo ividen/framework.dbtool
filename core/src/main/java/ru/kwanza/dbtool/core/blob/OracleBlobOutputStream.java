@@ -32,15 +32,13 @@ class OracleBlobOutputStream extends BlobOutputStream {
         final String whereCondition = getWhereCondition();
         final String sqlQueryClear = "UPDATE " + tableName + " SET " + fieldName + "=null WHERE " + whereCondition;
         try {
-            final int count = dbTool.getDataSource().getConnection().prepareCall(sqlQueryClear).executeUpdate();
+            final int count = connection.prepareCall(sqlQueryClear).executeUpdate();
 
             if (count != 1) {
                 throw new StreamException.RecordNotFoundException("Message with " + whereCondition + " not updated [" + count + "]");
             }
 
-            connection = dbTool.getDataSource().getConnection();
-            DelegatingConnection delegate = new DelegatingConnection(connection);
-            tempBlob = BLOB.createTemporary(delegate.getInnermostDelegate(), true, BLOB.DURATION_SESSION);
+            tempBlob = BLOB.createTemporary(connection, true, BLOB.DURATION_SESSION);
             tempOutputStream = tempBlob.setBinaryStream(1);
 
             if (tempOutputStream == null) {

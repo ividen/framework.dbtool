@@ -37,7 +37,7 @@ class MSSQLBlobOutputStream extends BlobOutputStream {
                 "DECLARE @ptrval VARBINARY(16)\n" + "SELECT @ptrval = TEXTPTR(" + getFieldName() + ") FROM " + getTableName() + " WHERE "
                         + whereCondition + "\n" + "UPDATETEXT " + getTableName() + "." + getFieldName() + " @ptrval ? null ?";
         try {
-            final int count = dbTool.getDataSource().getConnection().prepareStatement(sqlQueryClear).executeUpdate();
+            final int count = connection.prepareStatement(sqlQueryClear).executeUpdate();
             if (count != 1) {
                 throw new StreamException.RecordNotFoundException("Record with " + whereCondition + " not updated [" + count + "]");
             }
@@ -128,7 +128,7 @@ class MSSQLBlobOutputStream extends BlobOutputStream {
     }
 
     private int executeUpdate(String sql, Object[] params) throws SQLException {
-        PreparedStatement pst = getDbTool().getDataSource().getConnection().prepareStatement(sql);
+        PreparedStatement pst = connection.prepareStatement(sql);
         int index = 0;
         for (Object param : params) {
             pst.setObject(++index, param);
@@ -146,7 +146,7 @@ class MSSQLBlobOutputStream extends BlobOutputStream {
         try {
             ResultSet resultSet = null;
             try {
-                resultSet = getDbTool().getDataSource().getConnection().prepareStatement(sqlQuerySize).executeQuery();
+                resultSet =connection.prepareStatement(sqlQuerySize).executeQuery();
                 if (!resultSet.next()) {
                     throw new StreamException.RecordNotFoundException(sqlQuerySize);
                 }
@@ -165,7 +165,7 @@ class MSSQLBlobOutputStream extends BlobOutputStream {
     }
 
     private ResultSet executeQuery(String sql, Object[] params) throws SQLException {
-        PreparedStatement pst = getDbTool().getDataSource().getConnection().prepareStatement(sql);
+        PreparedStatement pst =connection.prepareStatement(sql);
         int index = 0;
         for (Object param : params) {
             pst.setObject(++index, param);

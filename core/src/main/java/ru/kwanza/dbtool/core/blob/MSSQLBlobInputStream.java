@@ -38,7 +38,7 @@ class MSSQLBlobInputStream extends BlobInputStream {
         sqlRead = "DECLARE @ptrval VARBINARY(16)\n" + "SELECT @ptrval = TEXTPTR(" + getFieldName() + ") FROM " + getTableName() + " WHERE "
                 + whereCondition + "\n" + "READTEXT " + getTableName() + "." + getFieldName() + " @ptrval ? ?";
         try {
-            resultSet = dbTool.getDataSource().getConnection().prepareStatement(sqlQuerySize).executeQuery();
+            resultSet = connection.prepareStatement(sqlQuerySize).executeQuery();
             if (!resultSet.next()) {
                 throw new StreamException.RecordNotFoundException(sqlQuerySize);
             }
@@ -127,7 +127,7 @@ class MSSQLBlobInputStream extends BlobInputStream {
     }
 
     private ResultSet executeQuery(String sql, int[] params) throws SQLException {
-        PreparedStatement pst = getDbTool().getDataSource().getConnection().prepareStatement(sql);
+        PreparedStatement pst = connection.prepareStatement(sql);
         int index = 0;
         for (int param : params) {
             pst.setInt(++index, param);

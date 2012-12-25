@@ -6,6 +6,7 @@ import ru.kwanza.dbtool.core.DBTool;
 import ru.kwanza.dbtool.core.KeyValue;
 
 import java.io.IOException;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
 
@@ -29,7 +30,7 @@ class OracleBlobInputStream extends BlobInputStream {
                 "SELECT LENGTH(" + getFieldName() + ") AS " + nameSize + " FROM " + getTableName() + " WHERE " + whereCondition;
         final String sqlQuery = "SELECT " + getFieldName() + " FROM " + getTableName() + " WHERE " + whereCondition;
         try {
-            resultSet = dbTool.getDataSource().getConnection().prepareCall(sqlQuerySize).executeQuery();
+            resultSet = connection.prepareCall(sqlQuerySize).executeQuery();
             if (!resultSet.next()) {
                 throw new StreamException.RecordNotFoundException(sqlQuerySize);
             }
@@ -40,7 +41,7 @@ class OracleBlobInputStream extends BlobInputStream {
                 throw new StreamException.EmptyFieldException("No data. Size = " + size);
             }
 
-            resultSet = dbTool.getDataSource().getConnection().prepareCall(sqlQuery).executeQuery();
+            resultSet = connection.prepareCall(sqlQuery).executeQuery();
             if (!resultSet.next()) {
                 throw new StreamException.RecordNotFoundException(sqlQuery);
             }
