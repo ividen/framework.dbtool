@@ -40,6 +40,6 @@ class RelationValue {
     }
 
     public String getIDGroupingField() {
-        return idField.getPropertyName();
+        return idField.getName();
     }
 }

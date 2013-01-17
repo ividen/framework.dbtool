@@ -71,8 +71,8 @@ public class UpdateOperation extends Operation implements IUpdateOperation {
 
         final String tableName = entityMappingRegistry.getTableName(entityClass);
         final Collection<String> columnNames = entityMappingRegistry.getColumnNames(entityClass);
-        final String idColumnName = idFieldMapping != null ? idFieldMapping.getColumnName() : null;
-        final String versionColumnName = versionFieldMapping != null ? versionFieldMapping.getColumnName() : null;
+        final String idColumnName = idFieldMapping != null ? idFieldMapping.getColumn() : null;
+        final String versionColumnName = versionFieldMapping != null ? versionFieldMapping.getColumn() : null;
 
         this.updateQuery = buildUpdateQuery(tableName, columnNames, idColumnName, versionColumnName);
         this.checkQuery = buildCheckQuery(tableName, idColumnName, versionColumnName);
@@ -149,7 +149,7 @@ public class UpdateOperation extends Operation implements IUpdateOperation {
                 int index = 0;
                 for (FieldMapping fieldMapping : fieldMappings) {
                     final EntityField entityFiled = fieldMapping.getEntityFiled();
-                    if (fieldMapping.getColumnName().equals(versionFieldMapping.getColumnName())) {
+                    if (fieldMapping.getColumn().equals(versionFieldMapping.getColumn())) {
                         FieldSetter.setLong(pst, ++index, newVersion);
                     } else {
                         FieldSetter.setValue(pst, ++index, entityFiled.getType(), entityFiled.getValue(object));
@@ -168,8 +168,8 @@ public class UpdateOperation extends Operation implements IUpdateOperation {
 
     private class KeyVersionRowMapper implements RowMapper<KeyValue<Comparable, Long>> {
         public KeyValue<Comparable, Long> mapRow(ResultSet rs, int rowNum) throws SQLException {
-            final Object key = FieldValueExtractor.getValue(rs, idFieldMapping.getColumnName(), idEntityField.getType());
-            final Long version = (Long) FieldValueExtractor.getValue(rs, versionFieldMapping.getColumnName(), versionEntityField.getType());
+            final Object key = FieldValueExtractor.getValue(rs, idFieldMapping.getColumn(), idEntityField.getType());
+            final Long version = (Long) FieldValueExtractor.getValue(rs, versionFieldMapping.getColumn(), versionEntityField.getType());
             return new KeyValue<Comparable, Long>((Comparable) key, version);
         }
     }

@@ -82,7 +82,7 @@ public class CreateOperation extends Operation implements ICreateOperation {
                 int index = 0;
                 for (FieldMapping fieldMapping : fieldMappings) {
                     final EntityField entityFiled = fieldMapping.getEntityFiled();
-                    if (versionFieldMapping != null && fieldMapping.getColumnName().equals(versionFieldMapping.getColumnName())) {
+                    if (versionFieldMapping != null && fieldMapping.getColumn().equals(versionFieldMapping.getColumn())) {
                         entityFiled.setValue(object, 1L);
                     }
                     FieldSetter.setValue(pst, ++index, entityFiled.getType(), entityFiled.getValue(object));

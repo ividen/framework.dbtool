@@ -57,7 +57,7 @@ public class QueryBuilderImpl<T> implements IQueryBuilder<T> {
                 if(fieldMapping==null){
                     throw new IllegalArgumentException("Unknown field!");
                 }
-                orderBy.append(fieldMapping.getColumnName())
+                orderBy.append(fieldMapping.getColumn())
                         .append(' ')
                         .append(ob.getType())
                         .append(", ");
@@ -139,7 +139,7 @@ public class QueryBuilderImpl<T> implements IQueryBuilder<T> {
             if(fieldMapping==null){
                      throw new IllegalArgumentException("Unknown field!");
             }
-            where.append(fieldMapping.getColumnName());
+            where.append(fieldMapping.getColumn());
             if (type == Condition.Type.IS_EQUAL) {
                 paramsTypes.add(fieldMapping.getType());
                 where.append(" = ?");
@@ -181,7 +181,7 @@ public class QueryBuilderImpl<T> implements IQueryBuilder<T> {
     private void addFields(StringBuilder select, Collection<FieldMapping> fields) {
         if (fields != null) {
             for (FieldMapping fm : fields) {
-                select.append(fm.getColumnName()).append(", ");
+                select.append(fm.getColumn()).append(", ");
             }
         }
     }

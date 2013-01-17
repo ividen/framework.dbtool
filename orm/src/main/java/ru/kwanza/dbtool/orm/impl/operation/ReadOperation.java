@@ -30,7 +30,7 @@ public class ReadOperation extends Operation implements IReadOperation {
         }
 
         final FieldMapping idFieldMapping = idFieldMappings.iterator().next();
-        final String propertyName = idFieldMapping.getPropertyName();
+        final String propertyName = idFieldMapping.getName();
 
         this.queryBuilderForObject = new QueryBuilderImpl(dbTool, entityMappingRegistry, entityClass).where(Condition.isEqual(propertyName));
         this.queryBuilderForList = new QueryBuilderImpl(dbTool, entityMappingRegistry, entityClass).where(Condition.in(propertyName));

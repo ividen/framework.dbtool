@@ -46,7 +46,7 @@ public class DeleteOperation extends Operation implements IDeleteOperation {
         this.idEntityFiled = idFieldMapping.getEntityFiled();
 
         final String tableName = entityMappingRegistry.getTableName(entityClass);
-        final String idColumnName = idFieldMapping.getColumnName();
+        final String idColumnName = idFieldMapping.getColumn();
 
         this.deleteQuery = buildQuery(tableName, idColumnName);
 

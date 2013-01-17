@@ -51,7 +51,8 @@ public class EntityMappingHelper {
     public static FetchMapping createFetchMapping(AnnotatedElement annotatedElement,
                                                   FieldMapping propertyMapping,
                                                   FieldMapping relationPropertyMapping) {
-        return new FetchMapping(propertyMapping,relationPropertyMapping, createEntityField(annotatedElement));
+        return new FetchMapping(getPropertyName(annotatedElement),
+                propertyMapping, relationPropertyMapping, createEntityField(annotatedElement));
     }
 
     private static EntityField createEntityField(AnnotatedElement annotatedElement) {

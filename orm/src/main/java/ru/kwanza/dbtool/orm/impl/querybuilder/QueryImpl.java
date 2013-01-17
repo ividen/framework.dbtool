@@ -211,7 +211,7 @@ public class QueryImpl<T> implements IQuery<T> {
 
         private void readAndFill(ResultSet rs, Collection<FieldMapping> fields, T obj) throws SQLException {
             for (FieldMapping idf : fields) {
-                Object value = FieldValueExtractor.getValue(rs, idf.getColumnName(), idf.getEntityFiled().getType());
+                Object value = FieldValueExtractor.getValue(rs, idf.getColumn(), idf.getEntityFiled().getType());
                 idf.getEntityFiled().setValue(obj, value);
             }
         }

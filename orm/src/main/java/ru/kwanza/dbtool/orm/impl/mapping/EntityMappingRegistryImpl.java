@@ -232,7 +232,7 @@ public class EntityMappingRegistryImpl implements IEntityMappingRegistry {
             fieldMappingsByEntityName.put(getEntityName(entityClass), fieldMappings);
         }
 
-        registerColumnName(entityClass, fieldMapping.getColumnName());
+        registerColumnName(entityClass, fieldMapping.getColumn());
         addFieldMappingByPropertyName(entityClass, fieldMapping);
 
         fieldMappings.add(fieldMapping);
@@ -282,7 +282,7 @@ public class EntityMappingRegistryImpl implements IEntityMappingRegistry {
             fieldMappingByPropertyNameEntityName.put(getEntityName(entityClass), fieldMappingByPropertyName);
         }
 
-        final String propertyName = fieldMapping.getPropertyName();
+        final String propertyName = fieldMapping.getName();
 
         if (fieldMappingByPropertyName.containsKey(propertyName)) {
             throw new RuntimeException("Duplicate property name '" + propertyName + "' in class " + entityClass);
@@ -299,7 +299,7 @@ public class EntityMappingRegistryImpl implements IEntityMappingRegistry {
             fetchMappingByPropertyNameEntityName.put(getEntityName(entityClass), fetchMappingByPropertyName);
         }
 
-        final String propertyName = fetchMapping.getPropertyName();
+        final String propertyName = fetchMapping.getName();
 
         if (fetchMappingByPropertyName.containsKey(propertyName)) {
             throw new RuntimeException("Duplicate property name '" + propertyName + "' in class " + entityClass);
