@@ -130,8 +130,48 @@ public class EntityMappingRegistryImpl implements IEntityMappingRegistry {
 
             if (annotatedElement.isAnnotationPresent(ManyToOne.class)) {
                 final ManyToOne manyToOne = annotatedElement.getAnnotation(ManyToOne.class);
-                final EntityField propertyField = getFetchPropertyField(entityClass, manyToOne.property());
-                final FetchMapping fetchMapping = createFetchMapping(annotatedElement, propertyField);
+                final FieldMapping propertyMapping = getPropertyFieldMapping(entityClass, manyToOne.property());
+                FieldMapping relationPropertyMapping = null;
+                EntityField field = propertyMapping.getEntityFiled();
+                if (propertyMapping != null &&
+                        entityNameByEntityClass.containsKey(field.getType())) {
+                    relationPropertyMapping = idFieldMappingsByEntityClass.get(field.getType()).iterator().next();
+
+                }
+                final FetchMapping fetchMapping = createFetchMapping(annotatedElement,
+                        propertyMapping, relationPropertyMapping);
+                addFetchMapping(entityClass, fetchMapping);
+            } else if (annotatedElement.isAnnotationPresent(OneToMany.class)) {
+                final OneToMany oneToMany = annotatedElement.getAnnotation(OneToMany.class);
+                final FieldMapping propertyMapping = idFieldMappingsByEntityClass.get(entityClass).iterator().next();
+                Class type = propertyMapping.getEntityFiled().getType();
+                if (Collection.class.isAssignableFrom(type)) {
+                    type = oneToMany.relationClass();
+                    if (type == Object.class) {
+                        throw new RuntimeException("Relation @OneToMany in  "
+                                + entityClass.getName() + "." + getPropertyName(annotatedElement)
+                                + " must have relativeClass() specified!");
+                    }
+                }
+                final FieldMapping relationPropertyMapping = getPropertyFieldMapping(type, oneToMany.relationProperty());
+                final FetchMapping fetchMapping = createFetchMapping(annotatedElement,
+                        propertyMapping, relationPropertyMapping);
+                addFetchMapping(entityClass, fetchMapping);
+            }  else if (annotatedElement.isAnnotationPresent(Association.class)) {
+                final Association association = annotatedElement.getAnnotation(Association.class);
+                final FieldMapping propertyMapping = getPropertyFieldMapping(entityClass,association.property());
+                Class type = propertyMapping.getEntityFiled().getType();
+                if (Collection.class.isAssignableFrom(type)) {
+                    type = association.relationClass();
+                    if (type == Object.class) {
+                        throw new RuntimeException("Relation @Association in  "
+                                + entityClass.getName() + "." + getPropertyName(annotatedElement)
+                                + " must have relativeClass() specified!");
+                    }
+                }
+                final FieldMapping relationPropertyMapping = getPropertyFieldMapping(type, association.relationProperty());
+                final FetchMapping fetchMapping = createFetchMapping(annotatedElement,
+                        propertyMapping, relationPropertyMapping);
                 addFetchMapping(entityClass, fetchMapping);
             }
         }
@@ -141,10 +181,9 @@ public class EntityMappingRegistryImpl implements IEntityMappingRegistry {
         return annotatedElement instanceof Member && Modifier.isTransient(((Member) annotatedElement).getModifiers());
     }
 
-    private EntityField getFetchPropertyField(Class entityClass, String fetchedPropertyName) {
+    private FieldMapping getPropertyFieldMapping(Class entityClass, String fetchedPropertyName) {
         final Map<String, FieldMapping> fieldMappingByPropertyName = fieldMappingByPropertyNameEntityClass.get(entityClass);
-        final FieldMapping fieldMapping = fieldMappingByPropertyName != null ? fieldMappingByPropertyName.get(fetchedPropertyName) : null;
-        return fieldMapping != null ? fieldMapping.getEntityFiled() : null;
+        return fieldMappingByPropertyName != null ? fieldMappingByPropertyName.get(fetchedPropertyName) : null;
     }
 
     @SuppressWarnings("unchecked")

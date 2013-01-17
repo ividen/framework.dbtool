@@ -4,19 +4,29 @@ package ru.kwanza.dbtool.orm.impl.mapping;
  * @author Kiryl Karatsetski
  */
 public class FetchMapping {
-    private String propertyName;
-
-    private EntityField propertyField;
+    private FieldMapping propertyFieldMapping;
+    private FieldMapping relationFieldMapping;
     private EntityField fetchField;
 
-    FetchMapping(String propertyName, EntityField propertyField, EntityField fetchField) {
-        this.propertyName = propertyName;
-        this.propertyField = propertyField;
+
+    FetchMapping(FieldMapping propertyFieldMapping,
+                 FieldMapping relationFieldMapping,
+                 EntityField fetchField) {
+        this.propertyFieldMapping = propertyFieldMapping;
+        this.relationFieldMapping = relationFieldMapping;
         this.fetchField = fetchField;
     }
 
+    public String getRelationPropertyName() {
+        return relationFieldMapping.getPropertyName();
+    }
+
+    public EntityField getRelationEntityField() {
+        return relationFieldMapping.getEntityFiled();
+    }
+
     public EntityField getPropertyField() {
-        return propertyField;
+        return propertyFieldMapping.getEntityFiled();
     }
 
     public EntityField getFetchField() {
@@ -24,16 +34,15 @@ public class FetchMapping {
     }
 
     public String getPropertyName() {
-        return propertyName;
+        return propertyFieldMapping.getPropertyName();
     }
 
     @Override
     public String toString() {
         final StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("FetchMapping{");
-        stringBuilder.append("property='").append(propertyName).append('\'');
-        stringBuilder.append(", propertyField=").append(propertyField != null ? propertyField.getClass() : null);
-        stringBuilder.append(", fetchField=").append(fetchField != null ? fetchField.getClass() : null);
+        stringBuilder.append("property='").append(getPropertyName()).append('\'');
+        stringBuilder.append("relationProperty='").append(getRelationEntityField()).append('\'');
         stringBuilder.append('}');
         return stringBuilder.toString();
     }
