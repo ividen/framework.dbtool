@@ -15,14 +15,13 @@ public class FieldImpl extends EntityField {
     private Field field;
     private String name;
 
-    public static EntityField create(String name,Field field) {
+    public static EntityField create(Field field) {
         field.setAccessible(true);
-        return new FieldImpl(name,field);
+        return new FieldImpl(field);
     }
 
-    FieldImpl(String name,Field field) {
+    FieldImpl(Field field) {
         this.field = field;
-        this.name = name;
     }
 
     @Override
@@ -48,10 +47,5 @@ public class FieldImpl extends EntityField {
     @Override
     public Class getType() {
         return field.getType();
-    }
-
-    @Override
-    public String getName() {
-        return name;
     }
 }

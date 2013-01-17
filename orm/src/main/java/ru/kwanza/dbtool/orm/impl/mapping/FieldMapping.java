@@ -4,7 +4,6 @@ package ru.kwanza.dbtool.orm.impl.mapping;
  * @author Kiryl Karatsetski
  */
 public class FieldMapping {
-
     private String propertyName;
     private String columnName;
     public int type;

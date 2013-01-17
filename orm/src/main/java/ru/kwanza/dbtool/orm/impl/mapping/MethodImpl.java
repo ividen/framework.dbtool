@@ -14,16 +14,14 @@ public class MethodImpl extends EntityField {
 
     private Method getter;
     private Method setter;
-    private String name;
 
-    public static EntityField create(String name,Method getMethod, Method setMethod) {
-        return new MethodImpl(name,getMethod, setMethod);
+    public static EntityField create(Method getMethod, Method setMethod) {
+        return new MethodImpl(getMethod, setMethod);
     }
 
-    MethodImpl(String name, Method getter, Method setter) {
+    MethodImpl(Method getter, Method setter) {
         this.getter = getter;
         this.setter = setter;
-        this.name = name;
     }
 
     @Override
@@ -49,10 +47,5 @@ public class MethodImpl extends EntityField {
     @Override
     public Class getType() {
         return getter.getReturnType();
-    }
-
-    @Override
-    public String getName() {
-        return name;
     }
 }
