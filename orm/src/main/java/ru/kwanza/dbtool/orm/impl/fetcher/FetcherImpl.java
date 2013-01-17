@@ -97,7 +97,7 @@ public class FetcherImpl implements IFetcher {
 
             FetchMapping fm = registry.getFetchMappingByPropertyName(entityClass, propertyName);
             if (fm == null) {
-                throw new IllegalArgumentException("Wrong relation name! Fetch field mapping not found!");
+                throw new IllegalArgumentException("Wrong relation name! ManyToOne field mapping not found!");
             }
 
             RelationKey relationKey = constructRelation(entityClass, propertyName, fm);

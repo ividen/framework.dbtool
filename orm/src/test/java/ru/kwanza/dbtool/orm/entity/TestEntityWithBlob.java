@@ -6,10 +6,10 @@ import ru.kwanza.dbtool.orm.annotations.Field;
 /**
  * @author Alexander Guzanov
  */
-@Entity(name = "TestEntityWithBlob", tableName = "test_entity")
+@Entity(name = "TestEntityWithBlob", table = "test_entity")
 public class TestEntityWithBlob extends TestEntity1 {
 
-    @Field(columnName = "entity_body")
+    @Field(column = "entity_body")
     private byte[] body;
 
     public byte[] getBody() {

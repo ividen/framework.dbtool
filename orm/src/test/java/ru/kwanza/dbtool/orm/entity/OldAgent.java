@@ -7,16 +7,16 @@ import ru.kwanza.dbtool.orm.annotations.IdField;
 /**
  * @author Alexander Guzanov
  */
-@Entity(name = "OldAgent", tableName = "agent")
+@Entity(name = "OldAgent", table = "agent")
 public class OldAgent {
 
-    @IdField(columnName = "id1")
+    @IdField(column = "id1")
     private Long id1;
 
-    @Field(columnName = "name1")
+    @Field(column = "name1")
     private String name1;
 
-    @Field(columnName = "address")
+    @Field(column = "address")
     private String address;
 
 //    public Long getId() {

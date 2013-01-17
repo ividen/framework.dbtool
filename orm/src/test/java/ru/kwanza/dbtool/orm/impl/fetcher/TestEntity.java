@@ -7,38 +7,38 @@ import java.util.Date;
 /**
  * @author Alexander Guzanov
  */
-@Entity(name = "TestEntity", tableName = "test_entity")
+@Entity(name = "TestEntity", table = "test_entity")
 public class TestEntity {
-    @IdField(columnName = "id")
+    @IdField(column = "id")
     private Long id;
-    @Field(columnName = "int_field")
+    @Field(column = "int_field")
     private Integer intField;
-    @Field(columnName = "string_field")
+    @Field(column = "string_field")
     private String stringField;
-    @Field(columnName = "date_field")
+    @Field(column = "date_field")
     private Date dateField;
-    @Field(columnName = "short_field")
+    @Field(column = "short_field")
     private Short shortField;
-    @VersionField(columnName = "version")
+    @VersionField(column = "version")
     private Long version;
 
-    @Field(columnName = "entity_aid")
+    @Field(column = "entity_aid")
     private Long entityAID;
-    @Field(columnName = "entity_bid")
+    @Field(column = "entity_bid")
     private Long entityBID;
-    @Field(columnName = "entity_cid")
+    @Field(column = "entity_cid")
     private Long entityCID;
-    @Field(columnName = "entity_did")
+    @Field(column = "entity_did")
     private Long entityDID;
 
 
-    @Fetch(propertyName = "entityAID")
+    @ManyToOne(property = "entityAID")
     private TestEntityA entityA;
-    @Fetch(propertyName = "entityBID")
+    @ManyToOne(property = "entityBID")
     private TestEntityB entityB;
-    @Fetch(propertyName = "entityCID")
+    @ManyToOne(property = "entityCID")
     private TestEntityC entityC;
-    @Fetch(propertyName = "entityDID")
+    @ManyToOne(property = "entityDID")
     private TestEntityD entityD;
 
     public TestEntity() {

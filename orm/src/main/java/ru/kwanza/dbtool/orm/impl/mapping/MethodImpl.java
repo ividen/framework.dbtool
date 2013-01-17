@@ -12,23 +12,24 @@ public class MethodImpl extends EntityField {
 
     private static final Logger log = LoggerFactory.getLogger(MethodImpl.class);
 
-    private Method getMethod;
+    private Method getter;
+    private Method setter;
+    private String name;
 
-    private Method setMethod;
-
-    public static EntityField create(Method getMethod, Method setMethod) {
-        return new MethodImpl(getMethod, setMethod);
+    public static EntityField create(String name,Method getMethod, Method setMethod) {
+        return new MethodImpl(name,getMethod, setMethod);
     }
 
-    MethodImpl(Method getMethod, Method setMethod) {
-        this.getMethod = getMethod;
-        this.setMethod = setMethod;
+    MethodImpl(String name, Method getter, Method setter) {
+        this.getter = getter;
+        this.setter = setter;
+        this.name = name;
     }
 
     @Override
     public Object getValue(Object object) {
         try {
-            return getMethod.invoke(object);
+            return getter.invoke(object);
         } catch (Exception e) {
             log.error("Error while getting value for object " + object, e);
             throw new RuntimeException(e);
@@ -38,7 +39,7 @@ public class MethodImpl extends EntityField {
     @Override
     public void setValue(Object object, Object value) {
         try {
-            setMethod.invoke(object, value);
+            setter.invoke(object, value);
         } catch (Exception e) {
             log.error("Error while setting value " + value + " for object " + object, e);
             throw new RuntimeException(e);
@@ -47,6 +48,11 @@ public class MethodImpl extends EntityField {
 
     @Override
     public Class getType() {
-        return getMethod.getReturnType();
+        return getter.getReturnType();
+    }
+
+    @Override
+    public String getName() {
+        return name;
     }
 }

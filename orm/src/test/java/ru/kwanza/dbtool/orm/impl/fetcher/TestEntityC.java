@@ -5,25 +5,25 @@ import ru.kwanza.dbtool.orm.annotations.*;
 /**
  * @author Alexander Guzanov
  */
-@Entity(name = "TestEntityC", tableName = "test_entity_c")
+@Entity(name = "TestEntityC", table = "test_entity_c")
 public class TestEntityC {
-    @IdField(columnName = "id")
+    @IdField(column = "id")
     private Long id;
-    @Field(columnName = "title")
+    @Field(column = "title")
     private String title;
-    @VersionField(columnName = "version")
+    @VersionField(column = "version")
     private Long version;
 
 
-    @Field(columnName = "entity_eid")
+    @Field(column = "entity_eid")
     private Long entityEID;
-    @Field(columnName = "entity_fid")
+    @Field(column = "entity_fid")
     private Long entityFID;
 
 
-    @Fetch(propertyName = "entityEID")
+    @ManyToOne(property = "entityEID")
     private TestEntityE entityE;
-    @Fetch(propertyName = "entityFID")
+    @ManyToOne(property = "entityFID")
     private TestEntityF entityF;
 
     public Long getId() {

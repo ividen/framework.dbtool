@@ -6,10 +6,10 @@ import ru.kwanza.dbtool.orm.annotations.Field;
 /**
  * @author Kiryl Karatsetski
  */
-@Entity(name = "Agent", tableName = "agent")
+@Entity(name = "Agent", table = "agent")
 public class Agent extends AbstractEntity {
 
-    @Field(columnName = "name")
+    @Field(column = "name")
     private String name;
 
     public Agent() {

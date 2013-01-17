@@ -7,16 +7,16 @@ import ru.kwanza.dbtool.orm.annotations.IdField;
 /**
  * @author Kiryl Karatsetski
  */
-@Entity(name = "TestEntity", tableName = "test_table")
+@Entity(name = "TestEntity", table = "test_table")
 public final class TestEntity {
 
-    @IdField(columnName = "xkey")
+    @IdField(column = "xkey")
     private Long key;
 
-    @Field(columnName = "name")
+    @Field(column = "name")
     private String name;
 
-    @Field(columnName = "version")
+    @Field(column = "version")
     private Long version;
 
     public TestEntity() {

@@ -8,7 +8,7 @@ import java.util.Collection;
 public interface IFetcher {
 
     /**
-     * Fetch relations for items. <br>
+     * ManyToOne relations for items. <br>
      * Example:  <br>
      * <code>
      *     IEntityManager em = ....   <br>

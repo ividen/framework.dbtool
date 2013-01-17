@@ -8,13 +8,13 @@ import ru.kwanza.dbtool.orm.annotations.VersionField;
 /**
  * @author Alexander Guzanov
  */
-@Entity(name="TestEntityB", tableName = "test_entity_b")
+@Entity(name="TestEntityB", table = "test_entity_b")
 public class TestEntityB {
-    @IdField(columnName = "id")
+    @IdField(column = "id")
     private Long id;
-    @Field(columnName = "title")
+    @Field(column = "title")
     private String title;
-    @VersionField(columnName = "version")
+    @VersionField(column = "version")
     private Long version;
 
     public Long getId() {

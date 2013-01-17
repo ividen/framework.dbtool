@@ -17,5 +17,5 @@ public @interface Entity {
 
     String name();
 
-    String tableName();
+    String table();
 }

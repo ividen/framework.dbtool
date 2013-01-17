@@ -9,13 +9,13 @@ import ru.kwanza.dbtool.orm.annotations.VersionField;
  * @author Alexander Guzanov
  */
 
-@Entity(name = "TestEntityG", tableName = "test_entity_g")
+@Entity(name = "TestEntityG", table = "test_entity_g")
 public class TestEntityG {
-    @IdField(columnName = "id")
+    @IdField(column = "id")
     private Long id;
-    @Field(columnName = "title")
+    @Field(column = "title")
     private String title;
-    @VersionField(columnName = "version")
+    @VersionField(column = "version")
     private Long version;
 
     public Long getId() {

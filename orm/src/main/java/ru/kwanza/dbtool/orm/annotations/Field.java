@@ -19,7 +19,7 @@ public @interface Field {
     /**
      * имя колонки в таблице
      */
-    String columnName();
+    String column();
 
     /**
      * Тип колонки в таблице. Это должна быть одна из констант в  of java.sql.Types

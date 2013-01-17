@@ -68,7 +68,7 @@ public class EntityMappingHelper {
     }
 
     public static String getEntityTableName(Entity entity, Class entityClass) {
-        final String tableName = entity.tableName();
+        final String tableName = entity.table();
         if (tableName.trim().isEmpty()) {
             return entityClass.getSimpleName().toLowerCase();
         }
@@ -84,27 +84,27 @@ public class EntityMappingHelper {
     }
 
     private static String getColumnName(Field fieldAnnotation, AnnotatedElement annotatedElement) {
-        final String columnName = fieldAnnotation.columnName();
+        final String columnName = fieldAnnotation.column();
         if (columnName.trim().isEmpty()) {
             return getPropertyName(annotatedElement);
         }
-        return fieldAnnotation.columnName();
+        return fieldAnnotation.column();
     }
 
     private static String getColumnName(IdField idFieldAnnotation, AnnotatedElement annotatedElement) {
-        final String columnName = idFieldAnnotation.columnName();
+        final String columnName = idFieldAnnotation.column();
         if (columnName.trim().isEmpty()) {
             return getPropertyName(annotatedElement);
         }
-        return idFieldAnnotation.columnName();
+        return idFieldAnnotation.column();
     }
 
     private static String getColumnName(VersionField versionFieldAnnotation, AnnotatedElement annotatedElement) {
-        final String columnName = versionFieldAnnotation.columnName();
+        final String columnName = versionFieldAnnotation.column();
         if (columnName.trim().isEmpty()) {
             return getPropertyName(annotatedElement);
         }
-        return versionFieldAnnotation.columnName();
+        return versionFieldAnnotation.column();
     }
 
     private static String getPropertyName(AnnotatedElement annotatedElement) {

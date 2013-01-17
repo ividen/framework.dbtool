@@ -8,18 +8,15 @@ import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
- * Описывает поле версию. <br>
- * Поле должно быть типа <b>java.lang.Long</b>
- *
- * @author Alexander Guzanov
+ * @author Guzanov Alexander
  */
 @Retention(RUNTIME)
 @Target({FIELD, METHOD})
-public @interface VersionField {
-
-
-    /**
-     * название колонки в базе данных
-     */
-    String column();
+public @interface Association {
+    
+    String property();
+    
+    String relationProperty();
+    
+    Class relationClass() default Object.class;
 }

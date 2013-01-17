@@ -128,9 +128,9 @@ public class EntityMappingRegistryImpl implements IEntityMappingRegistry {
                 continue;
             }
 
-            if (annotatedElement.isAnnotationPresent(Fetch.class)) {
-                final Fetch fetch = annotatedElement.getAnnotation(Fetch.class);
-                final EntityField propertyField = getFetchPropertyField(entityClass, fetch.propertyName());
+            if (annotatedElement.isAnnotationPresent(ManyToOne.class)) {
+                final ManyToOne manyToOne = annotatedElement.getAnnotation(ManyToOne.class);
+                final EntityField propertyField = getFetchPropertyField(entityClass, manyToOne.property());
                 final FetchMapping fetchMapping = createFetchMapping(annotatedElement, propertyField);
                 addFetchMapping(entityClass, fetchMapping);
             }
@@ -358,6 +358,6 @@ public class EntityMappingRegistryImpl implements IEntityMappingRegistry {
     }
 
     private static void logRegisterFetchMapping(Class entityClass, FetchMapping fetchMapping) {
-        log.trace("{}: Register Fetch Mapping {}", new Object[]{entityClass, fetchMapping});
+        log.trace("{}: Register ManyToOne Mapping {}", new Object[]{entityClass, fetchMapping});
     }
 }

@@ -20,7 +20,7 @@ public @interface IdField {
     /**
      * название колонки в базе данных
      */
-    String columnName();
+    String column();
 
     /**
      * Тип колонки. Это должна быть константа из  of java.sql.Types

@@ -6,13 +6,13 @@ import ru.kwanza.dbtool.orm.annotations.Field;
 /**
  * @author Kiryl Karatsetski
  */
-@Entity(name = "EntityWithDuplicateColumn", tableName = "entity_with_duplicate_column")
+@Entity(name = "EntityWithDuplicateColumn", table = "entity_with_duplicate_column")
 public class EntityWithDuplicateColumn {
 
-    @Field(columnName = "field")
+    @Field(column = "field")
     private int field1;
 
-    @Field(columnName = "field")
+    @Field(column = "field")
     private int field2;
 }
 

@@ -4,7 +4,6 @@ package ru.kwanza.dbtool.orm.impl.mapping;
  * @author Kiryl Karatsetski
  */
 public class FetchMapping {
-
     private String propertyName;
 
     private EntityField propertyField;
@@ -32,7 +31,7 @@ public class FetchMapping {
     public String toString() {
         final StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("FetchMapping{");
-        stringBuilder.append("propertyName='").append(propertyName).append('\'');
+        stringBuilder.append("property='").append(propertyName).append('\'');
         stringBuilder.append(", propertyField=").append(propertyField != null ? propertyField.getClass() : null);
         stringBuilder.append(", fetchField=").append(fetchField != null ? fetchField.getClass() : null);
         stringBuilder.append('}');

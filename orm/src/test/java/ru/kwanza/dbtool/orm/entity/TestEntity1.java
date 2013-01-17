@@ -7,24 +7,24 @@ import java.sql.Types;
 /**
  * @author Alexander Guzanov
  */
-@Entity(name = "TestEntity1", tableName = "test_entity")
+@Entity(name = "TestEntity1", table = "test_entity")
 public class TestEntity1 extends OldAgent {
 
-    @IdField(columnName = "id")
+    @IdField(column = "id")
     private Long id;
 
-    @Field(columnName = "name")
+    @Field(column = "name")
     private String name;
 
-    @Field(columnName = "desc", type = Types.NVARCHAR)
+    @Field(column = "desc", type = Types.NVARCHAR)
     private String description;
 
-    @VersionField(columnName = "version")
+    @VersionField(column = "version")
     private Long version = 0l;
 
     private Long counter;
 
-    @Fetch(propertyName = "agentId")
+    @ManyToOne(property = "agentId")
     private OldAgent oldAgent;
 
     public OldAgent getOldAgent() {
@@ -35,12 +35,12 @@ public class TestEntity1 extends OldAgent {
         this.oldAgent = oldAgent;
     }
 
-    @Field(columnName = "counter")
+    @Field(column = "counter")
     public Long getCounter() {
         return counter;
     }
 
-    @Field(columnName = "agent_id")
+    @Field(column = "agent_id")
     private Long agentId;
 
     public String getDescription() {

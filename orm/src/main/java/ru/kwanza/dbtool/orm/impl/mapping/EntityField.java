@@ -10,4 +10,6 @@ public abstract class EntityField {
     public abstract void setValue(Object object, Object value);
 
     public abstract Class getType();
+    
+    public abstract String getName();
 }
