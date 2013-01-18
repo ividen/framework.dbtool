@@ -1,9 +1,8 @@
 package ru.kwanza.dbtool.orm.impl.fetcher;
 
-import ru.kwanza.dbtool.orm.annotations.Entity;
-import ru.kwanza.dbtool.orm.annotations.Field;
-import ru.kwanza.dbtool.orm.annotations.IdField;
-import ru.kwanza.dbtool.orm.annotations.VersionField;
+import ru.kwanza.dbtool.orm.annotations.*;
+
+import java.util.Collection;
 
 /**
  * @author Alexander Guzanov
@@ -18,6 +17,9 @@ public class TestEntityG {
     @VersionField(column = "version")
     private Long version;
 
+    @OneToMany(relationClass = TestEntityE.class,relationProperty = "entityEID")
+    private Collection<TestEntityE> testEntities;
+
     public Long getId() {
         return id;
     }
@@ -28,5 +30,9 @@ public class TestEntityG {
 
     public Long getVersion() {
         return version;
+    }
+
+    public Collection<TestEntityE> getTestEntities() {
+        return testEntities;
     }
 }

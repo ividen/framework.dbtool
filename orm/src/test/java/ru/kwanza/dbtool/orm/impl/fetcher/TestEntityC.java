@@ -2,6 +2,8 @@ package ru.kwanza.dbtool.orm.impl.fetcher;
 
 import ru.kwanza.dbtool.orm.annotations.*;
 
+import java.util.Collection;
+
 /**
  * @author Alexander Guzanov
  */
@@ -25,6 +27,9 @@ public class TestEntityC {
     private TestEntityE entityE;
     @ManyToOne(property = "entityFID")
     private TestEntityF entityF;
+
+    @OneToMany(relationClass = TestEntity.class,relationProperty = "entityAID")
+    private Collection<TestEntity> testEntities;
 
     public Long getId() {
         return id;
@@ -52,5 +57,9 @@ public class TestEntityC {
 
     public TestEntityF getEntityF() {
         return entityF;
+    }
+
+    public Collection<TestEntity> getTestEntities() {
+        return testEntities;
     }
 }

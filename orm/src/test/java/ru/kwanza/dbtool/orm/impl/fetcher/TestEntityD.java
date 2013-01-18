@@ -17,6 +17,7 @@ public class TestEntityD {
     @VersionField(column = "version")
     private Long version;
 
+
     public Long getId() {
         return id;
     }

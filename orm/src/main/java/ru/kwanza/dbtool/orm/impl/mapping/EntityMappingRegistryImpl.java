@@ -161,66 +161,94 @@ public class EntityMappingRegistryImpl implements IEntityMappingRegistry {
             } else if (annotatedElement.isAnnotationPresent(OneToMany.class)) {
                 processOneToMany(entityClass, annotatedElement);
             } else if (annotatedElement.isAnnotationPresent(Association.class)) {
-                final Association association = annotatedElement.getAnnotation(Association.class);
-                final FieldMapping propertyMapping = getPropertyFieldMapping(entityClass, association.property());
-                Class type = propertyMapping.getEntityFiled().getType();
-                if (Collection.class.isAssignableFrom(type)) {
-                    type = association.relationClass();
-                    if (type == Object.class) {
-                        throw new RuntimeException("Relation @Association in  "
-                                + entityClass.getName() + "." + getPropertyName(annotatedElement)
-                                + " must have relativeClass() specified!");
-                    }
-                }
-                final FieldMapping relationPropertyMapping = getPropertyFieldMapping(type, association.relationProperty());
-                final FetchMapping fetchMapping = createFetchMapping(annotatedElement,
-                        propertyMapping, relationPropertyMapping);
-                addFetchMapping(entityClass, fetchMapping);
+                processAssociation(entityClass, annotatedElement);
             }
         }
     }
 
-    private void processOneToMany(Class entityClass, AnnotatedElement annotatedElement) {
-        final OneToMany oneToMany = annotatedElement.getAnnotation(OneToMany.class);
-        final FieldMapping propertyMapping = idFieldMappingsByEntityClass.get(entityClass).iterator().next();
-        Class type = propertyMapping.getEntityFiled().getType();
-        if (Collection.class.isAssignableFrom(type)) {
-            type = oneToMany.relationClass();
-            if (type == Object.class) {
-                throw new RuntimeException("Relation @OneToMany in  "
-                        + entityClass.getName() + "." + getPropertyName(annotatedElement)
-                        + " must have relativeClass() specified!");
-            }
+    private void processAssociation(final Class entityClass, AnnotatedElement annotatedElement) {
+        final Association association = annotatedElement.getAnnotation(Association.class);
+        final String name = getPropertyName(annotatedElement);
+        final FieldMapping propertyMapping = fieldMappingByPropertyNameEntityClass.get(entityClass).get(association.property());
+        final EntityField fetchField = createEntityField(annotatedElement);
+        final Class relationClass = Collection.class.isAssignableFrom(fetchField.getType()) ?
+                association.relationClass() : fetchField.getType();
+        if (relationClass == Object.class) {
+            throw new RuntimeException("Relation @OneToMany in  "
+                    + entityClass.getName() + "." + name
+                    + " must have relativeClass() specified!");
         }
-        final FieldMapping relationPropertyMapping = getPropertyFieldMapping(type, oneToMany.relationProperty());
-        final FetchMapping fetchMapping = createFetchMapping(annotatedElement,
-                propertyMapping, relationPropertyMapping);
-        addFetchMapping(entityClass, fetchMapping);
+
+        if (entityNameByEntityClass.containsKey(relationClass)) {
+            FieldMapping relationPropertyMapping = getPropertyFieldMapping(relationClass, association.relationProperty());
+            final FetchMapping fetchMapping = new FetchMapping(name, relationClass,
+                    propertyMapping, relationPropertyMapping, fetchField);
+            addFetchMapping(entityClass, fetchMapping);
+        } else {
+            waitForEntity(relationClass, new WaitingCallback() {
+                public void registered(Class type) {
+                    FieldMapping relationPropertyMapping = getPropertyFieldMapping(relationClass, association.relationProperty());
+                    final FetchMapping fetchMapping = new FetchMapping(name, relationClass,
+                            propertyMapping, relationPropertyMapping, fetchField);
+                    addFetchMapping(entityClass, fetchMapping);
+                }
+            });
+        }
+    }
+
+    private void processOneToMany(final Class entityClass, final AnnotatedElement annotatedElement) {
+        final OneToMany oneToMany = annotatedElement.getAnnotation(OneToMany.class);
+        final String name = getPropertyName(annotatedElement);
+        final FieldMapping propertyMapping = idFieldMappingsByEntityClass.get(entityClass).iterator().next();
+        final EntityField fetchField = createEntityField(annotatedElement);
+        final Class relationClass = Collection.class.isAssignableFrom(fetchField.getType()) ?
+                oneToMany.relationClass() : fetchField.getType();
+        if (relationClass == Object.class) {
+            throw new RuntimeException("Relation @OneToMany in  "
+                    + entityClass.getName() + "." + name
+                    + " must have relativeClass() specified!");
+        }
+
+        if (entityNameByEntityClass.containsKey(relationClass)) {
+            FieldMapping relationPropertyMapping = getPropertyFieldMapping(relationClass, oneToMany.relationProperty());
+            final FetchMapping fetchMapping = new FetchMapping(name, relationClass,
+                    propertyMapping, relationPropertyMapping, fetchField);
+            addFetchMapping(entityClass, fetchMapping);
+        } else {
+            waitForEntity(relationClass, new WaitingCallback() {
+                public void registered(Class type) {
+                    FieldMapping relationPropertyMapping = getPropertyFieldMapping(relationClass, oneToMany.relationProperty());
+                    final FetchMapping fetchMapping = new FetchMapping(name, relationClass,
+                            propertyMapping, relationPropertyMapping, fetchField);
+                    addFetchMapping(entityClass, fetchMapping);
+                }
+            });
+        }
     }
 
     private void processManyToOne(final Class entityClass, final AnnotatedElement annotatedElement) {
         final ManyToOne manyToOne = annotatedElement.getAnnotation(ManyToOne.class);
         final String name = getPropertyName(annotatedElement);
-        final FieldMapping propertyMapping = getPropertyFieldMapping(entityClass, manyToOne.property());     
+        final FieldMapping propertyMapping = getPropertyFieldMapping(entityClass, manyToOne.property());
         if (propertyMapping == null) {
             throw new RuntimeException("Not fount property "
                     + manyToOne.property() + "for @ManyToOne "
                     + entityClass.getName() + "." + getPropertyName(annotatedElement) + "!");
         }
-       
+
         final EntityField fetchField = createEntityField(annotatedElement);
         final Class relationClass = fetchField.getType();
         if (entityNameByEntityClass.containsKey(relationClass)) {
             final FieldMapping relationPropertyMapping = idFieldMappingsByEntityClass.get(relationClass).iterator().next();
-            final FetchMapping fetchMapping = new FetchMapping(name,relationClass,
-                    propertyMapping,relationPropertyMapping,fetchField);
+            final FetchMapping fetchMapping = new FetchMapping(name, relationClass,
+                    propertyMapping, relationPropertyMapping, fetchField);
             addFetchMapping(entityClass, fetchMapping);
         } else {
             waitForEntity(relationClass, new WaitingCallback() {
                 public void registered(Class type) {
                     final FieldMapping relationPropertyMapping = idFieldMappingsByEntityClass.get(relationClass).iterator().next();
-                    final FetchMapping fetchMapping = new FetchMapping(name,relationClass,
-                            propertyMapping,relationPropertyMapping,fetchField) ;
+                    final FetchMapping fetchMapping = new FetchMapping(name, relationClass,
+                            propertyMapping, relationPropertyMapping, fetchField);
                     addFetchMapping(entityClass, fetchMapping);
                 }
             });
