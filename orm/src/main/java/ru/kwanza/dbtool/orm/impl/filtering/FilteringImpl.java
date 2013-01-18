@@ -59,6 +59,18 @@ public class FilteringImpl<T> implements IFiltering<T> {
         return createQuery().selectMap(propertyName);
     }
 
+    public void selectList(List<T> result) {
+        createQuery().selectList(result);
+    }
+
+    public <F> void selectMapList(String propertyName, Map<F, List<T>> result) {
+        createQuery().selectMapList(propertyName,result);
+    }
+
+    public <F> void selectMap(String propertyName, Map<F, T> result) {
+        createQuery().selectMap(propertyName,result);
+    }
+
     protected IQuery<T> createQuery() {
         IQueryBuilder<T> queryBuilder = em.queryBuilder(entityClass);
         if (maxSize != null) {
