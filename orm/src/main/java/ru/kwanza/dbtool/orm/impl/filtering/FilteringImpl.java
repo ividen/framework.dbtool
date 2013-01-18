@@ -63,8 +63,8 @@ public class FilteringImpl<T> implements IFiltering<T> {
         createQuery().selectList(result);
     }
 
-    public <F> void selectMapList(String propertyName, Map<F, List<T>> result) {
-        createQuery().selectMapList(propertyName,result);
+    public <F> void selectMapList(String propertyName, Map<F, List<T>> result,ListProducer<T> listProducer) {
+        createQuery().selectMapList(propertyName,result,listProducer);
     }
 
     public <F> void selectMap(String propertyName, Map<F, T> result) {

@@ -1,16 +1,11 @@
 package ru.kwanza.dbtool.orm.impl.fetcher;
 
-import ru.kwanza.dbtool.orm.api.Condition;
-import ru.kwanza.dbtool.orm.api.IEntityManager;
-import ru.kwanza.dbtool.orm.api.IFetcher;
-import ru.kwanza.dbtool.orm.api.IQueryBuilder;
+import ru.kwanza.dbtool.orm.api.*;
 import ru.kwanza.dbtool.orm.impl.mapping.FetchMapping;
 import ru.kwanza.dbtool.orm.impl.mapping.FieldMapping;
 import ru.kwanza.dbtool.orm.impl.mapping.IEntityMappingRegistry;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -50,9 +45,7 @@ public class FetcherImpl implements IFetcher {
         for (Map.Entry<RelationKey, PathValue> entry : value.getRelationKeys().entrySet()) {
             RelationKey relationKey = entry.getKey();
             RelationValue relationValue = relationCache.get(relationKey);
-            Map<Object, Object> map = relationValue.getFetchQuery()
-                    .setParameter(1, relationValue.getRelationIds(items))
-                    .selectMap(relationValue.getIDGroupingField());
+            Map<Object, Object> map = queryRelation(items, relationValue);
             if (!map.isEmpty()) {
                 results.put(relationKey, map);
                 if (entry.getValue() != null) {
@@ -67,14 +60,63 @@ public class FetcherImpl implements IFetcher {
                 Map realtion = entry.getValue();
                 RelationValue relationValue = relationCache.get(key);
                 FetchMapping fetchMapping = relationValue.getFetchMapping();
-                Object relationIDValue = fetchMapping.getPropertyField().getValue(object);
-                if (relationIDValue != null) {
-                    Object relationObjValue = realtion.get(relationIDValue);
-                    if (relationObjValue != null) {
-                        fetchMapping.getFetchField().setValue(object, relationObjValue);
+                if(object instanceof Collection){
+                    Collection c = (Collection) object;
+                    for (Object o : c) {
+                        Object relationIDValue = fetchMapping.getPropertyField().getValue(o);
+                        if (relationIDValue != null) {
+                            Object relationObjValue = realtion.get(relationIDValue);
+                            if (relationObjValue != null) {
+                                fetchMapping.getFetchField().setValue(o, relationObjValue);
+                            }
+                        }
+                    }
+                }else{
+                    Object relationIDValue = fetchMapping.getPropertyField().getValue(object);
+                    if (relationIDValue != null) {
+                        Object relationObjValue = realtion.get(relationIDValue);
+                        if (relationObjValue != null) {
+                            fetchMapping.getFetchField().setValue(object, relationObjValue);
+                        }
                     }
                 }
+
             }
+        }
+    }
+
+    private <T> Map queryRelation(Collection<T> items, RelationValue relationValue) {
+        final FetchMapping fm = relationValue.getFetchMapping();
+        final Class type = fm.getFetchField().getType();
+        if (Collection.class.isAssignableFrom(type)) {
+            Map<Object, List<T>> result = new HashMap<Object, List<T>>();
+            ListProducer<T> producer;
+            if (Collection.class == type || LinkedList.class == type || List.class == type) {
+                producer = ListProducer.LINKED_LIST;
+            } else if (ArrayList.class == type) {
+                producer = ListProducer.ARRAY_LIST;
+            } else {
+                producer = new ListProducer<T>() {
+                    @Override
+                    public List<T> create() {
+                        try {
+                            return (List<T>) type.newInstance();
+                        } catch (Exception e) {
+                            throw new RuntimeException("Can't instantiate list for relation " + fm.toString());
+                        }
+                    }
+                };
+            }
+            relationValue.getFetchQuery()
+                    .setParameter(1, relationValue.getRelationIds(items))
+                    .selectMapList(relationValue.getIDGroupingField(), result, producer);
+            return result;
+        } else {
+            Map<Object, T> result = new HashMap<Object, T>();
+            relationValue.getFetchQuery()
+                    .setParameter(1, relationValue.getRelationIds(items))
+                    .selectMap(relationValue.getIDGroupingField(), result);
+            return result;
         }
     }
 
@@ -97,7 +139,7 @@ public class FetcherImpl implements IFetcher {
 
             FetchMapping fm = registry.getFetchMappingByPropertyName(entityClass, propertyName);
             if (fm == null) {
-                throw new IllegalArgumentException("Wrong relation name! ManyToOne field mapping not found!");
+                throw new IllegalArgumentException("Wrong relation name! ManyToOne/OneToMany/Association field mapping not found!");
             }
 
             RelationKey relationKey = constructRelation(entityClass, propertyName, fm);
@@ -105,7 +147,7 @@ public class FetcherImpl implements IFetcher {
             if (e.getValue() != null) {
                 Map<String, Object> subScan = (Map<String, Object>) e.getValue();
                 PathValue nextValue = new PathValue();
-                constructPath(fm.getFetchField().getType(), nextValue, subScan);
+                constructPath(fm.getRelationClass(), nextValue, subScan);
                 relationKeys.put(relationKey, nextValue);
             } else {
                 relationKeys.put(relationKey, null);

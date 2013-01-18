@@ -27,7 +27,7 @@ public class SelectUtil {
             public void add(Collection<T> object) {
                 result.addAll(object);
             }
-        }, getInputParams(params));
+        }, params);
         return result;
     }
 
@@ -42,7 +42,7 @@ public class SelectUtil {
             public void add(Collection<T> object) {
                 result.addAll(object);
             }
-        }, getInputParams(inValues));
+        }, inValues);
 
         return result;
     }
@@ -66,7 +66,7 @@ public class SelectUtil {
                             vs.add(kv.getValue());
                         }
                     }
-                }, getInputParams(params));
+                }, params);
         return result;
     }
 
@@ -86,7 +86,7 @@ public class SelectUtil {
                             kv.put(kv0.getValue().getKey(), kv0.getValue().getValue());
                         }
                     }
-                }, getInputParams(params));
+                }, params);
         return result;
     }
 
@@ -103,7 +103,7 @@ public class SelectUtil {
                             result.put(kv.getKey(), kv.getValue());
                         }
                     }
-                }, getInputParams(params));
+                }, params);
         return result;
     }
 
@@ -119,9 +119,9 @@ public class SelectUtil {
                 }
 
                 builder.append(']');
-            } else if(value instanceof SqlParameterValue){
-                builder.append(((SqlParameterValue)value).getValue());
-            }else {
+            } else if (value instanceof SqlParameterValue) {
+                builder.append(((SqlParameterValue) value).getValue());
+            } else {
                 builder.append(value);
             }
 
@@ -155,7 +155,11 @@ public class SelectUtil {
             if (lastListParam == -1) {
                 for (int j = 0; j < inValues.length; j++) {
                     Object p = inValues[j];
-                    if (p instanceof List) {
+                    if (p instanceof Collection) {
+
+                        if (!(p instanceof List)) {
+                            p = inValues[j] = new ArrayList((Collection) p);
+                        }
                         if (lastListParam == -1) {
                             lastListParam = j;
                         }
@@ -201,19 +205,5 @@ public class SelectUtil {
             mustContinue = true;
         }
         return mustContinue;
-    }
-
-    private static Object[] getInputParams(Object[] params) {
-        Object[] result = new Object[params.length];
-        for (int i = 0; i < params.length; i++) {
-            Object obj = params[i];
-            if ((obj instanceof Collection) && !(obj instanceof List)) {
-                result[i] = new ArrayList((Collection) obj);
-            } else {
-                result[i] = obj;
-            }
-        }
-
-        return result;
     }
 }

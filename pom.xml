@@ -190,6 +190,17 @@
                 </plugins>
             </build>
         </profile>
+        <profile>
+            <id>external-build-path</id>
+            <activation>
+                <property>
+                    <name>external.build.path</name>
+                </property>
+            </activation>
+            <build>
+                <directory>${external.build.path}/${project.artifactId}</directory>
+            </build>
+        </profile>
     </profiles>
 
     <dependencyManagement>

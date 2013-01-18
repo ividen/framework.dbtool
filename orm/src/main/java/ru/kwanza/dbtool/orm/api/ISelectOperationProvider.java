@@ -17,7 +17,7 @@ public interface ISelectOperationProvider<T> {
 
     void selectList(List<T> result);
 
-    <F> void selectMapList(String propertyName, Map<F, List<T>> result);
+    <F> void selectMapList(String propertyName, Map<F, List<T>> result, ListProducer<T> listProducer);
 
     <F> void selectMap(String propertyName, Map<F, T> result);
 

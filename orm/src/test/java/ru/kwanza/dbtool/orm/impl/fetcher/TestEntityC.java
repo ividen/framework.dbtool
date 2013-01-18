@@ -28,7 +28,7 @@ public class TestEntityC {
     @ManyToOne(property = "entityFID")
     private TestEntityF entityF;
 
-    @OneToMany(relationClass = TestEntity.class,relationProperty = "entityAID")
+    @OneToMany(relationClass = TestEntity.class,relationProperty = "entityCID")
     private Collection<TestEntity> testEntities;
 
     public Long getId() {

@@ -13,7 +13,7 @@ public class FieldImpl extends EntityField {
     private static final Logger log = LoggerFactory.getLogger(FieldImpl.class);
 
     private Field field;
-    private String name;
+
 
     public static EntityField create(Field field) {
         field.setAccessible(true);

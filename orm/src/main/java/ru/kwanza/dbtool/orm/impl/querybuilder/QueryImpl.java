@@ -10,6 +10,7 @@ import ru.kwanza.dbtool.core.SqlCollectionParameterValue;
 import ru.kwanza.dbtool.core.util.FieldValueExtractor;
 import ru.kwanza.dbtool.core.util.SelectUtil;
 import ru.kwanza.dbtool.orm.api.IQuery;
+import ru.kwanza.dbtool.orm.api.ListProducer;
 import ru.kwanza.dbtool.orm.impl.mapping.EntityField;
 import ru.kwanza.dbtool.orm.impl.mapping.FieldMapping;
 import ru.kwanza.dbtool.orm.impl.mapping.IEntityMappingRegistry;
@@ -95,7 +96,7 @@ public class QueryImpl<T> implements IQuery<T> {
 
     }
 
-    public <F> void selectMapList(String propertyName, final Map<F, List<T>> result) {
+    public <F> void selectMapList(String propertyName, final Map<F, List<T>> result, final ListProducer<T> listProducer) {
         FieldMapping fieldMapping = registry.getFieldMappingByPropertyName(entityClass, propertyName);
         if (fieldMapping == null) {
             throw new IllegalArgumentException("Unknown field name!");
@@ -107,7 +108,7 @@ public class QueryImpl<T> implements IQuery<T> {
                         for (KeyValue<F, T> kv : objects) {
                             List<T> vs = result.get(kv.getKey());
                             if (vs == null) {
-                                vs = new ArrayList<T>();
+                                vs = listProducer.create();
                                 result.put(kv.getKey(), vs);
                             }
                             vs.add(kv.getValue());
@@ -141,7 +142,7 @@ public class QueryImpl<T> implements IQuery<T> {
 
     public Map<Object, List<T>> selectMapList(String propertyName) {
         final Map<Object, List<T>> result = new LinkedHashMap<Object, List<T>>();
-        selectMapList(propertyName, result);
+        selectMapList(propertyName, result, ListProducer.LINKED_LIST);
         return result;
     }
 

@@ -181,6 +181,11 @@ public class EntityMappingRegistryImpl implements IEntityMappingRegistry {
 
         if (entityNameByEntityClass.containsKey(relationClass)) {
             FieldMapping relationPropertyMapping = getPropertyFieldMapping(relationClass, association.relationProperty());
+            if (relationPropertyMapping == null) {
+                throw new RuntimeException("Not found relational property mapping "
+                        +relationClass.getName()+"."+ association.relationProperty() +  " for @Association "
+                        + entityClass.getName() + "." + name + "!");
+            }
             final FetchMapping fetchMapping = new FetchMapping(name, relationClass,
                     propertyMapping, relationPropertyMapping, fetchField);
             addFetchMapping(entityClass, fetchMapping);
@@ -188,6 +193,11 @@ public class EntityMappingRegistryImpl implements IEntityMappingRegistry {
             waitForEntity(relationClass, new WaitingCallback() {
                 public void registered(Class type) {
                     FieldMapping relationPropertyMapping = getPropertyFieldMapping(relationClass, association.relationProperty());
+                    if (relationPropertyMapping == null) {
+                        throw new RuntimeException("Not found relational property mapping "
+                                +relationClass.getName()+"."+ association.relationProperty() +  " for @Association "
+                                + entityClass.getName() + "." + name + "!");
+                    }
                     final FetchMapping fetchMapping = new FetchMapping(name, relationClass,
                             propertyMapping, relationPropertyMapping, fetchField);
                     addFetchMapping(entityClass, fetchMapping);
@@ -211,6 +221,11 @@ public class EntityMappingRegistryImpl implements IEntityMappingRegistry {
 
         if (entityNameByEntityClass.containsKey(relationClass)) {
             FieldMapping relationPropertyMapping = getPropertyFieldMapping(relationClass, oneToMany.relationProperty());
+            if (relationPropertyMapping == null) {
+                throw new RuntimeException("Not found relational property mapping "
+                        +relationClass.getName()+"."+ oneToMany.relationProperty() +  " for @OneToMany "
+                        + entityClass.getName() + "." + name + "!");
+            }
             final FetchMapping fetchMapping = new FetchMapping(name, relationClass,
                     propertyMapping, relationPropertyMapping, fetchField);
             addFetchMapping(entityClass, fetchMapping);
@@ -218,6 +233,11 @@ public class EntityMappingRegistryImpl implements IEntityMappingRegistry {
             waitForEntity(relationClass, new WaitingCallback() {
                 public void registered(Class type) {
                     FieldMapping relationPropertyMapping = getPropertyFieldMapping(relationClass, oneToMany.relationProperty());
+                    if (relationPropertyMapping == null) {
+                        throw new RuntimeException("Not found relational property mapping "
+                                +relationClass.getName()+"."+ oneToMany.relationProperty() + " for @OneToMany "
+                                + entityClass.getName() + "." + name + "!");
+                    }
                     final FetchMapping fetchMapping = new FetchMapping(name, relationClass,
                             propertyMapping, relationPropertyMapping, fetchField);
                     addFetchMapping(entityClass, fetchMapping);
@@ -231,7 +251,7 @@ public class EntityMappingRegistryImpl implements IEntityMappingRegistry {
         final String name = getPropertyName(annotatedElement);
         final FieldMapping propertyMapping = getPropertyFieldMapping(entityClass, manyToOne.property());
         if (propertyMapping == null) {
-            throw new RuntimeException("Not fount property "
+            throw new RuntimeException("Not found property "
                     + manyToOne.property() + "for @ManyToOne "
                     + entityClass.getName() + "." + getPropertyName(annotatedElement) + "!");
         }

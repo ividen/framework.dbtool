@@ -159,12 +159,30 @@ public abstract class TestFetcherIml extends AbstractJUnit4SpringContextTests {
         em.getFetcher().fetch(TestEntity.class, testEntities, "entityA,entityB,entityC{entityF,entityE{entityG}},entityD");
     }
 
+
     @Test
     @ExpectedException(IllegalArgumentException.class)
     public void testFetch7() {
         List<TestEntityC> testEntities = em.queryBuilder(TestEntityC.class).create().selectList();
         em.getFetcher().fetch(TestEntityC.class, testEntities, "entityF,entityE{entityG},entityA");
 
+    }
+
+    @Test
+    public void testFetch8() {
+        List<TestEntityG> testEntities = em.queryBuilder(TestEntityG.class)
+                .create().selectList();
+        em.getFetcher().fetch(TestEntityG.class, testEntities, "entitiesE{entitiesC{testEntities{entityA,entityB,entityD},entityF}}");
+        long count = 0;
+        for (TestEntityG g : testEntities) {
+            for (TestEntityE e : g.getEntitiesE()) {
+                for (TestEntityC c : e.getEntitiesC()) {
+                    count += c.getTestEntities().size();
+                }
+            }
+
+        }
+        Assert.assertEquals(count, 3000);
     }
 
 }

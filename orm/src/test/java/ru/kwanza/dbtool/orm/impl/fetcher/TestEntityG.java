@@ -17,8 +17,8 @@ public class TestEntityG {
     @VersionField(column = "version")
     private Long version;
 
-    @OneToMany(relationClass = TestEntityE.class,relationProperty = "entityEID")
-    private Collection<TestEntityE> testEntities;
+    @OneToMany(relationClass = TestEntityE.class,relationProperty = "entityGID")
+    private Collection<TestEntityE> entitiesE;
 
     public Long getId() {
         return id;
@@ -32,7 +32,7 @@ public class TestEntityG {
         return version;
     }
 
-    public Collection<TestEntityE> getTestEntities() {
-        return testEntities;
+    public Collection<TestEntityE> getEntitiesE() {
+        return entitiesE;
     }
 }
