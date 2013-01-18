@@ -1,5 +1,6 @@
 package ru.kwanza.dbtool.orm.impl.mapping;
 
+import ru.kwanza.dbtool.orm.entity.OldAgent;
 import ru.kwanza.dbtool.orm.entity.TestEntity1;
 import ru.kwanza.dbtool.orm.impl.fetcher.*;
 
@@ -18,7 +19,9 @@ public class MappingTest {
         mappingRegistry.registerEntityClass(TestEntityC.class);
         mappingRegistry.registerEntityClass(TestEntityD.class);
         mappingRegistry.registerEntityClass(TestEntityF.class);
+        mappingRegistry.registerEntityClass(TestEntityE.class);
         mappingRegistry.registerEntityClass(TestEntityG.class);
+        mappingRegistry.registerEntityClass(OldAgent.class);
 
         System.out.println();
     }

@@ -5,16 +5,18 @@ package ru.kwanza.dbtool.orm.impl.mapping;
  */
 public class FetchMapping {
     private String name;
+    private Class relationClass;
     private FieldMapping propertyFieldMapping;
     private FieldMapping relationFieldMapping;
     private EntityField fetchField;
 
-
     FetchMapping(String name,
+                 Class relationClass,
                  FieldMapping propertyFieldMapping,
                  FieldMapping relationFieldMapping,
                  EntityField fetchField) {
         this.name = name;
+        this.relationClass = relationClass;
         this.propertyFieldMapping = propertyFieldMapping;
         this.relationFieldMapping = relationFieldMapping;
         this.fetchField = fetchField;
@@ -50,7 +52,7 @@ public class FetchMapping {
         stringBuilder.append("FetchMapping{");
         stringBuilder.append("name='").append(getName()).append('\'');
         stringBuilder.append("property='").append(getPropertyName()).append('\'');
-        stringBuilder.append("relationProperty='").append(getRelationEntityField()).append('\'');
+        stringBuilder.append("relationProperty='").append(getRelationPropertyName()).append('\'');
         stringBuilder.append('}');
         return stringBuilder.toString();
     }

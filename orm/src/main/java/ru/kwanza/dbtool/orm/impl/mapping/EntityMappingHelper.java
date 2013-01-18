@@ -51,11 +51,12 @@ public class EntityMappingHelper {
     public static FetchMapping createFetchMapping(AnnotatedElement annotatedElement,
                                                   FieldMapping propertyMapping,
                                                   FieldMapping relationPropertyMapping) {
-        return new FetchMapping(getPropertyName(annotatedElement),
+        return new FetchMapping(getPropertyName(annotatedElement),null,
                 propertyMapping, relationPropertyMapping, createEntityField(annotatedElement));
     }
 
-    private static EntityField createEntityField(AnnotatedElement annotatedElement) {
+
+    public static EntityField createEntityField(AnnotatedElement annotatedElement) {
         EntityField entityField;
         if (annotatedElement instanceof java.lang.reflect.Field) {
             entityField = FieldImpl.create((java.lang.reflect.Field) annotatedElement);
