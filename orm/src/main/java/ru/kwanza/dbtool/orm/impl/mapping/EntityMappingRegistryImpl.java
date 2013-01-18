@@ -180,30 +180,25 @@ public class EntityMappingRegistryImpl implements IEntityMappingRegistry {
         }
 
         if (entityNameByEntityClass.containsKey(relationClass)) {
-            FieldMapping relationPropertyMapping = getPropertyFieldMapping(relationClass, association.relationProperty());
-            if (relationPropertyMapping == null) {
-                throw new RuntimeException("Not found relational property mapping "
-                        +relationClass.getName()+"."+ association.relationProperty() +  " for @Association "
-                        + entityClass.getName() + "." + name + "!");
-            }
-            final FetchMapping fetchMapping = new FetchMapping(name, relationClass,
-                    propertyMapping, relationPropertyMapping, fetchField);
-            addFetchMapping(entityClass, fetchMapping);
+            registerAssociationFetchMapping(relationClass, association, entityClass, name, propertyMapping, fetchField);
         } else {
             waitForEntity(relationClass, new WaitingCallback() {
                 public void registered(Class type) {
-                    FieldMapping relationPropertyMapping = getPropertyFieldMapping(relationClass, association.relationProperty());
-                    if (relationPropertyMapping == null) {
-                        throw new RuntimeException("Not found relational property mapping "
-                                +relationClass.getName()+"."+ association.relationProperty() +  " for @Association "
-                                + entityClass.getName() + "." + name + "!");
-                    }
-                    final FetchMapping fetchMapping = new FetchMapping(name, relationClass,
-                            propertyMapping, relationPropertyMapping, fetchField);
-                    addFetchMapping(entityClass, fetchMapping);
+                    registerAssociationFetchMapping(relationClass, association, entityClass, name, propertyMapping, fetchField);
                 }
             });
         }
+    }
+
+    private void registerAssociationFetchMapping(Class relationClass, Association association, Class entityClass,
+                                                 String name, FieldMapping propertyMapping, EntityField fetchField) {
+        FieldMapping relationPropertyMapping = getPropertyFieldMapping(relationClass, association.relationProperty());
+        if (relationPropertyMapping == null) {
+            throw new RuntimeException("Not found relational property mapping "
+                    + relationClass.getName() + "." + association.relationProperty() + " for @Association "
+                    + entityClass.getName() + "." + name + "!");
+        }
+        registerFetchMapping(relationPropertyMapping, name, relationClass, propertyMapping, fetchField, entityClass);
     }
 
     private void processOneToMany(final Class entityClass, final AnnotatedElement annotatedElement) {
@@ -220,30 +215,25 @@ public class EntityMappingRegistryImpl implements IEntityMappingRegistry {
         }
 
         if (entityNameByEntityClass.containsKey(relationClass)) {
-            FieldMapping relationPropertyMapping = getPropertyFieldMapping(relationClass, oneToMany.relationProperty());
-            if (relationPropertyMapping == null) {
-                throw new RuntimeException("Not found relational property mapping "
-                        +relationClass.getName()+"."+ oneToMany.relationProperty() +  " for @OneToMany "
-                        + entityClass.getName() + "." + name + "!");
-            }
-            final FetchMapping fetchMapping = new FetchMapping(name, relationClass,
-                    propertyMapping, relationPropertyMapping, fetchField);
-            addFetchMapping(entityClass, fetchMapping);
+            registerOneToManyFetchMapping(relationClass, oneToMany, entityClass, name, propertyMapping, fetchField);
         } else {
             waitForEntity(relationClass, new WaitingCallback() {
                 public void registered(Class type) {
-                    FieldMapping relationPropertyMapping = getPropertyFieldMapping(relationClass, oneToMany.relationProperty());
-                    if (relationPropertyMapping == null) {
-                        throw new RuntimeException("Not found relational property mapping "
-                                +relationClass.getName()+"."+ oneToMany.relationProperty() + " for @OneToMany "
-                                + entityClass.getName() + "." + name + "!");
-                    }
-                    final FetchMapping fetchMapping = new FetchMapping(name, relationClass,
-                            propertyMapping, relationPropertyMapping, fetchField);
-                    addFetchMapping(entityClass, fetchMapping);
+                    registerOneToManyFetchMapping(relationClass, oneToMany, entityClass, name, propertyMapping, fetchField);
                 }
             });
         }
+    }
+
+    private void registerOneToManyFetchMapping(Class relationClass, OneToMany oneToMany, Class entityClass,
+                                               String name, FieldMapping propertyMapping, EntityField fetchField) {
+        FieldMapping relationPropertyMapping = getPropertyFieldMapping(relationClass, oneToMany.relationProperty());
+        if (relationPropertyMapping == null) {
+            throw new RuntimeException("Not found relational property mapping "
+                    + relationClass.getName() + "." + oneToMany.relationProperty() + " for @OneToMany "
+                    + entityClass.getName() + "." + name + "!");
+        }
+        registerFetchMapping(relationPropertyMapping, name, relationClass, propertyMapping, fetchField, entityClass);
     }
 
     private void processManyToOne(final Class entityClass, final AnnotatedElement annotatedElement) {
@@ -259,20 +249,27 @@ public class EntityMappingRegistryImpl implements IEntityMappingRegistry {
         final EntityField fetchField = createEntityField(annotatedElement);
         final Class relationClass = fetchField.getType();
         if (entityNameByEntityClass.containsKey(relationClass)) {
-            final FieldMapping relationPropertyMapping = idFieldMappingsByEntityClass.get(relationClass).iterator().next();
-            final FetchMapping fetchMapping = new FetchMapping(name, relationClass,
-                    propertyMapping, relationPropertyMapping, fetchField);
-            addFetchMapping(entityClass, fetchMapping);
+            registerFetchMappingWithIDField(entityClass, name, propertyMapping, fetchField, relationClass);
         } else {
             waitForEntity(relationClass, new WaitingCallback() {
                 public void registered(Class type) {
-                    final FieldMapping relationPropertyMapping = idFieldMappingsByEntityClass.get(relationClass).iterator().next();
-                    final FetchMapping fetchMapping = new FetchMapping(name, relationClass,
-                            propertyMapping, relationPropertyMapping, fetchField);
-                    addFetchMapping(entityClass, fetchMapping);
+                    registerFetchMappingWithIDField(entityClass, name, propertyMapping, fetchField, relationClass);
                 }
             });
         }
+    }
+
+    private void registerFetchMappingWithIDField(Class entityClass, String name, FieldMapping propertyMapping,
+                                                 EntityField fetchField, Class relationClass) {
+        final FieldMapping relationPropertyMapping = idFieldMappingsByEntityClass.get(relationClass).iterator().next();
+        registerFetchMapping(relationPropertyMapping, name, relationClass, propertyMapping, fetchField, entityClass);
+    }
+
+    private void registerFetchMapping(FieldMapping relationPropertyMapping, String name, Class relationClass,
+                                      FieldMapping propertyMapping, EntityField fetchField, Class entityClass) {
+        final FetchMapping fetchMapping = new FetchMapping(name, relationClass,
+                propertyMapping, relationPropertyMapping, fetchField);
+        addFetchMapping(entityClass, fetchMapping);
     }
 
     private boolean isTransient(AnnotatedElement annotatedElement) {
