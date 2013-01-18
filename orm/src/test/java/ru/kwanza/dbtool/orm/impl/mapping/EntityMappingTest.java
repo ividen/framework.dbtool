@@ -74,17 +74,18 @@ public class EntityMappingTest extends AbstractJUnit4SpringContextTests {
     @Before
     public void registerPaymentTrx() {
         entityMappingRegistry.registerEntityClass(PaymentTrx.class);
+        entityMappingRegistry.registerEntityClass(Agent.class);
     }
 
     @Test
     public void validateEntityMappingTest() throws Exception {
-        entityMappingRegistry.registerEntityClass(Agent.class);
         entityMappingRegistry.validateEntityMapping();
     }
 
     @Test
     @ExpectedException(RuntimeException.class)
     public void validateIncorrectEntityMappingTest() throws Exception {
+        entityMappingRegistry.registerEntityClass(Agent.class);
         entityMappingRegistry.validateEntityMapping();
     }
 
