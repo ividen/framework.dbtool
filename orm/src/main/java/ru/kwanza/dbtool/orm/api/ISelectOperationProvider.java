@@ -15,4 +15,10 @@ public interface ISelectOperationProvider<T> {
 
     <F> Map<F, T> selectMap(String propertyName);
 
+    void selectList(List<T> result);
+
+    <F> void selectMapList(String propertyName, Map<F, List<T>> result);
+
+    <F> void selectMap(String propertyName, Map<F, T> result);
+
 }

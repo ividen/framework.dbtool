@@ -54,7 +54,7 @@ public class QueryBuilderImpl<T> implements IQueryBuilder<T> {
             orderBy.append(" ORDER BY ");
             for (OrderBy ob : this.orderBy) {
                 FieldMapping fieldMapping = registry.getFieldMappingByPropertyName(entityClass, ob.getPropertyName());
-                if(fieldMapping==null){
+                if (fieldMapping == null) {
                     throw new IllegalArgumentException("Unknown field!");
                 }
                 orderBy.append(fieldMapping.getColumn())
@@ -136,8 +136,8 @@ public class QueryBuilderImpl<T> implements IQueryBuilder<T> {
         } else {
             FieldMapping fieldMapping =
                     registry.getFieldMappingByPropertyName(entityClass, condition.getPropertyName());
-            if(fieldMapping==null){
-                     throw new IllegalArgumentException("Unknown field!");
+            if (fieldMapping == null) {
+                throw new IllegalArgumentException("Unknown field!");
             }
             where.append(fieldMapping.getColumn());
             if (type == Condition.Type.IS_EQUAL) {

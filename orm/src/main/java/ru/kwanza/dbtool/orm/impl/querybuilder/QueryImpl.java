@@ -80,6 +80,11 @@ public class QueryImpl<T> implements IQuery<T> {
 
     public List<T> selectList() {
         final LinkedList<T> result = new LinkedList<T>();
+        selectList(result);
+        return result;
+    }
+
+    public void selectList(final List<T> result) {
         SelectUtil.batchSelect(dbTool.getJdbcTemplate(), sql, new ObjectExtractor<T>(), new SelectUtil.Container<Collection<T>>() {
             public void add(Collection<T> objects) {
                 if (objects != null) {
@@ -88,39 +93,18 @@ public class QueryImpl<T> implements IQuery<T> {
             }
         }, params, getResultSetType());
 
-        return result;
     }
 
-    public Map<Object, T> selectMap(String propertyName) {
-        final Map<Object, T> result = new LinkedHashMap<Object, T>();
+    public <F> void selectMapList(String propertyName, final Map<F, List<T>> result) {
         FieldMapping fieldMapping = registry.getFieldMappingByPropertyName(entityClass, propertyName);
         if (fieldMapping == null) {
             throw new IllegalArgumentException("Unknown field name!");
         }
 
         SelectUtil.batchSelect(dbTool.getJdbcTemplate(), sql, new MapExtractor(fieldMapping),
-                new SelectUtil.Container<Collection<KeyValue<Object, T>>>() {
-                    public void add(Collection<KeyValue<Object, T>> objects) {
-                        for (KeyValue<Object, T> kv : objects) {
-                            result.put(kv.getKey(), kv.getValue());
-                        }
-                    }
-                }, params, getResultSetType());
-
-        return result;
-    }
-
-    public Map<Object, List<T>> selectMapList(String propertyName) {
-        final Map<Object, List<T>> result = new LinkedHashMap<Object, List<T>>();
-        FieldMapping fieldMapping = registry.getFieldMappingByPropertyName(entityClass, propertyName);
-        if (fieldMapping == null) {
-            throw new IllegalArgumentException("Unknown field name!");
-        }
-
-        SelectUtil.batchSelect(dbTool.getJdbcTemplate(), sql, new MapExtractor(fieldMapping),
-                new SelectUtil.Container<Collection<KeyValue<Object, T>>>() {
-                    public void add(Collection<KeyValue<Object, T>> objects) {
-                        for (KeyValue<Object, T> kv : objects) {
+                new SelectUtil.Container<Collection<KeyValue<F, T>>>() {
+                    public void add(Collection<KeyValue<F, T>> objects) {
+                        for (KeyValue<F, T> kv : objects) {
                             List<T> vs = result.get(kv.getKey());
                             if (vs == null) {
                                 vs = new ArrayList<T>();
@@ -130,6 +114,34 @@ public class QueryImpl<T> implements IQuery<T> {
                         }
                     }
                 }, params, getResultSetType());
+    }
+
+    public <F> void selectMap(String propertyName, final Map<F, T> result) {
+        FieldMapping fieldMapping = registry.getFieldMappingByPropertyName(entityClass, propertyName);
+        if (fieldMapping == null) {
+            throw new IllegalArgumentException("Unknown field name!");
+        }
+
+        SelectUtil.batchSelect(dbTool.getJdbcTemplate(), sql, new MapExtractor(fieldMapping),
+                new SelectUtil.Container<Collection<KeyValue<F, T>>>() {
+                    public void add(Collection<KeyValue<F, T>> objects) {
+                        for (KeyValue<F, T> kv : objects) {
+                            result.put(kv.getKey(), kv.getValue());
+                        }
+                    }
+                }, params, getResultSetType());
+
+    }
+
+    public Map<Object, T> selectMap(String propertyName) {
+        final Map<Object, T> result = new LinkedHashMap<Object, T>();
+        selectMap(propertyName, result);
+        return result;
+    }
+
+    public Map<Object, List<T>> selectMapList(String propertyName) {
+        final Map<Object, List<T>> result = new LinkedHashMap<Object, List<T>>();
+        selectMapList(propertyName, result);
         return result;
     }
 
