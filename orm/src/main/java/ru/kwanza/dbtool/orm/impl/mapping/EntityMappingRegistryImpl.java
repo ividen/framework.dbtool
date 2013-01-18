@@ -127,6 +127,16 @@ public class EntityMappingRegistryImpl implements IEntityMappingRegistry {
                 throw new RuntimeException("Unknown class relation in mapping registry: " + fetchFieldClass);
             }
         }
+
+        boolean incompleteMapping = false;
+        for (Map.Entry<Class, Collection<WaitingCallback>> w : waiting.entrySet()) {
+            incompleteMapping = true;
+            log.error("Has incomplete mapping in relations. Expecting entity " + w.getKey().getName());
+        }
+
+        if (incompleteMapping) {
+            throw new RuntimeException("Has incomplete mappings!");
+        }
     }
 
     private void processFields(Class entityClass, AnnotatedElement[] annotatedElements) {
