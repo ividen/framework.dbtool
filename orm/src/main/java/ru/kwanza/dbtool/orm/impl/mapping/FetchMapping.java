@@ -22,6 +22,18 @@ public class FetchMapping {
         this.fetchField = fetchField;
     }
 
+    public FieldMapping getPropertyMapping() {
+        return propertyFieldMapping;
+    }
+
+    public Class getRelationClass() {
+        return relationClass;
+    }
+
+    public FieldMapping getRelationPropertyMapping() {
+        return relationFieldMapping;
+    }
+
     public String getRelationPropertyName() {
         return relationFieldMapping != null ? relationFieldMapping.getName() : null;
     }
@@ -41,8 +53,8 @@ public class FetchMapping {
     public String getPropertyName() {
         return propertyFieldMapping != null ? propertyFieldMapping.getName() : null;
     }
-    
-    public String getName(){
+
+    public String getName() {
         return name;
     }
 
