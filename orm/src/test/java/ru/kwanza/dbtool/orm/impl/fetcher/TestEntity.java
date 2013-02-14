@@ -41,10 +41,6 @@ public class TestEntity {
     @ManyToOne(property = "entityDID")
     private TestEntityD entityD;
 
-    public TestEntity() {
-    }
-
-
     public Long getId() {
         return id;
     }

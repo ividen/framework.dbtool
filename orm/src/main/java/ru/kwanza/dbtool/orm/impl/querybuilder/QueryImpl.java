@@ -15,6 +15,7 @@ import ru.kwanza.dbtool.orm.impl.mapping.EntityField;
 import ru.kwanza.dbtool.orm.impl.mapping.FieldMapping;
 import ru.kwanza.dbtool.orm.impl.mapping.IEntityMappingRegistry;
 
+import java.lang.reflect.Constructor;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
@@ -23,14 +24,15 @@ import java.util.*;
  * @author Alexander Guzanov
  */
 public class QueryImpl<T> implements IQuery<T> {
-    private DBTool dbTool;
-    private String sql;
-    private List<Integer> paramTypes;
-    private Object[] params;
-    private Integer maxSize;
-    private Integer offset;
-    private IEntityMappingRegistry registry;
-    private Class<T> entityClass;
+    private final DBTool dbTool;
+    private final String sql;
+    private final List<Integer> paramTypes;
+    private final Object[] params;
+    private final Integer maxSize;
+    private final Integer offset;
+    private final IEntityMappingRegistry registry;
+    private final Class<T> entityClass;
+    private final Constructor<T> contructor;
     private int paramsCount;
 
 
@@ -43,9 +45,13 @@ public class QueryImpl<T> implements IQuery<T> {
         this.paramTypes = paramTypes;
         this.registry = registry;
         this.entityClass = entityClass;
-
+        try {
+            this.contructor = entityClass.getConstructor();
+        } catch (NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        }
+        this.contructor.setAccessible(true);
         this.paramsCount = paramTypes.size();
-
 
         if (dbTool.getDbType() == DBTool.DBType.ORACLE && this.maxSize != null) {
             this.params = new Object[this.paramsCount + 1];
@@ -209,7 +215,7 @@ public class QueryImpl<T> implements IQuery<T> {
             while (rs.next()) {
                 T obj;
                 try {
-                    obj = entityClass.newInstance();
+                    obj = contructor.newInstance();
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
