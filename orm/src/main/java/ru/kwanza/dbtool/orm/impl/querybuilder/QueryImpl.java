@@ -46,7 +46,7 @@ public class QueryImpl<T> implements IQuery<T> {
         this.registry = registry;
         this.entityClass = entityClass;
         try {
-            this.contructor = entityClass.getConstructor();
+            this.contructor = entityClass.getDeclaredConstructor();
         } catch (NoSuchMethodException e) {
             throw new RuntimeException(e);
         }
