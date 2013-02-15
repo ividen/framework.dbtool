@@ -6,10 +6,10 @@ import java.util.Map;
 /**
  * @author Alexander Guzanov
  */
-class RelationPathScanner {
+public class RelationPathScanner {
     private char[] chars;
 
-    RelationPathScanner(String relationPath) {
+    public RelationPathScanner(String relationPath) {
         this.chars = relationPath.toCharArray();
     }
 

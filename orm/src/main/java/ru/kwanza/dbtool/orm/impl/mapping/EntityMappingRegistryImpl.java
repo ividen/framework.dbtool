@@ -105,7 +105,9 @@ public class EntityMappingRegistryImpl implements IEntityMappingRegistry {
         processFetches(entityClass, declaredFields);
         processFetches(entityClass, methods);
 
-        wakeUpWaiting(entityClass);
+        if (entityClass == targetClass) {
+            wakeUpWaiting(entityClass);
+        }
     }
 
     public boolean isRegisteredEntityClass(Class entityClass) {
