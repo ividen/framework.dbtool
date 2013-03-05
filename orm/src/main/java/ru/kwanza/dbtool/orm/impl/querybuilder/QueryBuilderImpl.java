@@ -115,6 +115,50 @@ public class QueryBuilderImpl<T> implements IQueryBuilder<T> {
         return new QueryImpl<T>(new QueryConfig<T>(dbTool, registry, entityClass, sqlString, maxSize, offset, paramsTypes));
     }
 
+    public IQuery<T> createNative(String sql) {
+        StringBuilder sqlBuilder = new StringBuilder();
+        StringBuilder paramBuilder = null;
+
+        char[] chars = sql.toCharArray();
+        boolean variableMatch = false;
+
+        LinkedList<Integer> paramTypes = new LinkedList<Integer>();
+        for (int i = 0; i < chars.length; i++) {
+            char c = chars[i];
+            if (c == '?') {
+                paramTypes.add(Integer.MAX_VALUE);
+                paramBuilder = new StringBuilder();
+                variableMatch = false;
+                sqlBuilder.append('?');
+            } else if (c == ':') {
+                variableMatch = true;
+                sqlBuilder.append('?');
+                paramTypes.add(Integer.MAX_VALUE);
+                paramBuilder = new StringBuilder();
+            } else if (variableMatch) {
+                if (isDelimiter(c)) {
+                    System.out.println();
+                    variableMatch = false;
+                    System.out.println("Param:" + paramBuilder.toString());
+                    sqlBuilder.append(c);
+                } else {
+                    paramBuilder.append(c);
+                }
+            } else {
+                sqlBuilder.append(c);
+            }
+        }
+
+
+        return new QueryImpl<T>(new QueryConfig<T>(dbTool, registry, entityClass, sqlBuilder.toString(),
+                null, null, paramTypes));
+    }
+
+
+    private boolean isDelimiter(char c) {
+        return c == '+' || c == '-' || c == ' ' || c == ')' || c == '(' || c == '\n' || c == '\t' || c == ',';
+    }
+
     private void createConditionString(Condition condition, List<Integer> paramsTypes, StringBuilder where) {
         if (condition == null) {
             return;

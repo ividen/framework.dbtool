@@ -229,4 +229,57 @@ public abstract class QueryTest extends AbstractJUnit4SpringContextTests {
     }
 
 
+    @Test
+    public void testNativeQuery_1() {
+        IQuery<TestEntity> query = em.queryBuilder(TestEntity.class)
+                .createNative("SELECT * FROM  test_entity where id in(?)");
+        System.out.println(query);
+        IStatement<TestEntity> statement = query.prepare();
+        statement.setParameter(1, Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
+        List<TestEntity> testEntities = statement.selectList();
+        assertEquals(testEntities.size(), 10);
+        Map<Long, TestEntity> id = statement.selectMap("id");
+        assertEquals(id.size(), 10);
+        Map<Long, List<TestEntity>> id1 = statement.selectMapList("intField");
+        assertEquals(id1.size(), 1);
+        assertEquals(id1.get(10).size(), 10);
+    }
+
+
+    @Test
+    public void testNativeQuery_2() {
+        IQuery<TestEntity> query = em.queryBuilder(TestEntity.class)
+                .createNative("SELECT * FROM  test_entity where id in(:ids)");
+        System.out.println(query);
+        IStatement<TestEntity> statement = query.prepare();
+        statement.setParameter(1, Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
+        List<TestEntity> testEntities = statement.selectList();
+        assertEquals(testEntities.size(), 10);
+        Map<Long, TestEntity> id = statement.selectMap("id");
+        assertEquals(id.size(), 10);
+        Map<Long, List<TestEntity>> id1 = statement.selectMapList("intField");
+        assertEquals(id1.size(), 1);
+        assertEquals(id1.get(10).size(), 10);
+    }
+
+    @Test
+    public void testNativeQuery_3() {
+        IQuery<TestEntity> query = em.queryBuilder(TestEntity.class)
+                .createNative(
+                        "SELECT * " +
+                                "FROM  test_entity where id in(:ids_1) " +
+                                "UNION ALL \n" +
+                                "SELECT * " +
+                                "FROM  test_entity where id in(:ids_2) ");
+        System.out.println(query);
+        IStatement<TestEntity> statement = query.prepare();
+        statement.setParameter(1, Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
+        statement.setParameter(2, Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
+        List<TestEntity> testEntities = statement.selectList();
+        assertEquals(testEntities.size(), 20);
+        Map<Long, List<TestEntity>> id1 = statement.selectMapList("id");
+        assertEquals(id1.size(), 10);
+        assertEquals(id1.get(10l).size(), 2);
+    }
+
 }
