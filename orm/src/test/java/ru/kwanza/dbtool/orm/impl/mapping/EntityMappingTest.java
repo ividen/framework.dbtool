@@ -3,7 +3,6 @@ package ru.kwanza.dbtool.orm.impl.mapping;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.annotation.ExpectedException;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
 import ru.kwanza.dbtool.orm.impl.mapping.entities.*;
@@ -82,8 +81,7 @@ public class EntityMappingTest extends AbstractJUnit4SpringContextTests {
         entityMappingRegistry.validateEntityMapping();
     }
 
-    @Test
-    @ExpectedException(RuntimeException.class)
+    @Test(expected = RuntimeException.class)
     public void validateIncorrectEntityMappingTest() throws Exception {
         entityMappingRegistry.registerEntityClass(Agent.class);
         entityMappingRegistry.validateEntityMapping();
@@ -97,32 +95,27 @@ public class EntityMappingTest extends AbstractJUnit4SpringContextTests {
         assertEquals(PAYMENT_TRX_TABLE_NAME, entityMappingRegistry.getTableName(PAYMENT_TRX_NAME));
     }
 
-    @Test
-    @ExpectedException(RuntimeException.class)
+    @Test(expected = RuntimeException.class)
     public void registerDuplicateEntityTest() throws Exception {
         registerPaymentTrx();
     }
 
-    @Test
-    @ExpectedException(RuntimeException.class)
+    @Test(expected = RuntimeException.class)
     public void registerNotEntityTest() throws Exception {
         entityMappingRegistry.registerEntityClass(NotEntity.class);
     }
 
-    @Test
-    @ExpectedException(RuntimeException.class)
+    @Test(expected = RuntimeException.class)
     public void registerEntityWithDuplicateColumnTest() throws Exception {
         entityMappingRegistry.registerEntityClass(EntityWithDuplicateColumn.class);
     }
 
-    @Test
-    @ExpectedException(RuntimeException.class)
+    @Test(expected =     RuntimeException.class)
     public void registerEntityWithDuplicateFieldPropertyTest() throws Exception {
         entityMappingRegistry.registerEntityClass(EntityWithDuplicateFieldProperty.class);
     }
 
-    @Test
-    @ExpectedException(RuntimeException.class)
+    @Test(expected = RuntimeException.class)
     public void registerEntityWithDuplicateFetchPropertyTest() throws Exception {
         entityMappingRegistry.registerEntityClass(EntityWithDuplicateFetchProperty.class);
     }

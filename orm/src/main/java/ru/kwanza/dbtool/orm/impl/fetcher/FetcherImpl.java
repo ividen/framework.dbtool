@@ -108,12 +108,14 @@ public class FetcherImpl implements IFetcher {
                 };
             }
             relationValue.getFetchQuery()
+                    .prepare()
                     .setParameter(1, relationValue.getRelationIds(items))
                     .selectMapList(relationValue.getIDGroupingField(), result, producer);
             return result;
         } else {
             Map<Object, T> result = new HashMap<Object, T>();
             relationValue.getFetchQuery()
+                    .prepare()
                     .setParameter(1, relationValue.getRelationIds(items))
                     .selectMap(relationValue.getIDGroupingField(), result);
             return result;

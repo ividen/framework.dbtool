@@ -12,12 +12,8 @@ import org.dbunit.operation.DatabaseOperation;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
-import org.springframework.test.annotation.ExpectedException;
 import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
-import ru.kwanza.dbtool.orm.api.Condition;
-import ru.kwanza.dbtool.orm.api.IEntityManager;
-import ru.kwanza.dbtool.orm.api.IQuery;
-import ru.kwanza.dbtool.orm.api.OrderBy;
+import ru.kwanza.dbtool.orm.api.*;
 import ru.kwanza.dbtool.orm.impl.fetcher.TestEntity;
 import ru.kwanza.dbtool.orm.impl.mapping.EntityMappingRegistryImpl;
 
@@ -73,11 +69,12 @@ public abstract class QueryTest extends AbstractJUnit4SpringContextTests {
         IQuery<TestEntity> query = em.queryBuilder(TestEntity.class)
                 .orderBy(OrderBy.ASC("id")).create();
         System.out.println(query);
-        List<TestEntity> testEntities = query.selectList();
+        IStatement<TestEntity> statement = query.prepare();
+        List<TestEntity> testEntities = statement.selectList();
         assertEquals(testEntities.size(), 200);
-        Map<Long, TestEntity> mapById = query.selectMap("id");
+        Map<Long, TestEntity> mapById = statement.selectMap("id");
         assertEquals(mapById.size(), 200);
-        Map<Long, List<TestEntity>> id1 = query.selectMapList("intField");
+        Map<Long, List<TestEntity>> id1 = statement.selectMapList("intField");
         assertEquals(id1.size(), 2);
         assertEquals(id1.get(10).size(), 100);
         assertEquals(id1.get(20).size(), 100);
@@ -90,79 +87,75 @@ public abstract class QueryTest extends AbstractJUnit4SpringContextTests {
                 .where(Condition.in("id"))
                 .orderBy(OrderBy.ASC("id")).create();
         System.out.println(query);
-        query.setParameter(1, Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
-        List<TestEntity> testEntities = query.selectList();
+        IStatement<TestEntity> statement = query.prepare();
+        statement.setParameter(1, Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
+        List<TestEntity> testEntities = statement.selectList();
         assertEquals(testEntities.size(), 10);
-        Map<Long, TestEntity> id = query.selectMap("id");
+        Map<Long, TestEntity> id = statement.selectMap("id");
         assertEquals(id.size(), 10);
-        Map<Long, List<TestEntity>> id1 = query.selectMapList("intField");
+        Map<Long, List<TestEntity>> id1 = statement.selectMapList("intField");
         assertEquals(id1.size(), 1);
         assertEquals(id1.get(10).size(), 10);
     }
 
-    @Test
-    @ExpectedException(java.lang.IllegalArgumentException.class)
+    @Test(expected = java.lang.IllegalArgumentException.class)
     public void testSelect_WrongParams_1() {
         IQuery<TestEntity> query = em.queryBuilder(TestEntity.class)
                 .setMaxSize(1000)
                 .orderBy(OrderBy.ASC("id")).create();
 
-        query.setParameter(1, Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
+        query.prepare().setParameter(1, Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
     }
 
-    @Test
-    @ExpectedException(java.lang.IllegalArgumentException.class)
+    @Test(expected = java.lang.IllegalArgumentException.class)
     public void testSelect_WrongParams_2() {
         IQuery<TestEntity> query = em.queryBuilder(TestEntity.class)
                 .setMaxSize(1000)
                 .where(Condition.in("id"))
                 .orderBy(OrderBy.ASC("id")).create();
 
-        query.setParameter(1, Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
-        query.setParameter(2, Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
+        IStatement<TestEntity> statement = query.prepare();
+        statement.setParameter(1, Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
+        statement.setParameter(2, Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
     }
 
-    @Test
-    @ExpectedException(java.lang.IllegalArgumentException.class)
+    @Test(expected = java.lang.IllegalArgumentException.class)
     public void testSelect_WrongParams_3() {
         IQuery<TestEntity> query = em.queryBuilder(TestEntity.class)
                 .setMaxSize(1000)
                 .where(Condition.in("id1"))
                 .orderBy(OrderBy.ASC("id")).create();
-
-        query.setParameter(1, Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
+        IStatement<TestEntity> statement = query.prepare();
+        statement.setParameter(1, Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
     }
 
-    @Test
-    @ExpectedException(java.lang.IllegalArgumentException.class)
+    @Test(expected = java.lang.IllegalArgumentException.class)
     public void testSelect_WrongParams_4() {
         IQuery<TestEntity> query = em.queryBuilder(TestEntity.class)
                 .setMaxSize(1000)
                 .where(Condition.in("id"))
                 .orderBy(OrderBy.ASC("id1")).create();
-
-        query.setParameter(1, Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
+        IStatement<TestEntity> statement = query.prepare();
+        statement.setParameter(1, Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
     }
 
 
-    @Test
-    @ExpectedException(java.lang.IllegalArgumentException.class)
+    @Test(expected = java.lang.IllegalArgumentException.class)
     public void testSelect_groupField_5() {
         IQuery<TestEntity> query = em.queryBuilder(TestEntity.class)
                 .setMaxSize(1000)
                 .orderBy(OrderBy.ASC("id")).create();
-
-        query.selectMap("title");
+        IStatement<TestEntity> statement = query.prepare();
+        statement.selectMap("title");
     }
 
-    @Test
-    @ExpectedException(java.lang.IllegalArgumentException.class)
+    @Test(expected = java.lang.IllegalArgumentException.class)
     public void testSelect_groupField_6() {
         IQuery<TestEntity> query = em.queryBuilder(TestEntity.class)
                 .setMaxSize(1000)
                 .orderBy(OrderBy.ASC("id")).create();
-
-        query.selectMapList("title");
+        IStatement<TestEntity> statement = query.prepare();
+        statement.selectMapList("title");
     }
 
     @Test
@@ -172,11 +165,12 @@ public abstract class QueryTest extends AbstractJUnit4SpringContextTests {
                 .setOffset(99)
                 .orderBy(OrderBy.ASC("id")).create();
 
-        List<TestEntity> testEntities = query.selectList();
+        IStatement<TestEntity> statement = query.prepare();
+        List<TestEntity> testEntities = statement.selectList();
         assertEquals(testEntities.size(), 1);
         Assert.assertEquals(testEntities.get(0).getId().longValue(), 99l);
 
-        Map<Long, TestEntity> map = query.selectMap("id");
+        Map<Long, TestEntity> map = statement.selectMap("id");
         assertEquals(map.size(), 1);
         Assert.assertEquals(map.get(99l).getId().longValue(), 99l);
     }
@@ -189,9 +183,10 @@ public abstract class QueryTest extends AbstractJUnit4SpringContextTests {
                 .setOffset(99)
                 .orderBy(OrderBy.ASC("id")).create();
 
-        List<TestEntity> testEntities = query.selectList();
+        IStatement<TestEntity> statement = query.prepare();
+        List<TestEntity> testEntities = statement.selectList();
         assertEquals(testEntities.size(), 0);
-        Map<Long, TestEntity> map = query.selectMap("id");
+        Map<Long, TestEntity> map = statement.selectMap("id");
         assertEquals(map.size(), 0);
     }
 
@@ -202,10 +197,10 @@ public abstract class QueryTest extends AbstractJUnit4SpringContextTests {
                 .where(Condition.isEqual("id"))
                 .setOffset(99)
                 .orderBy(OrderBy.ASC("id")).create();
-
-        List<TestEntity> testEntities = query.setParameter(1, 100).selectList();
+        IStatement<TestEntity> statement = query.prepare();
+        List<TestEntity> testEntities = statement.setParameter(1, 100).selectList();
         assertEquals(testEntities.size(), 0);
-        Map<Long, TestEntity> map = query.setParameter(1, 100).selectMap("id");
+        Map<Long, TestEntity> map = statement.setParameter(1, 100).selectMap("id");
         assertEquals(map.size(), 0);
     }
 
@@ -216,19 +211,20 @@ public abstract class QueryTest extends AbstractJUnit4SpringContextTests {
                 .where(Condition.isEqual("id"))
                 .orderBy(OrderBy.ASC("id")).create();
 
-        TestEntity select = query.setParameter(1, 100l).select();
+        IStatement<TestEntity> statement = query.prepare();
+        TestEntity select = statement.setParameter(1, 100l).select();
         assertEquals(select.getId().longValue(), 100l);
     }
 
 
-    @Test
-    @ExpectedException(IncorrectResultSizeDataAccessException.class)
+    @Test(expected = IncorrectResultSizeDataAccessException.class)
     public void testSelect_single_wrong() {
         IQuery<TestEntity> query = em.queryBuilder(TestEntity.class)
                 .where(Condition.isGreater("id"))
                 .orderBy(OrderBy.ASC("id")).create();
 
-        TestEntity select = query.setParameter(1, 1).select();
+        IStatement<TestEntity> statement = query.prepare();
+        TestEntity select = statement.setParameter(1, 1).select();
         assertEquals(select.getId().longValue(), 100l);
     }
 

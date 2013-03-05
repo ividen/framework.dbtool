@@ -174,7 +174,7 @@ public abstract class UpdateOperationWithOptimisticTest extends AbstractOperatio
         TransactionStatus status = getTxManager().getTransaction(getTxDef());
         try {
             final List<TestEntityVersion> testEntities =
-                    getEntityManager().queryBuilder(TestEntityVersion.class).orderBy(OrderBy.ASC("key")).create().selectList();
+                    getEntityManager().queryBuilder(TestEntityVersion.class).orderBy(OrderBy.ASC("key")).create().prepare().selectList();
             char[] buff = new char[1024];
             Arrays.fill(buff, 'S');
             testEntities.get(testEntities.size() - 1).setName(new String(buff));
@@ -636,6 +636,6 @@ public abstract class UpdateOperationWithOptimisticTest extends AbstractOperatio
     }
 
     private List<TestEntityVersion> selectTestEntities() {
-        return getEntityManager().queryBuilder(TestEntityVersion.class).orderBy(OrderBy.ASC("key")).create().selectList();
+        return getEntityManager().queryBuilder(TestEntityVersion.class).orderBy(OrderBy.ASC("key")).create().prepare().selectList();
     }
 }

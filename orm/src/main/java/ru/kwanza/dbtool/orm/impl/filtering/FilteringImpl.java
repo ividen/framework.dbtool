@@ -44,34 +44,34 @@ public class FilteringImpl<T> implements IFiltering<T> {
     }
 
     public T select() {
-        return createQuery().select();
+        return createStatement().select();
     }
 
     public List<T> selectList() {
-        return createQuery().selectList();
+        return createStatement().selectList();
     }
 
     public <F> Map selectMapList(String propertyName) {
-        return createQuery().selectMapList(propertyName);
+        return createStatement().selectMapList(propertyName);
     }
 
     public <F> Map selectMap(String propertyName) {
-        return createQuery().selectMap(propertyName);
+        return createStatement().selectMap(propertyName);
     }
 
     public void selectList(List<T> result) {
-        createQuery().selectList(result);
+        createStatement().selectList(result);
     }
 
     public <F> void selectMapList(String propertyName, Map<F, List<T>> result,ListProducer<T> listProducer) {
-        createQuery().selectMapList(propertyName,result,listProducer);
+        createStatement().selectMapList(propertyName, result, listProducer);
     }
 
     public <F> void selectMap(String propertyName, Map<F, T> result) {
-        createQuery().selectMap(propertyName,result);
+        createStatement().selectMap(propertyName, result);
     }
 
-    protected IQuery<T> createQuery() {
+    private IStatement<T> createStatement() {
         IQueryBuilder<T> queryBuilder = em.queryBuilder(entityClass);
         if (maxSize != null) {
             queryBuilder.setMaxSize(maxSize);
@@ -105,10 +105,11 @@ public class FilteringImpl<T> implements IFiltering<T> {
             queryBuilder.orderBy(orders);
         }
 
-        IQuery<T> query = queryBuilder.create();
+        IStatement<T> statement = queryBuilder.create().prepare();
         for (int i = 0; i < params.size(); i++) {
-            query.setParameter(i + 1, params.get(i));
+            statement.setParameter(i + 1, params.get(i));
         }
-        return query;
+        return statement;
     }
+
 }

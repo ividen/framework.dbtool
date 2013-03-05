@@ -37,10 +37,10 @@ public class ReadOperation extends Operation implements IReadOperation {
     }
 
     public Object selectByKey(Object key) {
-        return queryBuilderForObject.create().setParameter(1, key).select();
+        return queryBuilderForObject.create().prepare().setParameter(1, key).select();
     }
 
     public Collection selectByKeys(Object keys) {
-        return queryBuilderForList.create().setParameter(1, keys).selectList();
+        return queryBuilderForList.create().prepare().setParameter(1, keys).selectList();
     }
 }

@@ -2,10 +2,10 @@ package ru.kwanza.dbtool.orm.impl.fetcher;
 
 import junit.framework.Assert;
 import org.junit.Test;
-import org.springframework.test.annotation.ExpectedException;
 import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
 import ru.kwanza.dbtool.orm.api.Condition;
 import ru.kwanza.dbtool.orm.api.IEntityManager;
+import ru.kwanza.dbtool.orm.api.IQuery;
 import ru.kwanza.dbtool.orm.api.OrderBy;
 import ru.kwanza.dbtool.orm.impl.mapping.EntityMappingRegistryImpl;
 
@@ -28,7 +28,7 @@ public abstract class TestFetcherIml extends AbstractJUnit4SpringContextTests {
 
     @Test
     public void testFetch1() {
-        List<TestEntity> testEntities = em.queryBuilder(TestEntity.class).orderBy(OrderBy.ASC("id")).create().selectList();
+        List<TestEntity> testEntities = query().prepare().selectList();
         em.getFetcher().fetch(TestEntity.class, testEntities, "entityA,entityB,entityC{entityF,entityE{entityG}},entityD");
         for (int i = 0; i < 1500; i++) {
             TestEntity testEntity = testEntities.get(i);
@@ -55,9 +55,13 @@ public abstract class TestFetcherIml extends AbstractJUnit4SpringContextTests {
         }
     }
 
+    private IQuery<TestEntity> query() {
+        return em.queryBuilder(TestEntity.class).orderBy(OrderBy.ASC("id")).create();
+    }
+
     @Test
     public void testFetch2() {
-        List<TestEntity> testEntities = em.queryBuilder(TestEntity.class).orderBy(OrderBy.ASC("id")).create().selectList();
+        List<TestEntity> testEntities = query().prepare().selectList();
         em.getFetcher().fetch(TestEntity.class, testEntities, "entityA,entityB,entityC{entityF,entityE},entityD");
         for (int i = 0; i < 1500; i++) {
             TestEntity testEntity = testEntities.get(i);
@@ -86,7 +90,7 @@ public abstract class TestFetcherIml extends AbstractJUnit4SpringContextTests {
 
     @Test
     public void testFetch3() {
-        List<TestEntity> testEntities = em.queryBuilder(TestEntity.class).orderBy(OrderBy.ASC("id")).create().selectList();
+        List<TestEntity> testEntities = query().prepare().selectList();
         em.getFetcher().fetch(TestEntity.class, testEntities, "entityA,entityB,entityC,entityD");
         for (int i = 0; i < 1500; i++) {
             TestEntity testEntity = testEntities.get(i);
@@ -113,7 +117,7 @@ public abstract class TestFetcherIml extends AbstractJUnit4SpringContextTests {
 
     @Test
     public void testFetch4() {
-        List<TestEntity> testEntities = em.queryBuilder(TestEntity.class).orderBy(OrderBy.ASC("id")).create().selectList();
+        List<TestEntity> testEntities = query().prepare().selectList();
         em.getFetcher().fetch(TestEntity.class, testEntities, "entityC{entityE,entityF}");
         for (int i = 0; i < 1500; i++) {
             TestEntity testEntity = testEntities.get(i);
@@ -140,7 +144,8 @@ public abstract class TestFetcherIml extends AbstractJUnit4SpringContextTests {
 
     @Test
     public void testFetch5() {
-        List<TestEntityC> testEntities = em.queryBuilder(TestEntityC.class).orderBy(OrderBy.ASC("id")).create().selectList();
+        IQuery<TestEntityC> query = em.queryBuilder(TestEntityC.class).orderBy(OrderBy.ASC("id")).create();
+        List<TestEntityC> testEntities = query.prepare().selectList();
         em.getFetcher().fetch(TestEntityC.class, testEntities, "entityF,entityE{entityG}");
 
         for (int i = 0; i < 1500; i++) {
@@ -154,24 +159,24 @@ public abstract class TestFetcherIml extends AbstractJUnit4SpringContextTests {
 
     @Test
     public void testFetch6() {
-        List<TestEntity> testEntities = em.queryBuilder(TestEntity.class).where(Condition.isLess("id"))
-                .create().setParameter(1, 0l).selectList();
+        IQuery<TestEntity> query = em.queryBuilder(TestEntity.class).where(Condition.isLess("id"))
+                .create();
+        List<TestEntity> testEntities = query.prepare().setParameter(1, 0l).selectList();
         em.getFetcher().fetch(TestEntity.class, testEntities, "entityA,entityB,entityC{entityF,entityE{entityG}},entityD");
     }
 
 
-    @Test
-    @ExpectedException(IllegalArgumentException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void testFetch7() {
-        List<TestEntityC> testEntities = em.queryBuilder(TestEntityC.class).create().selectList();
+        List<TestEntityC> testEntities = em.queryBuilder(TestEntityC.class).create().prepare().selectList();
         em.getFetcher().fetch(TestEntityC.class, testEntities, "entityF,entityE{entityG},entityA");
 
     }
 
     @Test
     public void testFetch8() {
-        List<TestEntityG> testEntities = em.queryBuilder(TestEntityG.class)
-                .create().selectList();
+        IQuery<TestEntityG> query = em.queryBuilder(TestEntityG.class).create();
+        List<TestEntityG> testEntities = query.prepare().selectList();
         em.getFetcher().fetch(TestEntityG.class, testEntities, "entitiesE{entitiesC{testEntities{entityA,entityB,entityD},entityF}}");
         long count = 0;
         for (TestEntityG g : testEntities) {

@@ -16,7 +16,7 @@ public abstract class UpdateOperationTest extends AbstractOperationTest {
     public void testSuccessUpdate() throws Throwable {
         TransactionStatus status = getTxManager().getTransaction(getTxDef());
         try {
-            final List<TestEntity> testEntities = getEntityManager().queryBuilder(TestEntity.class).create().selectList();
+            final List<TestEntity> testEntities = getEntityManager().queryBuilder(TestEntity.class).create().prepare().selectList();
             for (TestEntity testEntity : testEntities) {
                 testEntity.incrementVersion();
             }
@@ -39,7 +39,7 @@ public abstract class UpdateOperationTest extends AbstractOperationTest {
         TransactionStatus status = getTxManager().getTransaction(getTxDef());
         try {
             final List<TestEntity> testEntities =
-                    getEntityManager().queryBuilder(TestEntity.class).orderBy(OrderBy.ASC("key")).create().selectList();
+                    getEntityManager().queryBuilder(TestEntity.class).orderBy(OrderBy.ASC("key")).create().prepare().selectList();
             for (TestEntity testEntity : testEntities) {
                 testEntity.incrementVersion();
             }
@@ -68,7 +68,7 @@ public abstract class UpdateOperationTest extends AbstractOperationTest {
         TransactionStatus status = getTxManager().getTransaction(getTxDef());
         try {
             final List<TestEntity> testEntities =
-                    getEntityManager().queryBuilder(TestEntity.class).orderBy(OrderBy.ASC("key")).create().selectList();
+                    getEntityManager().queryBuilder(TestEntity.class).orderBy(OrderBy.ASC("key")).create().prepare().selectList();
             for (TestEntity e : testEntities) {
                 e.incrementVersion();
             }
@@ -97,7 +97,7 @@ public abstract class UpdateOperationTest extends AbstractOperationTest {
         TransactionStatus status = getTxManager().getTransaction(getTxDef());
         try {
             final List<TestEntity> testEntities =
-                    getEntityManager().queryBuilder(TestEntity.class).orderBy(OrderBy.ASC("key")).create().selectList();
+                    getEntityManager().queryBuilder(TestEntity.class).orderBy(OrderBy.ASC("key")).create().prepare().selectList();
             for (TestEntity e : testEntities) {
                 e.incrementVersion();
             }
@@ -128,7 +128,7 @@ public abstract class UpdateOperationTest extends AbstractOperationTest {
         TransactionStatus status = getTxManager().getTransaction(getTxDef());
         try {
             final List<TestEntity> testEntities =
-                    getEntityManager().queryBuilder(TestEntity.class).orderBy(OrderBy.ASC("key")).create().selectList();
+                    getEntityManager().queryBuilder(TestEntity.class).orderBy(OrderBy.ASC("key")).create().prepare().selectList();
             for (TestEntity e : testEntities) {
                 e.incrementVersion();
             }
@@ -156,7 +156,7 @@ public abstract class UpdateOperationTest extends AbstractOperationTest {
         TransactionStatus status = getTxManager().getTransaction(getTxDef());
         try {
             final List<TestEntity> testEntities =
-                    getEntityManager().queryBuilder(TestEntity.class).orderBy(OrderBy.ASC("key")).create().selectList();
+                    getEntityManager().queryBuilder(TestEntity.class).orderBy(OrderBy.ASC("key")).create().prepare().selectList();
             for (TestEntity e : testEntities) {
                 e.incrementVersion();
             }
@@ -188,7 +188,7 @@ public abstract class UpdateOperationTest extends AbstractOperationTest {
         TransactionStatus status = getTxManager().getTransaction(getTxDef());
         try {
             final List<TestEntity> testEntities =
-                    getEntityManager().queryBuilder(TestEntity.class).orderBy(OrderBy.ASC("key")).create().selectList();
+                    getEntityManager().queryBuilder(TestEntity.class).orderBy(OrderBy.ASC("key")).create().prepare().selectList();
             char[] buff = new char[1024];
             Arrays.fill(buff, 'S');
             for (TestEntity e : testEntities) {

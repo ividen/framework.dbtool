@@ -112,7 +112,7 @@ public class QueryBuilderImpl<T> implements IQueryBuilder<T> {
 
         String sqlString = sql.toString();
         logger.debug("Creating query {}", sqlString);
-        return new QueryImpl<T>(dbTool, registry, entityClass, sqlString, maxSize, offset, paramsTypes);
+        return new QueryImpl<T>(new QueryConfig<T>(dbTool, registry, entityClass, sqlString, maxSize, offset, paramsTypes));
     }
 
     private void createConditionString(Condition condition, List<Integer> paramsTypes, StringBuilder where) {

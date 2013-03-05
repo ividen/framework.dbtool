@@ -242,7 +242,7 @@ public abstract class CreateOperationTest extends AbstractOperationTest {
         TransactionStatus status = getTxManager().getTransaction(getTxDef());
         try {
             final List<TestEntity> testEntities =
-                    getEntityManager().queryBuilder(TestEntity.class).orderBy(OrderBy.ASC("key")).create().selectList();
+                    getEntityManager().queryBuilder(TestEntity.class).orderBy(OrderBy.ASC("key")).create().prepare().selectList();
             for (TestEntity e : testEntities) {
                 e.incrementVersion();
                 if (e.getKey() == 0) {
