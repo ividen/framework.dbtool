@@ -48,7 +48,7 @@ public class MSSQLQueryBuilderTest extends AbstractJUnit4SpringContextTests {
                                 Condition.isNull("id"),
                                 Condition.between("id"),
                                 Condition.notEqual("id"),
-                                Condition.notEqual("id")
+                                Condition.not(Condition.notEqual("id"))
                         )).orderBy(OrderBy.ASC("id"), OrderBy.DESC("stringField")).create();
 
         assertEquals(query1.getConfig().getSql(),
@@ -56,7 +56,7 @@ public class MSSQLQueryBuilderTest extends AbstractJUnit4SpringContextTests {
                         "FROM test_entity " +
                         "WHERE (id IN (?)) AND (id LIKE ?) AND (id = ?) AND (id > ?) AND (id >= ?) AND (id < ?)" +
                         " AND (id <= ?) AND (id IS NOT NULL) AND (id IS NULL) AND (id BETWEEN ? AND ?) AND (id <> ?)" +
-                        " AND (id <> ?) ORDER BY id ASC, string_field DESC ");
+                        " AND (NOT (id <> ?)) ORDER BY id ASC, string_field DESC ");
 
         assertEquals(query1.getConfig().getParamsCount(), 11);
         QueryImpl<TestEntity> query2 = (QueryImpl<TestEntity>) em.queryBuilder(TestEntity.class)
@@ -85,10 +85,10 @@ public class MSSQLQueryBuilderTest extends AbstractJUnit4SpringContextTests {
         assertEquals(query1.getConfig().getParamsCount(), 11);
         QueryImpl<TestEntity> query3 = (QueryImpl<TestEntity>) em.queryBuilder(TestEntity.class)
                 .where(Condition.and(
-                        Condition.or(Condition.in("id"),
+                        Condition.not(Condition.or(Condition.in("id"),
                                 Condition.like("id"),
                                 Condition.isEqual("id"),
-                                Condition.isGreater("id")),
+                                Condition.isGreater("id"))),
                         Condition.or(
                                 Condition.isGreaterOrEqual("id"),
                                 Condition.isLess("id"),
@@ -105,7 +105,7 @@ public class MSSQLQueryBuilderTest extends AbstractJUnit4SpringContextTests {
                         "version, entity_aid, entity_bid, entity_cid, entity_did " +
                         "FROM test_entity " +
                         "WHERE " +
-                        "((id IN (?)) OR (id LIKE ?) OR (id = ?) OR (id > ?)) " +
+                        "(NOT ((id IN (?)) OR (id LIKE ?) OR (id = ?) OR (id > ?))) " +
                         "AND" +
                         " ((id >= ?) OR (id < ?) OR (id <= ?) OR (id IS NOT NULL) OR (id IS NULL)) " +
                         "AND" +

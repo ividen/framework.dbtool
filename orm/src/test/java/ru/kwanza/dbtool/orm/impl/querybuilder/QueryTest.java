@@ -98,6 +98,28 @@ public abstract class QueryTest extends AbstractJUnit4SpringContextTests {
         assertEquals(id1.get(10).size(), 10);
     }
 
+
+    @Test
+    public void testSelect_With_NamedParams() {
+        IQuery<TestEntity> query = em.queryBuilder(TestEntity.class)
+                .setMaxSize(100)
+                .where(Condition.and(
+                        Condition.isGreaterOrEqual("id", "id"),
+                        Condition.isLessOrEqual("id", "id"))
+                )
+                .orderBy(OrderBy.ASC("id")).create();
+        System.out.println(query);
+        IStatement<TestEntity> statement = query.prepare();
+        statement.setParameter("id", 1l);
+        List<TestEntity> testEntities = statement.selectList();
+        assertEquals(testEntities.size(), 1);
+        Map<Long, TestEntity> id = statement.selectMap("id");
+        assertEquals(id.size(), 1);
+        Map<Long, List<TestEntity>> id1 = statement.selectMapList("intField");
+        assertEquals(id1.size(), 1);
+        assertEquals(id1.get(10).size(), 1);
+    }
+
     @Test(expected = java.lang.IllegalArgumentException.class)
     public void testSelect_WrongParams_1() {
         IQuery<TestEntity> query = em.queryBuilder(TestEntity.class)

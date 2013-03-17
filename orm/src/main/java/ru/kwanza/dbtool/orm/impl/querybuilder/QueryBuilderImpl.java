@@ -25,6 +25,8 @@ public class QueryBuilderImpl<T> implements IQueryBuilder<T> {
     private OrderBy[] orderBy;
     private Integer maxSize;
     private Integer offset;
+    private Map<String, List<Integer>> namedParams = new HashMap<String, List<Integer>>();
+
 
     public QueryBuilderImpl(DBTool dbTool, IEntityMappingRegistry registry, Class entityClass) {
         this.dbTool = dbTool;
@@ -45,6 +47,7 @@ public class QueryBuilderImpl<T> implements IQueryBuilder<T> {
         selectFields.deleteCharAt(selectFields.length() - 2);
 
         List<Integer> paramsTypes = new LinkedList<Integer>();
+        namedParams.clear();
         createConditionString(this.condition, paramsTypes, where);
 
 
@@ -111,7 +114,7 @@ public class QueryBuilderImpl<T> implements IQueryBuilder<T> {
         String sqlString = sql.toString();
         logger.debug("Creating query {}", sqlString);
         return new QueryImpl<T>(new QueryConfig<T>(dbTool, registry, entityClass,
-                sqlString, maxSize, offset, paramsTypes, null));
+                sqlString, maxSize, offset, paramsTypes, namedParams));
     }
 
     public IQuery<T> createNative(String sql) {
@@ -121,8 +124,8 @@ public class QueryBuilderImpl<T> implements IQueryBuilder<T> {
         char[] chars = sql.toCharArray();
         boolean variableMatch = false;
 
+        namedParams.clear();
         LinkedList<Integer> paramTypes = new LinkedList<Integer>();
-        Map<String, List<Integer>> namedParams = new HashMap<String, List<Integer>>();
         for (int i = 0; i < chars.length; i++) {
             char c = chars[i];
             if (c == '?') {
@@ -173,14 +176,20 @@ public class QueryBuilderImpl<T> implements IQueryBuilder<T> {
         Condition[] childs = condition.getChilds();
         Condition.Type type = condition.getType();
         if (childs != null && childs.length > 0) {
-            where.append('(');
-            createConditionString(childs[0], paramsTypes, where);
-            where.append(')');
+            if (type != Condition.Type.NOT) {
+                where.append('(');
+                createConditionString(childs[0], paramsTypes, where);
+                where.append(')');
 
-            for (int i = 1; i < childs.length; i++) {
-                Condition c = childs[i];
-                where.append(' ').append(type.name()).append(" (");
-                createConditionString(c, paramsTypes, where);
+                for (int i = 1; i < childs.length; i++) {
+                    Condition c = childs[i];
+                    where.append(' ').append(type.name()).append(" (");
+                    createConditionString(c, paramsTypes, where);
+                    where.append(')');
+                }
+            }else{
+                where.append("NOT (");
+                createConditionString(childs[0], paramsTypes, where);
                 where.append(')');
             }
         } else {
@@ -191,40 +200,53 @@ public class QueryBuilderImpl<T> implements IQueryBuilder<T> {
             }
             where.append(fieldMapping.getColumn());
             if (type == Condition.Type.IS_EQUAL) {
-                paramsTypes.add(fieldMapping.getType());
+                addParam(condition, paramsTypes, fieldMapping.getType());
                 where.append(" = ?");
             } else if (type == Condition.Type.NOT_EQUAL) {
-                paramsTypes.add(fieldMapping.getType());
+                addParam(condition, paramsTypes, fieldMapping.getType());
                 where.append(" <> ?");
             } else if (type == Condition.Type.IS_NOT_NULL) {
                 where.append(" IS NOT NULL");
             } else if (type == Condition.Type.IS_NULL) {
                 where.append(" IS NULL");
             } else if (type == Condition.Type.IS_GREATER) {
-                paramsTypes.add(fieldMapping.getType());
+                addParam(condition, paramsTypes, fieldMapping.getType());
                 where.append(" > ?");
             } else if (type == Condition.Type.IS_GREATER_OR_EQUAL) {
-                paramsTypes.add(fieldMapping.getType());
+                addParam(condition, paramsTypes, fieldMapping.getType());
                 where.append(" >= ?");
             } else if (type == Condition.Type.IS_LESS) {
-                paramsTypes.add(fieldMapping.getType());
+                addParam(condition, paramsTypes, fieldMapping.getType());
                 where.append(" < ?");
             } else if (type == Condition.Type.IS_LESS_OR_EQUAL) {
-                paramsTypes.add(fieldMapping.getType());
+                addParam(condition, paramsTypes, fieldMapping.getType());
                 where.append(" <= ?");
             } else if (type == Condition.Type.IN) {
-                paramsTypes.add(fieldMapping.getType());
+                addParam(condition, paramsTypes, fieldMapping.getType());
                 where.append(" IN (?)");
             } else if (type == Condition.Type.LIKE) {
-                paramsTypes.add(fieldMapping.getType());
+                addParam(condition, paramsTypes, fieldMapping.getType());
                 where.append(" LIKE ?");
             } else if (type == Condition.Type.BETWEEN) {
-                paramsTypes.add(fieldMapping.getType());
-                paramsTypes.add(fieldMapping.getType());
+                addParam(condition, paramsTypes, fieldMapping.getType());
+                addParam(condition, paramsTypes, fieldMapping.getType());
                 where.append(" BETWEEN ? AND ?");
             } else {
                 throw new IllegalArgumentException("Unknown condition type!");
             }
+        }
+    }
+
+    private void addParam(Condition condition, List<Integer> paramsTypes, int type) {
+        paramsTypes.add(type);
+        String paramName = condition.getParamName();
+        if (paramName != null) {
+            List<Integer> indexes = namedParams.get(paramName);
+            if (indexes == null) {
+                indexes = new LinkedList<Integer>();
+                namedParams.put(paramName, indexes);
+            }
+            indexes.add(paramsTypes.size());
         }
     }
 
