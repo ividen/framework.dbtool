@@ -120,6 +120,7 @@ public class MSSQLQueryBuilderTest extends AbstractJUnit4SpringContextTests {
     public void testBuildConditionsWithLimit() {
         QueryImpl<TestEntity> query1 = (QueryImpl<TestEntity>) em.queryBuilder(TestEntity.class)
                 .setMaxSize(1000)
+                .setOffset(1000)
                 .where(Condition.and(Condition.in("id"),
                         Condition.like("id"),
                         Condition.isEqual("id"),
@@ -135,7 +136,7 @@ public class MSSQLQueryBuilderTest extends AbstractJUnit4SpringContextTests {
                 )).orderBy(OrderBy.ASC("id"), OrderBy.DESC("stringField")).create();
 
         assertEquals(query1.getConfig().getSql(),
-                "SELECT TOP 1000 id, int_field, string_field, date_field, short_field, version, entity_aid, entity_bid, entity_cid, entity_did " +
+                "SELECT TOP 2000 id, int_field, string_field, date_field, short_field, version, entity_aid, entity_bid, entity_cid, entity_did " +
                         "FROM test_entity " +
                         "WHERE (id IN (?)) AND (id LIKE ?) AND (id = ?) AND (id > ?) AND (id >= ?) AND (id < ?)" +
                         " AND (id <= ?) AND (id IS NOT NULL) AND (id IS NULL) AND (id BETWEEN ? AND ?) AND (id <> ?)" +

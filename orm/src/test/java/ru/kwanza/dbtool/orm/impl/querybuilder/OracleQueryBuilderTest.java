@@ -118,6 +118,7 @@ public class OracleQueryBuilderTest extends AbstractJUnit4SpringContextTests {
     public void testBuildConditionsWithLimit() {
         QueryImpl<TestEntity> query1 = (QueryImpl<TestEntity>) em.queryBuilder(TestEntity.class)
                 .setMaxSize(1000)
+                .setOffset(1000)
                 .where(Condition.and(Condition.in("id"),
                         Condition.like("id"),
                         Condition.isEqual("id"),
@@ -142,7 +143,7 @@ public class OracleQueryBuilderTest extends AbstractJUnit4SpringContextTests {
         assertEquals(query1.getConfig().getParamsCount(), 11);
 
         QueryImpl<TestEntity> query2 = (QueryImpl<TestEntity>) em.queryBuilder(TestEntity.class)
-                .setMaxSize(1000)
+                .setMaxSize(000)
                 .where(Condition.or(Condition.in("id"),
                         Condition.like("id"),
                         Condition.isEqual("id"),

@@ -69,7 +69,8 @@ public class QueryBuilderImpl<T> implements IQueryBuilder<T> {
 
         if (maxSize != null) {
             if (dbTool.getDbType() == DBTool.DBType.MSSQL) {
-                sql = new StringBuilder("SELECT TOP ").append(maxSize).append(' ')
+                sql = new StringBuilder("SELECT TOP ")
+                        .append(offset == null ? maxSize : (maxSize + offset)).append(' ')
                         .append(selectFields)
                         .append("FROM ")
                         .append(registry.getTableName(entityClass));
@@ -187,7 +188,7 @@ public class QueryBuilderImpl<T> implements IQueryBuilder<T> {
                     createConditionString(c, paramsTypes, where);
                     where.append(')');
                 }
-            }else{
+            } else {
                 where.append("NOT (");
                 createConditionString(childs[0], paramsTypes, where);
                 where.append(')');

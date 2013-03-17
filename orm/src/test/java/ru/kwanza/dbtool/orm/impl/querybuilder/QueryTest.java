@@ -183,7 +183,7 @@ public abstract class QueryTest extends AbstractJUnit4SpringContextTests {
     @Test
     public void testSelect_offset() {
         IQuery<TestEntity> query = em.queryBuilder(TestEntity.class)
-                .setMaxSize(100)
+                .setMaxSize(1)
                 .setOffset(99)
                 .orderBy(OrderBy.ASC("id")).create();
 
@@ -202,7 +202,7 @@ public abstract class QueryTest extends AbstractJUnit4SpringContextTests {
         IQuery<TestEntity> query = em.queryBuilder(TestEntity.class)
                 .setMaxSize(100)
                 .where(Condition.isNull("id"))
-                .setOffset(99)
+                .setOffset(1)
                 .orderBy(OrderBy.ASC("id")).create();
 
         IStatement<TestEntity> statement = query.prepare();
@@ -215,7 +215,7 @@ public abstract class QueryTest extends AbstractJUnit4SpringContextTests {
     @Test
     public void testSelect_offset_greater() {
         IQuery<TestEntity> query = em.queryBuilder(TestEntity.class)
-                .setMaxSize(100)
+                .setMaxSize(1)
                 .where(Condition.isEqual("id"))
                 .setOffset(99)
                 .orderBy(OrderBy.ASC("id")).create();

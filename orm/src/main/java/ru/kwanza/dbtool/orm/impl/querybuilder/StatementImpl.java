@@ -29,9 +29,15 @@ public class StatementImpl<T> implements IStatement<T> {
         this.config = config;
 
         int paramsCount = config.getParamsCount();
-        if (config.getDbTool().getDbType() == DBTool.DBType.ORACLE && config.getMaxSize() != null) {
+        Integer maxSize = config.getMaxSize();
+        if (config.getDbTool().getDbType() == DBTool.DBType.ORACLE && maxSize != null) {
             this.params = new Object[paramsCount + 1];
-            this.params[paramsCount] = config.getMaxSize();
+            Integer offset = config.getOffset();
+            if (offset != null) {
+                maxSize += offset;
+            }
+            this.params[paramsCount] = maxSize;
+
         } else {
             this.params = new Object[paramsCount];
         }
