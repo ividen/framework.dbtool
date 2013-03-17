@@ -4,7 +4,9 @@ import ru.kwanza.dbtool.core.DBTool;
 import ru.kwanza.dbtool.orm.impl.mapping.IEntityMappingRegistry;
 
 import java.lang.reflect.Constructor;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Alexander Guzanov
@@ -18,12 +20,13 @@ class QueryConfig<T> {
     private final IEntityMappingRegistry registry;
     private final Class<T> entityClass;
     private final Constructor<T> contructor;
+    private Map<String, List<Integer>> namedParams;
     private int paramsCount;
 
 
-    public QueryConfig(DBTool dbTool, IEntityMappingRegistry registry,
-                       Class<T> entityClass, String sql, Integer maxSize, Integer offset,
-                       List<Integer> paramTypes) {
+    QueryConfig(DBTool dbTool, IEntityMappingRegistry registry,
+                Class<T> entityClass, String sql, Integer maxSize, Integer offset,
+                List<Integer> paramTypes, Map<String, List<Integer>> namedParams) {
         this.dbTool = dbTool;
         this.sql = sql;
         this.maxSize = maxSize;
@@ -31,6 +34,7 @@ class QueryConfig<T> {
         this.paramTypes = paramTypes;
         this.registry = registry;
         this.entityClass = entityClass;
+        this.namedParams = namedParams;
         try {
             this.contructor = entityClass.getDeclaredConstructor();
         } catch (NoSuchMethodException e) {
@@ -74,5 +78,9 @@ class QueryConfig<T> {
 
     public int getParamsCount() {
         return paramsCount;
+    }
+
+    public Map<String, List<Integer>> getNamedParams() {
+        return namedParams;
     }
 }

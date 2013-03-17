@@ -10,9 +10,7 @@ import ru.kwanza.dbtool.orm.api.OrderBy;
 import ru.kwanza.dbtool.orm.impl.mapping.FieldMapping;
 import ru.kwanza.dbtool.orm.impl.mapping.IEntityMappingRegistry;
 
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author Alexander Guzanov
@@ -112,7 +110,8 @@ public class QueryBuilderImpl<T> implements IQueryBuilder<T> {
 
         String sqlString = sql.toString();
         logger.debug("Creating query {}", sqlString);
-        return new QueryImpl<T>(new QueryConfig<T>(dbTool, registry, entityClass, sqlString, maxSize, offset, paramsTypes));
+        return new QueryImpl<T>(new QueryConfig<T>(dbTool, registry, entityClass,
+                sqlString, maxSize, offset, paramsTypes, null));
     }
 
     public IQuery<T> createNative(String sql) {
@@ -123,6 +122,7 @@ public class QueryBuilderImpl<T> implements IQueryBuilder<T> {
         boolean variableMatch = false;
 
         LinkedList<Integer> paramTypes = new LinkedList<Integer>();
+        Map<String, List<Integer>> namedParams = new HashMap<String, List<Integer>>();
         for (int i = 0; i < chars.length; i++) {
             char c = chars[i];
             if (c == '?') {
@@ -137,9 +137,15 @@ public class QueryBuilderImpl<T> implements IQueryBuilder<T> {
                 paramBuilder = new StringBuilder();
             } else if (variableMatch) {
                 if (isDelimiter(c)) {
-                    System.out.println();
+                    String paramName = paramBuilder.toString();
+                    List<Integer> indexes = namedParams.get(paramName);
+                    if (indexes == null) {
+                        indexes = new LinkedList<Integer>();
+                        namedParams.put(paramName, indexes);
+                    }
+                    indexes.add(paramTypes.size());
                     variableMatch = false;
-                    System.out.println("Param:" + paramBuilder.toString());
+
                     sqlBuilder.append(c);
                 } else {
                     paramBuilder.append(c);
@@ -151,7 +157,7 @@ public class QueryBuilderImpl<T> implements IQueryBuilder<T> {
 
 
         return new QueryImpl<T>(new QueryConfig<T>(dbTool, registry, entityClass, sqlBuilder.toString(),
-                null, null, paramTypes));
+                null, null, paramTypes, namedParams));
     }
 
 

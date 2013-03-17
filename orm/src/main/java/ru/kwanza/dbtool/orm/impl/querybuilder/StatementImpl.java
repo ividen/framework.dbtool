@@ -9,7 +9,6 @@ import ru.kwanza.dbtool.core.KeyValue;
 import ru.kwanza.dbtool.core.SqlCollectionParameterValue;
 import ru.kwanza.dbtool.core.util.FieldValueExtractor;
 import ru.kwanza.dbtool.core.util.SelectUtil;
-import ru.kwanza.dbtool.orm.api.IQuery;
 import ru.kwanza.dbtool.orm.api.IStatement;
 import ru.kwanza.dbtool.orm.api.ListProducer;
 import ru.kwanza.dbtool.orm.impl.mapping.EntityField;
@@ -142,7 +141,16 @@ public class StatementImpl<T> implements IStatement<T> {
     }
 
     public IStatement<T> setParameter(String name, Object value) {
-        return null;
+        List<Integer> indexes = config.getNamedParams().get(name);
+        if (indexes == null) {
+            throw new IllegalStateException("Query doesn't constain named param!");
+        }
+
+        for (Integer index : indexes) {
+            setParameter(index, value);
+        }
+
+        return this;
     }
 
     @Override

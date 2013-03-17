@@ -267,14 +267,13 @@ public abstract class QueryTest extends AbstractJUnit4SpringContextTests {
         IQuery<TestEntity> query = em.queryBuilder(TestEntity.class)
                 .createNative(
                         "SELECT * " +
-                                "FROM  test_entity where id in(:ids_1) " +
+                                "FROM  test_entity where id in(:ids) " +
                                 "UNION ALL \n" +
                                 "SELECT * " +
-                                "FROM  test_entity where id in(:ids_2) ");
+                                "FROM  test_entity where id in(:ids) ");
         System.out.println(query);
         IStatement<TestEntity> statement = query.prepare();
-        statement.setParameter(1, Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
-        statement.setParameter(2, Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
+        statement.setParameter("ids", Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
         List<TestEntity> testEntities = statement.selectList();
         assertEquals(testEntities.size(), 20);
         Map<Long, List<TestEntity>> id1 = statement.selectMapList("id");
