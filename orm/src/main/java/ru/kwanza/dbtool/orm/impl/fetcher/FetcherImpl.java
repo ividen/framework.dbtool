@@ -39,6 +39,11 @@ public class FetcherImpl implements IFetcher {
     }
 
 
+    public <T> void fetch(T object, String relationPath){
+        fetch((Class<T>) object.getClass(),Collections.singleton(object),relationPath);
+    }
+
+
     private <T> void fillItems(Collection<T> items, PathValue value) {
         Map<RelationKey, Map> results = new HashMap<RelationKey, Map>(value.getRelationKeys().size());
 
