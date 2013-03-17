@@ -47,7 +47,9 @@ public class OracleQueryBuilderTest extends AbstractJUnit4SpringContextTests {
                         Condition.isNull("id"),
                         Condition.between("id"),
                         Condition.notEqual("id"),
-                        Condition.not(Condition.notEqual("id"))
+                        Condition.not(Condition.notEqual("id")),
+                        Condition.createNative("Exists(select * from test_entity where id=:id)")
+
                 )).orderBy(OrderBy.ASC("id"), OrderBy.DESC("stringField")).create();
 
         assertEquals(query1.getConfig().getSql(),
@@ -55,9 +57,9 @@ public class OracleQueryBuilderTest extends AbstractJUnit4SpringContextTests {
                         "FROM test_entity " +
                         "WHERE (id IN (?)) AND (id LIKE ?) AND (id = ?) AND (id > ?) AND (id >= ?) AND (id < ?)" +
                         " AND (id <= ?) AND (id IS NOT NULL) AND (id IS NULL) AND (id BETWEEN ? AND ?) AND (id <> ?)" +
-                        " AND (NOT (id <> ?)) ORDER BY id ASC, string_field DESC ");
+                        " AND (NOT (id <> ?)) AND (Exists(select * from test_entity where id=?)) ORDER BY id ASC, string_field DESC ");
 
-        assertEquals(query1.getConfig().getParamsCount(), 11);
+        assertEquals(query1.getConfig().getParamsCount(), 12);
         QueryImpl<TestEntity> query2 = (QueryImpl<TestEntity>) em.queryBuilder(TestEntity.class)
                 .where(Condition.or(Condition.in("id"),
                         Condition.like("id"),
@@ -80,7 +82,7 @@ public class OracleQueryBuilderTest extends AbstractJUnit4SpringContextTests {
                         "OR (id >= ?) OR (id < ?) OR (id <= ?) OR (id IS NOT NULL) OR (id IS NULL) " +
                         "OR (id BETWEEN ? AND ?) OR (id <> ?) OR (id <> ?) ORDER BY id ASC, string_field DESC ");
 
-        assertEquals(query1.getConfig().getParamsCount(), 11);
+        assertEquals(query1.getConfig().getParamsCount(), 12);
         QueryImpl<TestEntity> query3 = (QueryImpl<TestEntity>) em.queryBuilder(TestEntity.class)
                 .where(Condition.and(
                         Condition.not(Condition.or(Condition.in("id"),
@@ -111,7 +113,7 @@ public class OracleQueryBuilderTest extends AbstractJUnit4SpringContextTests {
                         "AND" +
                         " ((id <> ?) OR (id <> ?)) " +
                         "ORDER BY id ASC, string_field DESC ");
-        assertEquals(query1.getConfig().getParamsCount(), 11);
+        assertEquals(query3.getConfig().getParamsCount(), 11);
     }
 
     @Test

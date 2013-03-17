@@ -119,14 +119,18 @@ public class QueryBuilderImpl<T> implements IQueryBuilder<T> {
     }
 
     public IQuery<T> createNative(String sql) {
-        StringBuilder sqlBuilder = new StringBuilder();
-        StringBuilder paramBuilder = null;
-
-        char[] chars = sql.toCharArray();
-        boolean variableMatch = false;
-
         namedParams.clear();
         LinkedList<Integer> paramTypes = new LinkedList<Integer>();
+        String preparedSql = parseSql(sql, paramTypes);
+        return new QueryImpl<T>(new QueryConfig<T>(dbTool, registry, entityClass, preparedSql,
+                null, null, paramTypes, namedParams));
+    }
+
+    private String parseSql(String sql, List<Integer> paramTypes) {
+        StringBuilder sqlBuilder = new StringBuilder();
+        StringBuilder paramBuilder = null;
+        char[] chars = sql.toCharArray();
+        boolean variableMatch = false;
         for (int i = 0; i < chars.length; i++) {
             char c = chars[i];
             if (c == '?') {
@@ -158,10 +162,7 @@ public class QueryBuilderImpl<T> implements IQueryBuilder<T> {
                 sqlBuilder.append(c);
             }
         }
-
-
-        return new QueryImpl<T>(new QueryConfig<T>(dbTool, registry, entityClass, sqlBuilder.toString(),
-                null, null, paramTypes, namedParams));
+        return sqlBuilder.toString();
     }
 
 
@@ -193,7 +194,9 @@ public class QueryBuilderImpl<T> implements IQueryBuilder<T> {
                 createConditionString(childs[0], paramsTypes, where);
                 where.append(')');
             }
-        } else {
+        }else if(type== Condition.Type.NATIVE){
+            where.append(parseSql(condition.getSql(),paramsTypes));
+        }else {
             FieldMapping fieldMapping =
                     registry.getFieldMappingByPropertyName(entityClass, condition.getPropertyName());
             if (fieldMapping == null) {

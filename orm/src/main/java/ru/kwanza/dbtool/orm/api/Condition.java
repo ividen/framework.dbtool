@@ -19,10 +19,12 @@ public class Condition {
         LIKE,
         AND,
         OR,
-        NOT;
+        NOT,
+        NATIVE;
     }
 
     private String propertyName;
+    private String sql;
     private String paramName;
     private Type type;
     private Condition[] childs;
@@ -34,12 +36,21 @@ public class Condition {
         this.childs = childs;
     }
 
+    private Condition(String sql) {
+        this.sql = sql;
+        this.type = Type.NATIVE;
+    }
+
     private Condition(String propertyName, Type type, String paramName) {
         this(propertyName, type, null, paramName);
     }
 
     public String getPropertyName() {
         return propertyName;
+    }
+
+    public String getSql() {
+        return sql;
     }
 
     public String getParamName() {
@@ -128,7 +139,6 @@ public class Condition {
 
     public static Condition like(String property, String propertyName) {
         return new Condition(property, Type.LIKE, propertyName);
-
     }
 
     public static Condition between(String property) {
@@ -145,6 +155,10 @@ public class Condition {
 
     public static Condition not(Condition conditions) {
         return new Condition(Type.NOT, new Condition[]{conditions});
+    }
+
+    public static Condition createNative(String sql) {
+        return new Condition(sql);
     }
 
 }
