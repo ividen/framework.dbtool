@@ -22,11 +22,15 @@ public abstract class AbstractTestFieldHelper extends TestCase {
 
     private static String DELETE_SQL = "delete from test_table1";
     private static String INSERT_SQL =
-            "insert into test_table1 (bool, int, bigint, string, ts1, ts2, blob, bigdecimal) " + "values (?, ?, ?, ?, ?, ?, ?, ?)";
+            "insert into test_table1 (xbool, xint, xbigint, xstring, xts1, xts2, xblob, xbigdecimal) " + "values (?, ?, ?, ?, ?, ?, ?, ?)";
     private static String ORACLE_SELECT_SQL =
-            "select bool, int, bigint, string, ts1, ts2, blob, bigdecimal from test_table1 where rownum > ?";
+            "select xbool, xint, xbigint, xstring, xts1, xts2, xblob, xbigdecimal from test_table1 where rownum > ?";
     private static String MSSQL_SELECT_SQL =
-            "select top 10 bool, int, bigint, string, ts1, ts2, blob, bigdecimal from test_table1 where not(int = ?) ";
+            "select top 10 xbool, xint, xbigint, xstring, xts1, xts2, xblob, xbigdecimal from test_table1 where not(xint = ?) ";
+
+    private static String MYSQL_SELECT_SQL =
+            "select xbool, xint, xbigint, xstring, xts1, xts2, xblob, xbigdecimal from test_table1 where not(xint = ?) LIMIT 0,10";
+
     private static DBTool dbTool = null;
 
     @Override
@@ -50,16 +54,29 @@ public abstract class AbstractTestFieldHelper extends TestCase {
                 return true;
             }
         });
-        dbTool.selectList(dbTool.getDbType() == DBTool.DBType.ORACLE ? ORACLE_SELECT_SQL : MSSQL_SELECT_SQL, new RowMapper<Object>() {
+
+        String sql;
+
+        if(dbTool.getDbType() == DBTool.DBType.ORACLE){
+                    sql = ORACLE_SELECT_SQL;
+        }else if(dbTool.getDbType() == DBTool.DBType.MSSQL){
+            sql = MSSQL_SELECT_SQL;
+        }else if(dbTool.getDbType() == DBTool.DBType.MYSQL){
+            sql = MYSQL_SELECT_SQL;
+        }else{
+           throw new RuntimeException("Unsupported database type!");
+        }
+
+        dbTool.selectList(sql, new RowMapper<Object>() {
             public Object mapRow(ResultSet rs, int rowNum) throws SQLException {
-                Assert.assertEquals((Boolean) true, FieldGetter.getBoolean(rs, "bool"));
-                assertEquals((Integer) 2, FieldGetter.getInteger(rs, "int"));
-                assertEquals((Long) 3l, FieldGetter.getLong(rs, "bigint"));
-                assertEquals("4", FieldGetter.getString(rs, "string"));
-                assertEquals(new Date(1000l).getTime(), FieldGetter.getTimestamp(rs, "ts1").getTime());
-                assertEquals(new Date(1000l).getTime(), FieldGetter.getTimestamp(rs, "ts2").getTime());
-                assertEquals("blob", new String(FieldGetter.getBytes(rs, "blob")));
-                assertEquals(new BigDecimal(8), FieldGetter.getBigDecimal(rs, "bigdecimal"));
+                Assert.assertEquals((Boolean) true, FieldGetter.getBoolean(rs, "xbool"));
+                assertEquals((Integer) 2, FieldGetter.getInteger(rs, "xint"));
+                assertEquals((Long) 3l, FieldGetter.getLong(rs, "xbigint"));
+                assertEquals("4", FieldGetter.getString(rs, "xstring"));
+                assertEquals(new Date(1000l).getTime(), FieldGetter.getTimestamp(rs, "xts1").getTime());
+                assertEquals(new Date(1000l).getTime(), FieldGetter.getTimestamp(rs, "xts2").getTime());
+                assertEquals("blob", new String(FieldGetter.getBytes(rs, "xblob")));
+                assertEquals(new BigDecimal(8), FieldGetter.getBigDecimal(rs, "xbigdecimal"));
                 return null;
             }
         }, 0);
@@ -79,16 +96,28 @@ public abstract class AbstractTestFieldHelper extends TestCase {
                 return true;
             }
         });
-        dbTool.selectList(dbTool.getDbType() == DBTool.DBType.ORACLE ? ORACLE_SELECT_SQL : MSSQL_SELECT_SQL, new RowMapper<Object>() {
+
+        String sql;
+
+        if(dbTool.getDbType() == DBTool.DBType.ORACLE){
+            sql = ORACLE_SELECT_SQL;
+        }else if(dbTool.getDbType() == DBTool.DBType.MSSQL){
+            sql = MSSQL_SELECT_SQL;
+        }else if(dbTool.getDbType() == DBTool.DBType.MYSQL){
+            sql = MYSQL_SELECT_SQL;
+        }else{
+            throw new RuntimeException("Unsupported database type!");
+        }
+        dbTool.selectList(sql, new RowMapper<Object>() {
             public Object mapRow(ResultSet rs, int rowNum) throws SQLException {
-                assertNull(FieldGetter.getBoolean(rs, "bool"));
-                assertNull(FieldGetter.getInteger(rs, "int"));
-                assertNull(FieldGetter.getLong(rs, "bigint"));
-                assertNull(FieldGetter.getString(rs, "string"));
-                assertNull(FieldGetter.getTimestamp(rs, "ts1"));
-                assertNull(FieldGetter.getTimestamp(rs, "ts2"));
-                assertNull(FieldGetter.getBytes(rs, "blob"));
-                assertNull(FieldGetter.getBigDecimal(rs, "bigdecimal"));
+                assertNull(FieldGetter.getBoolean(rs, "xbool"));
+                assertNull(FieldGetter.getInteger(rs, "xint"));
+                assertNull(FieldGetter.getLong(rs, "xbigint"));
+                assertNull(FieldGetter.getString(rs, "xstring"));
+                assertNull(FieldGetter.getTimestamp(rs, "xts1"));
+                assertNull(FieldGetter.getTimestamp(rs, "xts2"));
+                assertNull(FieldGetter.getBytes(rs, "xblob"));
+                assertNull(FieldGetter.getBigDecimal(rs, "xbigdecimal"));
                 return null;
             }
         }, 0);

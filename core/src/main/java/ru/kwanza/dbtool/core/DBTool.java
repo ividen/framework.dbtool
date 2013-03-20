@@ -36,11 +36,14 @@ public class DBTool extends JdbcDaoSupport {
     protected void initDao() throws Exception {
         try {
             Connection conn = getConnection();
-            if ("Microsoft SQL Server".equalsIgnoreCase(conn.getMetaData().getDatabaseProductName())) {
+            String databaseProductName = conn.getMetaData().getDatabaseProductName();
+            if ("Microsoft SQL Server".equalsIgnoreCase(databaseProductName)) {
                 dbType = DBType.MSSQL;
-            } else if ("Oracle".equalsIgnoreCase(conn.getMetaData().getDatabaseProductName())) {
+            } else if ("Oracle".equalsIgnoreCase(databaseProductName)) {
                 dbType = DBType.ORACLE;
-            } else {
+            } else if("MySQL".equalsIgnoreCase(databaseProductName)){
+                dbType = DBType.MYSQL;
+            }else {
                 dbType = DBType.OTHER;
             }
             dbVersion = conn.getMetaData().getDatabaseMajorVersion();
@@ -127,7 +130,7 @@ public class DBTool extends JdbcDaoSupport {
     }
 
     public static enum DBType {
-        MSSQL, ORACLE, OTHER
+        MSSQL, ORACLE, MYSQL, OTHER
     }
 
     public void closeResources(Object... objects) {

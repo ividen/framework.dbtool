@@ -1,6 +1,7 @@
 package ru.kwanza.dbtool.core;
 
 import org.dbunit.DBTestCase;
+import org.dbunit.database.DatabaseConfig;
 import org.dbunit.dataset.IDataSet;
 import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
 import org.dbunit.operation.DatabaseOperation;
@@ -69,6 +70,11 @@ public abstract class TestSelectUtil extends DBTestCase {
     protected void setUp() throws Exception {
         ctx = new ClassPathXmlApplicationContext(getSpringCfgFile(), TestSelectUtil.class);
         DatabaseOperation.CLEAN_INSERT.execute(getConnection(), getDataSet());
+    }
+
+    @Override
+    protected void setUpDatabaseConfig(DatabaseConfig config) {
+        config.setProperty(DatabaseConfig.FEATURE_CASE_SENSITIVE_TABLE_NAMES,true);
     }
 
     protected abstract String getSpringCfgFile();

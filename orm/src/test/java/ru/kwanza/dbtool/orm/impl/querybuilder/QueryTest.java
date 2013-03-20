@@ -36,7 +36,7 @@ public abstract class QueryTest extends AbstractJUnit4SpringContextTests {
     @Resource(name = "dbtool.IEntityMappingRegistry")
     private EntityMappingRegistryImpl registry;
     @Resource(name = "dataSource")
-    private DataSource dataSource;
+    public DataSource dataSource;
 
 
     @Before
@@ -181,7 +181,7 @@ public abstract class QueryTest extends AbstractJUnit4SpringContextTests {
     }
 
     @Test
-    public void testSelect_offset() {
+    public void testSelect_offset_0() {
         IQuery<TestEntity> query = em.queryBuilder(TestEntity.class)
                 .setMaxSize(1)
                 .setOffset(99)
@@ -195,6 +195,35 @@ public abstract class QueryTest extends AbstractJUnit4SpringContextTests {
         Map<Long, TestEntity> map = statement.selectMap("id");
         assertEquals(map.size(), 1);
         Assert.assertEquals(map.get(99l).getId().longValue(), 99l);
+    }
+
+
+    @Test
+    public void testSelect_offset_1() {
+        IQuery<TestEntity> query = em.queryBuilder(TestEntity.class)
+                .setMaxSize(1)
+                .orderBy(OrderBy.ASC("id")).create();
+
+        IStatement<TestEntity> statement = query.prepare();
+        List<TestEntity> testEntities = statement.selectList();
+        assertEquals(testEntities.size(), 1);
+        Assert.assertEquals(testEntities.get(0).getId().longValue(), 0l);
+
+        Map<Long, TestEntity> map = statement.selectMap("id");
+        assertEquals(map.size(), 1);
+        Assert.assertEquals(map.get(0l).getId().longValue(), 0l);
+    }
+
+    @Test
+    public void testSelect_offset_2() {
+        IQuery<TestEntity> query = em.queryBuilder(TestEntity.class)
+                .setOffset(99)
+                .orderBy(OrderBy.ASC("id")).create();
+
+        IStatement<TestEntity> statement = query.prepare();
+        List<TestEntity> testEntities = statement.selectList();
+        assertEquals(testEntities.size(), 101);
+        Assert.assertEquals(testEntities.get(0).getId().longValue(), 99l);
     }
 
     @Test
@@ -225,7 +254,6 @@ public abstract class QueryTest extends AbstractJUnit4SpringContextTests {
         Map<Long, TestEntity> map = statement.setParameter(1, 100).selectMap("id");
         assertEquals(map.size(), 0);
     }
-
 
 
     @Test

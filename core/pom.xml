@@ -38,6 +38,12 @@
         </dependency>
 
         <dependency>
+            <groupId>com.mysql.jdbc</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
             <groupId>com.oracle.jdbc</groupId>
             <artifactId>orai18n</artifactId>
         </dependency>

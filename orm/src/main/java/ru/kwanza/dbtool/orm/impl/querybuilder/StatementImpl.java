@@ -30,13 +30,23 @@ public class StatementImpl<T> implements IStatement<T> {
 
         int paramsCount = config.getParamsCount();
         Integer maxSize = config.getMaxSize();
+        Integer offset = config.getOffset();
         if (config.getDbTool().getDbType() == DBTool.DBType.ORACLE && maxSize != null) {
             this.params = new Object[paramsCount + 1];
-            Integer offset = config.getOffset();
+            this.params[paramsCount] = maxSize + (offset == null ? 0 : offset);
+        } else if (config.getDbTool().getDbType() == DBTool.DBType.MYSQL && maxSize != null) {
+            int size = paramsCount+1;
             if (offset != null) {
-                maxSize += offset;
+                size++;
             }
-            this.params[paramsCount] = maxSize;
+
+            this.params = new Object[size];
+
+            if (offset != null) {
+                this.params[size-2] = offset;
+            }
+
+            this.params[size-1] = maxSize;
 
         } else {
             this.params = new Object[paramsCount];
@@ -195,7 +205,8 @@ public class StatementImpl<T> implements IStatement<T> {
     private abstract class BaseExtractor<TYPE> implements ResultSetExtractor {
         public Collection<TYPE> extractData(ResultSet rs) throws SQLException, DataAccessException {
             Integer offset = config.getOffset();
-            if (offset != null && offset > 1) {
+            if ((config.getDbTool().getDbType() != DBTool.DBType.MYSQL && offset != null && offset > 1) ||
+                    config.getDbTool().getDbType()== DBTool.DBType.MYSQL && offset!=null && config.getMaxSize()==null) {
                 if (rs.next()) {
                     rs.absolute(offset);
                 } else {

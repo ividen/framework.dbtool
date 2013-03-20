@@ -67,37 +67,63 @@ public class QueryBuilderImpl<T> implements IQueryBuilder<T> {
             orderBy.deleteCharAt(orderBy.length() - 2);
         }
 
-        if (maxSize != null) {
-            if (dbTool.getDbType() == DBTool.DBType.MSSQL) {
-                sql = new StringBuilder("SELECT TOP ")
-                        .append(offset == null ? maxSize : (maxSize + offset)).append(' ')
-                        .append(selectFields)
-                        .append("FROM ")
-                        .append(registry.getTableName(entityClass));
-                if (where.length() > 0) {
-                    sql.append(" WHERE ").append(where);
-                }
+        if (dbTool.getDbType() == DBTool.DBType.MSSQL && maxSize != null) {
+            long size = (offset == null ? 0 : offset) + maxSize;
+            sql = new StringBuilder("SELECT TOP ")
+                    .append(size).append(' ')
+                    .append(selectFields)
+                    .append("FROM ")
+                    .append(registry.getTableName(entityClass));
+            if (where.length() > 0) {
+                sql.append(" WHERE ").append(where);
+            }
 
-                if (orderBy.length() > 0) {
-                    sql.append(orderBy);
-                }
+            if (orderBy.length() > 0) {
+                sql.append(orderBy);
+            }
+
+        } else if (dbTool.getDbType() == DBTool.DBType.ORACLE && maxSize != null) {
+            sql = new StringBuilder("SELECT  * FROM (SELECT ")
+                    .append(selectFields)
+                    .append("FROM ")
+                    .append(registry.getTableName(entityClass));
+
+            if (where.length() > 0) {
+                sql.append(" WHERE ").append(where);
+            }
+
+            if (orderBy.length() > 0) {
+                sql.append(orderBy);
+            }
+
+
+            sql.append(") WHERE ");
+
+            if (maxSize != null) {
+                sql.append("rownum <=?");
+            }
+        } else if (dbTool.getDbType() == DBTool.DBType.MYSQL && maxSize != null) {
+            sql = new StringBuilder("SELECT ")
+                    .append(selectFields)
+                    .append("FROM ")
+                    .append(registry.getTableName(entityClass));
+            if (where.length() > 0) {
+                sql.append(" WHERE ").append(where);
+            }
+
+            if (orderBy.length() > 0) {
+                sql.append(orderBy);
+            }
+            sql.append("LIMIT");
+
+            if (offset != null) {
+                sql.append(" ?");
 
             } else {
-                sql = new StringBuilder("SELECT  * FROM (SELECT ")
-                        .append(selectFields)
-                        .append("FROM ")
-                        .append(registry.getTableName(entityClass));
-
-                if (where.length() > 0) {
-                    sql.append(" WHERE ").append(where);
-                }
-
-                if (orderBy.length() > 0) {
-                    sql.append(orderBy);
-                }
-
-                sql.append(") WHERE rownum <= ?");
+                sql.append(" 0");
             }
+
+            sql.append(",?");
         } else {
             sql = new StringBuilder("SELECT ")
                     .append(selectFields)
@@ -194,9 +220,9 @@ public class QueryBuilderImpl<T> implements IQueryBuilder<T> {
                 createConditionString(childs[0], paramsTypes, where);
                 where.append(')');
             }
-        }else if(type== Condition.Type.NATIVE){
-            where.append(parseSql(condition.getSql(),paramsTypes));
-        }else {
+        } else if (type == Condition.Type.NATIVE) {
+            where.append(parseSql(condition.getSql(), paramsTypes));
+        } else {
             FieldMapping fieldMapping =
                     registry.getFieldMappingByPropertyName(entityClass, condition.getPropertyName());
             if (fieldMapping == null) {
