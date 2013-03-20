@@ -5,7 +5,7 @@ import ru.kwanza.dbtool.orm.api.Condition;
 import ru.kwanza.dbtool.orm.api.IQueryBuilder;
 import ru.kwanza.dbtool.orm.impl.mapping.FieldMapping;
 import ru.kwanza.dbtool.orm.impl.mapping.IEntityMappingRegistry;
-import ru.kwanza.dbtool.orm.impl.querybuilder.QueryBuilderImpl;
+import ru.kwanza.dbtool.orm.impl.querybuilder.QueryBuilderFactory;
 
 import java.util.Collection;
 
@@ -32,8 +32,10 @@ public class ReadOperation extends Operation implements IReadOperation {
         final FieldMapping idFieldMapping = idFieldMappings.iterator().next();
         final String propertyName = idFieldMapping.getName();
 
-        this.queryBuilderForObject = new QueryBuilderImpl(dbTool, entityMappingRegistry, entityClass).where(Condition.isEqual(propertyName));
-        this.queryBuilderForList = new QueryBuilderImpl(dbTool, entityMappingRegistry, entityClass).where(Condition.in(propertyName));
+        this.queryBuilderForObject = QueryBuilderFactory.createBuilder(dbTool, entityMappingRegistry, entityClass)
+                .where(Condition.isEqual(propertyName));
+        this.queryBuilderForList = QueryBuilderFactory.createBuilder(dbTool, entityMappingRegistry, entityClass)
+                .where(Condition.in(propertyName));
     }
 
     public Object selectByKey(Object key) {

@@ -8,7 +8,7 @@ import ru.kwanza.dbtool.orm.impl.fetcher.FetcherImpl;
 import ru.kwanza.dbtool.orm.impl.filtering.FilteringImpl;
 import ru.kwanza.dbtool.orm.impl.mapping.IEntityMappingRegistry;
 import ru.kwanza.dbtool.orm.impl.operation.OperationFactory;
-import ru.kwanza.dbtool.orm.impl.querybuilder.QueryBuilderImpl;
+import ru.kwanza.dbtool.orm.impl.querybuilder.QueryBuilderFactory;
 
 import java.util.Collection;
 
@@ -84,7 +84,7 @@ public class EntityManagerImpl implements IEntityManager {
     }
 
     public <T> IQueryBuilder<T> queryBuilder(Class<T> entityClass) {
-        return new QueryBuilderImpl<T>(dbTool, mappingRegistry, entityClass);
+        return QueryBuilderFactory.createBuilder(dbTool,mappingRegistry,entityClass);
     }
 
     public <T> IFiltering<T> filtering(Class<T> entityClass) {

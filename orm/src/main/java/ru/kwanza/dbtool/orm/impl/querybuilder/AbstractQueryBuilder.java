@@ -15,141 +15,54 @@ import java.util.*;
 /**
  * @author Alexander Guzanov
  */
-public class QueryBuilderImpl<T> implements IQueryBuilder<T> {
-    private static final Logger logger = LoggerFactory.getLogger(QueryImpl.class);
+public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
+    protected static final Logger logger = LoggerFactory.getLogger(AbstractQuery.class);
+    protected IEntityMappingRegistry registry;
+    protected DBTool dbTool;
+    protected Class entityClass;
+    protected Condition condition;
+    protected OrderBy[] orderBy;
+    protected Integer maxSize;
+    protected Integer offset;
+    protected Map<String, List<Integer>> namedParams = new HashMap<String, List<Integer>>();
 
-    private IEntityMappingRegistry registry;
-    private DBTool dbTool;
-    private Class entityClass;
-    private Condition condition;
-    private OrderBy[] orderBy;
-    private Integer maxSize;
-    private Integer offset;
-    private Map<String, List<Integer>> namedParams = new HashMap<String, List<Integer>>();
-
-
-    public QueryBuilderImpl(DBTool dbTool, IEntityMappingRegistry registry, Class entityClass) {
-        this.dbTool = dbTool;
+    public AbstractQueryBuilder(DBTool dbTool, IEntityMappingRegistry registry, Class entityClass) {
         this.registry = registry;
         this.entityClass = entityClass;
+        this.dbTool = dbTool;
+
 
         if (!registry.isRegisteredEntityClass(entityClass)) {
             throw new RuntimeException("Not registered entity class: " + entityClass);
         }
     }
 
-    public IQuery<T> create() {
+    public final IQuery<T> create() {
         StringBuilder sql;
-        StringBuilder selectFields = new StringBuilder("");
-        StringBuilder orderBy = new StringBuilder();
-        StringBuilder where = new StringBuilder();
-        addFields(selectFields, registry.getFieldMappings(entityClass));
-        selectFields.deleteCharAt(selectFields.length() - 2);
-
         List<Integer> paramsTypes = new LinkedList<Integer>();
+
         namedParams.clear();
-        createConditionString(this.condition, paramsTypes, where);
+        String conditions = getConditionStringAndTypes(this.condition, paramsTypes);
+        String orderBy = createOrderBy();
+        String fieldsString = getFieldsString(registry.getFieldMappings(entityClass));
 
-
-        if (this.orderBy != null && this.orderBy.length > 0) {
-            orderBy.append(" ORDER BY ");
-            for (OrderBy ob : this.orderBy) {
-                FieldMapping fieldMapping = registry.getFieldMappingByPropertyName(entityClass, ob.getPropertyName());
-                if (fieldMapping == null) {
-                    throw new IllegalArgumentException("Unknown field!");
-                }
-                orderBy.append(fieldMapping.getColumn())
-                        .append(' ')
-                        .append(ob.getType())
-                        .append(", ");
-            }
-
-            orderBy.deleteCharAt(orderBy.length() - 2);
-        }
-
-        if (dbTool.getDbType() == DBTool.DBType.MSSQL && maxSize != null) {
-            long size = (offset == null ? 0 : offset) + maxSize;
-            sql = new StringBuilder("SELECT TOP ")
-                    .append(size).append(' ')
-                    .append(selectFields)
-                    .append("FROM ")
-                    .append(registry.getTableName(entityClass));
-            if (where.length() > 0) {
-                sql.append(" WHERE ").append(where);
-            }
-
-            if (orderBy.length() > 0) {
-                sql.append(orderBy);
-            }
-
-        } else if (dbTool.getDbType() == DBTool.DBType.ORACLE && maxSize != null) {
-            sql = new StringBuilder("SELECT  * FROM (SELECT ")
-                    .append(selectFields)
-                    .append("FROM ")
-                    .append(registry.getTableName(entityClass));
-
-            if (where.length() > 0) {
-                sql.append(" WHERE ").append(where);
-            }
-
-            if (orderBy.length() > 0) {
-                sql.append(orderBy);
-            }
-
-
-            sql.append(") WHERE ");
-
-            if (maxSize != null) {
-                sql.append("rownum <=?");
-            }
-        } else if (dbTool.getDbType() == DBTool.DBType.MYSQL && maxSize != null) {
-            sql = new StringBuilder("SELECT ")
-                    .append(selectFields)
-                    .append("FROM ")
-                    .append(registry.getTableName(entityClass));
-            if (where.length() > 0) {
-                sql.append(" WHERE ").append(where);
-            }
-
-            if (orderBy.length() > 0) {
-                sql.append(orderBy);
-            }
-            sql.append("LIMIT");
-
-            if (offset != null) {
-                sql.append(" ?");
-
-            } else {
-                sql.append(" 0");
-            }
-
-            sql.append(",?");
-        } else {
-            sql = new StringBuilder("SELECT ")
-                    .append(selectFields)
-                    .append("FROM ")
-                    .append(registry.getTableName(entityClass));
-            if (where.length() > 0) {
-                sql.append(" WHERE ").append(where);
-            }
-
-            if (orderBy.length() > 0) {
-                sql.append(orderBy);
-            }
-        }
+        sql = createSQLString(conditions, orderBy, fieldsString);
 
         String sqlString = sql.toString();
         logger.debug("Creating query {}", sqlString);
-        return new QueryImpl<T>(new QueryConfig<T>(dbTool, registry, entityClass,
-                sqlString, maxSize, offset, paramsTypes, namedParams));
+        return createQuery(paramsTypes, sqlString);
     }
+
+
+    protected abstract IQuery<T> createQuery(List<Integer> paramsTypes, String sqlString);
+
+    protected abstract StringBuilder createSQLString(String conditions, String orderBy, String fieldsString);
 
     public IQuery<T> createNative(String sql) {
         namedParams.clear();
         LinkedList<Integer> paramTypes = new LinkedList<Integer>();
         String preparedSql = parseSql(sql, paramTypes);
-        return new QueryImpl<T>(new QueryConfig<T>(dbTool, registry, entityClass, preparedSql,
-                null, null, paramTypes, namedParams));
+        return createQuery(paramTypes, preparedSql);
     }
 
     private String parseSql(String sql, List<Integer> paramTypes) {
@@ -191,9 +104,16 @@ public class QueryBuilderImpl<T> implements IQueryBuilder<T> {
         return sqlBuilder.toString();
     }
 
-
     private boolean isDelimiter(char c) {
         return c == '+' || c == '-' || c == ' ' || c == ')' || c == '(' || c == '\n' || c == '\t' || c == ',';
+    }
+
+    protected String getConditionStringAndTypes(Condition condition, List<Integer> paramsTypes) {
+        StringBuilder result = new StringBuilder();
+
+        createConditionString(condition, paramsTypes, result);
+
+        return result.toString();
     }
 
     private void createConditionString(Condition condition, List<Integer> paramsTypes, StringBuilder where) {
@@ -267,6 +187,42 @@ public class QueryBuilderImpl<T> implements IQueryBuilder<T> {
         }
     }
 
+    protected String createOrderBy() {
+        StringBuilder orderBy = new StringBuilder();
+        if (this.orderBy != null && this.orderBy.length > 0) {
+            for (OrderBy ob : this.orderBy) {
+                FieldMapping fieldMapping = registry.getFieldMappingByPropertyName(entityClass, ob.getPropertyName());
+                if (fieldMapping == null) {
+                    throw new IllegalArgumentException("Unknown field!");
+                }
+                orderBy.append(fieldMapping.getColumn())
+                        .append(' ')
+                        .append(ob.getType())
+                        .append(", ");
+            }
+
+            orderBy.deleteCharAt(orderBy.length() - 2);
+        }
+
+        return orderBy.toString();
+    }
+
+    protected StringBuilder createDefaultSQLString(String fieldsString, String conditions, String orderBy) {
+        StringBuilder sql;
+        sql = new StringBuilder("SELECT ")
+                .append(fieldsString)
+                .append("FROM ")
+                .append(registry.getTableName(entityClass));
+        if (conditions.length() > 0) {
+            sql.append(" WHERE ").append(conditions);
+        }
+
+        if (orderBy.length() > 0) {
+            sql.append(" ORDER BY ").append(orderBy);
+        }
+        return sql;
+    }
+
     private void addParam(Condition condition, List<Integer> paramsTypes, int type) {
         paramsTypes.add(type);
         String paramName = condition.getParamName();
@@ -280,12 +236,15 @@ public class QueryBuilderImpl<T> implements IQueryBuilder<T> {
         }
     }
 
-    private void addFields(StringBuilder select, Collection<FieldMapping> fields) {
+    protected String getFieldsString(Collection<FieldMapping> fields) {
+        StringBuilder result = new StringBuilder();
         if (fields != null) {
             for (FieldMapping fm : fields) {
-                select.append(fm.getColumn()).append(", ");
+                result.append(fm.getColumn()).append(", ");
             }
         }
+        result.deleteCharAt(result.length() - 2);
+        return result.toString();
     }
 
     public IQueryBuilder<T> setMaxSize(int maxSize) {

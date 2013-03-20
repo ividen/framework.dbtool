@@ -21,7 +21,7 @@ import java.util.*;
 /**
  * @author Alexander Guzanov
  */
-public class StatementImpl<T> implements IStatement<T> {
+public abstract class StatementImpl<T> implements IStatement<T> {
     private final QueryConfig<T> config;
     private final Object[] params;
 
@@ -31,31 +31,11 @@ public class StatementImpl<T> implements IStatement<T> {
         int paramsCount = config.getParamsCount();
         Integer maxSize = config.getMaxSize();
         Integer offset = config.getOffset();
-        if (config.getDbTool().getDbType() == DBTool.DBType.ORACLE && maxSize != null) {
-            this.params = new Object[paramsCount + 1];
-            this.params[paramsCount] = maxSize + (offset == null ? 0 : offset);
-        } else if (config.getDbTool().getDbType() == DBTool.DBType.MYSQL && maxSize != null) {
-            int size = paramsCount+1;
-            if (offset != null) {
-                size++;
-            }
-
-            this.params = new Object[size];
-
-            if (offset != null) {
-                this.params[size-2] = offset;
-            }
-
-            this.params[size-1] = maxSize;
-
-        } else {
-            this.params = new Object[paramsCount];
-        }
+        params = createParamsArray(config, paramsCount, maxSize, offset);
     }
 
-    public IStatement<T> prepare() {
-        return new StatementImpl<T>(config);
-    }
+    protected abstract Object[] createParamsArray(QueryConfig<T> config, int paramsCount, Integer maxSize, Integer offset) ;
+
 
     public T select() {
         final Object[] result = new Object[1];

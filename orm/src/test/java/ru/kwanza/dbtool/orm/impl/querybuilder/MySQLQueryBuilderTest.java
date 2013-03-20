@@ -19,9 +19,9 @@ import static junit.framework.Assert.assertEquals;
  * @author Alexander Guzanov
  */
 
-@ContextConfiguration(locations = "mssql-config.xml")
+@ContextConfiguration(locations = "mysql-config.xml")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-public class MSSQLQueryBuilderTest extends AbstractJUnit4SpringContextTests {
+public class MySQLQueryBuilderTest extends AbstractJUnit4SpringContextTests {
     @Resource(name = "dbtool.IEntityManager")
     private IEntityManager em;
     @Resource(name = "dbtool.IEntityMappingRegistry")
@@ -137,11 +137,11 @@ public class MSSQLQueryBuilderTest extends AbstractJUnit4SpringContextTests {
                 )).orderBy(OrderBy.ASC("id"), OrderBy.DESC("stringField")).create();
 
         assertEquals(query1.getConfig().getSql(),
-                "SELECT TOP 2000 id, int_field, string_field, date_field, short_field, version, entity_aid, entity_bid, entity_cid, entity_did " +
+                "SELECT id, int_field, string_field, date_field, short_field, version, entity_aid, entity_bid, entity_cid, entity_did " +
                         "FROM test_entity " +
                         "WHERE (id IN (?)) AND (id LIKE ?) AND (id = ?) AND (id > ?) AND (id >= ?) AND (id < ?)" +
                         " AND (id <= ?) AND (id IS NOT NULL) AND (id IS NULL) AND (id BETWEEN ? AND ?) AND (id <> ?)" +
-                        " AND (id <> ?) ORDER BY id ASC, string_field DESC ");
+                        " AND (id <> ?) ORDER BY id ASC, string_field DESC LIMIT ?,?");
 
         assertEquals(query1.getConfig().getParamsCount(), 11);
 
@@ -163,11 +163,11 @@ public class MSSQLQueryBuilderTest extends AbstractJUnit4SpringContextTests {
 
 
         assertEquals(query2.getConfig().getSql(),
-                "SELECT TOP 1000 id, int_field, string_field, date_field, short_field, " +
+                "SELECT id, int_field, string_field, date_field, short_field, " +
                         "version, entity_aid, entity_bid, entity_cid, entity_did FROM test_entity " +
                         "WHERE (id IN (?)) OR (id LIKE ?) OR (id = ?) OR (id > ?) " +
                         "OR (id >= ?) OR (id < ?) OR (id <= ?) OR (id IS NOT NULL) OR (id IS NULL) " +
-                        "OR (id BETWEEN ? AND ?) OR (id <> ?) OR (id <> ?) ORDER BY id ASC, string_field DESC ");
+                        "OR (id BETWEEN ? AND ?) OR (id <> ?) OR (id <> ?) ORDER BY id ASC, string_field DESC LIMIT 0,?");
         assertEquals(query1.getConfig().getParamsCount(), 11);
 
         AbstractQuery<TestEntity> query3 = (AbstractQuery<TestEntity>) em.queryBuilder(TestEntity.class)
@@ -189,7 +189,7 @@ public class MSSQLQueryBuilderTest extends AbstractJUnit4SpringContextTests {
                                 Condition.notEqual("id"))
                 )).orderBy(OrderBy.ASC("id"), OrderBy.DESC("stringField")).create();
         assertEquals(query3.getConfig().getSql(),
-                "SELECT TOP 1000 id, int_field, string_field, date_field, short_field, " +
+                "SELECT id, int_field, string_field, date_field, short_field, " +
                         "version, entity_aid, entity_bid, entity_cid, entity_did " +
                         "FROM test_entity " +
                         "WHERE " +
@@ -200,7 +200,7 @@ public class MSSQLQueryBuilderTest extends AbstractJUnit4SpringContextTests {
                         " (id BETWEEN ? AND ?) " +
                         "AND" +
                         " ((id <> ?) OR (id <> ?)) " +
-                        "ORDER BY id ASC, string_field DESC ");
+                        "ORDER BY id ASC, string_field DESC LIMIT 0,?");
         assertEquals(query1.getConfig().getParamsCount(), 11);
     }
 
