@@ -18,11 +18,6 @@ public final class NullBlobInputStream extends BlobInputStream {
     }
 
     @Override
-    public long skip(long n) throws IOException {
-        return super.skip(n);
-    }
-
-    @Override
     public long getPosition() {
         return 0;
     }

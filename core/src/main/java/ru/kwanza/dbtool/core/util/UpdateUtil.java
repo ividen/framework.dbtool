@@ -70,7 +70,6 @@ public class UpdateUtil {
                             action.getSkippedCount()});
         }
 
-        UpdateException ex;
         if (!action.getConstrained().isEmpty() || !action.getOptimistic().isEmpty()) {
             throw new UpdateException("Has some constrained violation!",
                     action.getConstrained(), action.getOptimistic(), action.getResult());

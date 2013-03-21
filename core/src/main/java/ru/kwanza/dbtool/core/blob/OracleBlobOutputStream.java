@@ -48,13 +48,15 @@ class OracleBlobOutputStream extends BlobOutputStream {
         } catch (IOException e) {
             try {
                 close();
-            } catch (IOException e1) {
+            } catch (IOException ex) {
+                ex.printStackTrace();
             }
             throw e;
         } catch (SQLException e0) {
             try {
                 close();
-            } catch (IOException e1) {
+            } catch (IOException ex) {
+                ex.printStackTrace();
             }
             throw new RuntimeException(e0);
         }

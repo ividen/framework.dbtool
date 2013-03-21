@@ -4,7 +4,6 @@ import ru.kwanza.dbtool.core.DBTool;
 import ru.kwanza.dbtool.orm.impl.mapping.IEntityMappingRegistry;
 
 import java.lang.reflect.Constructor;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 

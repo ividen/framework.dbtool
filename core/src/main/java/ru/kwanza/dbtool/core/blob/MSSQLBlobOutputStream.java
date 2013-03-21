@@ -146,7 +146,7 @@ class MSSQLBlobOutputStream extends BlobOutputStream {
         try {
             ResultSet resultSet = null;
             try {
-                resultSet =connection.prepareStatement(sqlQuerySize).executeQuery();
+                resultSet = connection.prepareStatement(sqlQuerySize).executeQuery();
                 if (!resultSet.next()) {
                     throw new StreamException.RecordNotFoundException(sqlQuerySize);
                 }
@@ -162,15 +162,6 @@ class MSSQLBlobOutputStream extends BlobOutputStream {
             log.error(e.getMessage(), e);
             throw new RuntimeException(e);
         }
-    }
-
-    private ResultSet executeQuery(String sql, Object[] params) throws SQLException {
-        PreparedStatement pst =connection.prepareStatement(sql);
-        int index = 0;
-        for (Object param : params) {
-            pst.setObject(++index, param);
-        }
-        return pst.executeQuery();
     }
 
     @Override
