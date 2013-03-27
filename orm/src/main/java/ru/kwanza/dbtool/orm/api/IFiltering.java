@@ -5,9 +5,9 @@ package ru.kwanza.dbtool.orm.api;
  */
 public interface IFiltering<T> extends ISelectOperationProvider<T> {
 
-    IFiltering<T> setOffset(int offset);
+    IFiltering<T> setOffset(Integer offset);
 
-    IFiltering<T> setMaxSize(int maxSize);
+    IFiltering<T> setMaxSize(Integer maxSize);
 
     IFiltering<T> filter(Filter ... filters);
 

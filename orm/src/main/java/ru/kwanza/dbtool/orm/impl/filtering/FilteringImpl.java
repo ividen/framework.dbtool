@@ -23,12 +23,12 @@ public class FilteringImpl<T> implements IFiltering<T> {
         this.entityClass = entityClass;
     }
 
-    public IFiltering setOffset(int offset) {
+    public IFiltering setOffset(Integer offset) {
         this.offset = offset;
         return this;
     }
 
-    public IFiltering setMaxSize(int maxSize) {
+    public IFiltering setMaxSize(Integer maxSize) {
         this.maxSize = maxSize;
         return this;
     }
