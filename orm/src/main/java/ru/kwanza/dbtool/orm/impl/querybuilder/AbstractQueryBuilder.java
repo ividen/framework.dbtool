@@ -101,6 +101,17 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
                 sqlBuilder.append(c);
             }
         }
+
+        if (variableMatch) {
+            String paramName = paramBuilder.toString();
+            List<Integer> indexes = namedParams.get(paramName);
+            if (indexes == null) {
+                indexes = new LinkedList<Integer>();
+                namedParams.put(paramName, indexes);
+            }
+            indexes.add(paramTypes.size());
+        }
+
         return sqlBuilder.toString();
     }
 

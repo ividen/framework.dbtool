@@ -25,11 +25,7 @@ public class OracleQueryBuilder<T> extends AbstractQueryBuilder<T> {
         if (maxSize != null) {
             sql = new StringBuilder("SELECT  * FROM (")
                     .append(createDefaultSQLString(fieldsString, conditions, orderBy))
-                    .append(") WHERE ");
-
-            if (maxSize != null) {
-                sql.append("rownum <= ?");
-            }
+                    .append(") WHERE rownum <= ?");
         } else {
             sql = createDefaultSQLString(fieldsString, conditions, orderBy);
         }
