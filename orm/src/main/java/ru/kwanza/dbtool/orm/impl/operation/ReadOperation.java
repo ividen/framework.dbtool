@@ -2,21 +2,22 @@ package ru.kwanza.dbtool.orm.impl.operation;
 
 import ru.kwanza.dbtool.core.DBTool;
 import ru.kwanza.dbtool.orm.api.Condition;
-import ru.kwanza.dbtool.orm.api.IQueryBuilder;
+import ru.kwanza.dbtool.orm.api.IQuery;
 import ru.kwanza.dbtool.orm.impl.mapping.FieldMapping;
 import ru.kwanza.dbtool.orm.impl.mapping.IEntityMappingRegistry;
 import ru.kwanza.dbtool.orm.impl.querybuilder.QueryBuilderFactory;
 
 import java.util.Collection;
+import java.util.Map;
 
 /**
  * @author Kiryl Karatsetski
  */
 public class ReadOperation extends Operation implements IReadOperation {
 
-    private IQueryBuilder queryBuilderForObject;
+    private IQuery queryForObject;
 
-    private IQueryBuilder queryBuilderForList;
+    private IQuery queryForCollection;
 
     public ReadOperation(IEntityMappingRegistry entityMappingRegistry, DBTool dbTool, Class entityClass) {
         super(entityMappingRegistry, dbTool, entityClass);
@@ -32,17 +33,26 @@ public class ReadOperation extends Operation implements IReadOperation {
         final FieldMapping idFieldMapping = idFieldMappings.iterator().next();
         final String propertyName = idFieldMapping.getName();
 
-        this.queryBuilderForObject = QueryBuilderFactory.createBuilder(dbTool, entityMappingRegistry, entityClass)
-                .where(Condition.isEqual(propertyName));
-        this.queryBuilderForList = QueryBuilderFactory.createBuilder(dbTool, entityMappingRegistry, entityClass)
-                .where(Condition.in(propertyName));
+        this.queryForObject =
+                QueryBuilderFactory.createBuilder(dbTool, entityMappingRegistry, entityClass).where(Condition.isEqual(propertyName))
+                        .create();
+        this.queryForCollection =
+                QueryBuilderFactory.createBuilder(dbTool, entityMappingRegistry, entityClass).where(Condition.in(propertyName)).create();
     }
 
     public Object selectByKey(Object key) {
-        return queryBuilderForObject.create().prepare().setParameter(1, key).select();
+        return queryForObject.prepare().setParameter(1, key).select();
     }
 
     public Collection selectByKeys(Object keys) {
-        return queryBuilderForList.create().prepare().setParameter(1, keys).selectList();
+        return queryForCollection.prepare().setParameter(1, keys).selectList();
+    }
+
+    public Map selectMapByKeys(Object keys, String propertyName) {
+        return queryForCollection.prepare().setParameter(1, keys).selectMap(propertyName);
+    }
+
+    public Map selectMapListByKeys(Object keys, String propertyName) {
+        return queryForCollection.prepare().setParameter(1, keys).selectMapList(propertyName);
     }
 }

@@ -18,8 +18,7 @@ import ru.kwanza.dbtool.orm.impl.mapping.entities.Agent;
 import javax.annotation.Resource;
 import javax.sql.DataSource;
 import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.Collection;
+import java.util.*;
 
 /**
  * @author Kiryl Karatsetski
@@ -56,11 +55,13 @@ public abstract class SimpleOperationTest extends AbstractJUnit4SpringContextTes
     public void testRead() throws UpdateException {
         final Agent agent1 = new Agent(1L, "pcid", "name");
         final Agent agent2 = new Agent(2L, "pcid", "name");
-        final Agent agent3 = new Agent(3L, "pcid", "name");
-        final Agent agent4 = new Agent(4L, "pcid", "name");
+        final Agent agent3 = new Agent(3L, "pcid", "name1");
+        final Agent agent4 = new Agent(4L, "pcid", "name1");
         entityManager.create(Agent.class, Arrays.asList(agent1, agent2, agent3, agent4));
         final Agent agent = entityManager.readByKey(Agent.class, Arrays.asList(1L));
         final Collection<Agent> agents = entityManager.readByKeys(Agent.class, Arrays.asList(1L, 2L, 3L, 4L));
+        final Map<String, Agent> agentByName = entityManager.readMapByKeys(Agent.class, Arrays.asList(1L, 2L, 3L, 4L), "name");
+        final Map<String, List<Agent>> agentsByName = entityManager.readMapListByKeys(Agent.class, Arrays.asList(1L, 2L, 3L, 4L), "name");
     }
 
     @Test

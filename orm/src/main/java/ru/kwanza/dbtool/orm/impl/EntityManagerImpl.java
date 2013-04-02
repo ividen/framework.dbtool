@@ -11,6 +11,8 @@ import ru.kwanza.dbtool.orm.impl.operation.OperationFactory;
 import ru.kwanza.dbtool.orm.impl.querybuilder.QueryBuilderFactory;
 
 import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Kiryl Karatsetski
@@ -83,8 +85,18 @@ public class EntityManagerImpl implements IEntityManager {
         return (Collection<T>) operationFactory.getReadOperation(entityClass).selectByKeys(keys);
     }
 
+    @SuppressWarnings("unchecked")
+    public <F, T> Map<F, T> readMapByKeys(Class<T> entityClass, Collection keys, String propertyName) {
+        return (Map<F, T>) operationFactory.getReadOperation(entityClass).selectMapByKeys(keys, propertyName);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <F, T> Map<F, List<T>> readMapListByKeys(Class<T> entityClass, Collection keys, String propertyName) {
+        return (Map<F, List<T>>) operationFactory.getReadOperation(entityClass).selectMapListByKeys(keys, propertyName);
+    }
+
     public <T> IQueryBuilder<T> queryBuilder(Class<T> entityClass) {
-        return QueryBuilderFactory.createBuilder(dbTool,mappingRegistry,entityClass);
+        return QueryBuilderFactory.createBuilder(dbTool, mappingRegistry, entityClass);
     }
 
     public <T> IFiltering<T> filtering(Class<T> entityClass) {
