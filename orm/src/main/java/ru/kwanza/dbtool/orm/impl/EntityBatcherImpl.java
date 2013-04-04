@@ -87,35 +87,35 @@ public class EntityBatcherImpl implements IEntityBatcher {
         final Map<Class, UpdateException> deleteByObjectExceptionMap = new HashMap<Class, UpdateException>();
         final Map<Class, UpdateException> deleteByKeyExceptionMap = new HashMap<Class, UpdateException>();
 
-        for (Class entityClass : createObjectStore.keySet()) {
+        for (Map.Entry<Class, Collection> e : createObjectStore.entrySet()) {
             try {
-                entityManager.create(entityClass, createObjectStore.get(entityClass));
-            } catch (UpdateException e) {
-                createExceptionMap.put(entityClass, e);
+                entityManager.create(e.getKey(), e.getValue());
+            } catch (UpdateException ex) {
+                createExceptionMap.put(e.getKey(), ex);
             }
         }
 
-        for (Class entityClass : updateObjectStore.keySet()) {
+        for (Map.Entry<Class, Collection> e :  updateObjectStore.entrySet()) {
             try {
-                entityManager.update(entityClass, updateObjectStore.get(entityClass));
-            } catch (UpdateException e) {
-                updateExceptionMap.put(entityClass, e);
+                entityManager.update(e.getKey(), e.getValue());
+            } catch (UpdateException ex) {
+                updateExceptionMap.put(e.getKey(), ex);
             }
         }
 
-        for (Class entityClass : deleteObjectStore.keySet()) {
+        for (Map.Entry<Class, Collection> e :  deleteObjectStore.entrySet()) {
             try {
-                entityManager.delete(entityClass, deleteObjectStore.get(entityClass));
-            } catch (UpdateException e) {
-                deleteByObjectExceptionMap.put(entityClass, e);
+                entityManager.delete(e.getKey(), e.getValue());
+            } catch (UpdateException ex) {
+                deleteByObjectExceptionMap.put(e.getKey(), ex);
             }
         }
 
-        for (Class entityClass : deleteObjectStore.keySet()) {
+        for (Map.Entry<Class, Collection> e :  deleteKeyStore.entrySet()) {
             try {
-                entityManager.deleteByKeys(entityClass, deleteObjectStore.get(entityClass));
-            } catch (UpdateException e) {
-                deleteByKeyExceptionMap.put(entityClass, e);
+                entityManager.deleteByKeys(e.getKey(), e.getValue());
+            } catch (UpdateException ex) {
+                deleteByKeyExceptionMap.put(e.getKey(), ex);
             }
         }
 
