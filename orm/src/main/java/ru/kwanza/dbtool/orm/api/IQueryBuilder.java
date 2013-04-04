@@ -9,9 +9,9 @@ public interface IQueryBuilder<T> {
 
     IQuery<T> createNative(String sql);
 
-    IQueryBuilder<T> setMaxSize(int maxSize);
+    IQueryBuilder<T> setMaxSize(Integer maxSize);
 
-    IQueryBuilder<T> setOffset(int offset);
+    IQueryBuilder<T> setOffset(Integer offset);
 
     IQueryBuilder<T> where(Condition condition);
 

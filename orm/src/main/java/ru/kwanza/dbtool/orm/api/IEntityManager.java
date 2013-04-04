@@ -3,6 +3,8 @@ package ru.kwanza.dbtool.orm.api;
 import ru.kwanza.dbtool.core.UpdateException;
 
 import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Alexander Guzanov
@@ -28,6 +30,10 @@ public interface IEntityManager {
     <T> T readByKey(Class<T> entityClass, Object key);
 
     <T> Collection<T> readByKeys(Class<T> entityClass, Collection keys);
+
+    <F, T> Map<F, T> readMapByKeys(Class<T> entityClass, Collection keys, String propertyName);
+
+    <F, T> Map<F, List<T>> readMapListByKeys(Class<T> entityClass, Collection keys, String propertyName);
 
     <T> IQueryBuilder<T> queryBuilder(Class<T> entityClass);
 

@@ -258,12 +258,12 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
         return result.toString();
     }
 
-    public IQueryBuilder<T> setMaxSize(int maxSize) {
+    public IQueryBuilder<T> setMaxSize(Integer maxSize) {
         this.maxSize = maxSize;
         return this;
     }
 
-    public IQueryBuilder<T> setOffset(int offset) {
+    public IQueryBuilder<T> setOffset(Integer offset) {
         this.offset = offset;
         return this;
     }
