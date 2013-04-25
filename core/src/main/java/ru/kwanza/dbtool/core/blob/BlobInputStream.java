@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Collection;
 
 /**
@@ -33,11 +32,7 @@ public abstract class BlobInputStream extends InputStream implements Closeable {
     protected BlobInputStream(DBTool dbTool, String tableName, String fieldName, Collection<KeyValue<String, Object>> keyValues)
             throws IOException {
         this.dbTool = dbTool;
-        try {
-            this.connection = dbTool == null ? null : dbTool.getDataSource().getConnection();
-        } catch (SQLException e) {
-            throw new IOException(e);
-        }
+        this.connection = dbTool == null ? null : dbTool.getJDBCConnection();
         this.fieldName = fieldName;
         this.tableName = tableName;
         this.condition = new KeyValueCondition(keyValues);

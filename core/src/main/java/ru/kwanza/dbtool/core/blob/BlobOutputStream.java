@@ -9,7 +9,6 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.Collection;
 
 /**
@@ -29,11 +28,7 @@ public abstract class BlobOutputStream extends OutputStream implements Closeable
     public BlobOutputStream(DBTool dbTool, String tableName, String fieldName, Collection<KeyValue<String, Object>> keyValues)
             throws IOException {
         this.dbTool = dbTool;
-        try {
-            this.connection = dbTool == null ? null : dbTool.getDataSource().getConnection();
-        } catch (SQLException e) {
-            throw new IOException(e);
-        }
+        this.connection = dbTool == null ? null : dbTool.getJDBCConnection();
         this.tableName = tableName;
         this.fieldName = fieldName;
         this.condition = new KeyValueCondition(keyValues);
@@ -70,7 +65,6 @@ public abstract class BlobOutputStream extends OutputStream implements Closeable
     protected String getWhereCondition() {
         return condition.getStringCondition();
     }
-
 
     @Override
     public void close() throws IOException {

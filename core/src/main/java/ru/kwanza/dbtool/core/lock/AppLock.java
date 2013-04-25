@@ -58,7 +58,7 @@ public abstract class AppLock {
     }
 
     protected void checkNewConnection() throws SQLException {
-        conn = dbTool.getDataSource().getConnection();
+        conn = dbTool.getJDBCConnection();
         if (conn.getAutoCommit()) {
             conn.setAutoCommit(false);
         }

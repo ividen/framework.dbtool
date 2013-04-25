@@ -35,7 +35,7 @@ public class DBTool extends JdbcDaoSupport {
     @Override
     protected void initDao() throws Exception {
         try {
-            Connection conn = getConnection();
+            Connection conn = getJDBCConnection();
             String databaseProductName = conn.getMetaData().getDatabaseProductName();
             if ("Microsoft SQL Server".equalsIgnoreCase(databaseProductName)) {
                 dbType = DBType.MSSQL;
@@ -51,6 +51,10 @@ public class DBTool extends JdbcDaoSupport {
         } catch (SQLException e) {
             throw new RuntimeException("Error in taking the type and version of database", e);
         }
+    }
+
+    public Connection getJDBCConnection(){
+        return new ConnetionWrapper(getDataSource());
     }
 
     public <T> List<T> selectList(String selectSQL, RowMapper<T> rowMapper, Object... inValues) {
