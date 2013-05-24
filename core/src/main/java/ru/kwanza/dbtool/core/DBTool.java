@@ -122,7 +122,14 @@ public class DBTool extends JdbcDaoSupport {
 
     public BlobOutputStream getBlobOutputStream(String tableName, String fieldName, Collection<KeyValue<String, Object>> conditions)
             throws IOException {
-        return BlobOutputStream.create(this, tableName, fieldName, conditions);
+        return BlobOutputStream.create(this, tableName, fieldName, conditions,false);
+    }
+
+
+    public BlobOutputStream getBlobOutputStream(String tableName, String fieldName, Collection<KeyValue<String, Object>> conditions,
+                                                boolean append)
+            throws IOException {
+        return BlobOutputStream.create(this, tableName, fieldName, conditions,append);
     }
 
     public DBType getDbType() {
