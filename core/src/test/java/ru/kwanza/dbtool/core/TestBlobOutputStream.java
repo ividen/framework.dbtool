@@ -8,6 +8,7 @@ import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
 import org.dbunit.operation.DatabaseOperation;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import ru.kwanza.dbtool.core.blob.BlobInputStream;
 import ru.kwanza.dbtool.core.blob.BlobOutputStream;
 
 import java.util.Arrays;
@@ -46,6 +47,14 @@ public abstract class TestBlobOutputStream extends DBTestCase {
                 getDBTool().getBlobOutputStream("test_blob", "value", Arrays.asList(new KeyValue<String, Object>("id", 1)),true);
         blobOS.write(new byte[1024*1024]);
         blobOS.close();
+
+
+       BlobInputStream blob =
+                getDBTool().getBlobInputStream("test_blob", "value", Arrays.asList(new KeyValue<String, Object>("id", 1)));
+        System.out.println(blob.getSize());
+        blob.close();
+
+
 //        IDataSet tempDataSet = new FlatXmlDataSetBuilder().build(this.getClass().getResourceAsStream("./data/blob_output_stream_test.xml"));
 //        ReplacementDataSet expDataSet = new ReplacementDataSet(tempDataSet);
 //        expDataSet.addReplacementObject("[DATA]", "hello".getBytes("UTF-8"));

@@ -48,7 +48,6 @@ class OracleBlobOutputStream extends BlobOutputStream {
                 ps = connection
                         .prepareStatement("SELECT " + fieldName + ", LENGTH(" + fieldName + ") FROM " + tableName + " WHERE " + whereCondition + " FOR UPDATE",
                                 ResultSet.TYPE_SCROLL_SENSITIVE,ResultSet.CONCUR_UPDATABLE);
-
                 rs = ps.executeQuery();
                 if (rs.next()) {
                      tempBlob = (BLOB) rs.getBlob(1);

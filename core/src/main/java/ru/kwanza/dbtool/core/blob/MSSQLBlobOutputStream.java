@@ -27,26 +27,39 @@ class MSSQLBlobOutputStream extends BlobOutputStream {
 
     private ByteArrayOutputStream outputStreamCache;
 
-    public MSSQLBlobOutputStream(final DBTool dbTool, String tableName, String fieldName, Collection<KeyValue<String, Object>> keyValues)
+    private boolean append;
+
+    public MSSQLBlobOutputStream(final DBTool dbTool, String tableName, String fieldName, Collection<KeyValue<String, Object>> keyValues,
+                                 boolean append)
             throws IOException, StreamException.RecordNotFoundException {
         super(dbTool, tableName, fieldName, keyValues);
 
         final String whereCondition = getWhereCondition();
+
         final String sqlQueryClear = "UPDATE " + tableName + " SET " + fieldName + " = null WHERE " + whereCondition;
         this.sqlQuery =
-                "DECLARE @ptrval VARBINARY(16)\n" + "SELECT @ptrval = TEXTPTR(" + getFieldName() + ") FROM " + getTableName() + " WHERE "
+                "DECLARE @ptrval VARBINARY(16)\n" + "SELECT @ptrval = TEXTPTR(" + getFieldName() + ") FROM " + getTableName()
+                        + " WHERE "
                         + whereCondition + "\n" + "UPDATETEXT " + getTableName() + "." + getFieldName() + " @ptrval ? null ?";
-        try {
-            final int count = connection.prepareStatement(sqlQueryClear).executeUpdate();
-            if (count != 1) {
-                throw new StreamException.RecordNotFoundException("Record with " + whereCondition + " not updated [" + count + "]");
+        this.append = append;
+        if (append) {
+            position = getSize()+1;
+        } else {
+
+            try {
+                final int count = connection.prepareStatement(sqlQueryClear).executeUpdate();
+                if (count != 1) {
+                    throw new StreamException.RecordNotFoundException("Record with " + whereCondition + " not updated [" + count + "]");
+                }
+            } catch (SQLException e) {
+                close();
+                throw new RuntimeException(e);
             }
-        } catch (SQLException e) {
-            close();
-            throw new RuntimeException(e);
+
+            position = 0;
+
         }
 
-        position = 0;
         outputStreamCache = new ByteArrayOutputStreamExt(BLOCK_SIZE);
     }
 
@@ -137,6 +150,34 @@ class MSSQLBlobOutputStream extends BlobOutputStream {
     }
 
     private void checkUpdate() throws IOException, StreamException.RecordNotFoundException {
+//        final String nameSize = "nameSize";
+//        final String whereCondition = getWhereCondition();
+//        final String sqlQuerySize = "SELECT DATALENGTH(" + getFieldName() +
+//                ") AS " + nameSize +
+//                " FROM " + getTableName() +
+//                " WHERE " + whereCondition;
+//        try {
+//            ResultSet resultSet = null;
+//            try {
+//                resultSet = connection.prepareStatement(sqlQuerySize).executeQuery();
+//                if (!resultSet.next()) {
+//                    throw new StreamException.RecordNotFoundException(sqlQuerySize);
+//                }
+//                final int size = resultSet.getInt(nameSize);
+//                if (writenBytes != size) {
+//                    throw new IOException(
+//                            "Expected: " + writenBytes + ", Actual: " + size + ". Table: " + getTableName() + ", where: " + whereCondition);
+//                }
+//            } finally {
+//                getDbTool().closeResources(resultSet);
+//            }
+//        } catch (SQLException e) {
+//            log.error(e.getMessage(), e);
+//            throw new RuntimeException(e);
+//        }
+    }
+
+    private int getSize() throws IOException, StreamException.RecordNotFoundException {
         final String nameSize = "nameSize";
         final String whereCondition = getWhereCondition();
         final String sqlQuerySize = "SELECT DATALENGTH(" + getFieldName() +
@@ -151,10 +192,7 @@ class MSSQLBlobOutputStream extends BlobOutputStream {
                     throw new StreamException.RecordNotFoundException(sqlQuerySize);
                 }
                 final int size = resultSet.getInt(nameSize);
-                if (writenBytes != size) {
-                    throw new IOException(
-                            "Expected: " + writenBytes + ", Actual: " + size + ". Table: " + getTableName() + ", where: " + whereCondition);
-                }
+                return size;
             } finally {
                 getDbTool().closeResources(resultSet);
             }

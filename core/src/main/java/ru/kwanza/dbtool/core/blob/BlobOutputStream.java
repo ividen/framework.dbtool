@@ -39,7 +39,7 @@ public abstract class BlobOutputStream extends OutputStream implements Closeable
             throws IOException {
         try {
             if (dbTool.getDbType().equals(DBTool.DBType.MSSQL)) {
-                return new MSSQLBlobOutputStream(dbTool, tableName, fieldName, keyValues);
+                return new MSSQLBlobOutputStream(dbTool, tableName, fieldName, keyValues,append);
             } else if (dbTool.getDbType().equals(DBTool.DBType.ORACLE)) {
                 return new OracleBlobOutputStream(dbTool, tableName, fieldName, keyValues,append);
             } else {
