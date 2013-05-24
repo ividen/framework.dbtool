@@ -11,6 +11,7 @@ import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.SystemPropertyUtils;
+import ru.kwanza.dbtool.orm.annotations.Entity;
 import ru.kwanza.dbtool.orm.springintegration.DBToolOrmNamespaceHandler;
 
 import java.io.IOException;
@@ -53,7 +54,10 @@ public class SpringEntityMappingRegistryImpl implements IEntityMappingRegistry {
                         if (!classMetadata.isAbstract() && !Enum.class.getName().equals(classMetadata.getSuperClassName())) {
                             log.trace(className);
                             final ClassLoader classLoader = resourcePatternResolver.getClassLoader();
-                            delegate.registerEntityClass(classLoader.loadClass(className));
+                            Class<?> entityClass = classLoader.loadClass(className);
+                            if (entityClass.isAnnotationPresent(Entity.class)) {
+                                delegate.registerEntityClass(entityClass);
+                            }
                         }
                     } catch (Throwable e) {
                         throw new RuntimeException("Error while registering entity mapping: " + resource, e);

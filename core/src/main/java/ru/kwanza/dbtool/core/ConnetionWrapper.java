@@ -13,6 +13,7 @@ import java.util.Properties;
 class ConnetionWrapper implements Connection {
     private DataSource ds;
     private Connection delegate;
+    private boolean isClosed = false;
 
     ConnetionWrapper(DataSource ds) {
         this.ds = ds;
@@ -51,7 +52,11 @@ class ConnetionWrapper implements Connection {
     }
 
     public void close() throws SQLException {
-        DataSourceUtils.releaseConnection(delegate, ds);
+        if(delegate!=null){
+            isClosed = true;
+            DataSourceUtils.releaseConnection(delegate, ds);
+            delegate = null;
+        }
     }
 
     public boolean isClosed() throws SQLException {
@@ -217,6 +222,9 @@ class ConnetionWrapper implements Connection {
     }
 
     private Connection getDelegate() {
+        if(isClosed){
+            throw new IllegalStateException("Connection is closed!");
+        }
         if (delegate == null) {
             delegate = DataSourceUtils.getConnection(ds);
         }
