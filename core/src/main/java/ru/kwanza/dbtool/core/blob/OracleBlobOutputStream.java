@@ -8,7 +8,6 @@ import ru.kwanza.dbtool.core.DBTool;
 import ru.kwanza.dbtool.core.KeyValue;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -22,172 +21,84 @@ class OracleBlobOutputStream extends BlobOutputStream {
 
     private static final Logger log = LoggerFactory.getLogger(OracleBlobOutputStream.class);
 
-    private BLOB tempBlob;
-    private OutputStream tempOutputStream;
-    private boolean append;
-    ResultSet rs;
+    private BLOB blobField;
+    private ResultSet rs;
 
     public OracleBlobOutputStream(final DBTool dbTool, String tableName, String fieldName, Collection<KeyValue<String, Object>> keyValues)
             throws IOException, StreamException.RecordNotFoundException {
-        this(dbTool, tableName, fieldName, keyValues, false);
-    }
-
-    public OracleBlobOutputStream(final DBTool dbTool, String tableName, String fieldName, Collection<KeyValue<String, Object>> keyValues,
-                                  boolean append)
-            throws IOException, StreamException.RecordNotFoundException {
         super(dbTool, tableName, fieldName, keyValues);
-        this.append = append;
 
         final String whereCondition = getWhereCondition();
 
-        if (append) {
+        PreparedStatement ps;
+        try {
 
-            PreparedStatement ps;
-            try {
+            ps = connection
+                    .prepareStatement("SELECT " + fieldName + ", LENGTH(" + fieldName + ") FROM " + tableName + " WHERE " + whereCondition
+                            + " FOR UPDATE",
+                            ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                blobField = (BLOB) rs.getBlob(1);
 
-                ps = connection
-                        .prepareStatement("SELECT " + fieldName + ", LENGTH(" + fieldName + ") FROM " + tableName + " WHERE " + whereCondition + " FOR UPDATE",
-                                ResultSet.TYPE_SCROLL_SENSITIVE,ResultSet.CONCUR_UPDATABLE);
-                rs = ps.executeQuery();
-                if (rs.next()) {
-                     tempBlob = (BLOB) rs.getBlob(1);
-                    long size = rs.getLong(2);
-                    tempOutputStream  = tempBlob.setBinaryStream(size+1);
+                if (blobField == null) {
+                    resetToDB();
                 } else {
-                    throw new StreamException.RecordNotFoundException("Record not found");
+                    setSize(rs.getLong(2));
                 }
-            } catch (Exception ex) {
-                throw new RuntimeException(ex);
+
+                if (getSize() > 0) {
+                    setPosition(getSize() - 1);
+                }
+
+            } else {
+                throw new StreamException.RecordNotFoundException("Record not found");
             }
-        } else {
-
-            final String sqlQueryClear = "UPDATE " + tableName + " SET " + fieldName + "=null WHERE " + whereCondition;
-            try {
-                final int count = connection.prepareStatement(sqlQueryClear).executeUpdate();
-
-                if (count != 1) {
-                    throw new StreamException.RecordNotFoundException("Message with " + whereCondition + " not updated [" + count + "]");
-                }
-
-                tempBlob = BLOB.createTemporary(connection.isWrapperFor(Connection.class) ?
-                        connection.unwrap(OracleConnection.class) : connection, true, BLOB.DURATION_SESSION);
-                tempOutputStream = tempBlob.setBinaryStream(1);
-
-                if (tempOutputStream == null) {
-                    throw new IOException("Stream is null");
-                }
-            } catch (IOException e) {
-                try {
-                    close();
-                } catch (IOException ex) {
-                    ex.printStackTrace();
-                }
-                throw e;
-            } catch (SQLException e0) {
-                try {
-                    close();
-                } catch (IOException ex) {
-                    ex.printStackTrace();
-                }
-                throw new RuntimeException(e0);
-            }
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
         }
-    }
 
-    public void write(int b) throws IOException {
-        tempOutputStream.write(b);
     }
 
     @Override
-    public void write(final byte b[], final int off, final int len) throws IOException {
-        tempOutputStream.write(b, off, len);
+    protected void flushToDB(long position, byte[] buffer) throws SQLException {
+        blobField.setBytes(position+1,buffer);
     }
 
     @Override
-    public void flush() throws IOException {
-        tempOutputStream.flush();
-        if(append){
-            try {
-                rs.updateBlob(1,tempBlob);
-                rs.updateRow();
-            } catch (SQLException e) {
-                throw new IOException(e);
-            }
+    protected void resetToDB() throws SQLException {
+        if (blobField != null) {
+            blobField.close();
         }
+
+        blobField = BLOB.createTemporary(connection.isWrapperFor(Connection.class) ?
+                connection.unwrap(OracleConnection.class) : connection, true, BLOB.DURATION_SESSION);
+        String whereCondition = getWhereCondition();
+        final String sqlQueryClear = "UPDATE " + getTableName() + " SET " + getFieldName() + "=null WHERE " + whereCondition;
+
+        final int count = connection.prepareStatement(sqlQueryClear).executeUpdate();
+
+        if (count != 1) {
+            throw new SQLException(
+                    "Table  " + getTableName() + " with condition " + whereCondition + " not updated [" + count + "]");
+        }
+
     }
 
     @Override
     public void close() throws IOException {
-        IOException exception = null;
+        flush();
         try {
-            if (tempOutputStream != null) {
-                flush();
-            }
-        } catch (IOException e) {
-            log.error("Error flushing " + this.toString(), e);
-            //noinspection ConstantConditions
-            if (exception == null) {
-                exception = e;
-            }
-        }
-        getDbTool().closeResources(tempOutputStream);
+            rs.updateBlob(1, blobField);
+            rs.updateRow();
 
-        if (append!=true && exception == null && tempBlob != null) {
-            String whereCondition = getWhereCondition();
-            final String sqlQuery = "UPDATE " + getTableName() + " SET " + getFieldName() + "=? WHERE " + whereCondition;
-            try {
-                final Object[] params = new Object[]{tempBlob};
-                int count;
-                try {
-                    count = executeUpdate(sqlQuery, params);
-                } catch (SQLException e) {
-                    throw new RuntimeException(e);
-                }
-
-                if (count != 1) {
-                    throw new IOException("Message with " + whereCondition + " not found");
-                }
-            } catch (IOException e) {
-                log.error(e.getMessage(), e);
-                exception = e;
+            if (blobField.isOpen()) {
+                blobField.close();
             }
+        } catch (SQLException e) {
+            throw new IOException("Error closing temporary blob", e);
         }
 
-        if (tempBlob != null) {
-            try {
-                if (tempBlob.isOpen()) {
-                    tempBlob.close();
-                }
-            } catch (SQLException e) {
-                log.error("Error closing temporary blob", e);
-                if (exception == null) {
-                    exception = new IOException("Error closing temporary blob", e);
-                }
-            } finally {
-                tempBlob = null;
-            }
-        }
-        try {
-            super.close();
-        } catch (IOException e) {
-            log.error("Error closing " + this.toString(), e);
-            if (exception == null) {
-                exception = e;
-            }
-        }
-
-        getDbTool().closeResources(connection);
-        if (exception != null) {
-            throw exception;
-        }
-    }
-
-    private int executeUpdate(String sql, Object[] params) throws SQLException {
-        PreparedStatement pst = connection.prepareStatement(sql);
-        int index = 0;
-        for (Object param : params) {
-            pst.setObject(++index, param);
-        }
-        return pst.executeUpdate();
+        super.close();
     }
 }

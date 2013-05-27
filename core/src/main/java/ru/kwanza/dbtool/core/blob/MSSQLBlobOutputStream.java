@@ -7,6 +7,7 @@ import ru.kwanza.dbtool.core.KeyValue;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -43,7 +44,7 @@ class MSSQLBlobOutputStream extends BlobOutputStream {
                         + whereCondition + "\n" + "UPDATETEXT " + getTableName() + "." + getFieldName() + " @ptrval ? null ?";
         this.append = append;
         if (append) {
-            position = getSize()+1;
+//            position = getSize()+1;
         } else {
 
             try {
@@ -68,6 +69,16 @@ class MSSQLBlobOutputStream extends BlobOutputStream {
         if (outputStreamCache.size() >= BLOCK_SIZE) {
             flush();
         }
+    }
+
+    @Override
+    protected void flushToDB(long position, byte[] array) throws SQLException {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    protected void resetToDB() throws SQLException {
+        //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override
@@ -102,6 +113,7 @@ class MSSQLBlobOutputStream extends BlobOutputStream {
         assert offset == off + len;
         assert length == 0;
     }
+
 
     @Override
     public void flush() throws IOException {
@@ -177,30 +189,30 @@ class MSSQLBlobOutputStream extends BlobOutputStream {
 //        }
     }
 
-    private int getSize() throws IOException, StreamException.RecordNotFoundException {
-        final String nameSize = "nameSize";
-        final String whereCondition = getWhereCondition();
-        final String sqlQuerySize = "SELECT DATALENGTH(" + getFieldName() +
-                ") AS " + nameSize +
-                " FROM " + getTableName() +
-                " WHERE " + whereCondition;
-        try {
-            ResultSet resultSet = null;
-            try {
-                resultSet = connection.prepareStatement(sqlQuerySize).executeQuery();
-                if (!resultSet.next()) {
-                    throw new StreamException.RecordNotFoundException(sqlQuerySize);
-                }
-                final int size = resultSet.getInt(nameSize);
-                return size;
-            } finally {
-                getDbTool().closeResources(resultSet);
-            }
-        } catch (SQLException e) {
-            log.error(e.getMessage(), e);
-            throw new RuntimeException(e);
-        }
-    }
+//    private long getSize() throws IOException, StreamException.RecordNotFoundException {
+//        final String nameSize = "nameSize";
+//        final String whereCondition = getWhereCondition();
+//        final String sqlQuerySize = "SELECT DATALENGTH(" + getFieldName() +
+//                ") AS " + nameSize +
+//                " FROM " + getTableName() +
+//                " WHERE " + whereCondition;
+//        try {
+//            ResultSet resultSet = null;
+//            try {
+//                resultSet = connection.prepareStatement(sqlQuerySize).executeQuery();
+//                if (!resultSet.next()) {
+//                    throw new StreamException.RecordNotFoundException(sqlQuerySize);
+//                }
+//                final int size = resultSet.getInt(nameSize);
+//                return size;
+//            } finally {
+//                getDbTool().closeResources(resultSet);
+//            }
+//        } catch (SQLException e) {
+//            log.error(e.getMessage(), e);
+//            throw new RuntimeException(e);
+//        }
+//    }
 
     @Override
     public void close() throws IOException {

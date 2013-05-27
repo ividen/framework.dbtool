@@ -39,16 +39,21 @@ public abstract class TestBlobOutputStream extends DBTestCase {
     public void testWrite() throws Exception {
         BlobOutputStream blobOS =
                 getDBTool().getBlobOutputStream("test_blob", "value", Arrays.asList(new KeyValue<String, Object>("id", 1)),false);
-        blobOS.write(new byte[1024*1024]);
+        assertEquals(blobOS.getPosition(),0);
+        assertEquals(blobOS.getSize(),0);
+        blobOS.write("hello".getBytes());
+        assertEquals(blobOS.getPosition(),4);
+        assertEquals(blobOS.getSize(),5);
         blobOS.close();
 
 
         blobOS =
                 getDBTool().getBlobOutputStream("test_blob", "value", Arrays.asList(new KeyValue<String, Object>("id", 1)),true);
-        blobOS.write(new byte[1024*1024]);
+        blobOS.setPosition(blobOS.getSize()-1);
+        blobOS.write(new byte[1024*1024*5]);
         blobOS.close();
 
-
+//
        BlobInputStream blob =
                 getDBTool().getBlobInputStream("test_blob", "value", Arrays.asList(new KeyValue<String, Object>("id", 1)));
         System.out.println(blob.getSize());
