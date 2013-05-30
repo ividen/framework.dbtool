@@ -1,6 +1,5 @@
 package ru.kwanza.dbtool.core;
 
-import org.dbunit.Assertion;
 import org.dbunit.DBTestCase;
 import org.dbunit.dataset.IDataSet;
 import org.dbunit.dataset.ReplacementDataSet;
@@ -37,28 +36,19 @@ public abstract class TestBlobOutputStream extends DBTestCase {
     protected abstract String getSpringCfgFile();
 
     public void testWrite() throws Exception {
-        BlobOutputStream blobOS =
-                getDBTool().getBlobOutputStream("test_blob", "value", Arrays.asList(new KeyValue<String, Object>("id", 1)),false);
-        assertEquals(blobOS.getPosition(),0);
-        assertEquals(blobOS.getSize(),0);
-        blobOS.write("hello".getBytes());
-        assertEquals(blobOS.getPosition(),4);
-        assertEquals(blobOS.getSize(),5);
-        blobOS.close();
+        BlobOutputStream blobOS;
 
-
-        blobOS =
-                getDBTool().getBlobOutputStream("test_blob", "value", Arrays.asList(new KeyValue<String, Object>("id", 1)),true);
-        blobOS.setPosition(blobOS.getSize()-1);
-        blobOS.write(new byte[1024*1024*5]);
-        blobOS.close();
+        for (int i = 0; i < 300; i++) {
+            blobOS = getDBTool().getBlobOutputStream("test_blob", "value", Arrays.asList(new KeyValue<String, Object>("id", 1)), false);
+            blobOS.write(new byte[1000]);
+            blobOS.close();
+        }
 
 //
-       BlobInputStream blob =
+        BlobInputStream blob =
                 getDBTool().getBlobInputStream("test_blob", "value", Arrays.asList(new KeyValue<String, Object>("id", 1)));
         System.out.println(blob.getSize());
         blob.close();
-
 
 //        IDataSet tempDataSet = new FlatXmlDataSetBuilder().build(this.getClass().getResourceAsStream("./data/blob_output_stream_test.xml"));
 //        ReplacementDataSet expDataSet = new ReplacementDataSet(tempDataSet);

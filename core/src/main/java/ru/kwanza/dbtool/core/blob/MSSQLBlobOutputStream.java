@@ -72,12 +72,12 @@ class MSSQLBlobOutputStream extends BlobOutputStream {
     }
 
     @Override
-    protected void flushToDB(long position, byte[] array) throws SQLException {
+    protected void dbFlush(long position, byte[] array) throws SQLException {
         //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override
-    protected void resetToDB() throws SQLException {
+    protected void dbReset() throws SQLException {
         //To change body of implemented methods use File | Settings | File Templates.
     }
 

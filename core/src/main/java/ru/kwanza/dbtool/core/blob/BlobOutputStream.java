@@ -37,7 +37,6 @@ public abstract class BlobOutputStream extends OutputStream implements Closeable
         this.tableName = tableName;
         this.fieldName = fieldName;
         this.condition = new KeyValueCondition(keyValues);
-        this.position = 0l;
     }
 
     public static BlobOutputStream create(DBTool dbTool, String tableName, String fieldName, Collection<KeyValue<String, Object>> keyValues,
@@ -67,6 +66,7 @@ public abstract class BlobOutputStream extends OutputStream implements Closeable
 
     protected void setSize(long size) {
         this.size = size;
+        this.position = size;
     }
 
     public long getPosition() {
@@ -88,14 +88,20 @@ public abstract class BlobOutputStream extends OutputStream implements Closeable
 
     @Override
     public void flush() throws IOException {
-        if (buffer.position() > 0) {
+        if (!isEmpty()) {
             try {
-                flushToDB(this.position - buffer.position() + 1, getArray());
+                makeFlush();
             } catch (SQLException e) {
                 throw new IOException(e);
-            } finally {
-                buffer.rewind();
             }
+        }
+    }
+
+    private void makeFlush() throws SQLException {
+        try {
+            dbFlush(this.position - buffer.position() + 1, getArray());
+        } finally {
+            buffer.rewind();
         }
     }
 
@@ -111,33 +117,35 @@ public abstract class BlobOutputStream extends OutputStream implements Closeable
     @Override
     public void write(int b) throws IOException {
         buffer.put((byte) b);
-        if (size == 0) {
-            size++;
-        } else {
-            position++;
-        }
+        position++;
 
         if (position >= size) {
-            size = position + 1;
+            size = position;
         }
-        if (buffer.position() >= BLOCK_SIZE) {
+        if (isFull()) {
             try {
-                flushToDB(position - BLOCK_SIZE, getArray());
+                makeFlush();
             } catch (SQLException e) {
                 throw new IOException(e);
-            }finally {
-                buffer.rewind();
             }
         }
     }
 
-    protected abstract void flushToDB(long position, byte[] array) throws SQLException;
+    private boolean isFull() {
+        return buffer.position() >= BLOCK_SIZE;
+    }
 
-    protected abstract void resetToDB() throws SQLException;
+    private boolean isEmpty() {
+        return buffer.position() == 0;
+    }
+
+    protected abstract void dbFlush(long position, byte[] array) throws SQLException;
+
+    protected abstract void dbReset() throws SQLException;
 
     public void reset() throws IOException {
         try {
-            resetToDB();
+            dbReset();
         } catch (SQLException e) {
             throw new IOException(e);
         }

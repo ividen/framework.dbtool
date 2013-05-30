@@ -42,7 +42,7 @@ class OracleBlobOutputStream extends BlobOutputStream {
                 blobField = (BLOB) rs.getBlob(1);
 
                 if (blobField == null) {
-                    resetToDB();
+                    dbReset();
                 } else {
                     setSize(rs.getLong(2));
                 }
@@ -61,12 +61,12 @@ class OracleBlobOutputStream extends BlobOutputStream {
     }
 
     @Override
-    protected void flushToDB(long position, byte[] buffer) throws SQLException {
-        blobField.setBytes(position+1,buffer);
+    protected void dbFlush(long position, byte[] buffer) throws SQLException {
+        blobField.setBytes(position,buffer);
     }
 
     @Override
-    protected void resetToDB() throws SQLException {
+    protected void dbReset() throws SQLException {
         if (blobField != null) {
             blobField.close();
         }
