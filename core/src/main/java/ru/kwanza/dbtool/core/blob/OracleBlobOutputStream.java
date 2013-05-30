@@ -44,11 +44,7 @@ class OracleBlobOutputStream extends BlobOutputStream {
                 if (blobField == null) {
                     dbReset();
                 } else {
-                    setSize(rs.getLong(2));
-                }
-
-                if (getSize() > 0) {
-                    setPosition(getSize() - 1);
+                    setUpSize(rs.getLong(2));
                 }
 
             } else {

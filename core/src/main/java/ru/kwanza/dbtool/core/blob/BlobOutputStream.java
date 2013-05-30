@@ -64,9 +64,12 @@ public abstract class BlobOutputStream extends OutputStream implements Closeable
         return size;
     }
 
-    protected void setSize(long size) {
+    protected void setUpSize(long size) throws IOException {
         this.size = size;
         this.position = size;
+        if (size > 0) {
+            setPosition(size);
+        }
     }
 
     public long getPosition() {
@@ -144,12 +147,14 @@ public abstract class BlobOutputStream extends OutputStream implements Closeable
     protected abstract void dbReset() throws SQLException;
 
     public void reset() throws IOException {
-        try {
-            dbReset();
-        } catch (SQLException e) {
-            throw new IOException(e);
+        if (size != 0) {
+            try {
+                dbReset();
+            } catch (SQLException e) {
+                throw new IOException(e);
+            }
+            size = position = 0;
         }
-        size = position = 0;
     }
 
     protected String getTableName() {
