@@ -49,6 +49,7 @@ class OracleBlobOutputStream extends BlobOutputStream {
 
     }
 
+
     @Override
     protected void dbFlush(long position, byte[] buffer) throws SQLException {
         blobField.setBytes(position, buffer);
@@ -56,21 +57,11 @@ class OracleBlobOutputStream extends BlobOutputStream {
 
     @Override
     protected void dbReset() throws SQLException {
-        if (blobField != null && blobField.isOpen()) {
-            blobField.close();
-        }
-
         blobField = BLOB.createTemporary(connection.isWrapperFor(Connection.class) ?
                 connection.unwrap(OracleConnection.class) : connection, true, BLOB.DURATION_SESSION);
-        String whereCondition = getCondition().getWhereClause();
-        final String sqlQueryClear = "UPDATE " + getTableName() + " SET " + getFieldName() + "=null WHERE " + whereCondition;
 
-        final int count = getCondition().installParams(connection.prepareStatement(sqlQueryClear)).executeUpdate();
-
-        if (count != 1) {
-            throw new SQLException("Record not found!");
-        }
-
+        rs.updateBlob(1, blobField);
+        rs.updateRow();
     }
 
     @Override
@@ -79,12 +70,11 @@ class OracleBlobOutputStream extends BlobOutputStream {
         try {
             rs.updateBlob(1, blobField);
             rs.updateRow();
-
-            if (blobField.isOpen()) {
-                blobField.close();
-            }
+            blobField.free();
         } catch (SQLException e) {
             throw new IOException("Error closing temporary blob", e);
+        } finally {
+            getDbTool().closeResources(rs);
         }
 
         super.close();
