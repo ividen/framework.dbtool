@@ -153,8 +153,8 @@ public abstract class BlobOutputStream extends OutputStream implements Closeable
             } catch (SQLException e) {
                 throw new IOException(e);
             }
-            size  = 0;
-            setPosition(0);
+            size  = position =  0;
+            buffer.position(0);
         }
     }
 

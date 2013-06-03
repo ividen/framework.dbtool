@@ -57,11 +57,12 @@ class OracleBlobOutputStream extends BlobOutputStream {
 
     @Override
     protected void dbReset() throws SQLException {
+        if(blobField!=null){
+            blobField.free();
+        }
+
         blobField = BLOB.createTemporary(connection.isWrapperFor(Connection.class) ?
                 connection.unwrap(OracleConnection.class) : connection, true, BLOB.DURATION_SESSION);
-
-        rs.updateBlob(1, blobField);
-        rs.updateRow();
     }
 
     @Override

@@ -135,13 +135,14 @@ public abstract class TestBlobOutputStream extends DBTestCase {
         blobOS.write("hello".getBytes());
         blobOS.reset();
         blobOS.close();
+        getDBTool().getJDBCConnection().commit();
 
-//        BlobInputStream blob =
-//                getDBTool().getBlobInputStream("test_blob", "value", Arrays.asList(new KeyValue<String, Object>("id", 1)));
-//        long size = blob.getSize();
-//        blob.close();
-//
-//        assertEquals(size, 0);
+        BlobInputStream blob =
+                getDBTool().getBlobInputStream("test_blob", "value", Arrays.asList(new KeyValue<String, Object>("id", 1)));
+        long size = blob.getSize();
+        blob.close();
+
+        assertEquals(size, 0);
         getDBTool().getJDBCConnection().commit();
     }
 
