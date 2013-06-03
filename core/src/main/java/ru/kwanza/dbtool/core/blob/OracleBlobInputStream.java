@@ -23,13 +23,13 @@ class OracleBlobInputStream extends BlobInputStream {
             throws IOException, StreamException.EmptyFieldException, StreamException.RecordNotFoundException {
         super(dbTool, tableName, fieldName, keyValues);
 
-        final String whereCondition = getWhereCondition();
+        final String whereCondition = getCondition().getWhereClause();
         final String nameSize = "nameSize";
         final String sqlQuerySize =
                 "SELECT LENGTH(" + getFieldName() + ") AS " + nameSize + " FROM " + getTableName() + " WHERE " + whereCondition;
         final String sqlQuery = "SELECT " + getFieldName() + " FROM " + getTableName() + " WHERE " + whereCondition;
         try {
-            resultSet = connection.prepareCall(sqlQuerySize).executeQuery();
+            resultSet = getCondition().installParams(connection.prepareStatement(sqlQuerySize)).executeQuery();
             if (!resultSet.next()) {
                 throw new StreamException.RecordNotFoundException(sqlQuerySize);
             }
@@ -40,7 +40,7 @@ class OracleBlobInputStream extends BlobInputStream {
                 throw new StreamException.EmptyFieldException("No data. Size = " + size);
             }
 
-            resultSet = connection.prepareCall(sqlQuery).executeQuery();
+            resultSet =  getCondition().installParams(connection.prepareStatement(sqlQuery)).executeQuery();
             if (!resultSet.next()) {
                 throw new StreamException.RecordNotFoundException(sqlQuery);
             }

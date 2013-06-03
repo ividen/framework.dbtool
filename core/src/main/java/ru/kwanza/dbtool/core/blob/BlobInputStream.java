@@ -72,8 +72,8 @@ public abstract class BlobInputStream extends InputStream implements Closeable {
         return fieldName;
     }
 
-    protected String getWhereCondition() {
-        return condition.getStringCondition();
+    protected KeyValueCondition getCondition() {
+        return condition;
     }
 
     public abstract long getPosition();
@@ -101,7 +101,7 @@ public abstract class BlobInputStream extends InputStream implements Closeable {
     public String toString() {
         final StringBuilder sb = new StringBuilder();
         sb.append(getClass().getSimpleName()).append("(").append(tableName).append(".").append(fieldName).append(" where ");
-        sb.append(getWhereCondition());
+        sb.append(getCondition().getWhereClause());
         sb.append(')');
         return sb.toString();
     }

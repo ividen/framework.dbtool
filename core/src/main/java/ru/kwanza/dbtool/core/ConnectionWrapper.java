@@ -10,12 +10,12 @@ import java.util.Properties;
 /**
  * @author Alexander Guzanov
  */
-class ConnetionWrapper implements Connection {
+class ConnectionWrapper implements Connection {
     private DataSource ds;
     private Connection delegate;
     private boolean isClosed = false;
 
-    ConnetionWrapper(DataSource ds) {
+    ConnectionWrapper(DataSource ds) {
         this.ds = ds;
     }
 

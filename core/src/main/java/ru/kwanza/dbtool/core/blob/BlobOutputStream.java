@@ -18,7 +18,7 @@ import java.util.Collection;
  */
 public abstract class BlobOutputStream extends OutputStream implements Closeable {
     public static final int BLOCK_SIZE = 1024 * 1024;
-    private static final Logger log = LoggerFactory.getLogger(BlobOutputStream.class);
+    private static final Logger logger = LoggerFactory.getLogger(BlobOutputStream.class);
 
     private DBTool dbTool;
 
@@ -51,7 +51,7 @@ public abstract class BlobOutputStream extends OutputStream implements Closeable
                 throw new RuntimeException("Unsupported type of database");
             }
         } catch (StreamException.RecordNotFoundException e) {
-            log.error(e.getMessage(), e);
+            logger.error(e.getMessage(), e);
             throw new IOException(e);
         }
     }
@@ -165,8 +165,8 @@ public abstract class BlobOutputStream extends OutputStream implements Closeable
         return fieldName;
     }
 
-    protected String getWhereCondition() {
-        return condition.getStringCondition();
+    public KeyValueCondition getCondition() {
+        return condition;
     }
 
     @Override
@@ -179,7 +179,7 @@ public abstract class BlobOutputStream extends OutputStream implements Closeable
     public String toString() {
         final StringBuilder sb = new StringBuilder();
         sb.append(getClass().getSimpleName()).append("(").append(tableName).append(".").append(fieldName).append(" where ");
-        sb.append(getWhereCondition());
+        sb.append(getCondition().getWhereClause());
         sb.append(')');
         return sb.toString();
     }

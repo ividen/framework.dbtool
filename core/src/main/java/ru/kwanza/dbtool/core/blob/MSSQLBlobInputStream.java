@@ -31,7 +31,7 @@ class MSSQLBlobInputStream extends BlobInputStream {
             throws IOException, StreamException.EmptyFieldException, StreamException.RecordNotFoundException {
         super(dbTool, tableName, fieldName, keyValues);
 
-        final String whereCondition = getWhereCondition();
+        final String whereCondition = getCondition().getWhereClause();
         final String nameSize = "nameSize";
         final String sqlQuerySize =
                 "SELECT DATALENGTH(" + getFieldName() + ") AS " + nameSize + " FROM " + getTableName() + " WHERE " + whereCondition;

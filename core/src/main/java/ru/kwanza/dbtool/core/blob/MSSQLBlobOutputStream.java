@@ -35,7 +35,7 @@ class MSSQLBlobOutputStream extends BlobOutputStream {
             throws IOException, StreamException.RecordNotFoundException {
         super(dbTool, tableName, fieldName, keyValues);
 
-        final String whereCondition = getWhereCondition();
+        final String whereCondition = getCondition().getWhereClause();
 
         final String sqlQueryClear = "UPDATE " + tableName + " SET " + fieldName + " = null WHERE " + whereCondition;
         this.sqlQuery =
