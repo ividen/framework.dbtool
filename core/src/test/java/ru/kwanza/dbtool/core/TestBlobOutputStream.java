@@ -36,11 +36,10 @@ public abstract class TestBlobOutputStream extends DBTestCase {
     protected abstract String getSpringCfgFile();
 
     public void testWrite_1() throws Exception {
-
         BlobOutputStream blobOS;
 
-        for (int i = 0; i < 10; i++) {
-            blobOS = getDBTool().getBlobOutputStream("test_blob", "value", Arrays.asList(new KeyValue<String, Object>("id", 1)), false);
+       for (int i = 0; i < 10; i++) {
+            blobOS = getDBTool().getBlobOutputStream("test_blob", "value", Arrays.asList(new KeyValue<String, Object>("id", 1)));
             blobOS.write(new byte[1000]);
             blobOS.close();
         }
@@ -52,13 +51,12 @@ public abstract class TestBlobOutputStream extends DBTestCase {
 
         assertEquals(size, 10000);
 
-        getDBTool().getJDBCConnection().commit();
     }
 
     public void testWrite_2() throws Exception {
         BlobOutputStream blobOS;
 
-        blobOS = getDBTool().getBlobOutputStream("test_blob", "value", Arrays.asList(new KeyValue<String, Object>("id", 1)), false);
+        blobOS = getDBTool().getBlobOutputStream("test_blob", "value", Arrays.asList(new KeyValue<String, Object>("id", 1)));
         blobOS.write("hello".getBytes());
         blobOS.close();
 
@@ -71,17 +69,16 @@ public abstract class TestBlobOutputStream extends DBTestCase {
 
         assertEquals(size, 5);
         assertEquals(new String(b), "hello");
-        getDBTool().getJDBCConnection().commit();
     }
 
     public void testWrite_3() throws Exception {
         BlobOutputStream blobOS;
 
-        blobOS = getDBTool().getBlobOutputStream("test_blob", "value", Arrays.asList(new KeyValue<String, Object>("id", 1)), false);
+        blobOS = getDBTool().getBlobOutputStream("test_blob", "value", Arrays.asList(new KeyValue<String, Object>("id", 1)));
         blobOS.write("hello".getBytes());
         blobOS.close();
 
-        blobOS = getDBTool().getBlobOutputStream("test_blob", "value", Arrays.asList(new KeyValue<String, Object>("id", 1)), false);
+        blobOS = getDBTool().getBlobOutputStream("test_blob", "value", Arrays.asList(new KeyValue<String, Object>("id", 1)));
         blobOS.setPosition(4);
         blobOS.write("OOOO".getBytes());
         blobOS.close();
@@ -95,13 +92,12 @@ public abstract class TestBlobOutputStream extends DBTestCase {
 
         assertEquals(size, 8);
         assertEquals(new String(b), "hellOOOO");
-        getDBTool().getJDBCConnection().commit();
     }
 
     public void testWrite_4() throws Exception {
         BlobOutputStream blobOS;
 
-        blobOS = getDBTool().getBlobOutputStream("test_blob", "value", Arrays.asList(new KeyValue<String, Object>("id", 1)), false);
+        blobOS = getDBTool().getBlobOutputStream("test_blob", "value", Arrays.asList(new KeyValue<String, Object>("id", 1)));
         blobOS.write("hello".getBytes());
         blobOS.close();
 
@@ -115,7 +111,7 @@ public abstract class TestBlobOutputStream extends DBTestCase {
         assertEquals(size, 5);
         assertEquals(new String(b), "hello");
 
-        blobOS = getDBTool().getBlobOutputStream("test_blob", "value", Arrays.asList(new KeyValue<String, Object>("id", 1)), false);
+        blobOS = getDBTool().getBlobOutputStream("test_blob", "value", Arrays.asList(new KeyValue<String, Object>("id", 1)));
         blobOS.reset();
         blobOS.close();
 
@@ -125,17 +121,15 @@ public abstract class TestBlobOutputStream extends DBTestCase {
         blob.close();
 
         assertEquals(size, 0);
-        getDBTool().getJDBCConnection().commit();
     }
 
     public void testWrite_5() throws Exception {
         BlobOutputStream blobOS;
 
-        blobOS = getDBTool().getBlobOutputStream("test_blob", "value", Arrays.asList(new KeyValue<String, Object>("id", 1)), false);
+        blobOS = getDBTool().getBlobOutputStream("test_blob", "value", Arrays.asList(new KeyValue<String, Object>("id", 1)));
         blobOS.write("hello".getBytes());
         blobOS.reset();
         blobOS.close();
-        getDBTool().getJDBCConnection().commit();
 
         BlobInputStream blob =
                 getDBTool().getBlobInputStream("test_blob", "value", Arrays.asList(new KeyValue<String, Object>("id", 1)));
@@ -143,7 +137,7 @@ public abstract class TestBlobOutputStream extends DBTestCase {
         blob.close();
 
         assertEquals(size, 0);
-        getDBTool().getJDBCConnection().commit();
+
     }
 
     public DBTool getDBTool() {

@@ -39,12 +39,11 @@ public abstract class BlobOutputStream extends OutputStream implements Closeable
         this.condition = new KeyValueCondition(keyValues);
     }
 
-    public static BlobOutputStream create(DBTool dbTool, String tableName, String fieldName, Collection<KeyValue<String, Object>> keyValues,
-                                          boolean append)
+    public static BlobOutputStream create(DBTool dbTool, String tableName, String fieldName, Collection<KeyValue<String, Object>> keyValues)
             throws IOException {
         try {
             if (dbTool.getDbType().equals(DBTool.DBType.MSSQL)) {
-                return new MSSQLBlobOutputStream(dbTool, tableName, fieldName, keyValues, append);
+                return new MSSQLBlobOutputStream(dbTool, tableName, fieldName, keyValues);
             } else if (dbTool.getDbType().equals(DBTool.DBType.ORACLE)) {
                 return new OracleBlobOutputStream(dbTool, tableName, fieldName, keyValues);
             } else {

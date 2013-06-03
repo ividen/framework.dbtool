@@ -38,15 +38,13 @@ class MSSQLBlobInputStream extends BlobInputStream {
         sqlRead = "DECLARE @ptrval VARBINARY(16)\n" + "SELECT @ptrval = TEXTPTR(" + getFieldName() + ") FROM " + getTableName() + " WHERE "
                 + whereCondition + "\n" + "READTEXT " + getTableName() + "." + getFieldName() + " @ptrval ? ?";
         try {
-            resultSet = connection.prepareStatement(sqlQuerySize).executeQuery();
+            PreparedStatement pst = connection.prepareStatement(sqlQuerySize);
+            resultSet = getCondition().installParams(pst).executeQuery();
             if (!resultSet.next()) {
                 throw new StreamException.RecordNotFoundException(sqlQuerySize);
             }
 
             size = resultSet.getLong(nameSize);
-            if (size <= 0) {
-                throw new StreamException.EmptyFieldException("No data. Size = " + size);
-            }
 
             position = 0;
             readCount = 0;
@@ -127,8 +125,8 @@ class MSSQLBlobInputStream extends BlobInputStream {
     }
 
     private ResultSet executeQuery(String sql, int[] params) throws SQLException {
-        PreparedStatement pst = connection.prepareStatement(sql);
-        int index = 0;
+        PreparedStatement pst = getCondition().installParams(connection.prepareStatement(sql));
+        int index =  getCondition().getParamsCount();
         for (int param : params) {
             pst.setInt(++index, param);
         }
