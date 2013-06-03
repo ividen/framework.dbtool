@@ -36,9 +36,6 @@ class OracleBlobInputStream extends BlobInputStream {
 
             size = resultSet.getLong(nameSize);
             dbTool.closeResources(resultSet);
-            if (size <= 0) {
-                throw new StreamException.EmptyFieldException("No data. Size = " + size);
-            }
 
             resultSet =  getCondition().installParams(connection.prepareStatement(sqlQuery)).executeQuery();
             if (!resultSet.next()) {

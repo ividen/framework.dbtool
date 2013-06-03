@@ -56,7 +56,7 @@ class OracleBlobOutputStream extends BlobOutputStream {
 
     @Override
     protected void dbReset() throws SQLException {
-        if (blobField != null) {
+        if (blobField != null && blobField.isOpen()) {
             blobField.close();
         }
 

@@ -35,27 +35,107 @@ public abstract class TestBlobOutputStream extends DBTestCase {
 
     protected abstract String getSpringCfgFile();
 
-    public void testWrite() throws Exception {
+    public void testWrite_1() throws Exception {
         BlobOutputStream blobOS;
 
-        for (int i = 0; i < 300; i++) {
+        for (int i = 0; i < 10; i++) {
             blobOS = getDBTool().getBlobOutputStream("test_blob", "value", Arrays.asList(new KeyValue<String, Object>("id", 1)), false);
             blobOS.write(new byte[1000]);
             blobOS.close();
         }
 
-//
         BlobInputStream blob =
                 getDBTool().getBlobInputStream("test_blob", "value", Arrays.asList(new KeyValue<String, Object>("id", 1)));
-        System.out.println(blob.getSize());
+        long size = blob.getSize();
         blob.close();
 
-//        IDataSet tempDataSet = new FlatXmlDataSetBuilder().build(this.getClass().getResourceAsStream("./data/blob_output_stream_test.xml"));
-//        ReplacementDataSet expDataSet = new ReplacementDataSet(tempDataSet);
-//        expDataSet.addReplacementObject("[DATA]", "hello".getBytes("UTF-8"));
-//
-//        IDataSet actDataSet = getConnection().createDataSet(new String[]{"test_blob"});
-//        Assertion.assertEquals(expDataSet.getTable("test_blob"), actDataSet.getTable("test_blob"));
+        assertEquals(size, 10000);
+    }
+
+    public void testWrite_2() throws Exception {
+        BlobOutputStream blobOS;
+
+        blobOS = getDBTool().getBlobOutputStream("test_blob", "value", Arrays.asList(new KeyValue<String, Object>("id", 1)), false);
+        blobOS.write("hello".getBytes());
+        blobOS.close();
+
+        BlobInputStream blob =
+                getDBTool().getBlobInputStream("test_blob", "value", Arrays.asList(new KeyValue<String, Object>("id", 1)));
+        long size = blob.getSize();
+        byte[] b = new byte[5];
+        blob.read(b);
+        blob.close();
+
+        assertEquals(size, 5);
+        assertEquals(new String(b), "hello");
+    }
+
+    public void testWrite_3() throws Exception {
+        BlobOutputStream blobOS;
+
+        blobOS = getDBTool().getBlobOutputStream("test_blob", "value", Arrays.asList(new KeyValue<String, Object>("id", 1)), false);
+        blobOS.write("hello".getBytes());
+        blobOS.close();
+
+        blobOS = getDBTool().getBlobOutputStream("test_blob", "value", Arrays.asList(new KeyValue<String, Object>("id", 1)), false);
+        blobOS.setPosition(4);
+        blobOS.write("OOOO".getBytes());
+        blobOS.close();
+
+        BlobInputStream blob =
+                getDBTool().getBlobInputStream("test_blob", "value", Arrays.asList(new KeyValue<String, Object>("id", 1)));
+        long size = blob.getSize();
+        byte[] b = new byte[8];
+        blob.read(b);
+        blob.close();
+
+        assertEquals(size, 8);
+        assertEquals(new String(b), "hellOOOO");
+    }
+
+    public void testWrite_4() throws Exception {
+        BlobOutputStream blobOS;
+
+        blobOS = getDBTool().getBlobOutputStream("test_blob", "value", Arrays.asList(new KeyValue<String, Object>("id", 1)), false);
+        blobOS.write("hello".getBytes());
+        blobOS.close();
+
+        BlobInputStream blob =
+                getDBTool().getBlobInputStream("test_blob", "value", Arrays.asList(new KeyValue<String, Object>("id", 1)));
+        long size = blob.getSize();
+        byte[] b = new byte[5];
+        blob.read(b);
+        blob.close();
+
+        assertEquals(size, 5);
+        assertEquals(new String(b), "hello");
+
+        blobOS = getDBTool().getBlobOutputStream("test_blob", "value", Arrays.asList(new KeyValue<String, Object>("id", 1)), false);
+        blobOS.reset();
+        blobOS.close();
+
+        blob =
+                getDBTool().getBlobInputStream("test_blob", "value", Arrays.asList(new KeyValue<String, Object>("id", 1)));
+        size = blob.getSize();
+        blob.close();
+
+        assertEquals(size, 0);
+    }
+
+    public void testWrite_5() throws Exception {
+        BlobOutputStream blobOS;
+
+        blobOS = getDBTool().getBlobOutputStream("test_blob", "value", Arrays.asList(new KeyValue<String, Object>("id", 1)), false);
+        blobOS.write("hello".getBytes());
+        blobOS.reset();
+        blobOS.close();
+
+        BlobInputStream blob =
+                getDBTool().getBlobInputStream("test_blob", "value", Arrays.asList(new KeyValue<String, Object>("id", 1)));
+        long size = blob.getSize();
+        blob.close();
+
+        assertEquals(size, 0);
     }
 
     public DBTool getDBTool() {
