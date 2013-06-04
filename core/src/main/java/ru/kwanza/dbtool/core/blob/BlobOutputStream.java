@@ -1,7 +1,5 @@
 package ru.kwanza.dbtool.core.blob;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import ru.kwanza.dbtool.core.DBTool;
 import ru.kwanza.dbtool.core.KeyValue;
 
@@ -41,6 +39,8 @@ public abstract class BlobOutputStream extends OutputStream implements Closeable
             return new MSSQLBlobOutputStream(dbTool, tableName, fieldName, keyValues);
         } else if (dbTool.getDbType().equals(DBTool.DBType.ORACLE)) {
             return new OracleBlobOutputStream(dbTool, tableName, fieldName, keyValues);
+        } else if (dbTool.getDbType().equals(DBTool.DBType.MYSQL)) {
+            return new MySQLBlobOutputStream(dbTool, tableName, fieldName, keyValues);
         } else {
             throw new RuntimeException("Unsupported type of database");
         }

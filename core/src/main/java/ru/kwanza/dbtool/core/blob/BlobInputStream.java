@@ -47,6 +47,8 @@ public abstract class BlobInputStream extends InputStream implements Closeable {
                 return new MSSQLBlobInputStream(dbTool, tableName, fieldName, keyValues);
             } else if (dbTool.getDbType().equals(DBTool.DBType.ORACLE)) {
                 return new OracleBlobInputStream(dbTool, tableName, fieldName, keyValues);
+            } else if (dbTool.getDbType().equals(DBTool.DBType.MYSQL)) {
+                return new MySQLBlobInputStream(dbTool, tableName, fieldName, keyValues);
             } else {
                 throw new RuntimeException("Unsupported type of database");
             }
