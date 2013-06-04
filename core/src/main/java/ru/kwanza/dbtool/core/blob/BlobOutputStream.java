@@ -163,7 +163,6 @@ public abstract class BlobOutputStream extends OutputStream implements Closeable
     @Override
     public void close() throws IOException {
         dbTool.closeResources(connection);
-        super.close();
     }
 
     @Override
@@ -173,9 +172,5 @@ public abstract class BlobOutputStream extends OutputStream implements Closeable
         sb.append(getCondition().getWhereClause());
         sb.append(')');
         return sb.toString();
-    }
-
-    public static void main(String[] args) {
-        System.out.println(Integer.MAX_VALUE);
     }
 }
