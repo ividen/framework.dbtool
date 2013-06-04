@@ -1,12 +1,9 @@
 package ru.kwanza.dbtool.core.blob;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import ru.kwanza.dbtool.core.DBTool;
 import ru.kwanza.dbtool.core.KeyValue;
 
 import java.io.Closeable;
-import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -43,15 +40,15 @@ public abstract class BlobInputStream extends InputStream implements Closeable {
 
     public static BlobInputStream create(DBTool dbTool, String tableName, String fieldName, Collection<KeyValue<String, Object>> keyValues)
             throws IOException {
-            if (dbTool.getDbType().equals(DBTool.DBType.MSSQL)) {
-                return new MSSQLBlobInputStream(dbTool, tableName, fieldName, keyValues);
-            } else if (dbTool.getDbType().equals(DBTool.DBType.ORACLE)) {
-                return new OracleBlobInputStream(dbTool, tableName, fieldName, keyValues);
-            } else if (dbTool.getDbType().equals(DBTool.DBType.MYSQL)) {
-                return new MySQLBlobInputStream(dbTool, tableName, fieldName, keyValues);
-            } else {
-                throw new RuntimeException("Unsupported type of database");
-            }
+        if (dbTool.getDbType().equals(DBTool.DBType.MSSQL)) {
+            return new MSSQLBlobInputStream(dbTool, tableName, fieldName, keyValues);
+        } else if (dbTool.getDbType().equals(DBTool.DBType.ORACLE)) {
+            return new OracleBlobInputStream(dbTool, tableName, fieldName, keyValues);
+        } else if (dbTool.getDbType().equals(DBTool.DBType.MYSQL)) {
+            return new MySQLBlobInputStream(dbTool, tableName, fieldName, keyValues);
+        } else {
+            throw new RuntimeException("Unsupported type of database");
+        }
     }
 
     protected DBTool getDbTool() {
@@ -122,7 +119,7 @@ public abstract class BlobInputStream extends InputStream implements Closeable {
 
     @Override
     public void close() throws IOException {
-            dbTool.closeResources(connection);
+        dbTool.closeResources(connection);
 
     }
 

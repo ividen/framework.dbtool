@@ -52,7 +52,7 @@ class KeyValueCondition {
     }
 
     public PreparedStatement installParams(PreparedStatement pst) throws SQLException {
-       return installParams(1,pst);
+        return installParams(1, pst);
     }
 
     public PreparedStatement installParams(int index, PreparedStatement pst) throws SQLException {

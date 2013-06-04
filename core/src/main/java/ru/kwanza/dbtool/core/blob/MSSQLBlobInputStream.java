@@ -49,7 +49,7 @@ class MSSQLBlobInputStream extends BlobInputStream {
             log.error(e.getMessage(), e);
             throw new IOException(e);
         } finally {
-            dbTool.closeResources(rs,pst);
+            dbTool.closeResources(rs, pst);
         }
     }
 
@@ -62,14 +62,14 @@ class MSSQLBlobInputStream extends BlobInputStream {
             pst = getCondition().installParams(connection.prepareStatement(this.sqlRead));
             int index = getCondition().getParamsCount();
             pst.setInt(++index, (int) position);
-            pst.setInt(++index, Math.min(blockSize,(int)(getSize()-position)));
+            pst.setInt(++index, Math.min(blockSize, (int) (getSize() - position)));
             rs = pst.executeQuery();
             if (!rs.next()) {
                 throw new SQLException("Record not found");
             }
             return rs.getBytes(getFieldName());
         } finally {
-            getDbTool().closeResources(rs,pst);
+            getDbTool().closeResources(rs, pst);
         }
 
     }

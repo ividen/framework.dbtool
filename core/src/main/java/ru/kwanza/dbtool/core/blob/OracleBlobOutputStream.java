@@ -49,7 +49,6 @@ class OracleBlobOutputStream extends BlobOutputStream {
 
     }
 
-
     @Override
     protected void dbFlush(long position, byte[] buffer) throws SQLException {
         blobField.setBytes(position, buffer);
@@ -57,7 +56,7 @@ class OracleBlobOutputStream extends BlobOutputStream {
 
     @Override
     protected void dbReset() throws SQLException {
-        if(blobField!=null){
+        if (blobField != null) {
             blobField.free();
         }
 

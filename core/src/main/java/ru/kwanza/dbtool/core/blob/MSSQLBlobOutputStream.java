@@ -107,6 +107,7 @@ class MSSQLBlobOutputStream extends BlobOutputStream {
 
     @Override
     public void close() throws IOException {
+        //todo aguzanov порефакторить это должно вызфываться только у родительского метода
         flush();
         super.close();
     }

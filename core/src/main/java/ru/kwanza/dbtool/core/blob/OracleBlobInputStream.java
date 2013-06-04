@@ -7,7 +7,6 @@ import ru.kwanza.dbtool.core.DBTool;
 import ru.kwanza.dbtool.core.KeyValue;
 
 import java.io.IOException;
-import java.sql.Blob;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -44,7 +43,7 @@ class OracleBlobInputStream extends BlobInputStream {
 
             setUpSize(rs.getLong(nameSize));
 
-            rs =  getCondition().installParams(connection.prepareStatement(sqlQuery)).executeQuery();
+            rs = getCondition().installParams(connection.prepareStatement(sqlQuery)).executeQuery();
             if (!rs.next()) {
                 throw new SQLException("Record not found!");
             }
@@ -58,14 +57,14 @@ class OracleBlobInputStream extends BlobInputStream {
             close();
             log.error(e.getMessage(), e);
             throw new IOException(e);
-        }finally {
-            dbTool.closeResources(rs,pst);
+        } finally {
+            dbTool.closeResources(rs, pst);
         }
     }
 
     @Override
     public byte[] dbRead(long position, int blockSize) throws SQLException {
-       return blobField.getBytes(position+1,blockSize);
+        return blobField.getBytes(position + 1, blockSize);
     }
 
 }
