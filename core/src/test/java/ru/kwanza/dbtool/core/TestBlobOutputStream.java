@@ -44,6 +44,33 @@ public abstract class TestBlobOutputStream extends DBTestCase {
 
     protected abstract String getSpringCfgFile();
 
+    public void testReadAndWrite() throws Exception {
+        BlobOutputStream blobOS;
+
+        blobOS = getDBTool().getBlobOutputStream("test_blob", "value", Arrays.asList(new KeyValue<String, Object>("id", 1)));
+        for (int i = 0; i < 5000; i++) {
+
+            blobOS.write("hello".getBytes());
+
+        }
+        blobOS.close();
+        BlobInputStream blob =
+                getDBTool().getBlobInputStream("test_blob", "value", Arrays.asList(new KeyValue<String, Object>("id", 1)));
+        long size = blob.getSize();
+
+        for (int i = 0; i < 5000; i++) {
+            byte[] bytes = new byte[5];
+            blob.read(bytes);
+            assertEquals(new String(bytes), "hello");
+
+        }
+
+        blob.close();
+
+        assertEquals(size, 5000 * "hello".getBytes().length);
+
+    }
+
     public void testWrite_1() throws Exception {
         BlobOutputStream blobOS;
 

@@ -14,6 +14,6 @@ public class TestMSSQLBlobInputStream extends TestBlobInputStream {
     }
 
     protected String getSpringCfgFile() {
-        return "mssql_config_select_util.xml";
+        return "mssql_config_blob.xml";
     }
 }

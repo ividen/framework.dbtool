@@ -94,12 +94,7 @@ public abstract class BlobInputStream extends InputStream implements Closeable {
     @Override
     public int read() throws IOException {
         if (position == size) {
-            position++;
             return -1;
-        }
-
-        if (position > size) {
-            throw new EOFException();
         }
 
         if (buffer.position() < BLOCK_SIZE) {

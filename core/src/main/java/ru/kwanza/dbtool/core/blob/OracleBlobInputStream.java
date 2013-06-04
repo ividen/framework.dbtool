@@ -57,7 +57,7 @@ class OracleBlobInputStream extends BlobInputStream {
         } catch (SQLException e) {
             close();
             log.error(e.getMessage(), e);
-            throw new RuntimeException(e);
+            throw new IOException(e);
         }finally {
             dbTool.closeResources(rs,pst);
         }

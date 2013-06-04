@@ -13,6 +13,6 @@ public class TestOracleBlobInputStream extends TestBlobInputStream {
     }
 
     protected String getSpringCfgFile() {
-        return "oracle_config_select_util.xml";
+        return "oracle_config_blob.xml";
     }
 }
