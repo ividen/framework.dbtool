@@ -17,7 +17,6 @@ import java.util.Collection;
  * @author Ivan Baluk
  */
 public abstract class BlobOutputStream extends OutputStream implements Closeable {
-    public static final int BLOCK_SIZE = 1024 * 1024;
     private static final Logger logger = LoggerFactory.getLogger(BlobOutputStream.class);
 
     private DBTool dbTool;
@@ -28,7 +27,7 @@ public abstract class BlobOutputStream extends OutputStream implements Closeable
     protected final Connection connection;
     private long position;
     private long size;
-    private ByteBuffer buffer = ByteBuffer.allocate(BLOCK_SIZE);
+    private ByteBuffer buffer = ByteBuffer.allocate(Const.BLOCK_SIZE);
 
     public BlobOutputStream(DBTool dbTool, String tableName, String fieldName, Collection<KeyValue<String, Object>> keyValues)
             throws IOException {
@@ -134,7 +133,7 @@ public abstract class BlobOutputStream extends OutputStream implements Closeable
     }
 
     private boolean isFull() {
-        return buffer.position() >= BLOCK_SIZE;
+        return buffer.position() >= Const.BLOCK_SIZE;
     }
 
     private boolean isEmpty() {

@@ -6,11 +6,15 @@ import ru.kwanza.dbtool.core.DBTool;
 import ru.kwanza.dbtool.core.KeyValue;
 
 import java.io.Closeable;
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
 import java.sql.Connection;
-import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Collection;
+
+import static ru.kwanza.dbtool.core.blob.Const.BLOCK_SIZE;
 
 /**
  * @author Ivan Baluk
@@ -24,10 +28,11 @@ public abstract class BlobInputStream extends InputStream implements Closeable {
     private final String tableName;
     private final String fieldName;
     private final KeyValueCondition condition;
-
+    //todo aguzanov подумать над тем, чтобы избавиться от этого.
     protected final Connection connection;
-    protected ResultSet resultSet;
-    protected InputStream inputStream;
+    private long position;
+    private long size;
+    private ByteBuffer buffer = ByteBuffer.allocate(BLOCK_SIZE);
 
     protected BlobInputStream(DBTool dbTool, String tableName, String fieldName, Collection<KeyValue<String, Object>> keyValues)
             throws IOException {
@@ -36,9 +41,8 @@ public abstract class BlobInputStream extends InputStream implements Closeable {
         this.fieldName = fieldName;
         this.tableName = tableName;
         this.condition = new KeyValueCondition(keyValues);
-
-        this.resultSet = null;
-        this.inputStream = null;
+        this.position = 0;
+        this.buffer.position(BLOCK_SIZE);
     }
 
     public static BlobInputStream create(DBTool dbTool, String tableName, String fieldName, Collection<KeyValue<String, Object>> keyValues)
@@ -76,9 +80,56 @@ public abstract class BlobInputStream extends InputStream implements Closeable {
         return condition;
     }
 
-    public abstract long getPosition();
+    public long getSize() {
+        return size;
+    }
 
-    public abstract long getSize();
+    protected void setUpSize(long size) throws IOException {
+        this.size = size;
+    }
+
+    public long getPosition() {
+        return position;
+    }
+
+    public void setPosition(long position) throws IOException {
+        if (position < 0) {
+            throw new IllegalStateException("Possition can't be negative!");
+        }
+        if (position > getSize()) {
+            throw new IllegalStateException("Position must be less then size!");
+        }
+        buffer.position(BLOCK_SIZE - 1);
+        this.position = position;
+    }
+
+    @Override
+    public int read() throws IOException {
+        if (position == size) {
+            position++;
+            return -1;
+        }
+
+        if (position > size) {
+            throw new EOFException();
+        }
+
+        if (buffer.position() < BLOCK_SIZE) {
+            position++;
+            return buffer.get();
+        } else {
+            buffer.rewind();
+            try {
+                buffer.put(dbRead(position, BLOCK_SIZE));
+            } catch (SQLException e) {
+                throw new IOException(e);
+            }
+            buffer.rewind();
+            return read();
+        }
+    }
+
+    public abstract byte[] dbRead(long position, int blockSize) throws SQLException;
 
     public int available() throws IOException {
         return (int) (getSize() - getPosition());
@@ -87,7 +138,7 @@ public abstract class BlobInputStream extends InputStream implements Closeable {
     @Override
     public void close() throws IOException {
         try {
-            dbTool.closeResources(inputStream, resultSet, connection);
+            dbTool.closeResources(connection);
         } finally {
             try {
                 super.close();
