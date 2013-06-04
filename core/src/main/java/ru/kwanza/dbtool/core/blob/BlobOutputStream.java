@@ -17,10 +17,7 @@ import java.util.Collection;
  * @author Ivan Baluk
  */
 public abstract class BlobOutputStream extends OutputStream implements Closeable {
-    private static final Logger logger = LoggerFactory.getLogger(BlobOutputStream.class);
-
     private DBTool dbTool;
-
     private final String tableName;
     private final String fieldName;
     private final KeyValueCondition condition;

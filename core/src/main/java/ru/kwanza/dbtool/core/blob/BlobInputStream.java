@@ -20,9 +20,6 @@ import static ru.kwanza.dbtool.core.blob.Const.BLOCK_SIZE;
  * @author Ivan Baluk
  */
 public abstract class BlobInputStream extends InputStream implements Closeable {
-
-    private static final Logger log = LoggerFactory.getLogger(BlobInputStream.class);
-
     private DBTool dbTool;
 
     private final String tableName;
@@ -128,15 +125,8 @@ public abstract class BlobInputStream extends InputStream implements Closeable {
 
     @Override
     public void close() throws IOException {
-        try {
             dbTool.closeResources(connection);
-        } finally {
-            try {
-                super.close();
-            } catch (IOException e) {
-                log.error("Error closing " + this.toString(), e);
-            }
-        }
+
     }
 
     @Override
