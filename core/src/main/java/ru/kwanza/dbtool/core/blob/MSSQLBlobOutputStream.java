@@ -18,8 +18,6 @@ import java.util.Collection;
  */
 class MSSQLBlobOutputStream extends BlobOutputStream {
 
-    protected static final int BLOCK_SIZE = 1000000;
-
     private static final Logger log = LoggerFactory.getLogger(MSSQLBlobOutputStream.class);
     private final String sqlUpdateTextQuery;
     private final String sqlUpdateQuery;
@@ -27,7 +25,7 @@ class MSSQLBlobOutputStream extends BlobOutputStream {
     private ByteArrayOutputStream outputStreamCache;
 
     public MSSQLBlobOutputStream(final DBTool dbTool, String tableName, String fieldName, Collection<KeyValue<String, Object>> keyValues)
-            throws IOException, StreamException.RecordNotFoundException {
+            throws IOException {
         super(dbTool, tableName, fieldName, keyValues);
 
         final String whereCondition = getCondition().getWhereClause();
@@ -46,7 +44,7 @@ class MSSQLBlobOutputStream extends BlobOutputStream {
             setUpSize(size);
         } catch (SQLException e) {
             close();
-            throw new RuntimeException(e);
+            throw new IOException(e);
         }
 
     }

@@ -40,17 +40,12 @@ public abstract class BlobOutputStream extends OutputStream implements Closeable
 
     public static BlobOutputStream create(DBTool dbTool, String tableName, String fieldName, Collection<KeyValue<String, Object>> keyValues)
             throws IOException {
-        try {
-            if (dbTool.getDbType().equals(DBTool.DBType.MSSQL)) {
-                return new MSSQLBlobOutputStream(dbTool, tableName, fieldName, keyValues);
-            } else if (dbTool.getDbType().equals(DBTool.DBType.ORACLE)) {
-                return new OracleBlobOutputStream(dbTool, tableName, fieldName, keyValues);
-            } else {
-                throw new RuntimeException("Unsupported type of database");
-            }
-        } catch (StreamException.RecordNotFoundException e) {
-            logger.error(e.getMessage(), e);
-            throw new IOException(e);
+        if (dbTool.getDbType().equals(DBTool.DBType.MSSQL)) {
+            return new MSSQLBlobOutputStream(dbTool, tableName, fieldName, keyValues);
+        } else if (dbTool.getDbType().equals(DBTool.DBType.ORACLE)) {
+            return new OracleBlobOutputStream(dbTool, tableName, fieldName, keyValues);
+        } else {
+            throw new RuntimeException("Unsupported type of database");
         }
     }
 
@@ -151,7 +146,7 @@ public abstract class BlobOutputStream extends OutputStream implements Closeable
             } catch (SQLException e) {
                 throw new IOException(e);
             }
-            size  = position =  0;
+            size = position = 0;
             buffer.position(0);
         }
     }

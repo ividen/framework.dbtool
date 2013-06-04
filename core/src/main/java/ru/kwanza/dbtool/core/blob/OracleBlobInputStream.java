@@ -22,7 +22,7 @@ class OracleBlobInputStream extends BlobInputStream {
     private final BLOB blobField;
 
     public OracleBlobInputStream(final DBTool dbTool, String tableName, String fieldName, Collection<KeyValue<String, Object>> keyValues)
-            throws IOException, StreamException.EmptyFieldException, StreamException.RecordNotFoundException {
+            throws IOException {
         super(dbTool, tableName, fieldName, keyValues);
 
         final String whereCondition = getCondition().getWhereClause();
@@ -46,7 +46,7 @@ class OracleBlobInputStream extends BlobInputStream {
 
             rs =  getCondition().installParams(connection.prepareStatement(sqlQuery)).executeQuery();
             if (!rs.next()) {
-                throw new StreamException.RecordNotFoundException(sqlQuery);
+                throw new SQLException("Record not found!");
             }
 
             this.blobField = (BLOB) rs.getBlob(getFieldName());

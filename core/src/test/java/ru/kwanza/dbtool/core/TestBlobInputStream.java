@@ -8,7 +8,6 @@ import org.dbunit.operation.DatabaseOperation;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import ru.kwanza.dbtool.core.blob.BlobInputStream;
-import ru.kwanza.dbtool.core.blob.NullBlobInputStream;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -43,11 +42,6 @@ public abstract class TestBlobInputStream extends DBTestCase {
     public void testRead() throws Exception {
         BlobInputStream blobIS = getDBTool().getBlobInputStream("test_blob", "value", Arrays.asList(new KeyValue<String, Object>("id", 1)));
         assertEquals("hello", inputStreamToString(blobIS));
-    }
-
-    public void testReadNull() throws Exception {
-        BlobInputStream blobIS = getDBTool().getBlobInputStream("test_blob", "value", Arrays.asList(new KeyValue<String, Object>("id", 2)));
-        assertTrue(blobIS instanceof NullBlobInputStream);
     }
 
     public void testReadFail() throws Exception {

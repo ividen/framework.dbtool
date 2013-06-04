@@ -19,7 +19,7 @@ class MSSQLBlobInputStream extends BlobInputStream {
     private final String sqlRead;
 
     public MSSQLBlobInputStream(final DBTool dbTool, String tableName, String fieldName, Collection<KeyValue<String, Object>> keyValues)
-            throws IOException, StreamException.EmptyFieldException, StreamException.RecordNotFoundException {
+            throws IOException {
         super(dbTool, tableName, fieldName, keyValues);
 
         final String whereCondition = getCondition().getWhereClause();
@@ -47,7 +47,7 @@ class MSSQLBlobInputStream extends BlobInputStream {
         } catch (SQLException e) {
             close();
             log.error(e.getMessage(), e);
-            throw new RuntimeException(e);
+            throw new IOException(e);
         } finally {
             dbTool.closeResources(rs,pst);
         }

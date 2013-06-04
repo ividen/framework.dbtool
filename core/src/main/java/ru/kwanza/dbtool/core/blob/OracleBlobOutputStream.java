@@ -20,7 +20,7 @@ class OracleBlobOutputStream extends BlobOutputStream {
     private ResultSet rs;
 
     public OracleBlobOutputStream(final DBTool dbTool, String tableName, String fieldName, Collection<KeyValue<String, Object>> keyValues)
-            throws IOException, StreamException.RecordNotFoundException {
+            throws IOException {
         super(dbTool, tableName, fieldName, keyValues);
 
         PreparedStatement ps;
@@ -41,7 +41,7 @@ class OracleBlobOutputStream extends BlobOutputStream {
                 }
 
             } else {
-                throw new StreamException.RecordNotFoundException("Record not found!");
+                throw new SQLException("Record not found!");
             }
         } catch (Exception ex) {
             throw new RuntimeException(ex);

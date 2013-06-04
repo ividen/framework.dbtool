@@ -28,7 +28,6 @@ public abstract class BlobInputStream extends InputStream implements Closeable {
     private final String tableName;
     private final String fieldName;
     private final KeyValueCondition condition;
-    //todo aguzanov подумать над тем, чтобы избавиться от этого.
     protected final Connection connection;
     private long position;
     private long size;
@@ -47,7 +46,6 @@ public abstract class BlobInputStream extends InputStream implements Closeable {
 
     public static BlobInputStream create(DBTool dbTool, String tableName, String fieldName, Collection<KeyValue<String, Object>> keyValues)
             throws IOException {
-        try {
             if (dbTool.getDbType().equals(DBTool.DBType.MSSQL)) {
                 return new MSSQLBlobInputStream(dbTool, tableName, fieldName, keyValues);
             } else if (dbTool.getDbType().equals(DBTool.DBType.ORACLE)) {
@@ -55,13 +53,6 @@ public abstract class BlobInputStream extends InputStream implements Closeable {
             } else {
                 throw new RuntimeException("Unsupported type of database");
             }
-        } catch (StreamException.RecordNotFoundException e) {
-            log.error(e.getMessage(), e);
-            return null;
-        } catch (StreamException.EmptyFieldException e) {
-            log.info(e.getMessage(), e);
-            return new NullBlobInputStream(tableName, fieldName, keyValues);
-        }
     }
 
     protected DBTool getDbTool() {
