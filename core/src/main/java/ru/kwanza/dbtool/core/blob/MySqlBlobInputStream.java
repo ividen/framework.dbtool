@@ -26,7 +26,7 @@ class MySQLBlobInputStream extends BlobInputStream {
         final String sqlQuerySize =
                 "SELECT LENGTH(" + getFieldName() + ") AS " + nameSize + " FROM " + getTableName() + " WHERE " + whereCondition;
         this.sqlRead =
-                "SELECT SUBSTRING(" + getFieldName() + ",?,?) FROM " + getTableName() + " WHERE " + whereCondition;
+                "SELECT SUBSTRING(" + getFieldName() + ",?,?) " + getFieldName() + " FROM " + getTableName() + " WHERE " + whereCondition;
         PreparedStatement pst = null;
         ResultSet rs = null;
         try {
@@ -58,8 +58,8 @@ class MySQLBlobInputStream extends BlobInputStream {
 
         try {
             pst = getCondition().installParams(3, connection.prepareStatement(this.sqlRead));
-            pst.setInt(1, (int) position);
-            pst.setInt(2, Math.min(blockSize, (int) (getSize() - position)));
+            pst.setLong(1, (int) position+1);
+            pst.setLong(2, Math.min(blockSize, getSize() - position));
             rs = pst.executeQuery();
             if (!rs.next()) {
                 throw new SQLException("Record not found");
