@@ -33,6 +33,8 @@ public interface IEntityManager {
 
     <F, T> Map<F, T> readMapByKeys(Class<T> entityClass, Collection keys, String propertyName);
 
+    <F, T> Map<F, T> readMapByKeys(Class<T> entityClass, Collection keys);
+
     <F, T> Map<F, List<T>> readMapListByKeys(Class<T> entityClass, Collection keys, String propertyName);
 
     <T> IQueryBuilder<T> queryBuilder(Class<T> entityClass);

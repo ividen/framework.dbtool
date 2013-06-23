@@ -6,6 +6,7 @@ import ru.kwanza.dbtool.core.VersionGenerator;
 import ru.kwanza.dbtool.orm.api.*;
 import ru.kwanza.dbtool.orm.impl.fetcher.FetcherImpl;
 import ru.kwanza.dbtool.orm.impl.filtering.FilteringImpl;
+import ru.kwanza.dbtool.orm.impl.mapping.FieldMapping;
 import ru.kwanza.dbtool.orm.impl.mapping.IEntityMappingRegistry;
 import ru.kwanza.dbtool.orm.impl.operation.OperationFactory;
 import ru.kwanza.dbtool.orm.impl.querybuilder.QueryBuilderFactory;
@@ -88,6 +89,18 @@ public class EntityManagerImpl implements IEntityManager {
     @SuppressWarnings("unchecked")
     public <F, T> Map<F, T> readMapByKeys(Class<T> entityClass, Collection keys, String propertyName) {
         return (Map<F, T>) operationFactory.getReadOperation(entityClass).selectMapByKeys(keys, propertyName);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <F, T> Map<F, T> readMapByKeys(Class<T> entityClass, Collection keys) {
+        Collection<FieldMapping> idFieldMappings = mappingRegistry.getIdFields(entityClass);
+        if (idFieldMappings == null || idFieldMappings.isEmpty()) {
+            throw new RuntimeException("IdFieldMapping for entity class" + entityClass + " not found");
+        }
+
+        String idField = idFieldMappings.iterator().next().getName();
+
+        return (Map<F, T>) operationFactory.getReadOperation(entityClass).selectMapByKeys(keys, idField);
     }
 
     @SuppressWarnings("unchecked")
