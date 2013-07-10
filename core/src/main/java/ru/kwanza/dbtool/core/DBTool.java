@@ -54,7 +54,7 @@ public class DBTool extends JdbcDaoSupport {
     }
 
     public Connection getJDBCConnection(){
-        return new ConnetionWrapper(getDataSource());
+        return new ConnectionWrapper(getDataSource());
     }
 
     public <T> List<T> selectList(String selectSQL, RowMapper<T> rowMapper, Object... inValues) {

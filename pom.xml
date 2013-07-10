@@ -29,6 +29,7 @@
         <toolbox.version>1.0-SNAPSHOT</toolbox.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <toolbox.version>1.0-SNAPSHOT</toolbox.version>
+        <txn.version>1.0-SNAPSHOT</txn.version>
         <maven.surefire.plugin.version>2.12</maven.surefire.plugin.version>
         <targetJdk>1.6</targetJdk>
     </properties>
@@ -212,6 +213,14 @@
                 <artifactId>dbtool-core</artifactId>
                 <version>${dbtool.version}</version>
             </dependency>
+
+            <dependency>
+                <groupId>ru.kwanza.txn</groupId>
+                <artifactId>txn</artifactId>
+                <version>${txn.version}</version>
+                <scope>test</scope>
+            </dependency>
+
 
             <dependency>
                 <groupId>junit</groupId>

@@ -8,7 +8,7 @@ import org.dbunit.operation.DatabaseOperation;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import ru.kwanza.dbtool.core.blob.BlobInputStream;
-import ru.kwanza.dbtool.core.blob.NullBlobInputStream;
+import ru.kwanza.txn.api.spi.ITransactionManager;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -36,6 +36,14 @@ public abstract class TestBlobInputStream extends DBTestCase {
     protected void setUp() throws Exception {
         ctx = new ClassPathXmlApplicationContext(getSpringCfgFile(), TestSelectUtil.class);
         DatabaseOperation.CLEAN_INSERT.execute(getConnection(), getDataSet());
+        ITransactionManager tm = ctx.getBean("txn.ITransactionManager", ITransactionManager.class);
+        tm.begin();
+    }
+
+    @Override
+    public void tearDown() throws Exception {
+        ITransactionManager tm = ctx.getBean("txn.ITransactionManager", ITransactionManager.class);
+        tm.commit();
     }
 
     protected abstract String getSpringCfgFile();
@@ -45,14 +53,13 @@ public abstract class TestBlobInputStream extends DBTestCase {
         assertEquals("hello", inputStreamToString(blobIS));
     }
 
-    public void testReadNull() throws Exception {
-        BlobInputStream blobIS = getDBTool().getBlobInputStream("test_blob", "value", Arrays.asList(new KeyValue<String, Object>("id", 2)));
-        assertTrue(blobIS instanceof NullBlobInputStream);
-    }
-
     public void testReadFail() throws Exception {
-        BlobInputStream blobIS = getDBTool().getBlobInputStream("test_blob", "value", Arrays.asList(new KeyValue<String, Object>("id", 3)));
-        assertNull(blobIS);
+        try {
+            BlobInputStream blobIS =
+                    getDBTool().getBlobInputStream("test_blob", "value", Arrays.asList(new KeyValue<String, Object>("id", 3)));
+            fail("Expected " + IOException.class);
+        } catch (IOException e) {
+        }
     }
 
     public DBTool getDBTool() {

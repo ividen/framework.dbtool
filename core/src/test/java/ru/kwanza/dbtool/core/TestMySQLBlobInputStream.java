@@ -6,13 +6,14 @@ import org.dbunit.ext.mssql.MsSqlDataTypeFactory;
 /**
  * @author: Ivan Baluk
  */
-public class TestMSSQLBlobOutputStream extends TestBlobOutputStream {
+public class TestMySQLBlobInputStream extends TestBlobInputStream {
+
     @Override
     protected void setUpDatabaseConfig(DatabaseConfig config) {
         config.setProperty(DatabaseConfig.PROPERTY_DATATYPE_FACTORY, new MsSqlDataTypeFactory());
     }
 
     protected String getSpringCfgFile() {
-        return "mssql_config_blob.xml";
+        return "mysql_config_blob.xml";
     }
 }

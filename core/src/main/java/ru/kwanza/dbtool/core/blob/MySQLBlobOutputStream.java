@@ -6,7 +6,6 @@ import ru.kwanza.dbtool.core.DBTool;
 import ru.kwanza.dbtool.core.FieldSetter;
 import ru.kwanza.dbtool.core.KeyValue;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -14,27 +13,22 @@ import java.sql.SQLException;
 import java.util.Collection;
 
 /**
- * @author Ivan Baluk
+ * @author Alexander Guzanov
  */
-class MSSQLBlobOutputStream extends BlobOutputStream {
+class MySQLBlobOutputStream extends BlobOutputStream {
+    private static final Logger log = LoggerFactory.getLogger(MySQLBlobOutputStream.class);
 
-    private static final Logger log = LoggerFactory.getLogger(MSSQLBlobOutputStream.class);
-    private final String sqlUpdateTextQuery;
     private final String sqlUpdateQuery;
+    private final String sqlUpdateTextQuery;
 
-    private ByteArrayOutputStream outputStreamCache;
-
-    public MSSQLBlobOutputStream(final DBTool dbTool, String tableName, String fieldName, Collection<KeyValue<String, Object>> keyValues)
-            throws IOException {
+    MySQLBlobOutputStream(DBTool dbTool, String tableName, String fieldName,
+                          Collection<KeyValue<String, Object>> keyValues) throws IOException {
         super(dbTool, tableName, fieldName, keyValues);
 
-        final String whereCondition = getCondition().getWhereClause();
-
+        String whereCondition = getCondition().getWhereClause();
         this.sqlUpdateQuery = "UPDATE " + tableName + " SET " + fieldName + " = ? WHERE " + whereCondition;
         this.sqlUpdateTextQuery =
-                "DECLARE @ptrval VARBINARY(16);\n" + "SELECT @ptrval = TEXTPTR(" + getFieldName() + ") FROM " + getTableName()
-                        + " WHERE "
-                        + whereCondition + ";\n" + "UPDATETEXT " + getTableName() + "." + getFieldName() + " @ptrval ? null ?";
+                "UPDATE " + tableName + " SET " + fieldName + " = INSERT(" + fieldName + ",?,?,?) WHERE " + whereCondition;
 
         try {
             long size = selectSize();
@@ -53,9 +47,10 @@ class MSSQLBlobOutputStream extends BlobOutputStream {
     protected void dbFlush(long position, byte[] array) throws SQLException {
         PreparedStatement pst = null;
         try {
-            pst = getCondition().installParams(connection.prepareStatement(sqlUpdateTextQuery));
-            pst.setInt(getCondition().getParamsCount() + 1, (int) position - 1);
-            pst.setBytes(getCondition().getParamsCount() + 2, array);
+            pst = getCondition().installParams(4, connection.prepareStatement(sqlUpdateTextQuery));
+            pst.setLong(1, position);
+            pst.setLong(2, array.length);
+            pst.setBytes(3, array);
             pst.executeUpdate();
         } finally {
             getDbTool().closeResources(pst);
@@ -83,7 +78,7 @@ class MSSQLBlobOutputStream extends BlobOutputStream {
     private long selectSize() throws SQLException {
         final String nameSize = "nameSize";
         final String whereCondition = getCondition().getWhereClause();
-        final String sqlQuerySize = "SELECT DATALENGTH(" + getFieldName() + ") AS " + nameSize + "  FROM " + getTableName() +
+        final String sqlQuerySize = "SELECT LENGTH(" + getFieldName() + ") AS " + nameSize + "  FROM " + getTableName() +
                 " WHERE " + whereCondition;
 
         PreparedStatement pst = null;
