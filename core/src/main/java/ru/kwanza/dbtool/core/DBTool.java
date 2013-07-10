@@ -41,9 +41,9 @@ public class DBTool extends JdbcDaoSupport {
                 dbType = DBType.MSSQL;
             } else if ("Oracle".equalsIgnoreCase(databaseProductName)) {
                 dbType = DBType.ORACLE;
-            } else if("MySQL".equalsIgnoreCase(databaseProductName)){
+            } else if ("MySQL".equalsIgnoreCase(databaseProductName)) {
                 dbType = DBType.MYSQL;
-            }else {
+            } else {
                 dbType = DBType.OTHER;
             }
             dbVersion = conn.getMetaData().getDatabaseMajorVersion();
@@ -53,7 +53,7 @@ public class DBTool extends JdbcDaoSupport {
         }
     }
 
-    public Connection getJDBCConnection(){
+    public Connection getJDBCConnection() {
         return new ConnectionWrapper(getDataSource());
     }
 
@@ -100,16 +100,24 @@ public class DBTool extends JdbcDaoSupport {
     }
 
     public AppLock getLock(String lockName) {
+        return getLock(lockName, false);
+    }
+
+    public AppLock getDefaultLock(String lockName) {
+        return getDefaultLock(lockName, false);
+    }
+
+    public AppLock getLock(String lockName, boolean reentrant) {
         try {
-            return AppLock.defineLock(this, lockName, dbType);
+            return AppLock.defineLock(this, lockName, dbType, reentrant);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public AppLock getDefaultLock(String lockName) {
+    public AppLock getDefaultLock(String lockName, boolean reentrant) {
         try {
-            return AppLock.defineLock(this, lockName, DBType.OTHER);
+            return AppLock.defineLock(this, lockName, DBType.OTHER, reentrant);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

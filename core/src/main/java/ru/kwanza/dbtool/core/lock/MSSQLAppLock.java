@@ -8,8 +8,8 @@ import java.sql.SQLException;
 
 class MSSQLAppLock extends AppLock {
 
-    MSSQLAppLock(DBTool dbTool, String lockName) throws SQLException {
-        super(dbTool, lockName);
+    MSSQLAppLock(DBTool dbTool, String lockName, boolean reentrant) throws SQLException {
+        super(dbTool, lockName, reentrant);
     }
 
     @Override

@@ -12,8 +12,8 @@ class DefaultAppLock extends AppLock {
     public static final String INSERT_LOCK = "insert into dbmutex(id) values(?)";
     public static final String UPDATE_LOCK = "select id from dbmutex where id = ?";
 
-    DefaultAppLock(DBTool dbTool, String lockName) throws SQLException {
-        super(dbTool, lockName);
+    DefaultAppLock(DBTool dbTool, String lockName, boolean reentrant) throws SQLException {
+        super(dbTool, lockName, reentrant);
     }
 
     @Override

@@ -13,10 +13,12 @@ public abstract class AppLock {
     protected DBTool dbTool;
     private String lockName;
     protected Connection conn;
+    private boolean reentrant;
 
-    protected AppLock(DBTool dbTool, String lockName) throws SQLException {
+    protected AppLock(DBTool dbTool, String lockName, boolean reentrant) throws SQLException {
         this.dbTool = dbTool;
         this.lockName = lockName;
+        this.reentrant = reentrant;
     }
 
     public String getLockName() {
@@ -52,15 +54,15 @@ public abstract class AppLock {
         }
     }
 
-    public static AppLock defineLock(DBTool dbTool, String lockName, DBTool.DBType dbType) throws SQLException {
+    public static AppLock defineLock(DBTool dbTool, String lockName, DBTool.DBType dbType, boolean reentrant) throws SQLException {
         if (dbType.equals(DBTool.DBType.MSSQL)) {
-            return new MSSQLAppLock(dbTool, lockName);
+            return new MSSQLAppLock(dbTool, lockName, reentrant);
         } else if (dbType.equals(DBTool.DBType.ORACLE)) {
-            return new OracleAppLock(dbTool, lockName);
+            return new OracleAppLock(dbTool, lockName, reentrant);
         } else if (dbType.equals(DBTool.DBType.MYSQL)) {
-            return new MySQLAppLock(dbTool, lockName);
+            return new MySQLAppLock(dbTool, lockName, reentrant);
         } else {
-            return new DefaultAppLock(dbTool, lockName);
+            return new DefaultAppLock(dbTool, lockName, reentrant);
         }
     }
 }

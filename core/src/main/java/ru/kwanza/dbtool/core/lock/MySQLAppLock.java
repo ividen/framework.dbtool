@@ -9,14 +9,14 @@ import java.sql.SQLException;
 /**
  * @author Alexander Guzanov
  */
-public class MySQLAppLock extends AppLock {
+ class MySQLAppLock extends AppLock {
     public static final String LOCK_SQL = "SELECT GET_LOCK(?,?)";
     public static final String RELEASE_LOCK_SQL = "SELECT RELEASE_LOCK(?)";
 
     private static long MAX_TIMEOUT = 15 * 60 * 1000;
 
-    protected MySQLAppLock(DBTool dbTool, String lockName) throws SQLException {
-        super(dbTool, lockName);
+    protected MySQLAppLock(DBTool dbTool, String lockName, boolean reentrant) throws SQLException {
+        super(dbTool, lockName,reentrant);
     }
 
     @Override

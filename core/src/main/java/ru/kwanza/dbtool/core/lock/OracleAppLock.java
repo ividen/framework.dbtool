@@ -9,8 +9,8 @@ class OracleAppLock extends AppLock {
 
     private String lockHandle;
 
-    OracleAppLock(DBTool dbTool, String lockName) throws SQLException {
-        super(dbTool, lockName);
+    OracleAppLock(DBTool dbTool, String lockName, boolean reentrant) throws SQLException {
+        super(dbTool, lockName, reentrant);
     }
 
     @Override
