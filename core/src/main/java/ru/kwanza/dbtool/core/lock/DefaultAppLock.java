@@ -8,31 +8,26 @@ import java.sql.SQLException;
 
 class DefaultAppLock extends AppLock {
 
+    public static final String DO_LOCK_SQL = "update dbmutex set id = id where id = ?";
+    public static final String INSERT_LOCK = "insert into dbmutex(id) values(?)";
+    public static final String UPDATE_LOCK = "select id from dbmutex where id = ?";
+
     DefaultAppLock(DBTool dbTool, String lockName) throws SQLException {
         super(dbTool, lockName);
-        allocateUnique();
     }
 
     @Override
-    public void lock() {
+    public void doLock() throws SQLException {
+        allocateUnique();
         PreparedStatement st = null;
         try {
-            checkNewConnection();
-            st = conn.prepareStatement("update dbmutex set id = id where id = ?");
+            st = conn.prepareStatement(DO_LOCK_SQL);
             st.setString(1, getLockName());
             if (1 != st.executeUpdate()) {
                 throw new IllegalStateException("Lock '" + getLockName() + "' not found");
             }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
         } finally {
-            if (null != st) {
-                try {
-                    st.close();
-                } catch (SQLException e) {
-                    logger.error("Can't close PreparedStatement", e);
-                }
-            }
+            dbTool.closeResources(st);
         }
     }
 
@@ -40,27 +35,22 @@ class DefaultAppLock extends AppLock {
         PreparedStatement st = null;
         ResultSet rs = null;
         try {
-            checkNewConnection();
-            st = conn.prepareStatement("insert into dbmutex(id) values(?)");
+            st = conn.prepareStatement(INSERT_LOCK);
             st.setString(1, getLockName());
             try {
                 st.executeUpdate();
             } catch (SQLException e) {
-                st = conn.prepareStatement("select id from dbmutex where id = ?");
+                st.close();
+                st = conn.prepareStatement(UPDATE_LOCK);
                 st.setString(1, getLockName());
+
                 rs = st.executeQuery();
                 if (!rs.next()) {
                     throw e;
                 }
             }
         } finally {
-            if (null != rs) {
-                rs.close();
-            }
-            if (null != st) {
-                st.close();
-            }
-            conn.close();
+            dbTool.closeResources(rs, st);
         }
     }
 }

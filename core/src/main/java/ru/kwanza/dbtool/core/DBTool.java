@@ -101,7 +101,7 @@ public class DBTool extends JdbcDaoSupport {
 
     public AppLock getLock(String lockName) {
         try {
-            return AppLock.defineLock(this, lockName, dbType, dbVersion);
+            return AppLock.defineLock(this, lockName, dbType);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -109,7 +109,7 @@ public class DBTool extends JdbcDaoSupport {
 
     public AppLock getDefaultLock(String lockName) {
         try {
-            return AppLock.defineLock(this, lockName, DBType.OTHER, dbVersion);
+            return AppLock.defineLock(this, lockName, DBType.OTHER);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

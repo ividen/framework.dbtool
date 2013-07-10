@@ -6,17 +6,13 @@ import ru.kwanza.dbtool.core.DBTool;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 public abstract class AppLock {
     public static final Logger logger = LoggerFactory.getLogger(AppLock.class);
 
-    private DBTool dbTool;
+    protected DBTool dbTool;
     private String lockName;
     protected Connection conn;
-
-    private static Map<String, AppLock> locks = new ConcurrentHashMap<String, AppLock>();
 
     protected AppLock(DBTool dbTool, String lockName) throws SQLException {
         this.dbTool = dbTool;
@@ -27,10 +23,16 @@ public abstract class AppLock {
         return lockName;
     }
 
-    /**
-     * ��������� ������� ������� ������� � ������������ ������.
-     */
-    public abstract void lock();
+    public final void lock() {
+        try {
+            checkNewConnection();
+            doLock();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public abstract void doLock() throws SQLException;
 
     public void close() {
         try {
@@ -43,52 +45,22 @@ public abstract class AppLock {
         }
     }
 
-    public void lockAndClose() {
-        try {
-            lock();
-        } finally {
-            if (null != conn) {
-                try {
-                    conn.close();
-                } catch (SQLException e) {
-                    logger.error("Can't close connection", e);
-                }
-            }
-        }
-    }
-
-    protected void checkNewConnection() throws SQLException {
+    private void checkNewConnection() throws SQLException {
         conn = dbTool.getJDBCConnection();
         if (conn.getAutoCommit()) {
             conn.setAutoCommit(false);
         }
     }
 
-    /**
-     * ����������� ������ ��� ��������� ����������.
-     * <p/>
-     * ��� ������� ��������� ������ ����������, ������� ����������� � ���������
-     * ���� ��� ��������.
-     *
-     * @param dbTool
-     * @param lockName  ��� �������
-     * @param dbType    ��� ���� ������
-     * @param dbVersion ������ ���� ������
-     * @return ������ ��� ������������� ���������� �� ������ ������
-     * @throws SQLException
-     */
-    public static synchronized AppLock defineLock(DBTool dbTool, String lockName, DBTool.DBType dbType, int dbVersion) throws SQLException {
-        AppLock lock = locks.get(lockName);
-        if (null == lock) {
-            if ((dbType.equals(DBTool.DBType.MSSQL)) && (dbVersion > 8)) {
-                lock = new MSSQLAppLock(dbTool, lockName);
-            } else if ((dbType.equals(DBTool.DBType.ORACLE)) && (dbVersion > 8)) {
-                lock = new OracleAppLock(dbTool, lockName);
-            } else {
-                lock = new DefaultAppLock(dbTool, lockName);
-            }
-            locks.put(lockName, lock);
+    public static AppLock defineLock(DBTool dbTool, String lockName, DBTool.DBType dbType) throws SQLException {
+        if (dbType.equals(DBTool.DBType.MSSQL)) {
+            return new MSSQLAppLock(dbTool, lockName);
+        } else if (dbType.equals(DBTool.DBType.ORACLE)) {
+            return new OracleAppLock(dbTool, lockName);
+        } else if (dbType.equals(DBTool.DBType.MYSQL)) {
+            return new MySQLAppLock(dbTool, lockName);
+        } else {
+            return new DefaultAppLock(dbTool, lockName);
         }
-        return lock;
     }
 }

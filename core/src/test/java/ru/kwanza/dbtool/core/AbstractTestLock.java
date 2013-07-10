@@ -24,10 +24,6 @@ public abstract class AbstractTestLock extends TestCase {
         conn.setAutoCommit(false);
     }
 
-    public void testDefineLock() throws Exception {
-        AppLock appLock = dbTool.getLock("lock1");
-        assertEquals(appLock, dbTool.getLock("lock1"));
-    }
 
     public void testWaitUnlock() throws Exception {
         lockTest("lock1");

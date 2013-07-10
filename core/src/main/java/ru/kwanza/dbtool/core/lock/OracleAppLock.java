@@ -11,14 +11,13 @@ class OracleAppLock extends AppLock {
 
     OracleAppLock(DBTool dbTool, String lockName) throws SQLException {
         super(dbTool, lockName);
-        this.lockHandle = allocateUnique();
     }
 
     @Override
-    public void lock() {
+    public void doLock() {
         CallableStatement st = null;
         try {
-            checkNewConnection();
+            lockHandle = allocateUnique();
             st = conn.prepareCall(
                     // lockhandle, x_mode, timeut sec, release on commit
                     "{? = call dbms_lock.request(?, 6, 32767, TRUE)}");
@@ -46,7 +45,6 @@ class OracleAppLock extends AppLock {
         String lockHandle = null;
         CallableStatement st = null;
         try {
-            checkNewConnection();
             st = conn.prepareCall("{call dbms_lock.allocate_unique(?, ?)}");
             st.setString(1, getLockName());
             st.registerOutParameter(2, java.sql.Types.VARCHAR);

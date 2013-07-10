@@ -13,10 +13,9 @@ class MSSQLAppLock extends AppLock {
     }
 
     @Override
-    public void lock() {
+    public void doLock() throws SQLException {
         CallableStatement st = null;
         try {
-            checkNewConnection();
             // 1. в JDBC нет явного способа начать транзакцию
             // 2. функция sp_getapplock требует, чтобы ее выполняли в транзакции
             // 3. сама она транзакцию не начинает
@@ -34,16 +33,8 @@ class MSSQLAppLock extends AppLock {
             if ((0 != rc) && (1 != rc)) {
                 throw new RuntimeException("Unable to acquire app lock, sp_getapplock returns " + rc + ": " + st.getWarnings());
             }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
         } finally {
-            if (null != st) {
-                try {
-                    st.close();
-                } catch (SQLException e) {
-                    logger.error("Can't close PreparedStatement", e);
-                }
-            }
+            dbTool.closeResources(st);
         }
     }
 }
