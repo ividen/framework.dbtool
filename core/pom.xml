@@ -38,6 +38,11 @@
         </dependency>
 
         <dependency>
+            <groupId>postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>com.mysql.jdbc</groupId>
             <artifactId>mysql-connector-java</artifactId>
             <scope>test</scope>

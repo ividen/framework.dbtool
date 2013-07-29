@@ -70,7 +70,7 @@ public class DeleteOperation extends Operation implements IDeleteOperation {
 
     @SuppressWarnings("unchecked")
     public void executeDelete(Collection objects) throws UpdateException {
-        UpdateUtil.batchUpdate(getJdbcTemplate(), deleteQuery, objects, updateSetterByObject);
+        UpdateUtil.batchUpdate(getJdbcTemplate(), deleteQuery, objects, updateSetterByObject, dbTool.getDbType());
     }
 
     public void executeDeleteByKey(Object key) throws UpdateException {
@@ -79,7 +79,7 @@ public class DeleteOperation extends Operation implements IDeleteOperation {
 
     @SuppressWarnings("unchecked")
     public void executeDeleteByKeys(Collection keys) throws UpdateException {
-        UpdateUtil.batchUpdate(getJdbcTemplate(), deleteQuery, keys, updateSetterByKey);
+        UpdateUtil.batchUpdate(getJdbcTemplate(), deleteQuery, keys, updateSetterByKey, dbTool.getDbType());
     }
 
     private class UpdateSetterByObject implements UpdateSetter {

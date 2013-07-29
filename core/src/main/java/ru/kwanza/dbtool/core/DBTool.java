@@ -43,7 +43,9 @@ public class DBTool extends JdbcDaoSupport {
                 dbType = DBType.ORACLE;
             } else if("MySQL".equalsIgnoreCase(databaseProductName)){
                 dbType = DBType.MYSQL;
-            }else {
+            } else if("PostgreSQL".equalsIgnoreCase(databaseProductName)){
+                dbType = DBType.POSTGRESQL;
+            } else {
                 dbType = DBType.OTHER;
             }
             dbVersion = conn.getMetaData().getDatabaseMajorVersion();
@@ -88,7 +90,7 @@ public class DBTool extends JdbcDaoSupport {
 
     // supress optimistic lock checking
     public <T> long update(String updateSQL, final Collection<T> objects, final UpdateSetter<T> updateSetter) throws UpdateException {
-        return UpdateUtil.batchUpdate(getJdbcTemplate(), updateSQL, objects, updateSetter);
+        return UpdateUtil.batchUpdate(getJdbcTemplate(), updateSQL, objects, updateSetter, dbType);
     }
 
     public <T, K extends Comparable, V> long update(String updateSQL, Collection<T> objects, UpdateSetterWithVersion<T, V> updateSetter,
@@ -96,7 +98,7 @@ public class DBTool extends JdbcDaoSupport {
                                                     FieldHelper.Field<T, K> keyField, FieldHelper.VersionField<T, V> versionField)
             throws UpdateException {
         return UpdateUtil
-                .batchUpdate(getJdbcTemplate(), updateSQL, objects, updateSetter, checkSQL, keyVersionMapper, keyField, versionField);
+                .batchUpdate(getJdbcTemplate(), updateSQL, objects, updateSetter, checkSQL, keyVersionMapper, keyField, versionField, dbType);
     }
 
     public AppLock getLock(String lockName) {
@@ -134,7 +136,7 @@ public class DBTool extends JdbcDaoSupport {
     }
 
     public static enum DBType {
-        MSSQL, ORACLE, MYSQL, OTHER
+        MSSQL, ORACLE, MYSQL, OTHER, POSTGRESQL
     }
 
     public void closeResources(Object... objects) {
