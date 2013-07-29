@@ -27,6 +27,7 @@
                 <prop key="dbunit.driverClass">${jdbc.driverClass}</prop>
                 <prop key="dbunit.username">${jdbc.username}</prop>
                 <prop key="dbunit.password">${jdbc.password}</prop>
+                <prop key="dbunit.schema">${jdbc.schema}</prop>
             </util:properties>
         </property>
     </bean>
