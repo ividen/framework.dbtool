@@ -8,6 +8,7 @@ import org.dbunit.dataset.IDataSet;
 import org.dbunit.dataset.SortedDataSet;
 import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
 import org.dbunit.operation.DatabaseOperation;
+import org.springframework.beans.factory.annotation.Value;
 import ru.kwanza.dbtool.orm.impl.mapping.EntityMappingRegistryImpl;
 
 import javax.annotation.Resource;
@@ -24,6 +25,9 @@ public class InitRegistryAndDB {
     private EntityMappingRegistryImpl registry;
     @Resource(name = "dataSource")
     private DataSource dataSource;
+
+    @Value("${jdbc.schema}")
+    private String schema;
 
     public void init() throws Exception {
         registry.registerEntityClass(TestEntity.class);
@@ -47,7 +51,7 @@ public class InitRegistryAndDB {
     }
 
     public IDatabaseConnection getConnection() throws SQLException, DatabaseUnitException {
-        return new DatabaseConnection(dataSource.getConnection());
+        return new DatabaseConnection(dataSource.getConnection(), schema);
     }
 
 

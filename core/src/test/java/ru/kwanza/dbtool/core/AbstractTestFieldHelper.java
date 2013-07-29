@@ -2,6 +2,7 @@ package ru.kwanza.dbtool.core;
 
 import junit.framework.Assert;
 import junit.framework.TestCase;
+import org.postgresql.Driver;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.jdbc.core.RowMapper;
@@ -30,6 +31,8 @@ public abstract class AbstractTestFieldHelper extends TestCase {
 
     private static String MYSQL_SELECT_SQL =
             "select xbool, xint, xbigint, xstring, xts1, xts2, xblob, xbigdecimal from test_table1 where not(xint = ?) LIMIT 0,10";
+
+    private static String POSTGRESQL_SELECT_SQL = "select xbool, xint, xbigint, xstring, xts1, xts2, xblob, xbigdecimal from test_table1 where not(xint = ?) LIMIT 10";
 
     private static DBTool dbTool = null;
 
@@ -63,6 +66,8 @@ public abstract class AbstractTestFieldHelper extends TestCase {
             sql = MSSQL_SELECT_SQL;
         }else if(dbTool.getDbType() == DBTool.DBType.MYSQL){
             sql = MYSQL_SELECT_SQL;
+        }else if(dbTool.getDbType() == DBTool.DBType.POSTGRESQL){
+            sql = POSTGRESQL_SELECT_SQL;
         }else{
            throw new RuntimeException("Unsupported database type!");
         }
@@ -105,7 +110,9 @@ public abstract class AbstractTestFieldHelper extends TestCase {
             sql = MSSQL_SELECT_SQL;
         }else if(dbTool.getDbType() == DBTool.DBType.MYSQL){
             sql = MYSQL_SELECT_SQL;
-        }else{
+        } else if (dbTool.getDbType() == DBTool.DBType.POSTGRESQL){
+            sql = POSTGRESQL_SELECT_SQL;
+        } else{
             throw new RuntimeException("Unsupported database type!");
         }
         dbTool.selectList(sql, new RowMapper<Object>() {

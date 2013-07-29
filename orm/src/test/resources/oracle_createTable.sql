@@ -1,5 +1,5 @@
 /******   TestEntity(test_entity) ******/
-CREATE TABLE test_entity
+CREATE TABLE test_entity(
 	id NUMBER NOT NULL,
 	int_field NUMBER NULL,
 	string_field varchar2(255)  NULL,

@@ -11,6 +11,7 @@ import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
 import org.dbunit.operation.DatabaseOperation;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
 import ru.kwanza.dbtool.orm.api.*;
@@ -38,6 +39,9 @@ public abstract class QueryTest extends AbstractJUnit4SpringContextTests {
     @Resource(name = "dataSource")
     public DataSource dataSource;
 
+    @Value("${jdbc.schema}")
+    private String schema;
+
 
     @Before
     public void setUpDV() throws Exception {
@@ -51,7 +55,7 @@ public abstract class QueryTest extends AbstractJUnit4SpringContextTests {
     }
 
     public IDatabaseConnection getConnection() throws SQLException, DatabaseUnitException {
-        return new DatabaseConnection(dataSource.getConnection());
+        return new DatabaseConnection(dataSource.getConnection(), schema);
     }
 
     @Before
