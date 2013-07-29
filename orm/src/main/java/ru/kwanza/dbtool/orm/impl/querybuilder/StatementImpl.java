@@ -185,8 +185,9 @@ public abstract class StatementImpl<T> implements IStatement<T> {
     private abstract class BaseExtractor<TYPE> implements ResultSetExtractor {
         public Collection<TYPE> extractData(ResultSet rs) throws SQLException, DataAccessException {
             Integer offset = config.getOffset();
-            if ((config.getDbTool().getDbType() != DBTool.DBType.MYSQL && offset != null && offset > 1) ||
-                    config.getDbTool().getDbType()== DBTool.DBType.MYSQL && offset!=null && config.getMaxSize()==null) {
+            DBTool.DBType dbType = config.getDbTool().getDbType();
+            if ( (!DBTool.DBType.MYSQL.equals(dbType)  && !DBTool.DBType.POSTGRESQL.equals(dbType)  && offset != null && offset > 0)
+                    || (DBTool.DBType.MYSQL.equals(dbType) && offset != null && offset > 0 && config.getMaxSize()==null) ) {
                 if (rs.next()) {
                     rs.absolute(offset);
                 } else {

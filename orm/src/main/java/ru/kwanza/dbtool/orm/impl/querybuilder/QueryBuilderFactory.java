@@ -17,6 +17,8 @@ public class QueryBuilderFactory {
             return new MySQLQueryBuilder<T>(dbTool, mappingRegistry, entityClass);
         } else if (dbType == DBTool.DBType.MSSQL) {
             return new MSSQLQueryBuilder<T>(dbTool, mappingRegistry, entityClass);
+        } else if (dbType == DBTool.DBType.POSTGRESQL) {
+            return new PostgreSQLQueryBuilder<T>(dbTool, mappingRegistry, entityClass);
         } else {
             throw new RuntimeException("Unsupported database type!");
         }
