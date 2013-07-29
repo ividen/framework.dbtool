@@ -7,7 +7,7 @@ package ru.kwanza.dbtool.core;
  *
  */
 
-public class TestPostgreSQLUpdateUtil extends TestUpdateUtil{
+public class TestPostgresUpdateUtil extends TestUpdateUtil{
 
 
     @Override
