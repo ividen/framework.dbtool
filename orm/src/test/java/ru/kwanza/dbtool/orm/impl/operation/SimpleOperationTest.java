@@ -8,6 +8,7 @@ import org.dbunit.dataset.DefaultTable;
 import org.dbunit.operation.DatabaseOperation;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
 import ru.kwanza.dbtool.core.UpdateException;
@@ -34,6 +35,9 @@ public abstract class SimpleOperationTest extends AbstractJUnit4SpringContextTes
 
     @Resource(name = "dataSource")
     private DataSource dataSource;
+
+    @Value("${jdbc.schema}")
+    private String schema;
 
     @Before
     public void registerAgent() throws Exception {
@@ -92,6 +96,6 @@ public abstract class SimpleOperationTest extends AbstractJUnit4SpringContextTes
     }
 
     public IDatabaseConnection getConnection() throws SQLException, DatabaseUnitException {
-        return new DatabaseConnection(dataSource.getConnection());
+        return new DatabaseConnection(dataSource.getConnection(), schema);
     }
 }
