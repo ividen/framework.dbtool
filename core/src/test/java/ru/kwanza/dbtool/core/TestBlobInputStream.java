@@ -1,6 +1,7 @@
 package ru.kwanza.dbtool.core;
 
 import org.dbunit.DBTestCase;
+import org.dbunit.database.DatabaseConfig;
 import org.dbunit.dataset.IDataSet;
 import org.dbunit.dataset.ReplacementDataSet;
 import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
@@ -36,6 +37,11 @@ public abstract class TestBlobInputStream extends DBTestCase {
     protected void setUp() throws Exception {
         ctx = new ClassPathXmlApplicationContext(getSpringCfgFile(), TestSelectUtil.class);
         DatabaseOperation.CLEAN_INSERT.execute(getConnection(), getDataSet());
+    }
+
+    @Override
+    protected void setUpDatabaseConfig(DatabaseConfig config) {
+        config.setProperty(DatabaseConfig.FEATURE_BATCHED_STATEMENTS, true);
     }
 
     protected abstract String getSpringCfgFile();
