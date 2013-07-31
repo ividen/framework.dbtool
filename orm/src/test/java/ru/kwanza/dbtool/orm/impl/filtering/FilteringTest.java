@@ -1,6 +1,7 @@
 package ru.kwanza.dbtool.orm.impl.filtering;
 
 import org.dbunit.DatabaseUnitException;
+import org.dbunit.database.DatabaseConfig;
 import org.dbunit.database.DatabaseConnection;
 import org.dbunit.database.DatabaseDataSourceConnection;
 import org.dbunit.database.IDatabaseConnection;
@@ -54,7 +55,9 @@ public abstract class FilteringTest extends AbstractJUnit4SpringContextTests {
     }
 
     public IDatabaseConnection getConnection() throws SQLException, DatabaseUnitException {
-        return new DatabaseConnection(dataSource.getConnection(), schema);
+        DatabaseConnection connection = new DatabaseConnection(dataSource.getConnection(), schema);
+        connection.getConfig().setProperty(DatabaseConfig.FEATURE_BATCHED_STATEMENTS, true);
+        return connection;
     }
 
     @Before

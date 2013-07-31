@@ -2,6 +2,7 @@ package ru.kwanza.dbtool.orm.impl.querybuilder;
 
 import junit.framework.Assert;
 import org.dbunit.DatabaseUnitException;
+import org.dbunit.database.DatabaseConfig;
 import org.dbunit.database.DatabaseConnection;
 import org.dbunit.database.IDatabaseConnection;
 import org.dbunit.dataset.DataSetException;
@@ -55,7 +56,9 @@ public abstract class QueryTest extends AbstractJUnit4SpringContextTests {
     }
 
     public IDatabaseConnection getConnection() throws SQLException, DatabaseUnitException {
-        return new DatabaseConnection(dataSource.getConnection(), schema);
+        DatabaseConnection connection = new DatabaseConnection(dataSource.getConnection(), schema);
+        connection.getConfig().setProperty(DatabaseConfig.FEATURE_BATCHED_STATEMENTS, true);
+        return connection;
     }
 
     @Before
