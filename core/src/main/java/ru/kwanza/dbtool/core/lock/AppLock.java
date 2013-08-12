@@ -6,14 +6,19 @@ import ru.kwanza.dbtool.core.DBTool;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.locks.ReentrantLock;
 
-public abstract class AppLock {
+public abstract class AppLock extends ReentrantLock {
     public static final Logger logger = LoggerFactory.getLogger(AppLock.class);
 
     protected DBTool dbTool;
     private String lockName;
-    protected Connection conn;
     private boolean reentrant;
+
+    //todo aguzanov подумать над исспользованием easygrid для эффективности хранение
+    private static final ConcurrentMap<String, AppLock> locks = new ConcurrentHashMap<String, AppLock>();
 
     protected AppLock(DBTool dbTool, String lockName, boolean reentrant) throws SQLException {
         this.dbTool = dbTool;
@@ -26,43 +31,89 @@ public abstract class AppLock {
     }
 
     public final void lock() {
+        if (reEnterLock()) {
+            return;
+        }
+
+        Connection connection = null;
         try {
-            checkNewConnection();
-            doLock();
+            connection = checkNewConnection();
+            doLock(connection);
         } catch (SQLException e) {
             throw new RuntimeException(e);
+        } finally {
+            dbTool.closeResources(connection);
         }
     }
 
-    public abstract void doLock() throws SQLException;
+    protected abstract void doLock(Connection connection) throws SQLException;
 
-    public void close() {
+    protected abstract void doUnLock(Connection connection);
+
+    public final void close() {
+        if (exitReEnterLock()) {
+            return;
+        }
+
+        Connection connection = null;
         try {
-            if (conn.isClosed()) {
-                throw new RuntimeException("Connection is closed");
+            connection = checkNewConnection();
+            doUnLock(connection);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } finally {
+            dbTool.closeResources(connection);
+        }
+    }
+
+    private boolean exitReEnterLock() {
+        super.unlock();
+
+        if (reentrant && isHeldByCurrentThread()) {
+            return true;
+        }
+        return false;
+    }
+
+    private boolean reEnterLock() {
+
+        try {
+            if (reentrant && isHeldByCurrentThread()) {
+                return true;
             }
-            conn.close();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+            return false;
+        } finally {
+            super.lock();
         }
     }
 
-    private void checkNewConnection() throws SQLException {
-        conn = dbTool.getJDBCConnection();
-        if (conn.getAutoCommit()) {
-            conn.setAutoCommit(false);
+    private Connection checkNewConnection() throws SQLException {
+        Connection connection = dbTool.getJDBCConnection();
+        if (connection.getAutoCommit()) {
+            connection.setAutoCommit(false);
         }
+
+        return connection;
     }
 
     public static AppLock defineLock(DBTool dbTool, String lockName, DBTool.DBType dbType, boolean reentrant) throws SQLException {
-        if (dbType.equals(DBTool.DBType.MSSQL)) {
-            return new MSSQLAppLock(dbTool, lockName, reentrant);
-        } else if (dbType.equals(DBTool.DBType.ORACLE)) {
-            return new OracleAppLock(dbTool, lockName, reentrant);
-        } else if (dbType.equals(DBTool.DBType.MYSQL)) {
-            return new MySQLAppLock(dbTool, lockName, reentrant);
-        } else {
-            return new DefaultAppLock(dbTool, lockName, reentrant);
+        AppLock appLock = locks.get(lockName);
+        if (appLock == null) {
+            if (dbType.equals(DBTool.DBType.MSSQL)) {
+                appLock = new MSSQLAppLock(dbTool, lockName, reentrant);
+            } else if (dbType.equals(DBTool.DBType.ORACLE)) {
+                appLock = new OracleAppLock(dbTool, lockName, reentrant);
+            } else if (dbType.equals(DBTool.DBType.MYSQL)) {
+                appLock = new MySQLAppLock(dbTool, lockName, reentrant);
+            } else {
+                appLock = new DefaultAppLock(dbTool, lockName, reentrant);
+            }
+
+            if (null != locks.putIfAbsent(lockName, appLock)) {
+                appLock = locks.get(lockName);
+            }
         }
+
+        return appLock;
     }
 }

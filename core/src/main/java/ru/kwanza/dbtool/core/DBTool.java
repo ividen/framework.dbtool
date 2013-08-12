@@ -100,11 +100,11 @@ public class DBTool extends JdbcDaoSupport {
     }
 
     public AppLock getLock(String lockName) {
-        return getLock(lockName, false);
+        return getLock(lockName, true);
     }
 
     public AppLock getDefaultLock(String lockName) {
-        return getDefaultLock(lockName, false);
+        return getDefaultLock(lockName, true);
     }
 
     public AppLock getLock(String lockName, boolean reentrant) {

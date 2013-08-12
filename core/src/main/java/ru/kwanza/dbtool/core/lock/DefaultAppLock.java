@@ -2,6 +2,7 @@ package ru.kwanza.dbtool.core.lock;
 
 import ru.kwanza.dbtool.core.DBTool;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -17,11 +18,11 @@ class DefaultAppLock extends AppLock {
     }
 
     @Override
-    public void doLock() throws SQLException {
-        allocateUnique();
+    public void doLock(Connection connection) throws SQLException {
+        allocateUnique(connection);
         PreparedStatement st = null;
         try {
-            st = conn.prepareStatement(DO_LOCK_SQL);
+            st = connection.prepareStatement(DO_LOCK_SQL);
             st.setString(1, getLockName());
             if (1 != st.executeUpdate()) {
                 throw new IllegalStateException("Lock '" + getLockName() + "' not found");
@@ -31,17 +32,21 @@ class DefaultAppLock extends AppLock {
         }
     }
 
-    private void allocateUnique() throws SQLException {
+    @Override
+    protected void doUnLock(Connection connection) {
+    }
+
+    private void allocateUnique(Connection connection) throws SQLException {
         PreparedStatement st = null;
         ResultSet rs = null;
         try {
-            st = conn.prepareStatement(INSERT_LOCK);
+            st = connection.prepareStatement(INSERT_LOCK);
             st.setString(1, getLockName());
             try {
                 st.executeUpdate();
             } catch (SQLException e) {
                 st.close();
-                st = conn.prepareStatement(UPDATE_LOCK);
+                st = connection.prepareStatement(UPDATE_LOCK);
                 st.setString(1, getLockName());
 
                 rs = st.executeQuery();

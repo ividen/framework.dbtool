@@ -2,6 +2,7 @@ package ru.kwanza.dbtool.core.lock;
 
 import ru.kwanza.dbtool.core.DBTool;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -20,12 +21,12 @@ import java.sql.SQLException;
     }
 
     @Override
-    public void doLock() throws SQLException {
+    public void doLock(Connection connection) throws SQLException {
         PreparedStatement ps = null;
         ResultSet rs = null;
 
         try {
-            ps = conn.prepareStatement(LOCK_SQL);
+            ps = connection.prepareStatement(LOCK_SQL);
             ps.setString(1, getLockName());
             ps.setInt(2, 100);
 
@@ -51,14 +52,14 @@ import java.sql.SQLException;
     }
 
     @Override
-    public void close() {
+    protected void doUnLock(Connection connection) {
         PreparedStatement ps = null;
         try {
-            ps = conn.prepareStatement(RELEASE_LOCK_SQL);
+            ps = connection.prepareStatement(RELEASE_LOCK_SQL);
             ps.setString(1, getLockName());
             ps.execute();
         } catch (SQLException e) {
-            //todo  aguzanov что делать?
+            throw new RuntimeException(e);
         } finally {
             dbTool.closeResources(ps);
         }
