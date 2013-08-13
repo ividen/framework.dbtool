@@ -3,10 +3,7 @@ package ru.kwanza.dbtool.orm.impl.querybuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.kwanza.dbtool.core.DBTool;
-import ru.kwanza.dbtool.orm.api.Condition;
-import ru.kwanza.dbtool.orm.api.IQuery;
-import ru.kwanza.dbtool.orm.api.IQueryBuilder;
-import ru.kwanza.dbtool.orm.api.OrderBy;
+import ru.kwanza.dbtool.orm.api.*;
 import ru.kwanza.dbtool.orm.impl.mapping.FieldMapping;
 import ru.kwanza.dbtool.orm.impl.mapping.IEntityMappingRegistry;
 
@@ -25,6 +22,8 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
     protected Integer maxSize;
     protected Integer offset;
     protected Map<String, List<Integer>> namedParams = new HashMap<String, List<Integer>>();
+    protected ArrayList<Join> joins = null;
+
 
     public AbstractQueryBuilder(DBTool dbTool, IEntityMappingRegistry registry, Class entityClass) {
         this.registry = registry;
@@ -53,6 +52,16 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
         return createQuery(paramsTypes, sqlString);
     }
 
+    public IQueryBuilder<T> join(String string) {
+
+        return this;
+    }
+
+    public IQueryBuilder<T> join(Join joinClause) {
+        joins.add(joinClause);
+
+        return this;
+    }
 
     protected abstract IQuery<T> createQuery(List<Integer> paramsTypes, String sqlString);
 

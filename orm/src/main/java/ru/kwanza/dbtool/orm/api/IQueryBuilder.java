@@ -13,6 +13,10 @@ public interface IQueryBuilder<T> {
 
     IQueryBuilder<T> setOffset(Integer offset);
 
+    IQueryBuilder<T> join(Join joinClause);
+
+    IQueryBuilder<T> join(String string);
+
     IQueryBuilder<T> where(Condition condition);
 
     IQueryBuilder<T> orderBy(OrderBy... orderBy);
