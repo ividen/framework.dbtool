@@ -11,8 +11,6 @@ public final class Join {
     public enum Type {
         INNER,
         LEFT,
-        RIGHT,
-        OUTER
     }
 
     Join(Type type, String propertyName, Join[] subJoins) {
@@ -25,16 +23,7 @@ public final class Join {
         return new Join(Type.LEFT, property, subJoins);
     }
 
-    public static Join right(String property, Join... subJoins) {
-        return new Join(Type.RIGHT, property, subJoins);
-    }
-
     public static Join inner(String property, Join... subJoins) {
         return new Join(Type.INNER, property, subJoins);
     }
-
-    public static Join outer(String property, Join... subJoins) {
-        return new Join(Type.OUTER, property, subJoins);
-    }
-
 }

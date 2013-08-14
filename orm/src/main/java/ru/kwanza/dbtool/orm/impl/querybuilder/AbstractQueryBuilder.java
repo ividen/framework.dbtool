@@ -4,9 +4,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.kwanza.dbtool.core.DBTool;
 import ru.kwanza.dbtool.orm.api.*;
+import ru.kwanza.dbtool.orm.impl.RelationPathScanner;
 import ru.kwanza.dbtool.orm.impl.mapping.FieldMapping;
 import ru.kwanza.dbtool.orm.impl.mapping.IEntityMappingRegistry;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 /**
@@ -24,12 +26,10 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
     protected Map<String, List<Integer>> namedParams = new HashMap<String, List<Integer>>();
     protected ArrayList<Join> joins = null;
 
-
     public AbstractQueryBuilder(DBTool dbTool, IEntityMappingRegistry registry, Class entityClass) {
         this.registry = registry;
         this.entityClass = entityClass;
         this.dbTool = dbTool;
-
 
         if (!registry.isRegisteredEntityClass(entityClass)) {
             throw new RuntimeException("Not registered entity class: " + entityClass);
@@ -53,14 +53,49 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
     }
 
     public IQueryBuilder<T> join(String string) {
+        final Map<String, Object> scan = new RelationPathScanner(string).scan();
+
+        checkJoins();
+        joins.addAll(processScanRelations(scan));
 
         return this;
     }
 
+    private ArrayList<Join> processScanRelations(Map<String, Object> scan) {
+        ArrayList<Join> result = new ArrayList<Join>();
+        for (Map.Entry<String, Object> entry : scan.entrySet()) {
+            if (entry.getValue() instanceof Map) {
+                if (entry.getKey().startsWith("#")) {
+                    result.add(Join.left(entry.getKey().substring(1).trim(),
+                            processScanRelations((Map<String, Object>) entry.getValue()).toArray(new Join[]{})));
+                } else {
+                    result.add(
+                            Join.inner(entry.getKey(), processScanRelations((Map<String, Object>) entry.getValue()).toArray(new Join[]{})));
+                }
+            } else {
+                if (entry.getKey().startsWith("#")) {
+                    result.add(Join.left(entry.getKey().substring(1).trim()));
+                } else {
+                    result.add(Join.inner(entry.getKey()));
+                }
+            }
+        }
+
+        return result;
+    }
+
     public IQueryBuilder<T> join(Join joinClause) {
+        checkJoins();
+
         joins.add(joinClause);
 
         return this;
+    }
+
+    private void checkJoins() {
+        if (joins == null) {
+            joins = new ArrayList<Join>();
+        }
     }
 
     protected abstract IQuery<T> createQuery(List<Integer> paramsTypes, String sqlString);
@@ -163,8 +198,7 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
         } else if (type == Condition.Type.NATIVE) {
             where.append(parseSql(condition.getSql(), paramsTypes));
         } else {
-            FieldMapping fieldMapping =
-                    registry.getFieldMappingByPropertyName(entityClass, condition.getPropertyName());
+            FieldMapping fieldMapping = registry.getFieldMappingByPropertyName(entityClass, condition.getPropertyName());
             if (fieldMapping == null) {
                 throw new IllegalArgumentException("Unknown field!");
             }
@@ -215,10 +249,7 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
                 if (fieldMapping == null) {
                     throw new IllegalArgumentException("Unknown field!");
                 }
-                orderBy.append(fieldMapping.getColumn())
-                        .append(' ')
-                        .append(ob.getType())
-                        .append(", ");
+                orderBy.append(fieldMapping.getColumn()).append(' ').append(ob.getType()).append(", ");
             }
 
             orderBy.deleteCharAt(orderBy.length() - 2);
@@ -229,10 +260,7 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
 
     protected StringBuilder createDefaultSQLString(String fieldsString, String conditions, String orderBy) {
         StringBuilder sql;
-        sql = new StringBuilder("SELECT ")
-                .append(fieldsString)
-                .append("FROM ")
-                .append(registry.getTableName(entityClass));
+        sql = new StringBuilder("SELECT ").append(fieldsString).append("FROM ").append(registry.getTableName(entityClass));
         if (conditions.length() > 0) {
             sql.append(" WHERE ").append(conditions);
         }
@@ -291,5 +319,9 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
         }
         this.orderBy = orderBy;
         return this;
+    }
+
+    public static void main(String[] args) {
+        System.out.println(new BigDecimal(Long.MAX_VALUE).add(new BigDecimal(Long.MAX_VALUE)));
     }
 }

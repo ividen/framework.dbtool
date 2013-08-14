@@ -1,6 +1,7 @@
 package ru.kwanza.dbtool.orm.impl.fetcher;
 
 import org.junit.Test;
+import ru.kwanza.dbtool.orm.impl.RelationPathScanner;
 
 import java.util.Map;
 
