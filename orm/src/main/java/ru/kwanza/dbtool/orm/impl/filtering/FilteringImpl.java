@@ -70,7 +70,7 @@ public class FilteringImpl<T> implements IFiltering<T> {
 
     private IStatement<T> createStatement() {
         IQueryBuilder<T> queryBuilder = em.queryBuilder(entityClass);
-        final boolean usePaging = maxSize != null || offset != null;
+        final boolean usePaging = maxSize != null && offset != null;
         if (usePaging) {
             queryBuilder.usePaging(true);
         }
@@ -99,8 +99,10 @@ public class FilteringImpl<T> implements IFiltering<T> {
             queryBuilder.orderBy(orders);
         }
 
-        IStatement<T> statement =
-                usePaging ? queryBuilder.create().prepare(offset == null ? 0 : offset, maxSize) : queryBuilder.create().prepare();
+        IStatement<T> statement = queryBuilder.create().prepare();
+        if (usePaging) {
+            statement.paging(offset, maxSize);
+        }
         for (int i = 0; i < params.size(); i++) {
             statement.setParameter(i + 1, params.get(i));
         }

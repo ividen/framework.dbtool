@@ -47,18 +47,18 @@ public class Main {
                 em.queryBuilder(TestEntity1.class).where(or(and(isEqual("name"), in("counter")), like("description"))).usePaging(true)
                         .create();
 
-        TestEntity1 sadfd = query.prepare(0,1000).setParameter(1, "sadfd").select();
+        TestEntity1 sadfd = query.prepare().paging(0,1000).setParameter(1, "sadfd").select();
 
         List<TestEntity1> testEntities = query.prepare().selectList();
 
         em.queryBuilder(TestEntity1.class).where(or(and(isEqual("name"), in("counter")), like("description"))).usePaging(true).create()
-                .prepare(0,1000).setParameter(1, 1).select();
+                .prepare().paging(0,1000).setParameter(1, 1).select();
 
         query = em.queryBuilder(TestEntity1.class).where(and(isEqual("name"), isEqual("counter"))).orderBy(ASC("name"), DESC("description"))
                 .usePaging(true).create();
 
         String desc = "desc*";
-        query.prepare(0,1000).setParameter(1, "name").setParameter(2, 100);
+        query.prepare().paging(0,1000).setParameter(1, "name").setParameter(2, 100);
 
         IQueryBuilder<TestEntity1> SELECT_ENTITY_QUERY = em.queryBuilder(TestEntity1.class);
 

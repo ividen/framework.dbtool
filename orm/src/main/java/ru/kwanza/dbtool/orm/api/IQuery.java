@@ -6,6 +6,4 @@ package ru.kwanza.dbtool.orm.api;
 public interface IQuery<T>{
 
     IStatement<T> prepare();
-
-    IStatement<T> prepare(int offset, int maxSize);
 }

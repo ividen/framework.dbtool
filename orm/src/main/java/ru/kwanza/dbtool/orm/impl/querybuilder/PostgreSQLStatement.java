@@ -4,20 +4,20 @@ package ru.kwanza.dbtool.orm.impl.querybuilder;
  * @author Michael Yeskov
  */
 public class PostgreSQLStatement<T> extends StatementImpl<T> {
-    public PostgreSQLStatement(QueryConfig<T> config, Integer offset, Integer maxSize) {
-        super(config, offset, maxSize);
+    public PostgreSQLStatement(QueryConfig<T> config) {
+        super(config);
     }
 
     @Override
-    protected Object[] createParamsArray(QueryConfig<T> config, int paramsCount, Integer maxSize, Integer offset) {
+    protected Object[] createParamsArray(QueryConfig<T> config, int paramsCount) {
         int size = paramsCount + (config.isUsePaging() ? 2 : 0);
         Object[] params = new Object[size];
-
-        if (config.isUsePaging()) {
-            params[size - 2] = maxSize;
-            params[size - 1] = offset;
-        }
-
         return params;
+    }
+
+    @Override
+    protected void installPagingParams(Object[] params, int maxSize, int offset) {
+        params[params.length - 2] = maxSize;
+        params[params.length - 1] = offset;
     }
 }

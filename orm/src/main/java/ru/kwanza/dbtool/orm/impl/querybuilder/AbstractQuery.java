@@ -13,21 +13,7 @@ public abstract class AbstractQuery<T> implements IQuery<T> {
         this.config = config;
     }
 
-    public final IStatement<T> prepare() {
-        if (config.isUsePaging()) {
-            throw new IllegalStateException("Query must use paging - prepare with offset and maxSize!");
-        }
-        return doPrepare(config, null, null);
-    }
-
-    public final IStatement<T> prepare(int offset, int maxSize) {
-        if (!config.isUsePaging()) {
-            throw new IllegalStateException("Query don't use paging - prepare without offset and maxSize!");
-        }
-        return doPrepare(config, offset, maxSize);
-    }
-
-    protected abstract IStatement<T> doPrepare(QueryConfig config, Integer offset, Integer maxSize);
+    public abstract IStatement<T> prepare();
 
     public QueryConfig getConfig() {
         return config;

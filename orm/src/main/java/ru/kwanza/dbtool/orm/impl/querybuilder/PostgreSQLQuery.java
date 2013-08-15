@@ -11,7 +11,8 @@ public class PostgreSQLQuery<T> extends AbstractQuery<T> {
     }
 
     @Override
-    protected IStatement<T> doPrepare(QueryConfig config, Integer offset, Integer maxSize) {
-        return new PostgreSQLStatement<T>(config,offset,maxSize);
+    public IStatement<T> prepare() {
+        return new PostgreSQLStatement<T>(config);
     }
+
 }
