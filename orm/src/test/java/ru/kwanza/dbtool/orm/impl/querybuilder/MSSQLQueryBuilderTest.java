@@ -120,8 +120,7 @@ public class MSSQLQueryBuilderTest extends AbstractJUnit4SpringContextTests {
     @Test
     public void testBuildConditionsWithLimit() {
         AbstractQuery<TestEntity> query1 = (AbstractQuery<TestEntity>) em.queryBuilder(TestEntity.class)
-                .setMaxSize(1000)
-                .setOffset(1000)
+                .usePaging(true)
                 .where(Condition.and(Condition.in("id"),
                         Condition.like("id"),
                         Condition.isEqual("id"),
@@ -137,7 +136,7 @@ public class MSSQLQueryBuilderTest extends AbstractJUnit4SpringContextTests {
                 )).orderBy(OrderBy.ASC("id"), OrderBy.DESC("stringField")).create();
 
         assertEquals(query1.getConfig().getSql(),
-                "SELECT TOP 2000 id, int_field, string_field, date_field, short_field, version, entity_aid, entity_bid, entity_cid, entity_did " +
+                "SELECT TOP $TOP$ id, int_field, string_field, date_field, short_field, version, entity_aid, entity_bid, entity_cid, entity_did " +
                         "FROM test_entity " +
                         "WHERE (id IN (?)) AND (id LIKE ?) AND (id = ?) AND (id > ?) AND (id >= ?) AND (id < ?)" +
                         " AND (id <= ?) AND (id IS NOT NULL) AND (id IS NULL) AND (id BETWEEN ? AND ?) AND (id <> ?)" +
@@ -146,7 +145,7 @@ public class MSSQLQueryBuilderTest extends AbstractJUnit4SpringContextTests {
         assertEquals(query1.getConfig().getParamsCount(), 11);
 
         AbstractQuery<TestEntity> query2 = (AbstractQuery<TestEntity>) em.queryBuilder(TestEntity.class)
-                .setMaxSize(1000)
+                .usePaging(true)
                 .where(Condition.or(Condition.in("id"),
                         Condition.like("id"),
                         Condition.isEqual("id"),
@@ -163,7 +162,7 @@ public class MSSQLQueryBuilderTest extends AbstractJUnit4SpringContextTests {
 
 
         assertEquals(query2.getConfig().getSql(),
-                "SELECT TOP 1000 id, int_field, string_field, date_field, short_field, " +
+                "SELECT TOP $TOP$ id, int_field, string_field, date_field, short_field, " +
                         "version, entity_aid, entity_bid, entity_cid, entity_did FROM test_entity " +
                         "WHERE (id IN (?)) OR (id LIKE ?) OR (id = ?) OR (id > ?) " +
                         "OR (id >= ?) OR (id < ?) OR (id <= ?) OR (id IS NOT NULL) OR (id IS NULL) " +
@@ -171,7 +170,7 @@ public class MSSQLQueryBuilderTest extends AbstractJUnit4SpringContextTests {
         assertEquals(query1.getConfig().getParamsCount(), 11);
 
         AbstractQuery<TestEntity> query3 = (AbstractQuery<TestEntity>) em.queryBuilder(TestEntity.class)
-                .setMaxSize(1000)
+                .usePaging(true)
                 .where(Condition.and(
                         Condition.or(Condition.in("id"),
                                 Condition.like("id"),
@@ -189,7 +188,7 @@ public class MSSQLQueryBuilderTest extends AbstractJUnit4SpringContextTests {
                                 Condition.notEqual("id"))
                 )).orderBy(OrderBy.ASC("id"), OrderBy.DESC("stringField")).create();
         assertEquals(query3.getConfig().getSql(),
-                "SELECT TOP 1000 id, int_field, string_field, date_field, short_field, " +
+                "SELECT TOP $TOP$ id, int_field, string_field, date_field, short_field, " +
                         "version, entity_aid, entity_bid, entity_cid, entity_did " +
                         "FROM test_entity " +
                         "WHERE " +
@@ -207,7 +206,6 @@ public class MSSQLQueryBuilderTest extends AbstractJUnit4SpringContextTests {
     @Test
     public void testBuildWithouCondition() {
         AbstractQuery<TestEntity> query1 = (AbstractQuery<TestEntity>) em.queryBuilder(TestEntity.class)
-                .setOffset(100)
                 .orderBy(OrderBy.ASC("id"), OrderBy.DESC("stringField")).create();
         assertEquals(query1.getConfig().getSql(),
                 "SELECT id, int_field, string_field, date_field, short_field, " +
@@ -219,7 +217,7 @@ public class MSSQLQueryBuilderTest extends AbstractJUnit4SpringContextTests {
     @Test(expected = IllegalStateException.class)
     public void testBadBuild_where() {
         AbstractQuery<TestEntity> query1 = (AbstractQuery<TestEntity>) em.queryBuilder(TestEntity.class)
-                .setOffset(100)
+                .usePaging(true)
                 .where(Condition.like("id"))
                 .where(Condition.like("id"))
                 .orderBy(OrderBy.ASC("id"), OrderBy.DESC("stringField")).create();
@@ -228,7 +226,7 @@ public class MSSQLQueryBuilderTest extends AbstractJUnit4SpringContextTests {
     @Test(expected = IllegalStateException.class)
     public void testBadBuild_order() {
         AbstractQuery<TestEntity> query1 = (AbstractQuery<TestEntity>) em.queryBuilder(TestEntity.class)
-                .setOffset(100)
+                .usePaging(true)
                 .where(Condition.like("id"))
                 .orderBy(OrderBy.ASC("id"))
                 .orderBy(OrderBy.DESC("stringField")).create();

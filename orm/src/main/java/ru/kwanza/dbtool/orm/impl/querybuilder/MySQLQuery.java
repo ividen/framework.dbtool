@@ -10,8 +10,9 @@ public class MySQLQuery<T> extends AbstractQuery<T> {
         super(config);
     }
 
+
     @Override
-    public IStatement<T> prepare() {
-        return new MySQLStatement<T>(config);
+    protected IStatement<T> doPrepare(QueryConfig config, Integer offset, Integer maxSize) {
+        return new MySQLStatement<T>(config,offset,maxSize);
     }
 }

@@ -10,8 +10,9 @@ public class OracleQuery<T> extends AbstractQuery<T> {
         super(config);
     }
 
+
     @Override
-    public IStatement<T> prepare() {
-        return new OracleStatement<T>(config);
+    protected IStatement<T> doPrepare(QueryConfig config, Integer offset, Integer maxSize) {
+        return new OracleStatement<T>(config,offset,maxSize);
     }
 }

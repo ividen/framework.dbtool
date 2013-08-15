@@ -88,7 +88,7 @@ public abstract class FilteringTest extends AbstractJUnit4SpringContextTests {
         IFiltering<TestEntity> filtering = em.filtering(TestEntity.class);
 
         filtering
-                .setMaxSize(100)
+                .paging(0,100)
                 .filter(new Filter(true, Condition.in("id"), Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)))
                 .orderBy(OrderBy.ASC("id"));
 
@@ -107,7 +107,7 @@ public abstract class FilteringTest extends AbstractJUnit4SpringContextTests {
         IFiltering<TestEntity> filtering = em.filtering(TestEntity.class);
 
         filtering
-                .setMaxSize(100)
+                .paging(0,100)
                 .filter(new Filter(true, Condition.between("id"), 0, 9))
                 .orderBy(OrderBy.ASC("id"));
 
@@ -126,7 +126,7 @@ public abstract class FilteringTest extends AbstractJUnit4SpringContextTests {
         IFiltering<TestEntity> filtering = em.filtering(TestEntity.class);
 
         filtering
-                .setMaxSize(100)
+                .paging(0,100)
                 .filter(new Filter(true, Condition.between("id"), 0, 9),
                         new Filter(true, Condition.isEqual("intField"), 10))
                 .orderBy(OrderBy.ASC("id"));
@@ -146,7 +146,7 @@ public abstract class FilteringTest extends AbstractJUnit4SpringContextTests {
         IFiltering<TestEntity> filtering = em.filtering(TestEntity.class);
 
         filtering
-                .setOffset(100)
+                .paging(100,100)
                 .filter(new Filter(false, Condition.between("id"), 0, 10),
                         new Filter(false, Condition.isEqual("intField"), 1))
                 .orderBy(OrderBy.ASC("id"));

@@ -23,13 +23,10 @@ public class FilteringImpl<T> implements IFiltering<T> {
         this.entityClass = entityClass;
     }
 
-    public IFiltering setOffset(Integer offset) {
-        this.offset = offset;
-        return this;
-    }
-
-    public IFiltering setMaxSize(Integer maxSize) {
+    public IFiltering<T> paging(Integer offset, Integer maxSize) {
         this.maxSize = maxSize;
+        this.offset = offset;
+
         return this;
     }
 
@@ -63,7 +60,7 @@ public class FilteringImpl<T> implements IFiltering<T> {
         createStatement().selectList(result);
     }
 
-    public <F> void selectMapList(String propertyName, Map<F, List<T>> result,ListProducer<T> listProducer) {
+    public <F> void selectMapList(String propertyName, Map<F, List<T>> result, ListProducer<T> listProducer) {
         createStatement().selectMapList(propertyName, result, listProducer);
     }
 
@@ -73,12 +70,9 @@ public class FilteringImpl<T> implements IFiltering<T> {
 
     private IStatement<T> createStatement() {
         IQueryBuilder<T> queryBuilder = em.queryBuilder(entityClass);
-        if (maxSize != null) {
-            queryBuilder.setMaxSize(maxSize);
-        }
-
-        if (offset != null) {
-            queryBuilder.setOffset(offset);
+        final boolean usePaging = maxSize != null || offset != null;
+        if (usePaging) {
+            queryBuilder.usePaging(true);
         }
 
         LinkedList params = new LinkedList();
@@ -105,7 +99,8 @@ public class FilteringImpl<T> implements IFiltering<T> {
             queryBuilder.orderBy(orders);
         }
 
-        IStatement<T> statement = queryBuilder.create().prepare();
+        IStatement<T> statement =
+                usePaging ? queryBuilder.create().prepare(offset == null ? 0 : offset, maxSize) : queryBuilder.create().prepare();
         for (int i = 0; i < params.size(); i++) {
             statement.setParameter(i + 1, params.get(i));
         }

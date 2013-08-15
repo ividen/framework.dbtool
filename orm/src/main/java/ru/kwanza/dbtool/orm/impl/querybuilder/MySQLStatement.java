@@ -4,8 +4,8 @@ package ru.kwanza.dbtool.orm.impl.querybuilder;
  * @author Alexander Guzanov
  */
 public class MySQLStatement<T> extends StatementImpl<T> {
-    public MySQLStatement(QueryConfig<T> config) {
-        super(config);
+    public MySQLStatement(QueryConfig<T> config, Integer offset, Integer maxSize) {
+        super(config,offset,maxSize);
     }
 
     @Override

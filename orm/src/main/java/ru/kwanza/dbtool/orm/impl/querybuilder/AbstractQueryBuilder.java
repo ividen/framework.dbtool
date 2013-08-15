@@ -22,15 +22,13 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
     protected Class entityClass;
     protected Condition condition;
     protected OrderBy[] orderBy;
-    protected Integer maxSize;
-    protected Integer offset;
+    protected boolean usePaging = false;
     protected Map<String, List<Integer>> namedParams = new HashMap<String, List<Integer>>();
 
     public AbstractQueryBuilder(DBTool dbTool, IEntityMappingRegistry registry, Class entityClass) {
         this.registry = registry;
         this.entityClass = entityClass;
         this.dbTool = dbTool;
-
 
         if (!registry.isRegisteredEntityClass(entityClass)) {
             throw new RuntimeException("Not registered entity class: " + entityClass);
@@ -50,11 +48,17 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
 
         String sqlString = sql.toString();
         logger.debug("Creating query {}", sqlString);
-        return createQuery(paramsTypes, sqlString);
+
+        return createQuery(createConfig(paramsTypes, sqlString));
     }
 
+    public IQueryBuilder<T> usePaging(boolean userPaging) {
+        this.usePaging = userPaging;
 
-    protected abstract IQuery<T> createQuery(List<Integer> paramsTypes, String sqlString);
+        return this;
+    }
+
+    protected abstract IQuery<T> createQuery(QueryConfig config);
 
     protected abstract StringBuilder createSQLString(String conditions, String orderBy, String fieldsString);
 
@@ -62,7 +66,11 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
         namedParams.clear();
         LinkedList<Integer> paramTypes = new LinkedList<Integer>();
         String preparedSql = parseSql(sql, paramTypes);
-        return createQuery(paramTypes, preparedSql);
+        return createQuery(createConfig(paramTypes, preparedSql));
+    }
+
+    private QueryConfig<T> createConfig(List<Integer> paramsTypes, String sqlString) {
+        return new QueryConfig<T>(dbTool, registry, entityClass, sqlString, usePaging, paramsTypes, namedParams);
     }
 
     private String parseSql(String sql, List<Integer> paramTypes) {
@@ -154,8 +162,7 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
         } else if (type == Condition.Type.NATIVE) {
             where.append(parseSql(condition.getSql(), paramsTypes));
         } else {
-            FieldMapping fieldMapping =
-                    registry.getFieldMappingByPropertyName(entityClass, condition.getPropertyName());
+            FieldMapping fieldMapping = registry.getFieldMappingByPropertyName(entityClass, condition.getPropertyName());
             if (fieldMapping == null) {
                 throw new IllegalArgumentException("Unknown field!");
             }
@@ -206,10 +213,7 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
                 if (fieldMapping == null) {
                     throw new IllegalArgumentException("Unknown field!");
                 }
-                orderBy.append(fieldMapping.getColumn())
-                        .append(' ')
-                        .append(ob.getType())
-                        .append(", ");
+                orderBy.append(fieldMapping.getColumn()).append(' ').append(ob.getType()).append(", ");
             }
 
             orderBy.deleteCharAt(orderBy.length() - 2);
@@ -220,10 +224,7 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
 
     protected StringBuilder createDefaultSQLString(String fieldsString, String conditions, String orderBy) {
         StringBuilder sql;
-        sql = new StringBuilder("SELECT ")
-                .append(fieldsString)
-                .append("FROM ")
-                .append(registry.getTableName(entityClass));
+        sql = new StringBuilder("SELECT ").append(fieldsString).append("FROM ").append(registry.getTableName(entityClass));
         if (conditions.length() > 0) {
             sql.append(" WHERE ").append(conditions);
         }
@@ -256,16 +257,6 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
         }
         result.deleteCharAt(result.length() - 2);
         return result.toString();
-    }
-
-    public IQueryBuilder<T> setMaxSize(Integer maxSize) {
-        this.maxSize = maxSize;
-        return this;
-    }
-
-    public IQueryBuilder<T> setOffset(Integer offset) {
-        this.offset = offset;
-        return this;
     }
 
     public IQueryBuilder<T> where(Condition condition) {

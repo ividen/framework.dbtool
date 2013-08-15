@@ -15,19 +15,19 @@ public class PostgreSQLQueryBuilder<T> extends AbstractQueryBuilder<T> {
         super(dbTool, registry, entityClass);
     }
 
-    protected IQuery<T> createQuery(List<Integer> paramsTypes, String sqlString) {
-        return new PostgreSQLQuery<T>(new QueryConfig<T>(dbTool, registry, entityClass,
-                sqlString, maxSize, offset, paramsTypes, namedParams));
+    @Override
+    protected IQuery<T> createQuery(QueryConfig config) {
+        return new PostgreSQLQuery<T>(config);
     }
 
     protected StringBuilder createSQLString(String conditions, String orderBy, String fieldsString) {
         StringBuilder sql = createDefaultSQLString(fieldsString, conditions, orderBy);
-        if (maxSize != null) {
+
+        if (usePaging) {
             sql.append(" LIMIT ?");
-        }
-        if (offset != null) {
             sql.append(" OFFSET ?");
         }
+
         return sql;
     }
 

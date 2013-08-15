@@ -4,8 +4,8 @@ package ru.kwanza.dbtool.orm.impl.querybuilder;
  * @author Alexander Guzanov
  */
 public class OracleStatement<T> extends StatementImpl<T> {
-    public OracleStatement(QueryConfig<T> config) {
-        super(config);
+    public OracleStatement(QueryConfig<T> config, Integer offset, Integer maxSize) {
+        super(config,offset,maxSize);
     }
 
     @Override

@@ -9,13 +9,25 @@ import ru.kwanza.dbtool.orm.api.IStatement;
 public abstract class AbstractQuery<T> implements IQuery<T> {
     protected QueryConfig config;
 
-
     public AbstractQuery(QueryConfig<T> config) {
         this.config = config;
     }
 
-    public abstract IStatement<T> prepare();
+    public final IStatement<T> prepare() {
+        if (config.isUsePaging()) {
+            throw new IllegalStateException("Query must use paging - prepare with offset and maxSize!");
+        }
+        return doPrepare(config, null, null);
+    }
 
+    public final IStatement<T> prepare(int offset, int maxSize) {
+        if (!config.isUsePaging()) {
+            throw new IllegalStateException("Query don't use paging - prepare without offset and maxSize!");
+        }
+        return doPrepare(config, offset, maxSize);
+    }
+
+    protected abstract IStatement<T> doPrepare(QueryConfig config, Integer offset, Integer maxSize);
 
     public QueryConfig getConfig() {
         return config;
@@ -27,6 +39,5 @@ public abstract class AbstractQuery<T> implements IQuery<T> {
                 "query='" + config.getSql() + '\'' +
                 '}';
     }
-
 
 }
