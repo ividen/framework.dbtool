@@ -56,7 +56,7 @@ public class CreateOperation extends Operation implements ICreateOperation {
 
     @SuppressWarnings("unchecked")
     public void executeCreate(Collection objects) throws UpdateException {
-        UpdateUtil.batchUpdate(getJdbcTemplate(), createQuery, objects, updateSetter);
+        UpdateUtil.batchUpdate(getJdbcTemplate(), createQuery, objects, updateSetter, dbTool.getDbType());
     }
 
     private String buildQuery(String tableName, Collection<String> columnNames) {

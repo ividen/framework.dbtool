@@ -1,7 +1,9 @@
 package ru.kwanza.dbtool.orm.impl.filtering;
 
 import org.dbunit.DatabaseUnitException;
+import org.dbunit.database.DatabaseConfig;
 import org.dbunit.database.DatabaseConnection;
+import org.dbunit.database.DatabaseDataSourceConnection;
 import org.dbunit.database.IDatabaseConnection;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.IDataSet;
@@ -10,6 +12,7 @@ import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
 import org.dbunit.operation.DatabaseOperation;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
 import ru.kwanza.dbtool.orm.api.*;
 import ru.kwanza.dbtool.orm.impl.fetcher.TestEntity;
@@ -36,6 +39,9 @@ public abstract class FilteringTest extends AbstractJUnit4SpringContextTests {
     @Resource(name = "dataSource")
     private DataSource dataSource;
 
+    @Value("${jdbc.schema}")
+    private String schema;
+
 
     @Before
     public void setUpDV() throws Exception {
@@ -49,7 +55,9 @@ public abstract class FilteringTest extends AbstractJUnit4SpringContextTests {
     }
 
     public IDatabaseConnection getConnection() throws SQLException, DatabaseUnitException {
-        return new DatabaseConnection(dataSource.getConnection());
+        DatabaseConnection connection = new DatabaseConnection(dataSource.getConnection(), schema);
+        connection.getConfig().setProperty(DatabaseConfig.FEATURE_BATCHED_STATEMENTS, true);
+        return connection;
     }
 
     @Before

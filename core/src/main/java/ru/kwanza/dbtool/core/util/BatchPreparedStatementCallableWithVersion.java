@@ -5,6 +5,7 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.PreparedStatementCallback;
 import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.support.SQLExceptionTranslator;
+import ru.kwanza.dbtool.core.DBTool;
 import ru.kwanza.dbtool.core.UpdateSetterWithVersion;
 import ru.kwanza.toolbox.fieldhelper.FieldHelper;
 
@@ -14,12 +15,11 @@ import java.util.*;
 /**
  * @author Guzanov Alexander
  */
-public class BatchPreparedStatementCallableWithVersion<T, K, V> implements PreparedStatementCallback, PreparedStatementCreator {
+public class BatchPreparedStatementCallableWithVersion<T, K, V> extends AbstractBatchPreparedStatementCallable {
     private UpdateSetterWithVersion setter;
     private FieldHelper.VersionField versionField;
     private FieldHelper.Field<T, K> keyField;
     private Collection<T> objects;
-    private String sql;
 
     private ArrayList<T> constrained = new ArrayList<T>();
     private ArrayList<T> optimistic = new ArrayList<T>();
@@ -31,10 +31,10 @@ public class BatchPreparedStatementCallableWithVersion<T, K, V> implements Prepa
 
     public BatchPreparedStatementCallableWithVersion(String sql, final Collection<T> objects, UpdateSetterWithVersion<T, V> setter,
                                                      FieldHelper.Field<T, K> keyField, FieldHelper.VersionField<T, V> versionField,
-                                                     SQLExceptionTranslator exceptionTranslator) {
+                                                     SQLExceptionTranslator exceptionTranslator, DBTool.DBType dbType) {
+        super(sql, dbType);
         this.objects = objects;
         this.setter = setter;
-        this.sql = sql;
         this.versionField = versionField;
         this.keyField = keyField;
         this.exeptionTranslator = exceptionTranslator;
@@ -136,9 +136,6 @@ public class BatchPreparedStatementCallableWithVersion<T, K, V> implements Prepa
         return result;
     }
 
-    public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
-        return con.prepareStatement(sql);
-    }
 
     public long getResult() {
         return result;

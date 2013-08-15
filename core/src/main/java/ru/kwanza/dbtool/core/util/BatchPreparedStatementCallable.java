@@ -1,10 +1,12 @@
 package ru.kwanza.dbtool.core.util;
 
+import org.postgresql.jdbc2.AbstractJdbc2Statement;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.PreparedStatementCallback;
 import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.support.SQLExceptionTranslator;
+import ru.kwanza.dbtool.core.DBTool;
 import ru.kwanza.dbtool.core.UpdateSetter;
 
 import java.sql.*;
@@ -15,21 +17,20 @@ import java.util.Iterator;
 /**
  * @author Guzanov Alexander
  */
-public class BatchPreparedStatementCallable<T> implements PreparedStatementCallback, PreparedStatementCreator {
+public class BatchPreparedStatementCallable<T> extends AbstractBatchPreparedStatementCallable {
     private final UpdateSetter setter;
     private final SQLExceptionTranslator exeptionTranslator;
     private final Collection<T> objects;
-    private final String sql;
     private ArrayList<T> constrained = new ArrayList<T>();
     private long result = 0;
     private long skippedCount = 0;
 
     public BatchPreparedStatementCallable(String sql, final Collection<T> objects, UpdateSetter<T> setter,
-                                          SQLExceptionTranslator exceptionTranslator) {
+                                          SQLExceptionTranslator exceptionTranslator, DBTool.DBType dbType) {
+        super(sql, dbType);
         this.setter = setter;
         this.exeptionTranslator = exceptionTranslator;
         this.objects = objects;
-        this.sql = sql;
     }
 
     public Object doInPreparedStatement0(PreparedStatement ps, Iterator iterator) throws SQLException, DataAccessException {
@@ -74,9 +75,7 @@ public class BatchPreparedStatementCallable<T> implements PreparedStatementCallb
         }
     }
 
-    public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
-        return con.prepareStatement(sql);
-    }
+
 
     public Object doInPreparedStatement(PreparedStatement ps) throws SQLException, DataAccessException {
         int from = 0;

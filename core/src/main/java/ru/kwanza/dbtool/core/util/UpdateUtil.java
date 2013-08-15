@@ -16,10 +16,10 @@ public class UpdateUtil {
     public static final Logger logger = LoggerFactory.getLogger(DBTool.class);
 
     public static <T> long batchUpdate(JdbcTemplate template, String updateSQL, final Collection<T> objects,
-                                       final UpdateSetter<T> updateSetter) throws UpdateException {
+                                       final UpdateSetter<T> updateSetter, final DBTool.DBType dbType) throws UpdateException {
 
         BatchPreparedStatementCallable action =
-                new BatchPreparedStatementCallable(updateSQL, objects, updateSetter, template.getExceptionTranslator());
+                new BatchPreparedStatementCallable(updateSQL, objects, updateSetter, template.getExceptionTranslator(), dbType);
         template.execute(action, action);
 
         if (logger.isTraceEnabled()) {
@@ -40,12 +40,13 @@ public class UpdateUtil {
                                                                 final UpdateSetterWithVersion<T, V> updateSetter, final String checkSQL,
                                                                 final RowMapper<KeyValue<K, V>> keyVersionMapper,
                                                                 final FieldHelper.Field<T, K> keyField,
-                                                                final FieldHelper.VersionField<T, V> versionField) throws UpdateException {
+                                                                final FieldHelper.VersionField<T, V> versionField,
+                                                                final DBTool.DBType dbType) throws UpdateException {
 
         List<T> sortedObjects = getSortedList(objects, keyField);
         BatchPreparedStatementCallableWithVersion<T, K, V> action =
                 new BatchPreparedStatementCallableWithVersion<T, K, V>(updateSQL, sortedObjects, updateSetter, keyField, versionField,
-                        template.getExceptionTranslator());
+                        template.getExceptionTranslator(), dbType);
         Long result = (Long) template.execute(action, action);
 
         if (!action.getCheckList().isEmpty()) {
