@@ -14,22 +14,20 @@ class QueryConfig<T> {
     private final DBTool dbTool;
     private final String sql;
     private final List<Integer> paramTypes;
-    private final Integer maxSize;
-    private final Integer offset;
     private final IEntityMappingRegistry registry;
     private final Class<T> entityClass;
     private final Constructor<T> contructor;
+    private final boolean usePaging;
     private Map<String, List<Integer>> namedParams;
     private int paramsCount;
 
 
     QueryConfig(DBTool dbTool, IEntityMappingRegistry registry,
-                Class<T> entityClass, String sql, Integer maxSize, Integer offset,
+                Class<T> entityClass, String sql,boolean usePaging,
                 List<Integer> paramTypes, Map<String, List<Integer>> namedParams) {
         this.dbTool = dbTool;
         this.sql = sql;
-        this.maxSize = maxSize;
-        this.offset = offset;
+        this.usePaging = usePaging;
         this.paramTypes = paramTypes;
         this.registry = registry;
         this.entityClass = entityClass;
@@ -55,12 +53,8 @@ class QueryConfig<T> {
         return paramTypes;
     }
 
-    public Integer getMaxSize() {
-        return maxSize;
-    }
-
-    public Integer getOffset() {
-        return offset;
+    boolean isUsePaging() {
+        return usePaging;
     }
 
     public IEntityMappingRegistry getRegistry() {

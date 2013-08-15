@@ -11,7 +11,7 @@ public class MSSQLQuery<T> extends AbstractQuery<T> {
     }
 
     @Override
-    public IStatement<T> prepare() {
-        return new MSSQLStatement<T>(config);
+    protected IStatement<T> doPrepare(QueryConfig config, Integer offset, Integer maxSize) {
+        return new MSSQLStatement<T>(config, offset, maxSize);
     }
 }

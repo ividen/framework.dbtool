@@ -119,8 +119,7 @@ public class OracleQueryBuilderTest extends AbstractJUnit4SpringContextTests {
     @Test
     public void testBuildConditionsWithLimit() {
         AbstractQuery<TestEntity> query1 = (AbstractQuery<TestEntity>) em.queryBuilder(TestEntity.class)
-                .setMaxSize(1000)
-                .setOffset(1000)
+                .usePaging(true)
                 .where(Condition.and(Condition.in("id"),
                         Condition.like("id"),
                         Condition.isEqual("id"),
@@ -145,7 +144,7 @@ public class OracleQueryBuilderTest extends AbstractJUnit4SpringContextTests {
         assertEquals(query1.getConfig().getParamsCount(), 11);
 
         AbstractQuery<TestEntity> query2 = (AbstractQuery<TestEntity>) em.queryBuilder(TestEntity.class)
-                .setMaxSize(000)
+                .usePaging(true)
                 .where(Condition.or(Condition.in("id"),
                         Condition.like("id"),
                         Condition.isEqual("id"),
@@ -170,7 +169,7 @@ public class OracleQueryBuilderTest extends AbstractJUnit4SpringContextTests {
         assertEquals(query1.getConfig().getParamsCount(), 11);
 
         AbstractQuery<TestEntity> query3 = (AbstractQuery<TestEntity>) em.queryBuilder(TestEntity.class)
-                .setMaxSize(1000)
+                .usePaging(true)
                 .where(Condition.and(
                         Condition.or(Condition.in("id"),
                                 Condition.like("id"),
@@ -206,7 +205,6 @@ public class OracleQueryBuilderTest extends AbstractJUnit4SpringContextTests {
     @Test
     public void testBuildWithouCondition() {
         AbstractQuery<TestEntity> query1 = (AbstractQuery<TestEntity>) em.queryBuilder(TestEntity.class)
-                .setOffset(100)
                 .orderBy(OrderBy.ASC("id"), OrderBy.DESC("stringField")).create();
         assertEquals(query1.getConfig().getSql(),
                 "SELECT id, int_field, string_field, date_field, short_field, " +
@@ -218,7 +216,7 @@ public class OracleQueryBuilderTest extends AbstractJUnit4SpringContextTests {
     @Test(expected = IllegalStateException.class)
     public void testBadBuild_where() {
         AbstractQuery<TestEntity> query1 = (AbstractQuery<TestEntity>) em.queryBuilder(TestEntity.class)
-                .setOffset(100)
+                .usePaging(true)
                 .where(Condition.like("id"))
                 .where(Condition.like("id"))
                 .orderBy(OrderBy.ASC("id"), OrderBy.DESC("stringField")).create();
@@ -227,7 +225,7 @@ public class OracleQueryBuilderTest extends AbstractJUnit4SpringContextTests {
     @Test(expected = IllegalStateException.class)
     public void testBadBuild_order() {
         AbstractQuery<TestEntity> query1 = (AbstractQuery<TestEntity>) em.queryBuilder(TestEntity.class)
-                .setOffset(100)
+                .usePaging(true)
                 .where(Condition.like("id"))
                 .orderBy(OrderBy.ASC("id"))
                 .orderBy(OrderBy.DESC("stringField")).create();

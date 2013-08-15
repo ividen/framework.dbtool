@@ -4,29 +4,27 @@ import ru.kwanza.dbtool.core.DBTool;
 import ru.kwanza.dbtool.orm.api.IQuery;
 import ru.kwanza.dbtool.orm.impl.mapping.IEntityMappingRegistry;
 
-import java.util.List;
-
 /**
  * @author Alexander Guzanov
  */
 public class MSSQLQueryBuilder<T> extends AbstractQueryBuilder<T> {
+
+    public static final String $_TOP = "$TOP$";
 
     public MSSQLQueryBuilder(DBTool dbTool, IEntityMappingRegistry registry, Class entityClass) {
         super(dbTool, registry, entityClass);
     }
 
 
-    protected IQuery<T> createQuery(List<Integer> paramsTypes, String sqlString) {
-        return new MSSQLQuery<T>(new QueryConfig<T>(dbTool, registry, entityClass,
-                sqlString, maxSize, offset, paramsTypes, namedParams));
+    protected IQuery<T> createQuery(QueryConfig config) {
+        return new MSSQLQuery<T>(config);
     }
 
     protected StringBuilder createSQLString(String conditions, String orderBy, String fieldsString) {
         StringBuilder sql;
-        if (maxSize != null) {
-            long size = (offset == null ? 0 : offset) + maxSize;
+        if (usePaging) {
             sql = new StringBuilder("SELECT TOP ")
-                    .append(size).append(' ')
+                    .append($_TOP).append(' ')
                     .append(fieldsString)
                     .append("FROM ")
                     .append(registry.getTableName(entityClass));
@@ -44,5 +42,7 @@ public class MSSQLQueryBuilder<T> extends AbstractQueryBuilder<T> {
         return sql;
     }
 
-
+     static String replaceTop(String sql, Long top) {
+         return sql.replace($_TOP, String.valueOf(top));
+    }
 }

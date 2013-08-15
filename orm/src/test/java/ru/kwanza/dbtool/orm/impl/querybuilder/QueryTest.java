@@ -83,11 +83,11 @@ public abstract class QueryTest extends AbstractJUnit4SpringContextTests {
     @Test
     public void testSelectIn() {
         IQuery<TestEntity> query = em.queryBuilder(TestEntity.class)
-                .setMaxSize(100)
+                .usePaging(true)
                 .where(Condition.in("id"))
                 .orderBy(OrderBy.ASC("id")).create();
         System.out.println(query);
-        IStatement<TestEntity> statement = query.prepare();
+        IStatement<TestEntity> statement = query.prepare(0,100);
         statement.setParameter(1, Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
         List<TestEntity> testEntities = statement.selectList();
         assertEquals(testEntities.size(), 10);
@@ -102,14 +102,14 @@ public abstract class QueryTest extends AbstractJUnit4SpringContextTests {
     @Test
     public void testSelect_With_NamedParams() {
         IQuery<TestEntity> query = em.queryBuilder(TestEntity.class)
-                .setMaxSize(100)
+                .usePaging(true)
                 .where(Condition.and(
                         Condition.isGreaterOrEqual("id", "id"),
                         Condition.isLessOrEqual("id", "id"))
                 )
                 .orderBy(OrderBy.ASC("id")).create();
         System.out.println(query);
-        IStatement<TestEntity> statement = query.prepare();
+        IStatement<TestEntity> statement = query.prepare(0,100);
         statement.setParameter("id", 1l);
         List<TestEntity> testEntities = statement.selectList();
         assertEquals(testEntities.size(), 1);
@@ -123,20 +123,20 @@ public abstract class QueryTest extends AbstractJUnit4SpringContextTests {
     @Test(expected = java.lang.IllegalArgumentException.class)
     public void testSelect_WrongParams_1() {
         IQuery<TestEntity> query = em.queryBuilder(TestEntity.class)
-                .setMaxSize(1000)
+                .usePaging(true)
                 .orderBy(OrderBy.ASC("id")).create();
 
-        query.prepare().setParameter(1, Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
+        query.prepare(0,1000).setParameter(1, Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
     }
 
     @Test(expected = java.lang.IllegalArgumentException.class)
     public void testSelect_WrongParams_2() {
         IQuery<TestEntity> query = em.queryBuilder(TestEntity.class)
-                .setMaxSize(1000)
+                .usePaging(true)
                 .where(Condition.in("id"))
                 .orderBy(OrderBy.ASC("id")).create();
 
-        IStatement<TestEntity> statement = query.prepare();
+        IStatement<TestEntity> statement = query.prepare(0,1000);
         statement.setParameter(1, Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
         statement.setParameter(2, Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
     }
@@ -144,20 +144,20 @@ public abstract class QueryTest extends AbstractJUnit4SpringContextTests {
     @Test(expected = java.lang.IllegalArgumentException.class)
     public void testSelect_WrongParams_3() {
         IQuery<TestEntity> query = em.queryBuilder(TestEntity.class)
-                .setMaxSize(1000)
+                .usePaging(true)
                 .where(Condition.in("id1"))
                 .orderBy(OrderBy.ASC("id")).create();
-        IStatement<TestEntity> statement = query.prepare();
+        IStatement<TestEntity> statement = query.prepare(0,1000);
         statement.setParameter(1, Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
     }
 
     @Test(expected = java.lang.IllegalArgumentException.class)
     public void testSelect_WrongParams_4() {
         IQuery<TestEntity> query = em.queryBuilder(TestEntity.class)
-                .setMaxSize(1000)
+                .usePaging(true)
                 .where(Condition.in("id"))
                 .orderBy(OrderBy.ASC("id1")).create();
-        IStatement<TestEntity> statement = query.prepare();
+        IStatement<TestEntity> statement = query.prepare(0,1000);
         statement.setParameter(1, Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
     }
 
@@ -165,29 +165,28 @@ public abstract class QueryTest extends AbstractJUnit4SpringContextTests {
     @Test(expected = java.lang.IllegalArgumentException.class)
     public void testSelect_groupField_5() {
         IQuery<TestEntity> query = em.queryBuilder(TestEntity.class)
-                .setMaxSize(1000)
+                .usePaging(true)
                 .orderBy(OrderBy.ASC("id")).create();
-        IStatement<TestEntity> statement = query.prepare();
+        IStatement<TestEntity> statement = query.prepare(0,1000);
         statement.selectMap("title");
     }
 
     @Test(expected = java.lang.IllegalArgumentException.class)
     public void testSelect_groupField_6() {
         IQuery<TestEntity> query = em.queryBuilder(TestEntity.class)
-                .setMaxSize(1000)
+                .usePaging(true)
                 .orderBy(OrderBy.ASC("id")).create();
-        IStatement<TestEntity> statement = query.prepare();
+        IStatement<TestEntity> statement = query.prepare(0,1000);
         statement.selectMapList("title");
     }
 
     @Test
     public void testSelect_offset_0() {
         IQuery<TestEntity> query = em.queryBuilder(TestEntity.class)
-                .setMaxSize(1)
-                .setOffset(99)
+                .usePaging(true)
                 .orderBy(OrderBy.ASC("id")).create();
 
-        IStatement<TestEntity> statement = query.prepare();
+        IStatement<TestEntity> statement = query.prepare(99,1);
         List<TestEntity> testEntities = statement.selectList();
         assertEquals(testEntities.size(), 1);
         Assert.assertEquals(testEntities.get(0).getId().longValue(), 99l);
@@ -201,10 +200,10 @@ public abstract class QueryTest extends AbstractJUnit4SpringContextTests {
     @Test
     public void testSelect_offset_1() {
         IQuery<TestEntity> query = em.queryBuilder(TestEntity.class)
-                .setMaxSize(1)
+                .usePaging(true)
                 .orderBy(OrderBy.ASC("id")).create();
 
-        IStatement<TestEntity> statement = query.prepare();
+        IStatement<TestEntity> statement = query.prepare(0,1);
         List<TestEntity> testEntities = statement.selectList();
         assertEquals(testEntities.size(), 1);
         Assert.assertEquals(testEntities.get(0).getId().longValue(), 0l);
@@ -217,10 +216,10 @@ public abstract class QueryTest extends AbstractJUnit4SpringContextTests {
     @Test
     public void testSelect_offset_2() {
         IQuery<TestEntity> query = em.queryBuilder(TestEntity.class)
-                .setOffset(99)
+                .usePaging(true)
                 .orderBy(OrderBy.ASC("id")).create();
 
-        IStatement<TestEntity> statement = query.prepare();
+        IStatement<TestEntity> statement = query.prepare(99,101);
         List<TestEntity> testEntities = statement.selectList();
         assertEquals(testEntities.size(), 101);
         Assert.assertEquals(testEntities.get(0).getId().longValue(), 99l);
@@ -229,12 +228,12 @@ public abstract class QueryTest extends AbstractJUnit4SpringContextTests {
     @Test
     public void testSelect_offset_noteixts() {
         IQuery<TestEntity> query = em.queryBuilder(TestEntity.class)
-                .setMaxSize(100)
+                .usePaging(true)
                 .where(Condition.isNull("id"))
-                .setOffset(1)
+
                 .orderBy(OrderBy.ASC("id")).create();
 
-        IStatement<TestEntity> statement = query.prepare();
+        IStatement<TestEntity> statement = query.prepare(1,100);
         List<TestEntity> testEntities = statement.selectList();
         assertEquals(testEntities.size(), 0);
         Map<Long, TestEntity> map = statement.selectMap("id");
@@ -244,11 +243,10 @@ public abstract class QueryTest extends AbstractJUnit4SpringContextTests {
     @Test
     public void testSelect_offset_greater() {
         IQuery<TestEntity> query = em.queryBuilder(TestEntity.class)
-                .setMaxSize(1)
+                .usePaging(true)
                 .where(Condition.isEqual("id"))
-                .setOffset(99)
                 .orderBy(OrderBy.ASC("id")).create();
-        IStatement<TestEntity> statement = query.prepare();
+        IStatement<TestEntity> statement = query.prepare(99,1);
         List<TestEntity> testEntities = statement.setParameter(1, 100).selectList();
         assertEquals(testEntities.size(), 0);
         Map<Long, TestEntity> map = statement.setParameter(1, 100).selectMap("id");

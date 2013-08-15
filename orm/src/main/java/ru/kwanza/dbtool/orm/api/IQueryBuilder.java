@@ -9,9 +9,7 @@ public interface IQueryBuilder<T> {
 
     IQuery<T> createNative(String sql);
 
-    IQueryBuilder<T> setMaxSize(Integer maxSize);
-
-    IQueryBuilder<T> setOffset(Integer offset);
+    IQueryBuilder<T> usePaging(boolean userPaging);
 
     IQueryBuilder<T> where(Condition condition);
 
