@@ -178,7 +178,7 @@ public class PostgreSQLQueryBuilderTest extends AbstractJUnit4SpringContextTests
                         "version, entity_aid, entity_bid, entity_cid, entity_did FROM test_entity " +
                         "WHERE (id IN (?)) OR (id LIKE ?) OR (id = ?) OR (id > ?) " +
                         "OR (id >= ?) OR (id < ?) OR (id <= ?) OR (id IS NOT NULL) OR (id IS NULL) " +
-                        "OR (id BETWEEN ? AND ?) OR (id <> ?) OR (id <> ?) ORDER BY id ASC, string_field DESC  LIMIT ?");
+                        "OR (id BETWEEN ? AND ?) OR (id <> ?) OR (id <> ?) ORDER BY id ASC, string_field DESC  LIMIT ? OFFSET ?");
         assertEquals(query1.getConfig().getParamsCount(), 11);
 
         AbstractQuery<TestEntity> query3 = (AbstractQuery<TestEntity>) em.queryBuilder(TestEntity.class)
@@ -214,7 +214,7 @@ public class PostgreSQLQueryBuilderTest extends AbstractJUnit4SpringContextTests
                         " (id BETWEEN ? AND ?) " +
                         "AND" +
                         " ((id <> ?) OR (id <> ?)) " +
-                        "ORDER BY id ASC, string_field DESC  LIMIT ?");
+                        "ORDER BY id ASC, string_field DESC  LIMIT ? OFFSET ?");
         assertEquals(query1.getConfig().getParamsCount(), 11);
     }
 
@@ -228,7 +228,7 @@ public class PostgreSQLQueryBuilderTest extends AbstractJUnit4SpringContextTests
                 "SELECT id, int_field, string_field, date_field, short_field, " +
                         "version, entity_aid, entity_bid, entity_cid, entity_did " +
                         "FROM test_entity " +
-                        "ORDER BY id ASC, string_field DESC   LIMIT ? OFFSET ?");
+                        "ORDER BY id ASC, string_field DESC  LIMIT ? OFFSET ?");
     }
 
     @Test(expected = IllegalStateException.class)

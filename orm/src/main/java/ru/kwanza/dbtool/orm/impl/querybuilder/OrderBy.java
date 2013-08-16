@@ -47,7 +47,7 @@ public class OrderBy {
                 if (type.equals("ASC")) {
                     result.add(OrderBy.ASC(token.substring(0, i).trim()));
                 } else if (type.equals("DESC")) {
-                    result.add(OrderBy.ASC(token.substring(0, i).trim()));
+                    result.add(OrderBy.DESC(token.substring(0, i).trim()));
                 }
             }
 
