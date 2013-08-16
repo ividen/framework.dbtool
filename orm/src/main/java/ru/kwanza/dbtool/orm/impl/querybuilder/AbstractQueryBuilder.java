@@ -6,7 +6,6 @@ import ru.kwanza.dbtool.core.DBTool;
 import ru.kwanza.dbtool.orm.api.Condition;
 import ru.kwanza.dbtool.orm.api.IQuery;
 import ru.kwanza.dbtool.orm.api.IQueryBuilder;
-import ru.kwanza.dbtool.orm.api.OrderBy;
 import ru.kwanza.dbtool.orm.impl.mapping.FieldMapping;
 import ru.kwanza.dbtool.orm.impl.mapping.IEntityMappingRegistry;
 
@@ -21,7 +20,7 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
     protected DBTool dbTool;
     protected Class entityClass;
     protected Condition condition;
-    protected OrderBy[] orderBy;
+    protected List<OrderBy> orderBy;
     protected boolean usePaging = false;
     protected Map<String, List<Integer>> namedParams = new HashMap<String, List<Integer>>();
 
@@ -207,7 +206,7 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
 
     protected String createOrderBy() {
         StringBuilder orderBy = new StringBuilder();
-        if (this.orderBy != null && this.orderBy.length > 0) {
+        if (this.orderBy != null && this.orderBy.size() > 0) {
             for (OrderBy ob : this.orderBy) {
                 FieldMapping fieldMapping = registry.getFieldMappingByPropertyName(entityClass, ob.getPropertyName());
                 if (fieldMapping == null) {
@@ -264,14 +263,19 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
             throw new IllegalStateException("Condition statement is set already in WHERE clause!");
         }
         this.condition = condition;
+
         return this;
     }
 
-    public IQueryBuilder<T> orderBy(OrderBy... orderBy) {
-        if (this.orderBy != null) {
-            throw new IllegalStateException("Order statement is set already in ORDER BY clause!");
+    public IQueryBuilder<T> orderBy(String orderByClause) {
+        final List<OrderBy> parse = OrderBy.parse(orderByClause);
+        if (orderBy == null) {
+            orderBy = new ArrayList<OrderBy>(parse.size());
         }
-        this.orderBy = orderBy;
+
+        orderBy.addAll(parse);
+
         return this;
     }
+
 }

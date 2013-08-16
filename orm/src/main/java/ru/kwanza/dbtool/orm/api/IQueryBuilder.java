@@ -1,5 +1,7 @@
 package ru.kwanza.dbtool.orm.api;
 
+import ru.kwanza.dbtool.orm.impl.querybuilder.OrderBy;
+
 /**
  * @author Alexander Guzanov
  */
@@ -13,5 +15,5 @@ public interface IQueryBuilder<T> {
 
     IQueryBuilder<T> where(Condition condition);
 
-    IQueryBuilder<T> orderBy(OrderBy... orderBy);
+    IQueryBuilder<T> orderBy(String orderByClause);
 }

@@ -7,7 +7,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
 import ru.kwanza.dbtool.orm.api.Condition;
 import ru.kwanza.dbtool.orm.api.IEntityManager;
-import ru.kwanza.dbtool.orm.api.OrderBy;
 import ru.kwanza.dbtool.orm.impl.fetcher.TestEntity;
 import ru.kwanza.dbtool.orm.impl.mapping.EntityMappingRegistryImpl;
 
@@ -35,24 +34,26 @@ public class PostgreSQLQueryBuilderTest extends AbstractJUnit4SpringContextTests
     @Test
     public void testBuildConditions() {
         AbstractQuery<TestEntity> query1 = (AbstractQuery<TestEntity>) em.queryBuilder(TestEntity.class)
-                .where(Condition.and(
-                        Condition.in("id"),
-                        Condition.like("id"),
-                        Condition.isEqual("id"),
-                        Condition.isGreater("id"),
-                        Condition.isGreaterOrEqual("id"),
-                        Condition.isLess("id"),
-                        Condition.isLessOrEqual("id"),
-                        Condition.isNotNull("id"),
-                        Condition.isNull("id"),
-                        Condition.between("id"),
-                        Condition.notEqual("id"),
-                        Condition.not(Condition.notEqual("id")),
-                        Condition.createNative("Exists(select * from test_entity where id=:id)")
+                .where(
+                        Condition.and(
+                                Condition.in("id"),
+                                Condition.like("id"),
+                                Condition.isEqual("id"),
+                                Condition.isGreater("id"),
+                                Condition.isGreaterOrEqual("id"),
+                                Condition.isLess("id"),
+                                Condition.isLessOrEqual("id"),
+                                Condition.isNotNull("id"),
+                                Condition.isNull("id"),
+                                Condition.between("id"),
+                                Condition.notEqual("id"),
+                                Condition.not(Condition.notEqual("id")),
+                                Condition.createNative("Exists(select * from test_entity where id=:id)")
 
-                )).orderBy(OrderBy.ASC("id"), OrderBy.DESC("stringField")).create();
+                        )).orderBy("id,stringField DESC").create();
 
-        assertEquals(query1.getConfig().getSql(),
+        assertEquals(
+                query1.getConfig().getSql(),
                 "SELECT id, int_field, string_field, date_field, short_field, version, entity_aid, entity_bid, entity_cid, entity_did " +
                         "FROM test_entity " +
                         "WHERE (id IN (?)) AND (id LIKE ?) AND (id = ?) AND (id > ?) AND (id >= ?) AND (id < ?)" +
@@ -61,21 +62,24 @@ public class PostgreSQLQueryBuilderTest extends AbstractJUnit4SpringContextTests
 
         assertEquals(query1.getConfig().getParamsCount(), 12);
         AbstractQuery<TestEntity> query2 = (AbstractQuery<TestEntity>) em.queryBuilder(TestEntity.class)
-                .where(Condition.or(Condition.in("id"),
-                        Condition.like("id"),
-                        Condition.isEqual("id"),
-                        Condition.isGreater("id"),
-                        Condition.isGreaterOrEqual("id"),
-                        Condition.isLess("id"),
-                        Condition.isLessOrEqual("id"),
-                        Condition.isNotNull("id"),
-                        Condition.isNull("id"),
-                        Condition.between("id"),
-                        Condition.notEqual("id"),
-                        Condition.notEqual("id")
-                )).orderBy(OrderBy.ASC("id"), OrderBy.DESC("stringField")).create();
+                .where(
+                        Condition.or(
+                                Condition.in("id"),
+                                Condition.like("id"),
+                                Condition.isEqual("id"),
+                                Condition.isGreater("id"),
+                                Condition.isGreaterOrEqual("id"),
+                                Condition.isLess("id"),
+                                Condition.isLessOrEqual("id"),
+                                Condition.isNotNull("id"),
+                                Condition.isNull("id"),
+                                Condition.between("id"),
+                                Condition.notEqual("id"),
+                                Condition.notEqual("id")
+                        )).orderBy("id").orderBy("stringField DESC").create();
 
-        assertEquals(query2.getConfig().getSql(),
+        assertEquals(
+                query2.getConfig().getSql(),
                 "SELECT id, int_field, string_field, date_field, short_field, " +
                         "version, entity_aid, entity_bid, entity_cid, entity_did FROM test_entity " +
                         "WHERE (id IN (?)) OR (id LIKE ?) OR (id = ?) OR (id > ?) " +
@@ -84,23 +88,27 @@ public class PostgreSQLQueryBuilderTest extends AbstractJUnit4SpringContextTests
 
         assertEquals(query1.getConfig().getParamsCount(), 12);
         AbstractQuery<TestEntity> query3 = (AbstractQuery<TestEntity>) em.queryBuilder(TestEntity.class)
-                .where(Condition.and(
-                        Condition.not(Condition.or(Condition.in("id"),
-                                Condition.like("id"),
-                                Condition.isEqual("id"),
-                                Condition.isGreater("id"))),
-                        Condition.or(
-                                Condition.isGreaterOrEqual("id"),
-                                Condition.isLess("id"),
-                                Condition.isLessOrEqual("id"),
-                                Condition.isNotNull("id"),
-                                Condition.isNull("id")),
-                        Condition.between("id"),
-                        Condition.or(
-                                Condition.notEqual("id"),
-                                Condition.notEqual("id"))
-                )).orderBy(OrderBy.ASC("id"), OrderBy.DESC("stringField")).create();
-        assertEquals(query3.getConfig().getSql(),
+                .where(
+                        Condition.and(
+                                Condition.not(
+                                        Condition.or(
+                                                Condition.in("id"),
+                                                Condition.like("id"),
+                                                Condition.isEqual("id"),
+                                                Condition.isGreater("id"))),
+                                Condition.or(
+                                        Condition.isGreaterOrEqual("id"),
+                                        Condition.isLess("id"),
+                                        Condition.isLessOrEqual("id"),
+                                        Condition.isNotNull("id"),
+                                        Condition.isNull("id")),
+                                Condition.between("id"),
+                                Condition.or(
+                                        Condition.notEqual("id"),
+                                        Condition.notEqual("id"))
+                        )).orderBy("id").orderBy("stringField DESC").create();
+        assertEquals(
+                query3.getConfig().getSql(),
                 "SELECT id, int_field, string_field, date_field, short_field, " +
                         "version, entity_aid, entity_bid, entity_cid, entity_did " +
                         "FROM test_entity " +
@@ -120,21 +128,24 @@ public class PostgreSQLQueryBuilderTest extends AbstractJUnit4SpringContextTests
     public void testBuildConditionsWithLimit() {
         AbstractQuery<TestEntity> query1 = (AbstractQuery<TestEntity>) em.queryBuilder(TestEntity.class)
                 .usePaging(true)
-                .where(Condition.and(Condition.in("id"),
-                        Condition.like("id"),
-                        Condition.isEqual("id"),
-                        Condition.isGreater("id"),
-                        Condition.isGreaterOrEqual("id"),
-                        Condition.isLess("id"),
-                        Condition.isLessOrEqual("id"),
-                        Condition.isNotNull("id"),
-                        Condition.isNull("id"),
-                        Condition.between("id"),
-                        Condition.notEqual("id"),
-                        Condition.notEqual("id")
-                )).orderBy(OrderBy.ASC("id"), OrderBy.DESC("stringField")).create();
+                .where(
+                        Condition.and(
+                                Condition.in("id"),
+                                Condition.like("id"),
+                                Condition.isEqual("id"),
+                                Condition.isGreater("id"),
+                                Condition.isGreaterOrEqual("id"),
+                                Condition.isLess("id"),
+                                Condition.isLessOrEqual("id"),
+                                Condition.isNotNull("id"),
+                                Condition.isNull("id"),
+                                Condition.between("id"),
+                                Condition.notEqual("id"),
+                                Condition.notEqual("id")
+                        )).orderBy("id").orderBy("stringField DESC").create();
 
-        assertEquals(query1.getConfig().getSql(),
+        assertEquals(
+                query1.getConfig().getSql(),
                 "SELECT id, int_field, string_field, date_field, short_field, version, entity_aid, entity_bid, entity_cid, entity_did " +
                         "FROM test_entity " +
                         "WHERE (id IN (?)) AND (id LIKE ?) AND (id = ?) AND (id > ?) AND (id >= ?) AND (id < ?)" +
@@ -145,22 +156,24 @@ public class PostgreSQLQueryBuilderTest extends AbstractJUnit4SpringContextTests
 
         AbstractQuery<TestEntity> query2 = (AbstractQuery<TestEntity>) em.queryBuilder(TestEntity.class)
                 .usePaging(true)
-                .where(Condition.or(Condition.in("id"),
-                        Condition.like("id"),
-                        Condition.isEqual("id"),
-                        Condition.isGreater("id"),
-                        Condition.isGreaterOrEqual("id"),
-                        Condition.isLess("id"),
-                        Condition.isLessOrEqual("id"),
-                        Condition.isNotNull("id"),
-                        Condition.isNull("id"),
-                        Condition.between("id"),
-                        Condition.notEqual("id"),
-                        Condition.notEqual("id")
-                )).orderBy(OrderBy.ASC("id"), OrderBy.DESC("stringField")).create();
+                .where(
+                        Condition.or(
+                                Condition.in("id"),
+                                Condition.like("id"),
+                                Condition.isEqual("id"),
+                                Condition.isGreater("id"),
+                                Condition.isGreaterOrEqual("id"),
+                                Condition.isLess("id"),
+                                Condition.isLessOrEqual("id"),
+                                Condition.isNotNull("id"),
+                                Condition.isNull("id"),
+                                Condition.between("id"),
+                                Condition.notEqual("id"),
+                                Condition.notEqual("id")
+                        )).orderBy("id").orderBy("stringField DESC").create();
 
-
-        assertEquals(query2.getConfig().getSql(),
+        assertEquals(
+                query2.getConfig().getSql(),
                 "SELECT id, int_field, string_field, date_field, short_field, " +
                         "version, entity_aid, entity_bid, entity_cid, entity_did FROM test_entity " +
                         "WHERE (id IN (?)) OR (id LIKE ?) OR (id = ?) OR (id > ?) " +
@@ -170,23 +183,26 @@ public class PostgreSQLQueryBuilderTest extends AbstractJUnit4SpringContextTests
 
         AbstractQuery<TestEntity> query3 = (AbstractQuery<TestEntity>) em.queryBuilder(TestEntity.class)
                 .usePaging(true)
-                .where(Condition.and(
-                        Condition.or(Condition.in("id"),
-                                Condition.like("id"),
-                                Condition.isEqual("id"),
-                                Condition.isGreater("id")),
-                        Condition.or(
-                                Condition.isGreaterOrEqual("id"),
-                                Condition.isLess("id"),
-                                Condition.isLessOrEqual("id"),
-                                Condition.isNotNull("id"),
-                                Condition.isNull("id")),
-                        Condition.between("id"),
-                        Condition.or(
-                                Condition.notEqual("id"),
-                                Condition.notEqual("id"))
-                )).orderBy(OrderBy.ASC("id"), OrderBy.DESC("stringField")).create();
-        assertEquals(query3.getConfig().getSql(),
+                .where(
+                        Condition.and(
+                                Condition.or(
+                                        Condition.in("id"),
+                                        Condition.like("id"),
+                                        Condition.isEqual("id"),
+                                        Condition.isGreater("id")),
+                                Condition.or(
+                                        Condition.isGreaterOrEqual("id"),
+                                        Condition.isLess("id"),
+                                        Condition.isLessOrEqual("id"),
+                                        Condition.isNotNull("id"),
+                                        Condition.isNull("id")),
+                                Condition.between("id"),
+                                Condition.or(
+                                        Condition.notEqual("id"),
+                                        Condition.notEqual("id"))
+                        )).orderBy("id").orderBy("stringField DESC").create();
+        assertEquals(
+                query3.getConfig().getSql(),
                 "SELECT id, int_field, string_field, date_field, short_field, " +
                         "version, entity_aid, entity_bid, entity_cid, entity_did " +
                         "FROM test_entity " +
@@ -206,8 +222,9 @@ public class PostgreSQLQueryBuilderTest extends AbstractJUnit4SpringContextTests
     public void testBuildWithouCondition() {
         AbstractQuery<TestEntity> query1 = (AbstractQuery<TestEntity>) em.queryBuilder(TestEntity.class)
                 .usePaging(true)
-                .orderBy(OrderBy.ASC("id"), OrderBy.DESC("stringField")).create();
-        assertEquals(query1.getConfig().getSql(),
+                .orderBy("id").orderBy("stringField DESC").create();
+        assertEquals(
+                query1.getConfig().getSql(),
                 "SELECT id, int_field, string_field, date_field, short_field, " +
                         "version, entity_aid, entity_bid, entity_cid, entity_did " +
                         "FROM test_entity " +
@@ -220,15 +237,6 @@ public class PostgreSQLQueryBuilderTest extends AbstractJUnit4SpringContextTests
                 .usePaging(true)
                 .where(Condition.like("id"))
                 .where(Condition.like("id"))
-                .orderBy(OrderBy.ASC("id"), OrderBy.DESC("stringField")).create();
-    }
-
-    @Test(expected = IllegalStateException.class)
-    public void testBadBuild_order() {
-        AbstractQuery<TestEntity> query1 = (AbstractQuery<TestEntity>) em.queryBuilder(TestEntity.class)
-                .usePaging(true)
-                .where(Condition.like("id"))
-                .orderBy(OrderBy.ASC("id"))
-                .orderBy(OrderBy.DESC("stringField")).create();
+                .orderBy("id").orderBy("stringField DESC").create();
     }
 }

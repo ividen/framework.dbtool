@@ -7,7 +7,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
 import ru.kwanza.dbtool.orm.api.Condition;
 import ru.kwanza.dbtool.orm.api.IEntityManager;
-import ru.kwanza.dbtool.orm.api.OrderBy;
 import ru.kwanza.dbtool.orm.impl.fetcher.TestEntity;
 import ru.kwanza.dbtool.orm.impl.mapping.EntityMappingRegistryImpl;
 
@@ -50,7 +49,7 @@ public class OracleQueryBuilderTest extends AbstractJUnit4SpringContextTests {
                         Condition.not(Condition.notEqual("id")),
                         Condition.createNative("Exists(select * from test_entity where id=:id)")
 
-                )).orderBy(OrderBy.ASC("id"), OrderBy.DESC("stringField")).create();
+                )).orderBy("id").orderBy("stringField DESC").create();
 
         assertEquals(query1.getConfig().getSql(),
                 "SELECT id, int_field, string_field, date_field, short_field, version, entity_aid, entity_bid, entity_cid, entity_did " +
@@ -73,7 +72,7 @@ public class OracleQueryBuilderTest extends AbstractJUnit4SpringContextTests {
                         Condition.between("id"),
                         Condition.notEqual("id"),
                         Condition.notEqual("id")
-                )).orderBy(OrderBy.ASC("id"), OrderBy.DESC("stringField")).create();
+                )).orderBy("id").orderBy("stringField DESC").create();
 
         assertEquals(query2.getConfig().getSql(),
                 "SELECT id, int_field, string_field, date_field, short_field, " +
@@ -99,7 +98,7 @@ public class OracleQueryBuilderTest extends AbstractJUnit4SpringContextTests {
                         Condition.or(
                                 Condition.notEqual("id"),
                                 Condition.notEqual("id"))
-                )).orderBy(OrderBy.ASC("id"), OrderBy.DESC("stringField")).create();
+                )).orderBy("id").orderBy("stringField DESC").create();
         assertEquals(query3.getConfig().getSql(),
                 "SELECT id, int_field, string_field, date_field, short_field, " +
                         "version, entity_aid, entity_bid, entity_cid, entity_did " +
@@ -132,7 +131,7 @@ public class OracleQueryBuilderTest extends AbstractJUnit4SpringContextTests {
                         Condition.between("id"),
                         Condition.notEqual("id"),
                         Condition.notEqual("id")
-                )).orderBy(OrderBy.ASC("id"), OrderBy.DESC("stringField")).create();
+                )).orderBy("id").orderBy("stringField DESC").create();
 
         assertEquals(query1.getConfig().getSql(),
                 "SELECT  * FROM (SELECT id, int_field, string_field, date_field, short_field, version, entity_aid, entity_bid, entity_cid, entity_did " +
@@ -157,7 +156,7 @@ public class OracleQueryBuilderTest extends AbstractJUnit4SpringContextTests {
                         Condition.between("id"),
                         Condition.notEqual("id"),
                         Condition.notEqual("id")
-                )).orderBy(OrderBy.ASC("id"), OrderBy.DESC("stringField")).create();
+                )).orderBy("id").orderBy("stringField DESC").create();
 
 
         assertEquals(query2.getConfig().getSql(),
@@ -185,7 +184,7 @@ public class OracleQueryBuilderTest extends AbstractJUnit4SpringContextTests {
                         Condition.or(
                                 Condition.notEqual("id"),
                                 Condition.notEqual("id"))
-                )).orderBy(OrderBy.ASC("id"), OrderBy.DESC("stringField")).create();
+                )).orderBy("id").orderBy("stringField DESC").create();
         assertEquals(query3.getConfig().getSql(),
                 "SELECT  * FROM (SELECT id, int_field, string_field, date_field, short_field, " +
                         "version, entity_aid, entity_bid, entity_cid, entity_did " +
@@ -205,7 +204,7 @@ public class OracleQueryBuilderTest extends AbstractJUnit4SpringContextTests {
     @Test
     public void testBuildWithouCondition() {
         AbstractQuery<TestEntity> query1 = (AbstractQuery<TestEntity>) em.queryBuilder(TestEntity.class)
-                .orderBy(OrderBy.ASC("id"), OrderBy.DESC("stringField")).create();
+                .orderBy("id").orderBy("stringField DESC").create();
         assertEquals(query1.getConfig().getSql(),
                 "SELECT id, int_field, string_field, date_field, short_field, " +
                         "version, entity_aid, entity_bid, entity_cid, entity_did " +
@@ -219,15 +218,6 @@ public class OracleQueryBuilderTest extends AbstractJUnit4SpringContextTests {
                 .usePaging(true)
                 .where(Condition.like("id"))
                 .where(Condition.like("id"))
-                .orderBy(OrderBy.ASC("id"), OrderBy.DESC("stringField")).create();
-    }
-
-    @Test(expected = IllegalStateException.class)
-    public void testBadBuild_order() {
-        AbstractQuery<TestEntity> query1 = (AbstractQuery<TestEntity>) em.queryBuilder(TestEntity.class)
-                .usePaging(true)
-                .where(Condition.like("id"))
-                .orderBy(OrderBy.ASC("id"))
-                .orderBy(OrderBy.DESC("stringField")).create();
+                .orderBy("id").orderBy("stringField DESC").create();
     }
 }
