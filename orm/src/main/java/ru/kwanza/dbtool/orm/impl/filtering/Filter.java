@@ -1,27 +1,23 @@
-package ru.kwanza.dbtool.orm.api;
+package ru.kwanza.dbtool.orm.impl.filtering;
+
+import ru.kwanza.dbtool.orm.api.Condition;
 
 /**
  * @author Alexander Guzanov
  */
 public class Filter {
-    private boolean use;
     private Condition condition;
     private Object[] value;
     private boolean hasParams = true;
 
-    public Filter(boolean use, Condition condition, Object ... value) {
-        this.use = use;
+    public Filter(Condition condition, Object ... value) {
         this.condition = condition;
         this.value = value;
     }
 
-    public Filter(boolean use, Condition condition) {
-        this(use, condition, null);
+    public Filter(Condition condition) {
+        this(condition, null);
         this.hasParams = false;
-    }
-
-    public boolean isUse() {
-        return use;
     }
 
     public boolean isHasParams() {

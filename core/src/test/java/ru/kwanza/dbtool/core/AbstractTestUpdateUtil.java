@@ -1,11 +1,13 @@
 package ru.kwanza.dbtool.core;
 
 import org.dbunit.DBTestCase;
+import org.dbunit.database.DatabaseConfig;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.IDataSet;
 import org.dbunit.dataset.SortedDataSet;
 import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
 import org.dbunit.operation.DatabaseOperation;
+import org.postgresql.Driver;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.jdbc.core.RowMapper;
@@ -140,6 +142,11 @@ public abstract class AbstractTestUpdateUtil extends DBTestCase {
     protected void setUp() throws Exception {
         ctx = new ClassPathXmlApplicationContext(getSpringCfgFile(), TestSelectUtil.class);
         DatabaseOperation.CLEAN_INSERT.execute(getConnection(), getDataSet());
+    }
+
+    @Override
+    protected void setUpDatabaseConfig(DatabaseConfig config) {
+        config.setProperty(DatabaseConfig.FEATURE_BATCHED_STATEMENTS, true);
     }
 
     protected abstract String getSpringCfgFile();

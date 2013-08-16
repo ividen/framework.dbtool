@@ -1,5 +1,7 @@
 package ru.kwanza.dbtool.orm.api;
 
+import ru.kwanza.dbtool.orm.impl.querybuilder.OrderBy;
+
 /**
  * @author Alexander Guzanov
  */
@@ -9,9 +11,7 @@ public interface IQueryBuilder<T> {
 
     IQuery<T> createNative(String sql);
 
-    IQueryBuilder<T> setMaxSize(Integer maxSize);
-
-    IQueryBuilder<T> setOffset(Integer offset);
+    IQueryBuilder<T> usePaging(boolean userPaging);
 
     IQueryBuilder<T> join(Join joinClause);
 
@@ -19,5 +19,5 @@ public interface IQueryBuilder<T> {
 
     IQueryBuilder<T> where(Condition condition);
 
-    IQueryBuilder<T> orderBy(OrderBy... orderBy);
+    IQueryBuilder<T> orderBy(String orderByClause);
 }

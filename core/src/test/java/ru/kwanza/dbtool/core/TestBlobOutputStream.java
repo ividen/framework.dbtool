@@ -1,6 +1,7 @@
 package ru.kwanza.dbtool.core;
 
 import org.dbunit.DBTestCase;
+import org.dbunit.database.DatabaseConfig;
 import org.dbunit.dataset.IDataSet;
 import org.dbunit.dataset.ReplacementDataSet;
 import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
@@ -40,6 +41,11 @@ public abstract class TestBlobOutputStream extends DBTestCase {
     public void tearDown() throws Exception {
         ITransactionManager tm = ctx.getBean("txn.ITransactionManager", ITransactionManager.class);
         tm.commit();
+    }
+
+    @Override
+    protected void setUpDatabaseConfig(DatabaseConfig config) {
+        config.setProperty(DatabaseConfig.FEATURE_BATCHED_STATEMENTS, true);
     }
 
     protected abstract String getSpringCfgFile();

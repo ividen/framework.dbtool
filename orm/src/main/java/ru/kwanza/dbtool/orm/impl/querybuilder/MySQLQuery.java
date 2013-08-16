@@ -14,4 +14,5 @@ public class MySQLQuery<T> extends AbstractQuery<T> {
     public IStatement<T> prepare() {
         return new MySQLStatement<T>(config);
     }
+
 }

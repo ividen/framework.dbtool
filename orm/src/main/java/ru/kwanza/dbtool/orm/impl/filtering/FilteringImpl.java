@@ -2,6 +2,7 @@ package ru.kwanza.dbtool.orm.impl.filtering;
 
 import ru.kwanza.dbtool.orm.api.*;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -15,31 +16,39 @@ public class FilteringImpl<T> implements IFiltering<T> {
     private Class<T> entityClass;
     private Integer offset;
     private Integer maxSize;
-    private Filter[] filters = null;
-    private OrderBy[] orders = null;
+    private ArrayList<Filter> filters = new ArrayList<Filter>();
+    private StringBuilder orderByClause;
 
     public FilteringImpl(IEntityManager em, Class<T> entityClass) {
         this.em = em;
         this.entityClass = entityClass;
     }
 
-    public IFiltering setOffset(Integer offset) {
-        this.offset = offset;
-        return this;
-    }
-
-    public IFiltering setMaxSize(Integer maxSize) {
+    public IFiltering<T> paging(Integer offset, Integer maxSize) {
         this.maxSize = maxSize;
+        this.offset = offset;
+
         return this;
     }
 
-    public IFiltering filter(Filter... filters) {
-        this.filters = filters;
+    public IFiltering<T> filter(boolean use, Condition condition, Object... params) {
+        if (use) {
+            filters.add(new Filter(condition, params));
+        }
+
         return this;
     }
 
-    public IFiltering orderBy(OrderBy... orderBy) {
-        orders = orderBy;
+    public IFiltering<T> filter(Condition condition, Object... params) {
+        return filter(true, condition, params);
+    }
+
+    public IFiltering<T> orderBy(String orderByClause) {
+        if (this.orderByClause == null) {
+            this.orderByClause = new StringBuilder(orderByClause);
+        } else {
+            this.orderByClause.append(',').append(orderByClause);
+        }
         return this;
     }
 
@@ -63,7 +72,7 @@ public class FilteringImpl<T> implements IFiltering<T> {
         createStatement().selectList(result);
     }
 
-    public <F> void selectMapList(String propertyName, Map<F, List<T>> result,ListProducer<T> listProducer) {
+    public <F> void selectMapList(String propertyName, Map<F, List<T>> result, ListProducer<T> listProducer) {
         createStatement().selectMapList(propertyName, result, listProducer);
     }
 
@@ -73,26 +82,22 @@ public class FilteringImpl<T> implements IFiltering<T> {
 
     private IStatement<T> createStatement() {
         IQueryBuilder<T> queryBuilder = em.queryBuilder(entityClass);
-        if (maxSize != null) {
-            queryBuilder.setMaxSize(maxSize);
-        }
-
-        if (offset != null) {
-            queryBuilder.setOffset(offset);
+        final boolean usePaging = maxSize != null && offset != null;
+        if (usePaging) {
+            queryBuilder.usePaging(true);
         }
 
         LinkedList params = new LinkedList();
         LinkedList<Condition> conditions = new LinkedList<Condition>();
         if (filters != null) {
             for (Filter f : filters) {
-                if (f != null && f.isUse()) {
-                    if (f.isHasParams()) {
-                        for (Object p : f.getValue()) {
-                            params.add(p);
-                        }
+                if (f.isHasParams()) {
+                    for (Object p : f.getValue()) {
+                        params.add(p);
                     }
-                    conditions.add(f.getCondition());
                 }
+                conditions.add(f.getCondition());
+
             }
         }
 
@@ -101,11 +106,14 @@ public class FilteringImpl<T> implements IFiltering<T> {
             queryBuilder.where(Condition.and(conditions.toArray(cns)));
         }
 
-        if (orders != null) {
-            queryBuilder.orderBy(orders);
+        if (orderByClause != null) {
+            queryBuilder.orderBy(orderByClause.toString());
         }
 
         IStatement<T> statement = queryBuilder.create().prepare();
+        if (usePaging) {
+            statement.paging(offset, maxSize);
+        }
         for (int i = 0; i < params.size(); i++) {
             statement.setParameter(i + 1, params.get(i));
         }

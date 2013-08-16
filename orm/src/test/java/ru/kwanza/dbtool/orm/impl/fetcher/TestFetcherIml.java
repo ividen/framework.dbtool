@@ -6,7 +6,7 @@ import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
 import ru.kwanza.dbtool.orm.api.Condition;
 import ru.kwanza.dbtool.orm.api.IEntityManager;
 import ru.kwanza.dbtool.orm.api.IQuery;
-import ru.kwanza.dbtool.orm.api.OrderBy;
+import ru.kwanza.dbtool.orm.impl.querybuilder.OrderBy;
 import ru.kwanza.dbtool.orm.impl.mapping.EntityMappingRegistryImpl;
 
 import javax.annotation.Resource;
@@ -56,7 +56,7 @@ public abstract class TestFetcherIml extends AbstractJUnit4SpringContextTests {
     }
 
     private IQuery<TestEntity> query() {
-        return em.queryBuilder(TestEntity.class).orderBy(OrderBy.ASC("id")).create();
+        return em.queryBuilder(TestEntity.class).orderBy("id ASC").create();
     }
 
     @Test
@@ -144,7 +144,7 @@ public abstract class TestFetcherIml extends AbstractJUnit4SpringContextTests {
 
     @Test
     public void testFetch5() {
-        IQuery<TestEntityC> query = em.queryBuilder(TestEntityC.class).orderBy(OrderBy.ASC("id")).create();
+        IQuery<TestEntityC> query = em.queryBuilder(TestEntityC.class).orderBy("id").create();
         List<TestEntityC> testEntities = query.prepare().selectList();
         em.getFetcher().fetch(TestEntityC.class, testEntities, "entityF,entityE{entityG}");
 

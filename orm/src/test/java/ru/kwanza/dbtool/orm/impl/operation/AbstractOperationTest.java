@@ -1,6 +1,7 @@
 package ru.kwanza.dbtool.orm.impl.operation;
 
 import org.dbunit.DBTestCase;
+import org.dbunit.database.DatabaseConfig;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.IDataSet;
 import org.dbunit.dataset.SortedDataSet;
@@ -33,6 +34,11 @@ public abstract class AbstractOperationTest extends DBTestCase {
         DatabaseOperation.CLEAN_INSERT.execute(getConnection(), getDataSet());
         getEntityMappingRegistry().registerEntityClass(TestEntity.class);
         getEntityMappingRegistry().registerEntityClass(TestEntityVersion.class);
+    }
+
+    @Override
+    protected void setUpDatabaseConfig(DatabaseConfig config) {
+        config.setProperty(DatabaseConfig.FEATURE_BATCHED_STATEMENTS, true);
     }
 
     protected abstract String getSpringConfigFile();

@@ -104,7 +104,7 @@ public class FieldSetter {
 
     public static void setBoolean(PreparedStatement pst, int index, Boolean value) throws SQLException {
         if (value == null) {
-            pst.setNull(index, Types.NUMERIC);
+            pst.setNull(index, Types.BIT);
         } else {
             pst.setBoolean(index, value);
         }

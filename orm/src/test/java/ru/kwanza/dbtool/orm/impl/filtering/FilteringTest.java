@@ -1,6 +1,7 @@
 package ru.kwanza.dbtool.orm.impl.filtering;
 
 import org.dbunit.DatabaseUnitException;
+import org.dbunit.database.DatabaseConfig;
 import org.dbunit.database.DatabaseConnection;
 import org.dbunit.database.IDatabaseConnection;
 import org.dbunit.dataset.DataSetException;
@@ -10,8 +11,12 @@ import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
 import org.dbunit.operation.DatabaseOperation;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
-import ru.kwanza.dbtool.orm.api.*;
+import ru.kwanza.dbtool.orm.api.Condition;
+import ru.kwanza.dbtool.orm.api.IEntityManager;
+import ru.kwanza.dbtool.orm.api.IFiltering;
+import ru.kwanza.dbtool.orm.impl.querybuilder.OrderBy;
 import ru.kwanza.dbtool.orm.impl.fetcher.TestEntity;
 import ru.kwanza.dbtool.orm.impl.mapping.EntityMappingRegistryImpl;
 
@@ -36,6 +41,8 @@ public abstract class FilteringTest extends AbstractJUnit4SpringContextTests {
     @Resource(name = "dataSource")
     private DataSource dataSource;
 
+    @Value("${jdbc.schema}")
+    private String schema;
 
     @Before
     public void setUpDV() throws Exception {
@@ -43,13 +50,15 @@ public abstract class FilteringTest extends AbstractJUnit4SpringContextTests {
     }
 
     private static IDataSet getDataSet() throws IOException,
-            DataSetException {
+                                                DataSetException {
 
         return new FlatXmlDataSetBuilder().build(FilteringTest.class.getResourceAsStream("initdb.xml"));
     }
 
     public IDatabaseConnection getConnection() throws SQLException, DatabaseUnitException {
-        return new DatabaseConnection(dataSource.getConnection());
+        DatabaseConnection connection = new DatabaseConnection(dataSource.getConnection(), schema);
+        connection.getConfig().setProperty(DatabaseConfig.FEATURE_BATCHED_STATEMENTS, true);
+        return connection;
     }
 
     @Before
@@ -80,9 +89,9 @@ public abstract class FilteringTest extends AbstractJUnit4SpringContextTests {
         IFiltering<TestEntity> filtering = em.filtering(TestEntity.class);
 
         filtering
-                .setMaxSize(100)
-                .filter(new Filter(true, Condition.in("id"), Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)))
-                .orderBy(OrderBy.ASC("id"));
+                .paging(0, 100)
+                .filter(true, Condition.in("id"), Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10))
+                .orderBy("id");
 
         List<TestEntity> testEntities = filtering.selectList();
         assertEquals(testEntities.size(), 10);
@@ -92,16 +101,15 @@ public abstract class FilteringTest extends AbstractJUnit4SpringContextTests {
         assertEquals(id1.size(), 1);
         assertEquals(id1.get(10).size(), 10);
     }
-
 
     @Test
     public void testSelectBetween() {
         IFiltering<TestEntity> filtering = em.filtering(TestEntity.class);
 
         filtering
-                .setMaxSize(100)
-                .filter(new Filter(true, Condition.between("id"), 0, 9))
-                .orderBy(OrderBy.ASC("id"));
+                .paging(0, 100)
+                .filter(true, Condition.between("id"), 0, 9)
+                .orderBy("id");
 
         List<TestEntity> testEntities = filtering.selectList();
         assertEquals(testEntities.size(), 10);
@@ -111,17 +119,16 @@ public abstract class FilteringTest extends AbstractJUnit4SpringContextTests {
         assertEquals(id1.size(), 1);
         assertEquals(id1.get(10).size(), 10);
     }
-
 
     @Test
     public void testSelectSomeFilters() {
         IFiltering<TestEntity> filtering = em.filtering(TestEntity.class);
 
         filtering
-                .setMaxSize(100)
-                .filter(new Filter(true, Condition.between("id"), 0, 9),
-                        new Filter(true, Condition.isEqual("intField"), 10))
-                .orderBy(OrderBy.ASC("id"));
+                .paging(0, 100)
+                .filter(true, Condition.between("id"), 0, 9)
+                .filter(Condition.isEqual("intField"), 10)
+                .orderBy("id");
 
         List<TestEntity> testEntities = filtering.selectList();
         assertEquals(testEntities.size(), 10);
@@ -132,16 +139,15 @@ public abstract class FilteringTest extends AbstractJUnit4SpringContextTests {
         assertEquals(id1.get(10).size(), 10);
     }
 
-
     @Test
     public void testSelectSomeFiltersWithFalse() {
         IFiltering<TestEntity> filtering = em.filtering(TestEntity.class);
 
         filtering
-                .setOffset(100)
-                .filter(new Filter(false, Condition.between("id"), 0, 10),
-                        new Filter(false, Condition.isEqual("intField"), 1))
-                .orderBy(OrderBy.ASC("id"));
+                .paging(100, 100)
+                .filter(false, Condition.between("id"), 0, 10)
+                .filter(false, Condition.isEqual("intField"), 1)
+                .orderBy("id");
 
         List<TestEntity> testEntities = filtering.selectList();
         assertEquals(testEntities.size(), 100);
@@ -151,6 +157,5 @@ public abstract class FilteringTest extends AbstractJUnit4SpringContextTests {
         assertEquals(id1.size(), 1);
         assertEquals(id1.get(20).size(), 100);
     }
-
 
 }

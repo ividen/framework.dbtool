@@ -120,9 +120,9 @@ public class UpdateOperation extends Operation implements IUpdateOperation {
     public void executeUpdate(Collection objects) throws UpdateException {
         if (versionSupport) {
             UpdateUtil.batchUpdate(getJdbcTemplate(), updateQuery, objects, updateOperationSetter, checkQuery, keyVersionRowMapper, keyField,
-                    versionField);
+                    versionField, dbTool.getDbType());
         } else {
-            UpdateUtil.batchUpdate(getJdbcTemplate(), updateQuery, objects, updateSetter);
+            UpdateUtil.batchUpdate(getJdbcTemplate(), updateQuery, objects, updateSetter, dbTool.getDbType());
         }
     }
 

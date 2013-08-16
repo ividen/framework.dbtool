@@ -9,16 +9,19 @@ public class OracleStatement<T> extends StatementImpl<T> {
     }
 
     @Override
-    protected Object[] createParamsArray(QueryConfig<T> config, int paramsCount, Integer maxSize, Integer offset) {
+    protected Object[] createParamsArray(QueryConfig<T> config, int paramsCount) {
         Object[] params;
-        if (maxSize != null) {
+        if (config.isUsePaging()) {
             params = new Object[paramsCount + 1];
-            params[paramsCount] = maxSize + (offset == null ? 0 : offset);
-
         } else {
             params = new Object[paramsCount];
         }
 
         return params;
+    }
+
+    @Override
+    protected void installPagingParams(Object[] params, int maxSize, int offset) {
+        params[params.length - 1] = (long) maxSize + (long) offset;
     }
 }

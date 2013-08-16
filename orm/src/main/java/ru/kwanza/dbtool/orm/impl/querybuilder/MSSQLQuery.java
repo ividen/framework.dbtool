@@ -14,4 +14,5 @@ public class MSSQLQuery<T> extends AbstractQuery<T> {
     public IStatement<T> prepare() {
         return new MSSQLStatement<T>(config);
     }
+
 }

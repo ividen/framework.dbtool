@@ -72,6 +72,11 @@ public abstract class TestSelectUtil extends DBTestCase {
         DatabaseOperation.CLEAN_INSERT.execute(getConnection(), getDataSet());
     }
 
+    @Override
+    protected void setUpDatabaseConfig(DatabaseConfig config) {
+        config.setProperty(DatabaseConfig.FEATURE_BATCHED_STATEMENTS, true);
+    }
+
     protected abstract String getSpringCfgFile();
 
     public void testEmpty() throws Exception {

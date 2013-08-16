@@ -5,7 +5,7 @@ import org.dbunit.dataset.IDataSet;
 import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
 import org.springframework.transaction.TransactionStatus;
 import ru.kwanza.dbtool.core.UpdateException;
-import ru.kwanza.dbtool.orm.api.OrderBy;
+import ru.kwanza.dbtool.orm.impl.querybuilder.OrderBy;
 
 import java.util.Arrays;
 import java.util.List;
@@ -174,7 +174,7 @@ public abstract class UpdateOperationWithOptimisticTest extends AbstractOperatio
         TransactionStatus status = getTxManager().getTransaction(getTxDef());
         try {
             final List<TestEntityVersion> testEntities =
-                    getEntityManager().queryBuilder(TestEntityVersion.class).orderBy(OrderBy.ASC("key")).create().prepare().selectList();
+                    getEntityManager().queryBuilder(TestEntityVersion.class).orderBy("key").create().prepare().selectList();
             char[] buff = new char[1024];
             Arrays.fill(buff, 'S');
             testEntities.get(testEntities.size() - 1).setName(new String(buff));
@@ -636,6 +636,6 @@ public abstract class UpdateOperationWithOptimisticTest extends AbstractOperatio
     }
 
     private List<TestEntityVersion> selectTestEntities() {
-        return getEntityManager().queryBuilder(TestEntityVersion.class).orderBy(OrderBy.ASC("key")).create().prepare().selectList();
+        return getEntityManager().queryBuilder(TestEntityVersion.class).orderBy("key").create().prepare().selectList();
     }
 }

@@ -3,12 +3,14 @@ package ru.kwanza.dbtool.orm.impl.querybuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.kwanza.dbtool.core.DBTool;
-import ru.kwanza.dbtool.orm.api.*;
+import ru.kwanza.dbtool.orm.api.Condition;
+import ru.kwanza.dbtool.orm.api.IQuery;
+import ru.kwanza.dbtool.orm.api.IQueryBuilder;
+import ru.kwanza.dbtool.orm.api.Join;
 import ru.kwanza.dbtool.orm.impl.RelationPathScanner;
 import ru.kwanza.dbtool.orm.impl.mapping.FieldMapping;
 import ru.kwanza.dbtool.orm.impl.mapping.IEntityMappingRegistry;
 
-import java.math.BigDecimal;
 import java.util.*;
 
 /**
@@ -20,9 +22,8 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
     protected DBTool dbTool;
     protected Class entityClass;
     protected Condition condition;
-    protected OrderBy[] orderBy;
-    protected Integer maxSize;
-    protected Integer offset;
+    protected List<OrderBy> orderBy;
+    protected boolean usePaging = false;
     protected Map<String, List<Integer>> namedParams = new HashMap<String, List<Integer>>();
     protected ArrayList<Join> joins = null;
 
@@ -49,7 +50,8 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
 
         String sqlString = sql.toString();
         logger.debug("Creating query {}", sqlString);
-        return createQuery(paramsTypes, sqlString);
+
+        return createQuery(createConfig(paramsTypes, sqlString));
     }
 
     public IQueryBuilder<T> join(String string) {
@@ -66,8 +68,10 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
         for (Map.Entry<String, Object> entry : scan.entrySet()) {
             if (entry.getValue() instanceof Map) {
                 if (entry.getKey().startsWith("#")) {
-                    result.add(Join.left(entry.getKey().substring(1).trim(),
-                            processScanRelations((Map<String, Object>) entry.getValue()).toArray(new Join[]{})));
+                    result.add(
+                            Join.left(
+                                    entry.getKey().substring(1).trim(),
+                                    processScanRelations((Map<String, Object>) entry.getValue()).toArray(new Join[]{})));
                 } else {
                     result.add(
                             Join.inner(entry.getKey(), processScanRelations((Map<String, Object>) entry.getValue()).toArray(new Join[]{})));
@@ -98,7 +102,13 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
         }
     }
 
-    protected abstract IQuery<T> createQuery(List<Integer> paramsTypes, String sqlString);
+    public IQueryBuilder<T> usePaging(boolean userPaging) {
+        this.usePaging = userPaging;
+
+        return this;
+    }
+
+    protected abstract IQuery<T> createQuery(QueryConfig config);
 
     protected abstract StringBuilder createSQLString(String conditions, String orderBy, String fieldsString);
 
@@ -106,7 +116,11 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
         namedParams.clear();
         LinkedList<Integer> paramTypes = new LinkedList<Integer>();
         String preparedSql = parseSql(sql, paramTypes);
-        return createQuery(paramTypes, preparedSql);
+        return createQuery(createConfig(paramTypes, preparedSql));
+    }
+
+    private QueryConfig<T> createConfig(List<Integer> paramsTypes, String sqlString) {
+        return new QueryConfig<T>(dbTool, registry, entityClass, sqlString, usePaging, paramsTypes, namedParams);
     }
 
     private String parseSql(String sql, List<Integer> paramTypes) {
@@ -243,7 +257,7 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
 
     protected String createOrderBy() {
         StringBuilder orderBy = new StringBuilder();
-        if (this.orderBy != null && this.orderBy.length > 0) {
+        if (this.orderBy != null && this.orderBy.size() > 0) {
             for (OrderBy ob : this.orderBy) {
                 FieldMapping fieldMapping = registry.getFieldMappingByPropertyName(entityClass, ob.getPropertyName());
                 if (fieldMapping == null) {
@@ -295,33 +309,24 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
         return result.toString();
     }
 
-    public IQueryBuilder<T> setMaxSize(Integer maxSize) {
-        this.maxSize = maxSize;
-        return this;
-    }
-
-    public IQueryBuilder<T> setOffset(Integer offset) {
-        this.offset = offset;
-        return this;
-    }
-
     public IQueryBuilder<T> where(Condition condition) {
         if (this.condition != null) {
             throw new IllegalStateException("Condition statement is set already in WHERE clause!");
         }
         this.condition = condition;
+
         return this;
     }
 
-    public IQueryBuilder<T> orderBy(OrderBy... orderBy) {
-        if (this.orderBy != null) {
-            throw new IllegalStateException("Order statement is set already in ORDER BY clause!");
+    public IQueryBuilder<T> orderBy(String orderByClause) {
+        final List<OrderBy> parse = OrderBy.parse(orderByClause);
+        if (orderBy == null) {
+            orderBy = new ArrayList<OrderBy>(parse.size());
         }
-        this.orderBy = orderBy;
+
+        orderBy.addAll(parse);
+
         return this;
     }
 
-    public static void main(String[] args) {
-        System.out.println(new BigDecimal(Long.MAX_VALUE).add(new BigDecimal(Long.MAX_VALUE)));
-    }
 }
