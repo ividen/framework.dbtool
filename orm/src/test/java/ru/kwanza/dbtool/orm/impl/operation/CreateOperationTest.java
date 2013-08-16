@@ -4,7 +4,7 @@ import org.dbunit.Assertion;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.transaction.TransactionStatus;
 import ru.kwanza.dbtool.core.UpdateException;
-import ru.kwanza.dbtool.orm.api.OrderBy;
+import ru.kwanza.dbtool.orm.impl.querybuilder.OrderBy;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -242,7 +242,7 @@ public abstract class CreateOperationTest extends AbstractOperationTest {
         TransactionStatus status = getTxManager().getTransaction(getTxDef());
         try {
             final List<TestEntity> testEntities =
-                    getEntityManager().queryBuilder(TestEntity.class).orderBy(OrderBy.ASC("key")).create().prepare().selectList();
+                    getEntityManager().queryBuilder(TestEntity.class).orderBy("key").create().prepare().selectList();
             for (TestEntity e : testEntities) {
                 e.incrementVersion();
                 if (e.getKey() == 0) {

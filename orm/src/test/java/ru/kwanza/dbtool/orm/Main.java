@@ -7,8 +7,8 @@ import ru.kwanza.dbtool.orm.entity.TestEntity1;
 import java.util.List;
 
 import static ru.kwanza.dbtool.orm.api.Condition.*;
-import static ru.kwanza.dbtool.orm.api.OrderBy.ASC;
-import static ru.kwanza.dbtool.orm.api.OrderBy.DESC;
+import static ru.kwanza.dbtool.orm.impl.querybuilder.OrderBy.ASC;
+import static ru.kwanza.dbtool.orm.impl.querybuilder.OrderBy.DESC;
 
 /**
  * @author Alexander Guzanov
@@ -54,7 +54,7 @@ public class Main {
         em.queryBuilder(TestEntity1.class).where(or(and(isEqual("name"), in("counter")), like("description"))).usePaging(true).create()
                 .prepare().paging(0,1000).setParameter(1, 1).select();
 
-        query = em.queryBuilder(TestEntity1.class).where(and(isEqual("name"), isEqual("counter"))).orderBy(ASC("name"), DESC("description"))
+        query = em.queryBuilder(TestEntity1.class).where(and(isEqual("name"), isEqual("counter"))).orderBy("name,description DESC")
                 .usePaging(true).create();
 
         String desc = "desc*";
