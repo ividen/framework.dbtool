@@ -12,9 +12,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public abstract class AppLock {
     public static final Logger logger = LoggerFactory.getLogger(AppLock.class);
 
-    private DBTool dbTool;
+    protected DBTool dbTool;
     private String lockName;
-    protected Connection conn;
 
     private static Map<String, AppLock> locks = new ConcurrentHashMap<String, AppLock>();
 
@@ -33,35 +32,37 @@ public abstract class AppLock {
     public abstract void lock();
 
     public void close() {
-        try {
-            if (conn.isClosed()) {
-                throw new RuntimeException("Connection is closed");
-            }
-            conn.close();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+//        try {
+//            if (conn!=null && conn.isClosed()) {
+//                throw new RuntimeException("Connection is closed");
+//            }
+//            conn.close();
+//        } catch (SQLException e) {
+//            throw new RuntimeException(e);
+//        }
     }
 
     public void lockAndClose() {
         try {
             lock();
         } finally {
-            if (null != conn) {
-                try {
-                    conn.close();
-                } catch (SQLException e) {
-                    logger.error("Can't close connection", e);
-                }
-            }
+//            if (null != conn) {
+//                try {
+//                    conn.close();
+//                } catch (SQLException e) {
+//                    logger.error("Can't close connection", e);
+//                }
+//            }
         }
     }
 
-    protected void checkNewConnection() throws SQLException {
-        conn = dbTool.getJDBCConnection();
+    protected Connection checkNewConnection() throws SQLException {
+       Connection conn = dbTool.getJDBCConnection();
         if (conn.getAutoCommit()) {
             conn.setAutoCommit(false);
         }
+
+        return conn;
     }
 
     /**

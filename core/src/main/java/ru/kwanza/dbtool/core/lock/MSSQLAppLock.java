@@ -3,6 +3,7 @@ package ru.kwanza.dbtool.core.lock;
 import ru.kwanza.dbtool.core.DBTool;
 
 import java.sql.CallableStatement;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
@@ -15,8 +16,9 @@ class MSSQLAppLock extends AppLock {
     @Override
     public void lock() {
         CallableStatement st = null;
+        Connection conn = null;
         try {
-            checkNewConnection();
+            conn = checkNewConnection();
             // 1. в JDBC нет явного способа начать транзакцию
             // 2. функция sp_getapplock требует, чтобы ее выполняли в транзакции
             // 3. сама она транзакцию не начинает
@@ -37,13 +39,7 @@ class MSSQLAppLock extends AppLock {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         } finally {
-            if (null != st) {
-                try {
-                    st.close();
-                } catch (SQLException e) {
-                    logger.error("Can't close PreparedStatement", e);
-                }
-            }
+            dbTool.closeResources(st,conn);
         }
     }
 }

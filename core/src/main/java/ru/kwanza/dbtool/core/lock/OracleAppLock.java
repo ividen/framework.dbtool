@@ -3,6 +3,7 @@ package ru.kwanza.dbtool.core.lock;
 import ru.kwanza.dbtool.core.DBTool;
 
 import java.sql.CallableStatement;
+import java.sql.Connection;
 import java.sql.SQLException;
 
 class OracleAppLock extends AppLock {
@@ -17,8 +18,9 @@ class OracleAppLock extends AppLock {
     @Override
     public void lock() {
         CallableStatement st = null;
+        Connection conn = null;
         try {
-            checkNewConnection();
+            conn = checkNewConnection();
             st = conn.prepareCall(
                     // lockhandle, x_mode, timeut sec, release on commit
                     "{? = call dbms_lock.request(?, 6, 32767, TRUE)}");
@@ -32,31 +34,23 @@ class OracleAppLock extends AppLock {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         } finally {
-            if (null != st) {
-                try {
-                    st.close();
-                } catch (SQLException e) {
-                    logger.error("Can't close PreparedStatement", e);
-                }
-            }
+           dbTool.closeResources(st,conn);
         }
     }
 
     private String allocateUnique() throws SQLException {
         String lockHandle = null;
         CallableStatement st = null;
+        Connection conn = null;
         try {
-            checkNewConnection();
+            conn = checkNewConnection();
             st = conn.prepareCall("{call dbms_lock.allocate_unique(?, ?)}");
             st.setString(1, getLockName());
             st.registerOutParameter(2, java.sql.Types.VARCHAR);
             st.execute();
             lockHandle = st.getString(2);
         } finally {
-            if (null != st) {
-                st.close();
-            }
-            conn.close();
+           dbTool.closeResources(st,conn);
         }
         return lockHandle;
     }

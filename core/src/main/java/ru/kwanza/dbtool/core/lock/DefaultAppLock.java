@@ -2,6 +2,7 @@ package ru.kwanza.dbtool.core.lock;
 
 import ru.kwanza.dbtool.core.DBTool;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -16,8 +17,9 @@ class DefaultAppLock extends AppLock {
     @Override
     public void lock() {
         PreparedStatement st = null;
+        Connection conn = null;
         try {
-            checkNewConnection();
+            conn = checkNewConnection();
             st = conn.prepareStatement("update dbmutex set id = id where id = ?");
             st.setString(1, getLockName());
             if (1 != st.executeUpdate()) {
@@ -26,21 +28,16 @@ class DefaultAppLock extends AppLock {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         } finally {
-            if (null != st) {
-                try {
-                    st.close();
-                } catch (SQLException e) {
-                    logger.error("Can't close PreparedStatement", e);
-                }
-            }
+            dbTool.closeResources(st, conn);
         }
     }
 
     private void allocateUnique() throws SQLException {
         PreparedStatement st = null;
         ResultSet rs = null;
+        Connection conn = null;
         try {
-            checkNewConnection();
+            conn = checkNewConnection();
             st = conn.prepareStatement("insert into dbmutex(id) values(?)");
             st.setString(1, getLockName());
             try {
@@ -54,13 +51,7 @@ class DefaultAppLock extends AppLock {
                 }
             }
         } finally {
-            if (null != rs) {
-                rs.close();
-            }
-            if (null != st) {
-                st.close();
-            }
-            conn.close();
+            dbTool.closeResources(rs, st, conn);
         }
     }
 }

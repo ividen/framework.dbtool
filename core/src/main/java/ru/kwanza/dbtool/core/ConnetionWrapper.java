@@ -60,7 +60,7 @@ class ConnetionWrapper implements Connection {
     }
 
     public boolean isClosed() throws SQLException {
-        return getDelegate().isClosed();
+        return isClosed;
     }
 
     public DatabaseMetaData getMetaData() throws SQLException {
