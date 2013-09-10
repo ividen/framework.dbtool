@@ -15,34 +15,15 @@ public class MSSQLQueryBuilder<T> extends AbstractQueryBuilder<T> {
         super(dbTool, registry, entityClass);
     }
 
-
     protected IQuery<T> createQuery(QueryConfig config) {
         return new MSSQLQuery<T>(config);
     }
 
-    protected StringBuilder createSQLString(String conditions, String orderBy, String fieldsString) {
-        StringBuilder sql;
-        if (usePaging) {
-            sql = new StringBuilder("SELECT TOP ")
-                    .append($_TOP).append(' ')
-                    .append(fieldsString)
-                    .append("FROM ")
-                    .append(registry.getTableName(entityClass));
-            if (conditions.length() > 0) {
-                sql.append(" WHERE ").append(conditions);
-            }
-
-            if (orderBy.length() > 0) {
-                sql.append(" ORDER BY ").append(orderBy);
-            }
-
-        } else {
-            sql = createDefaultSQLString(fieldsString, conditions, orderBy);
-        }
-        return sql;
+    protected StringBuilder createSQLString(String fieldsString, String from, String where, String orderBy) {
+        return super.createSQLString(usePaging ? " TOP " + $_TOP + " " + fieldsString : fieldsString, from, where, orderBy);
     }
 
-     static String replaceTop(String sql, Long top) {
-         return sql.replace($_TOP, String.valueOf(top));
+    static String replaceTop(String sql, Long top) {
+        return sql.replace($_TOP, String.valueOf(top));
     }
 }

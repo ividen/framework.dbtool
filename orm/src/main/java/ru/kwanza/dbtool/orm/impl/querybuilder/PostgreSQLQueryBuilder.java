@@ -4,8 +4,6 @@ import ru.kwanza.dbtool.core.DBTool;
 import ru.kwanza.dbtool.orm.api.IQuery;
 import ru.kwanza.dbtool.orm.impl.mapping.IEntityMappingRegistry;
 
-import java.util.List;
-
 /**
  * @author Michael Yeskov
  */
@@ -20,9 +18,8 @@ public class PostgreSQLQueryBuilder<T> extends AbstractQueryBuilder<T> {
         return new PostgreSQLQuery<T>(config);
     }
 
-    protected StringBuilder createSQLString(String conditions, String orderBy, String fieldsString) {
-        StringBuilder sql = createDefaultSQLString(fieldsString, conditions, orderBy);
-
+    protected StringBuilder createSQLString(String fieldsString, String from, String where, String orderBy) {
+        StringBuilder sql = super.createSQLString(fieldsString, from, where, orderBy);
         if (usePaging) {
             sql.append(" LIMIT ?");
             sql.append(" OFFSET ?");
@@ -30,6 +27,5 @@ public class PostgreSQLQueryBuilder<T> extends AbstractQueryBuilder<T> {
 
         return sql;
     }
-
 
 }

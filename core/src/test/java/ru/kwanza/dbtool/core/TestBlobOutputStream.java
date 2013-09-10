@@ -10,7 +10,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import ru.kwanza.dbtool.core.blob.BlobInputStream;
 import ru.kwanza.dbtool.core.blob.BlobOutputStream;
-import ru.kwanza.txn.api.spi.ITransactionManager;
 
 import java.util.Arrays;
 
@@ -33,14 +32,14 @@ public abstract class TestBlobOutputStream extends DBTestCase {
     protected void setUp() throws Exception {
         ctx = new ClassPathXmlApplicationContext(getSpringCfgFile(), TestSelectUtil.class);
         DatabaseOperation.CLEAN_INSERT.execute(getConnection(), getDataSet());
-        ITransactionManager tm = ctx.getBean("txn.ITransactionManager", ITransactionManager.class);
-        tm.begin();
+//        ITransactionManager tm = ctx.getBean("txn.ITransactionManager", ITransactionManager.class);
+//        tm.begin();
     }
 
     @Override
     public void tearDown() throws Exception {
-        ITransactionManager tm = ctx.getBean("txn.ITransactionManager", ITransactionManager.class);
-        tm.commit();
+//        ITransactionManager tm = ctx.getBean("txn.ITransactionManager", ITransactionManager.class);
+//        tm.commit();
     }
 
     @Override

@@ -20,4 +20,6 @@ public interface IQueryBuilder<T> {
     IQueryBuilder<T> where(Condition condition);
 
     IQueryBuilder<T> orderBy(String orderByClause);
+
+    IQueryBuilder<T> orderBy(OrderBy orderBy);
 }

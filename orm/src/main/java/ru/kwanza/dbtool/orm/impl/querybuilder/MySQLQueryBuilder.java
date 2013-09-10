@@ -17,26 +17,14 @@ public class MySQLQueryBuilder<T> extends AbstractQueryBuilder<T> {
         return new MySQLQuery<T>(config);
     }
 
-    protected StringBuilder createSQLString(String conditions, String orderBy, String fieldsString) {
-        StringBuilder sql;
+    protected StringBuilder createSQLString(String fieldsString, String from, String where, String orderBy) {
+        StringBuilder sql = createSQLString(fieldsString, from, where, orderBy); ;
         if (usePaging) {
-            sql = new StringBuilder("SELECT ")
-                    .append(fieldsString)
-                    .append("FROM ")
-                    .append(registry.getTableName(entityClass));
-            if (conditions.length() > 0) {
-                sql.append(" WHERE ").append(conditions);
-            }
-
-            if (orderBy.length() > 0) {
-                sql.append(" ORDER BY ").append(orderBy);
-            }
             sql.append("LIMIT ?,?");
-        }else {
-            sql = createDefaultSQLString(fieldsString, conditions, orderBy);
+        } else {
+
         }
         return sql;
     }
-
 
 }

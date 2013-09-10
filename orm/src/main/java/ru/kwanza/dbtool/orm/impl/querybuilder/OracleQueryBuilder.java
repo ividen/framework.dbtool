@@ -17,14 +17,12 @@ public class OracleQueryBuilder<T> extends AbstractQueryBuilder<T> {
         return new OracleQuery<T>(config);
     }
 
-    protected StringBuilder createSQLString(String conditions, String orderBy, String fieldsString) {
-        StringBuilder sql;
+    protected StringBuilder createSQLString(String fieldsString, String from, String where, String orderBy) {
+        StringBuilder sql = createSQLString(fieldsString,from , where, orderBy );
         if (usePaging) {
             sql = new StringBuilder("SELECT  * FROM (")
-                    .append(createDefaultSQLString(fieldsString, conditions, orderBy))
+                    .append(sql)
                     .append(") WHERE rownum <= ?");
-        } else {
-            sql = createDefaultSQLString(fieldsString, conditions, orderBy);
         }
         return sql;
     }
