@@ -1,8 +1,10 @@
-package ru.kwanza.dbtool.orm.impl.querybuilder;
+package ru.kwanza.dbtool.orm.impl.querybuilder.db.oracle;
 
 import ru.kwanza.dbtool.core.DBTool;
 import ru.kwanza.dbtool.orm.api.IQuery;
 import ru.kwanza.dbtool.orm.impl.mapping.IEntityMappingRegistry;
+import ru.kwanza.dbtool.orm.impl.querybuilder.AbstractQueryBuilder;
+import ru.kwanza.dbtool.orm.impl.querybuilder.QueryConfig;
 
 /**
  * @author Alexander Guzanov
@@ -17,14 +19,12 @@ public class OracleQueryBuilder<T> extends AbstractQueryBuilder<T> {
         return new OracleQuery<T>(config);
     }
 
-    protected StringBuilder createSQLString(String conditions, String orderBy, String fieldsString) {
-        StringBuilder sql;
-        if (usePaging) {
+    protected StringBuilder createSQLString(String fieldsString, String from, String where, String orderBy) {
+        StringBuilder sql = super.createSQLString(fieldsString,from , where, orderBy );
+        if (isUsePaging()) {
             sql = new StringBuilder("SELECT  * FROM (")
-                    .append(createDefaultSQLString(fieldsString, conditions, orderBy))
+                    .append(sql)
                     .append(") WHERE rownum <= ?");
-        } else {
-            sql = createDefaultSQLString(fieldsString, conditions, orderBy);
         }
         return sql;
     }

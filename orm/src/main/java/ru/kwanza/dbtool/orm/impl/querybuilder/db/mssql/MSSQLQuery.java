@@ -1,6 +1,8 @@
-package ru.kwanza.dbtool.orm.impl.querybuilder;
+package ru.kwanza.dbtool.orm.impl.querybuilder.db.mssql;
 
 import ru.kwanza.dbtool.orm.api.IStatement;
+import ru.kwanza.dbtool.orm.impl.querybuilder.AbstractQuery;
+import ru.kwanza.dbtool.orm.impl.querybuilder.QueryConfig;
 
 /**
  * @author Alexander Guzanov

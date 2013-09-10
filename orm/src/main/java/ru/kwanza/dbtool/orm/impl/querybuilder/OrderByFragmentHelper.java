@@ -1,5 +1,7 @@
 package ru.kwanza.dbtool.orm.impl.querybuilder;
 
+import ru.kwanza.dbtool.orm.api.OrderBy;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
@@ -7,34 +9,14 @@ import java.util.StringTokenizer;
 /**
  * @author Alexander Guzanov
  */
-public class OrderBy {
-    public static final String ASC = "ASC";
-    public static final String DESC = "DESC";
-    private String propertyName;
-    private String type;
+class OrderByFragmentHelper {
+    private AbstractQueryBuilder builder;
 
-    private OrderBy(String propertyName, String type) {
-        this.propertyName = propertyName;
-        this.type = type;
+    public OrderByFragmentHelper(AbstractQueryBuilder builder) {
+        this.builder = builder;
     }
 
-    public String getPropertyName() {
-        return propertyName;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public static OrderBy ASC(String propertyName) {
-        return new OrderBy(propertyName, ASC);
-    }
-
-    public static OrderBy DESC(String propertyName) {
-        return new OrderBy(propertyName, DESC);
-    }
-
-    public static List<OrderBy> parse(String orderByClause) {
+    static List<OrderBy> parse(String orderByClause) {
         StringTokenizer tokenizer = new StringTokenizer(orderByClause, ",");
         List<OrderBy> result = new ArrayList<OrderBy>();
         while (tokenizer.hasMoreTokens()) {
@@ -56,7 +38,18 @@ public class OrderBy {
         return result;
     }
 
-    public static void main(String[] args) {
-        parse("name");
+    String createOrderByFragment() {
+        StringBuilder orderBy = new StringBuilder();
+        final List<OrderBy> orderByList = builder.getOrderBy();
+        if (orderByList != null && !orderByList.isEmpty()) {
+            for (OrderBy ob : orderByList) {
+                orderBy.append(builder.getColumnFactory().findColumn(ob.getPropertyName()).getColumnName()).append(' ').append(ob.getType())
+                        .append(", ");
+            }
+
+            orderBy.deleteCharAt(orderBy.length() - 2);
+        }
+
+        return orderBy.toString();
     }
 }

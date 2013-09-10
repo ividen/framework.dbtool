@@ -5,7 +5,6 @@ import org.dbunit.dataset.IDataSet;
 import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
 import org.springframework.transaction.TransactionStatus;
 import ru.kwanza.dbtool.core.UpdateException;
-import ru.kwanza.dbtool.orm.impl.querybuilder.OrderBy;
 
 import java.util.Arrays;
 import java.util.List;

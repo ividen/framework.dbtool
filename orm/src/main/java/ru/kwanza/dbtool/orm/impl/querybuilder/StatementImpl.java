@@ -159,7 +159,7 @@ public abstract class StatementImpl<T> implements IStatement<T> {
     }
 
     public IStatement<T> setParameter(String name, Object value) {
-        List<Integer> indexes = config.getNamedParams().get(name);
+        List<Integer> indexes = config.getHolder().get(name);
         if (indexes == null) {
             throw new IllegalStateException("Query doesn't constain named param!");
         }
@@ -215,18 +215,20 @@ public abstract class StatementImpl<T> implements IStatement<T> {
                     return null;
                 }
             }
-            LinkedList<TYPE> objects = new LinkedList<TYPE>();
-            Collection<FieldMapping> fieldMapping = config.getRegistry().getFieldMappings(config.getEntityClass());
+            ArrayList<TYPE> objects = new ArrayList<TYPE>();
 
             while (rs.next()) {
-                T obj;
+                T result;
                 try {
-                    obj = config.getContructor().newInstance();
+                    result = config.getEntityClass().newInstance();
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
-                readAndFill(rs, fieldMapping, obj);
-                objects.add(getValue(obj));
+
+                readAndFill(rs, config.getEntityClass(), config.getRootRelation(), result);
+                readRelation(result, config.getRootRelation(), rs);
+
+                objects.add(getValue(result));
             }
 
             return objects;
@@ -234,12 +236,56 @@ public abstract class StatementImpl<T> implements IStatement<T> {
 
         public abstract TYPE getValue(Object e);
 
-        private void readAndFill(ResultSet rs, Collection<FieldMapping> fields, T obj) throws SQLException {
-            for (FieldMapping idf : fields) {
-                Object value = FieldValueExtractor.getValue(rs, idf.getColumn(), idf.getEntityFiled().getType());
-                idf.getEntityFiled().setValue(obj, value);
+        private void readRelation(Object parentObj, JoinRelation relation, ResultSet rs) throws SQLException {
+            if (relation == null) {
+                return;
+            }
+
+            Object obj;
+            if (!relation.isRoot()) {
+                final Class relationClass = relation.getFetchMapping().getRelationClass();
+                if (!hasIdValue(relation, rs, relationClass)) {
+                    return;
+                }
+                try {
+                    obj = relationClass.newInstance();
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+
+                readAndFill(rs, relationClass, relation, obj);
+            } else {
+                obj = parentObj;
+            }
+
+            if (relation.getAllChilds() != null) {
+                for (JoinRelation joinRelation : relation.getAllChilds().values()) {
+                    readRelation(obj, joinRelation, rs);
+                }
+            }
+
+            if (relation.getFetchMapping() != null) {
+                relation.getFetchMapping().getFetchField().setValue(parentObj, obj);
             }
         }
+
+        private boolean hasIdValue(JoinRelation relation, ResultSet rs, Class relationClass) throws SQLException {
+            FieldMapping idField = config.getRegistry().getIdFields(relationClass).iterator().next();
+            if (FieldValueExtractor.getValue(rs, Column.getFullColumnName(relation, idField), idField.getEntityFiled().getType()) == null) {
+                return false;
+            }
+            return true;
+        }
+
+        private void readAndFill(ResultSet rs, Class entityClass, JoinRelation relation, Object obj) throws SQLException {
+            String alias = relation.getAlias();
+            for (FieldMapping idf : config.getRegistry().getFieldMappings(entityClass)) {
+                Object value = FieldValueExtractor.getValue(rs, alias + idf.getColumn(), idf.getEntityFiled().getType());
+                idf.getEntityFiled().setValue(obj, value);
+            }
+
+        }
+
     }
 
     private class SingleObjectObjectExtractor<T> extends ObjectExtractor<T> {

@@ -1,10 +1,10 @@
-package ru.kwanza.dbtool.orm.impl.querybuilder;
+package ru.kwanza.dbtool.orm.impl.querybuilder.db.postgresql;
 
 import ru.kwanza.dbtool.core.DBTool;
 import ru.kwanza.dbtool.orm.api.IQuery;
 import ru.kwanza.dbtool.orm.impl.mapping.IEntityMappingRegistry;
-
-import java.util.List;
+import ru.kwanza.dbtool.orm.impl.querybuilder.AbstractQueryBuilder;
+import ru.kwanza.dbtool.orm.impl.querybuilder.QueryConfig;
 
 /**
  * @author Michael Yeskov
@@ -20,16 +20,14 @@ public class PostgreSQLQueryBuilder<T> extends AbstractQueryBuilder<T> {
         return new PostgreSQLQuery<T>(config);
     }
 
-    protected StringBuilder createSQLString(String conditions, String orderBy, String fieldsString) {
-        StringBuilder sql = createDefaultSQLString(fieldsString, conditions, orderBy);
-
-        if (usePaging) {
+    protected StringBuilder createSQLString(String fieldsString, String from, String where, String orderBy) {
+        StringBuilder sql = super.createSQLString(fieldsString, from, where, orderBy);
+        if (isUsePaging()) {
             sql.append(" LIMIT ?");
             sql.append(" OFFSET ?");
         }
 
         return sql;
     }
-
 
 }

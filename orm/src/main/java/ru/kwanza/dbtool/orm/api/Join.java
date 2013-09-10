@@ -13,10 +13,23 @@ public final class Join {
         LEFT,
     }
 
+    //todo aguzanov конструктор с ArrayList
     Join(Type type, String propertyName, Join[] subJoins) {
         this.propertyName = propertyName;
         this.type = type;
         this.subJoins = subJoins;
+    }
+
+    public Type getType() {
+        return type;
+    }
+
+    public String getPropertyName() {
+        return propertyName;
+    }
+
+    public Join[] getSubJoins() {
+        return subJoins;
     }
 
     public static Join left(String property, Join... subJoins) {
