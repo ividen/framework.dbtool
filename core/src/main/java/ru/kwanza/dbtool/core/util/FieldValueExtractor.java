@@ -40,7 +40,7 @@ public final class FieldValueExtractor {
             value = getLong(rs, column);
             wasNullCheck = true;
         } else if (float.class.equals(requiredType) || Float.class.equals(requiredType)) {
-            value = getFlow(rs, column);
+            value = getFloat(rs, column);
             wasNullCheck = true;
         } else if (double.class.equals(requiredType) || Double.class.equals(requiredType) ||
                 Number.class.equals(requiredType)) {
@@ -106,7 +106,7 @@ public final class FieldValueExtractor {
         return column instanceof String ? rs.getDouble((String) column) : rs.getDouble((Integer) column);
     }
 
-    private static float getFlow(ResultSet rs, Object column) throws SQLException {
+    private static float getFloat(ResultSet rs, Object column) throws SQLException {
         return column instanceof String ? rs.getFloat((String) column) : rs.getFloat((Integer) column);
     }
 

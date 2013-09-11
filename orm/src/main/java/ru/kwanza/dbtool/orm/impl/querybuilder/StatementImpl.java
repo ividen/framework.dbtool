@@ -243,23 +243,28 @@ public abstract class StatementImpl<T> implements IStatement<T> {
                 return;
             }
 
-            final Class relationClass = relation.getFetchMapping().getRelationClass();
             Object obj;
-            try {
-                obj = relationClass.newInstance();
-            } catch (Exception e) {
-                throw new RuntimeException(e);
+            if (relation.getAlias() != null) {
+                final Class relationClass = relation.getFetchMapping().getRelationClass();
+
+                try {
+                    obj = relationClass.newInstance();
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+
+                fieldIndex = readAndFill(rs, config.getRegistry().getFieldMappings(relationClass), obj, fieldIndex);
+            } else {
+                obj = parentObj;
             }
-
-            fieldIndex = readAndFill(rs, config.getRegistry().getFieldMappings(relationClass), obj, fieldIndex);
-
             if (relation.getAllChilds() != null) {
                 for (JoinRelation joinRelation : relation.getAllChilds().values()) {
                     readRelation(obj, joinRelation, rs, fieldIndex);
                 }
             }
-
-            relation.getFetchMapping().getFetchField().setValue(parentObj, obj);
+            if (relation.getFetchMapping() != null) {
+                relation.getFetchMapping().getFetchField().setValue(parentObj, obj);
+            }
         }
 
         private int readAndFill(ResultSet rs, Collection<FieldMapping> fields, Object obj, int fieldIndex) throws SQLException {

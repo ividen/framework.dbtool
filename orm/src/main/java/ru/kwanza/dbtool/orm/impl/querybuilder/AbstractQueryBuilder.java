@@ -56,7 +56,7 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
         String sqlString = sql.toString();
         logger.debug("Creating query {}", sqlString);
 
-        return createQuery(createConfig(paramsTypes,rootRelations, sqlString));
+        return createQuery(createConfig(paramsTypes, rootRelations, sqlString));
     }
 
     private String createFrom() {
@@ -177,7 +177,7 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
     }
 
     private QueryConfig<T> createConfig(List<Integer> paramsTypes, JoinRelation rootRelations, String sqlString) {
-        return new QueryConfig<T>(dbTool, registry, entityClass, sqlString,rootRelations, usePaging, paramsTypes, namedParams);
+        return new QueryConfig<T>(dbTool, registry, entityClass, sqlString, rootRelations, usePaging, paramsTypes, namedParams);
     }
 
     private String parseSql(String sql, List<Integer> paramTypes) {
@@ -372,10 +372,10 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
                 result.append("\n\t");
 
                 if (alias != null) {
-                    result.append(alias).append('.');
+                    result.append(alias).append('.').append(fm.getColumn()).append(' ').append(alias).append('_').append(fm.getColumn()).append(",");
+                } else {
+                    result.append(fm.getColumn()).append(",");
                 }
-
-                result.append(fm.getColumn()).append(",");
             }
 
         }
