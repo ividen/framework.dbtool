@@ -18,7 +18,7 @@ public class OracleQueryBuilder<T> extends AbstractQueryBuilder<T> {
     }
 
     protected StringBuilder createSQLString(String fieldsString, String from, String where, String orderBy) {
-        StringBuilder sql = createSQLString(fieldsString,from , where, orderBy );
+        StringBuilder sql = super.createSQLString(fieldsString,from , where, orderBy );
         if (usePaging) {
             sql = new StringBuilder("SELECT  * FROM (")
                     .append(sql)

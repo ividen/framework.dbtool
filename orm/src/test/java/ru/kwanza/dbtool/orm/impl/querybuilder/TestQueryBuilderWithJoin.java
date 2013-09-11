@@ -11,12 +11,13 @@ import ru.kwanza.dbtool.orm.impl.fetcher.*;
 import ru.kwanza.dbtool.orm.impl.mapping.EntityMappingRegistryImpl;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 /**
  * @author Alexander Guzanov
  */
 
-@ContextConfiguration(locations = "mssql-config.xml")
+@ContextConfiguration(locations = "oracle-config.xml")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class TestQueryBuilderWithJoin extends AbstractJUnit4SpringContextTests {
     @Resource(name = "dbtool.IEntityManager")
@@ -50,6 +51,14 @@ public class TestQueryBuilderWithJoin extends AbstractJUnit4SpringContextTests {
                 .join("#entityA, #entityB, #entityC {#entityE{#entityG},#entityF} ,#entityD").create();
 
         System.out.println(query1.getConfig().getSql());
+
+
+        AbstractQuery<TestEntity> query2 = (AbstractQuery<TestEntity>) em.queryBuilder(TestEntity.class)
+                .usePaging(true)
+                .join("#entityA, #entityB, #entityC {#entityE{#entityG},#entityF} ,#entityD").create();
+
+        final List<TestEntity> result = query2.prepare().paging(0, 10000).selectList();
+        System.out.println(result.size());
     }
 
     @Test

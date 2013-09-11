@@ -25,7 +25,9 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
     protected Condition condition;
     protected List<OrderBy> orderBy = null;
     protected boolean usePaging = false;
+    //todo aguzanov эта ссылка не должна передавать в Query
     protected Map<String, List<Integer>> namedParams = new HashMap<String, List<Integer>>();
+    //todo aguzanov эта ссылка не должна передавать в Query
     protected JoinRelation rootRelations;
     private int aliasCounter = 0;
 
@@ -44,8 +46,6 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
         List<Integer> paramsTypes = new ArrayList<Integer>();
 
         namedParams.clear();
-        final Collection<FieldMapping> fieldMappings = registry.getFieldMappings(entityClass);
-
         String from = createFrom();
         String fieldsString = createFields(rootRelations);
         String where = createWhere(this.condition, paramsTypes);
@@ -56,16 +56,16 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
         String sqlString = sql.toString();
         logger.debug("Creating query {}", sqlString);
 
-        return createQuery(createConfig(paramsTypes, sqlString));
+        return createQuery(createConfig(paramsTypes,rootRelations, sqlString));
     }
 
     private String createFrom() {
         final StringBuilder fromPart = new StringBuilder(registry.getTableName(entityClass));
 
         final JoinRelation rootRelations = this.rootRelations;
-
-        processJoinRelation(fromPart, rootRelations);
-
+        if (rootRelations != null) {
+            processJoinRelation(fromPart, rootRelations);
+        }
         return fromPart.toString();
     }
 
@@ -86,7 +86,6 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
                         .append(joinRelation.getFetchMapping().getRelationPropertyMapping().getColumn());
 
                 processJoinRelation(fromPart, joinRelation);
-//                fromPart.append(')');
             }
         }
     }
@@ -174,11 +173,11 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
         namedParams.clear();
         LinkedList<Integer> paramTypes = new LinkedList<Integer>();
         String preparedSql = parseSql(sql, paramTypes);
-        return createQuery(createConfig(paramTypes, preparedSql));
+        return createQuery(createConfig(paramTypes, rootRelations, preparedSql));
     }
 
-    private QueryConfig<T> createConfig(List<Integer> paramsTypes, String sqlString) {
-        return new QueryConfig<T>(dbTool, registry, entityClass, sqlString, usePaging, paramsTypes, namedParams);
+    private QueryConfig<T> createConfig(List<Integer> paramsTypes, JoinRelation rootRelations, String sqlString) {
+        return new QueryConfig<T>(dbTool, registry, entityClass, sqlString,rootRelations, usePaging, paramsTypes, namedParams);
     }
 
     private String parseSql(String sql, List<Integer> paramTypes) {
@@ -358,24 +357,31 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
 
     protected String createFields(JoinRelation root) {
         StringBuilder result = new StringBuilder();
-        String alias = root.getAllChilds() == null ? "" : registry.getTableName(entityClass);
+        String alias = root == null || root.getAllChilds() == null ? null : registry.getTableName(entityClass);
         processFields(alias, root, result);
         result.deleteCharAt(result.length() - 1);
         return result.toString();
     }
 
     private void processFields(String alias, JoinRelation root, StringBuilder result) {
-        Collection<FieldMapping> fields = root.getFetchMapping() == null
+        Collection<FieldMapping> fields = root == null || root.getFetchMapping() == null
                 ? registry.getFieldMappings(this.entityClass)
                 : registry.getFieldMappings(root.getFetchMapping().getRelationClass());
         if (fields != null) {
             for (FieldMapping fm : fields) {
-                result.append("\n\t").append(alias).append('.').append(fm.getColumn()).append(",");
+                result.append("\n\t");
+
+                if (alias != null) {
+                    result.append(alias).append('.');
+                }
+
+                result.append(fm.getColumn()).append(",");
             }
+
         }
-        if (root.getAllChilds() != null) {
+        if (root != null && root.getAllChilds() != null) {
             for (JoinRelation joinRelation : root.getAllChilds().values()) {
-                processFields(joinRelation.getAlias(),joinRelation, result);
+                processFields(joinRelation.getAlias(), joinRelation, result);
             }
         }
     }

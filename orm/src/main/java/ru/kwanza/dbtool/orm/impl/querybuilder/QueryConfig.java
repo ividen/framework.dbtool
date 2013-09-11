@@ -18,12 +18,12 @@ class QueryConfig<T> {
     private final Class<T> entityClass;
     private final Constructor<T> contructor;
     private final boolean usePaging;
+    private final JoinRelation rootRelation;
     private Map<String, List<Integer>> namedParams;
     private int paramsCount;
 
 
-    QueryConfig(DBTool dbTool, IEntityMappingRegistry registry,
-                Class<T> entityClass, String sql,boolean usePaging,
+    QueryConfig(DBTool dbTool, IEntityMappingRegistry registry, Class<T> entityClass, String sql, JoinRelation rootRelations, boolean usePaging,
                 List<Integer> paramTypes, Map<String, List<Integer>> namedParams) {
         this.dbTool = dbTool;
         this.sql = sql;
@@ -32,6 +32,7 @@ class QueryConfig<T> {
         this.registry = registry;
         this.entityClass = entityClass;
         this.namedParams = namedParams;
+        this.rootRelation = rootRelations;
         try {
             this.contructor = entityClass.getDeclaredConstructor();
         } catch (NoSuchMethodException e) {
@@ -39,6 +40,10 @@ class QueryConfig<T> {
         }
         this.contructor.setAccessible(true);
         this.paramsCount = paramTypes.size();
+    }
+
+    public JoinRelation getRootRelation() {
+        return rootRelation;
     }
 
     public DBTool getDbTool() {

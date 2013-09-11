@@ -12,7 +12,6 @@ import java.util.Map;
 class JoinRelation {
     private String alias;
     private Join.Type type;
-    private int fieldsStartIndex;
     private FetchMapping fetchMapping;
     private Map<String, JoinRelation> childs;
 
@@ -32,14 +31,6 @@ class JoinRelation {
 
     FetchMapping getFetchMapping() {
         return fetchMapping;
-    }
-
-    int getFieldsStartIndex() {
-        return fieldsStartIndex;
-    }
-
-    void setFieldsStartIndex(int fieldsStartIndex) {
-        this.fieldsStartIndex = fieldsStartIndex;
     }
 
     public void addChild(String name, JoinRelation relation) {
