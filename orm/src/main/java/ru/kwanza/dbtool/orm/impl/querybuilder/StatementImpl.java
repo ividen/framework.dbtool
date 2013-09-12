@@ -271,8 +271,7 @@ public abstract class StatementImpl<T> implements IStatement<T> {
 
         private boolean hasIdValue(JoinRelation relation, ResultSet rs, Class relationClass) throws SQLException {
             FieldMapping idField = config.getRegistry().getIdFields(relationClass).iterator().next();
-            if (FieldValueExtractor.getValue(rs, relation.getAlias() + "_" + idField.getColumn(), idField.getEntityFiled().getType())
-                    == null) {
+            if (FieldValueExtractor.getValue(rs, Column.getFullColumnName(relation, idField), idField.getEntityFiled().getType()) == null) {
                 return false;
             }
             return true;

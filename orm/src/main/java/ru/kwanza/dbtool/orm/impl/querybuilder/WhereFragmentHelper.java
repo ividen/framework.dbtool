@@ -14,7 +14,7 @@ class WhereFragmentHelper {
         this.builder = builder;
     }
 
-    public String createWhere(Condition condition, List<Integer> paramsTypes, ParamsHolder paramsHolder) {
+    public String createWhereFragment(Condition condition, List<Integer> paramsTypes, ParamsHolder paramsHolder) {
         StringBuilder result = new StringBuilder();
 
         createConditionString(condition, paramsTypes, result,paramsHolder);
@@ -51,7 +51,7 @@ class WhereFragmentHelper {
         } else {
 
             final Column column = builder.getColumnFactory().findColumn(condition.getPropertyName());
-            where.append(column.getFullColumnName());
+            where.append(column.getColumnName());
             final int fieldType = column.getType();
 
             if (type == Condition.Type.IS_EQUAL) {

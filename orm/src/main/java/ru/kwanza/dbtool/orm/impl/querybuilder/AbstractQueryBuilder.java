@@ -5,11 +5,9 @@ import org.slf4j.LoggerFactory;
 import ru.kwanza.dbtool.core.DBTool;
 import ru.kwanza.dbtool.orm.api.*;
 import ru.kwanza.dbtool.orm.impl.RelationPathScanner;
-import ru.kwanza.dbtool.orm.impl.mapping.FieldMapping;
 import ru.kwanza.dbtool.orm.impl.mapping.IEntityMappingRegistry;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -27,7 +25,11 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
 
     private JoinRelationFactory relationFactory;
     private ColumnFactory columnFactory;
+
     private WhereFragmentHelper whereFragmentHelper;
+    private FieldFragmentHelper fieldFragmentHelper;
+    private FromFragmentHelper fromFragmentHelper;
+    private OrderByFragmentHelper orderByFragmentHelper;
 
     public AbstractQueryBuilder(DBTool dbTool, IEntityMappingRegistry registry, Class entityClass) {
         if (!registry.isRegisteredEntityClass(entityClass)) {
@@ -39,6 +41,9 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
         this.relationFactory = new JoinRelationFactory(this);
         this.columnFactory = new ColumnFactory(this);
         this.whereFragmentHelper = new WhereFragmentHelper(this);
+        this.fieldFragmentHelper = new FieldFragmentHelper(this);
+        this.fromFragmentHelper = new FromFragmentHelper(this);
+        this.orderByFragmentHelper = new OrderByFragmentHelper(this);
     }
 
     protected boolean isUsePaging() {
@@ -61,15 +66,19 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
         return registry;
     }
 
+    public List<OrderBy> getOrderBy() {
+        return orderBy;
+    }
+
     public final IQuery<T> create() {
         StringBuilder sql;
         List<Integer> paramsTypes = new ArrayList<Integer>();
 
         ParamsHolder holder = new ParamsHolder();
-        String where = whereFragmentHelper.createWhere(this.condition, paramsTypes, holder);
-        String orderBy = createOrderBy();
-        String from = createFrom();
-        String fieldsString = createFields(relationFactory.getRoot());
+        String where = whereFragmentHelper.createWhereFragment(this.condition, paramsTypes, holder);
+        String orderBy = orderByFragmentHelper.createOrderByFragment();
+        String from = fromFragmentHelper.createFromFragment();
+        String fieldsString = fieldFragmentHelper.createFieldsFragment();
 
         sql = createSQLString(fieldsString, from, where, orderBy);
 
@@ -79,31 +88,7 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
         return createQuery(createConfig(paramsTypes, relationFactory.getRoot(), sqlString, holder));
     }
 
-    private String createFrom() {
-        final StringBuilder fromPart = new StringBuilder(registry.getTableName(entityClass));
 
-        final JoinRelation rootRelations = relationFactory.getRoot();
-        if (rootRelations != null) {
-            processJoinRelation(fromPart, rootRelations);
-        }
-        return fromPart.toString();
-    }
-
-    private void processJoinRelation(StringBuilder fromPart, JoinRelation rootRelations) {
-        if (rootRelations.getAllChilds() != null) {
-            for (JoinRelation joinRelation : rootRelations.getAllChilds().values()) {
-                final Class relationClass = joinRelation.getFetchMapping().getRelationClass();
-                fromPart.append(joinRelation.getType() == Join.Type.LEFT ? "\n\tLEFT JOIN " : "\n\tINNER JOIN ")
-                        .append(registry.getTableName(relationClass)).append(' ').append(joinRelation.getAlias()).append(" ON ")
-                        .append(rootRelations.getAlias() == null ? registry.getTableName(this.entityClass) : rootRelations.getAlias())
-                        .append('.').append(joinRelation.getFetchMapping().getPropertyMapping().getColumn()).append('=')
-                        .append(joinRelation.getAlias()).append('.')
-                        .append(joinRelation.getFetchMapping().getRelationPropertyMapping().getColumn());
-
-                processJoinRelation(fromPart, joinRelation);
-            }
-        }
-    }
 
     public IQueryBuilder<T> join(String string) {
         final Map<String, Object> scan = new RelationPathScanner(string).scan();
@@ -146,11 +131,7 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
     }
 
     private void processJoin(JoinRelation root, Join joinClause) {
-        JoinRelation joinRelation = root.getChild(joinClause.getPropertyName());
-
-        if (joinRelation == null) {
-            joinRelation = relationFactory.createJoinRelation(root, joinClause.getType(), joinClause.getPropertyName());
-        }
+        JoinRelation joinRelation = relationFactory.registerRelation(root, joinClause.getType(), joinClause.getPropertyName());
 
         if (joinClause != null) {
             for (Join join : joinClause.getSubJoins()) {
@@ -178,19 +159,6 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
         return new QueryConfig<T>(dbTool, registry, entityClass, sqlString, rootRelations, usePaging, paramsTypes, holder);
     }
 
-    protected String createOrderBy() {
-        StringBuilder orderBy = new StringBuilder();
-        if (this.orderBy != null && this.orderBy.size() > 0) {
-            for (OrderBy ob : this.orderBy) {
-                orderBy.append(columnFactory.findColumn(ob.getPropertyName()).getFullColumnName()).append(' ').append(ob.getType())
-                        .append(", ");
-            }
-
-            orderBy.deleteCharAt(orderBy.length() - 2);
-        }
-
-        return orderBy.toString();
-    }
 
     protected StringBuilder createSQLString(String fieldsString, String from, String where, String orderBy) {
         StringBuilder sql;
@@ -205,38 +173,6 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
         return sql;
     }
 
-    protected String createFields(JoinRelation root) {
-        StringBuilder result = new StringBuilder();
-        String alias = root == null || root.getAllChilds() == null ? null : registry.getTableName(entityClass);
-        processFields(alias, root, result);
-        result.deleteCharAt(result.length() - 1);
-        return result.toString();
-    }
-
-    private void processFields(String alias, JoinRelation root, StringBuilder result) {
-        Collection<FieldMapping> fields = root == null || root.getFetchMapping() == null
-                ? registry.getFieldMappings(this.entityClass)
-                : registry.getFieldMappings(root.getFetchMapping().getRelationClass());
-        if (fields != null) {
-            for (FieldMapping fm : fields) {
-                result.append("\n\t");
-
-                if (alias != null) {
-                    result.append(alias).append('.').append(fm.getColumn()).append(' ').append(alias).append('_').append(fm.getColumn())
-                            .append(",");
-                } else {
-                    result.append(fm.getColumn()).append(",");
-                }
-            }
-
-        }
-        if (root != null && root.getAllChilds() != null) {
-            for (JoinRelation joinRelation : root.getAllChilds().values()) {
-                processFields(joinRelation.getAlias(), joinRelation, result);
-            }
-        }
-    }
-
     public IQueryBuilder<T> where(Condition condition) {
         if (this.condition != null) {
             throw new IllegalStateException("Condition statement is set already in WHERE clause!");
@@ -247,7 +183,7 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
     }
 
     public IQueryBuilder<T> orderBy(String orderByClause) {
-        final List<OrderBy> parse = OrderBy.parse(orderByClause);
+        final List<OrderBy> parse = OrderByFragmentHelper.parse(orderByClause);
         checkOrderBy();
         orderBy.addAll(parse);
 

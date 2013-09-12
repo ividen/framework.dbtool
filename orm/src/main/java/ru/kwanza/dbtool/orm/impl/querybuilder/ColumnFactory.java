@@ -27,10 +27,8 @@ class ColumnFactory {
             StringTokenizer st = new StringTokenizer(path, ".");
             while (st.hasMoreElements()) {
                 final String token = st.nextToken();
-                if (root.getChild(token) == null) {
-                    root = builder.getRelationFactory().createJoinRelation(root, Join.Type.INNER, token);
-                    entityClass = root.getFetchMapping().getRelationClass();
-                }
+                root = builder.getRelationFactory().registerRelation(root, Join.Type.INNER, token);
+                entityClass = root.getFetchMapping().getRelationClass();
             }
         }
 

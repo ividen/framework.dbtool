@@ -34,25 +34,4 @@ public class OrderBy {
         return new OrderBy(propertyName, DESC);
     }
 
-    public static List<OrderBy> parse(String orderByClause) {
-        StringTokenizer tokenizer = new StringTokenizer(orderByClause, ",");
-        List<OrderBy> result = new ArrayList<OrderBy>();
-        while (tokenizer.hasMoreTokens()) {
-            final String token = tokenizer.nextToken().trim();
-            final int i = token.indexOf(' ');
-            if (i == -1) {
-                result.add(OrderBy.ASC(token));
-            } else {
-                final String type = token.substring(i + 1).trim();
-                if (type.equals("ASC")) {
-                    result.add(OrderBy.ASC(token.substring(0, i).trim()));
-                } else if (type.equals("DESC")) {
-                    result.add(OrderBy.DESC(token.substring(0, i).trim()));
-                }
-            }
-
-        }
-
-        return result;
-    }
 }
