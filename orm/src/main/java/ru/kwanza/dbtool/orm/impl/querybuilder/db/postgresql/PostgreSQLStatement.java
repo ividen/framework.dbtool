@@ -1,4 +1,7 @@
-package ru.kwanza.dbtool.orm.impl.querybuilder;
+package ru.kwanza.dbtool.orm.impl.querybuilder.db.postgresql;
+
+import ru.kwanza.dbtool.orm.impl.querybuilder.QueryConfig;
+import ru.kwanza.dbtool.orm.impl.querybuilder.StatementImpl;
 
 /**
  * @author Michael Yeskov

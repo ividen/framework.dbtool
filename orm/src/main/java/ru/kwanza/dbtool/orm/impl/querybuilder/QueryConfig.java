@@ -16,7 +16,6 @@ public class QueryConfig<T> {
     private final List<Integer> paramTypes;
     private final IEntityMappingRegistry registry;
     private final Class<T> entityClass;
-    private final Constructor<T> contructor;
     private final boolean usePaging;
     private final JoinRelation rootRelation;
     private ParamsHolder holder;
@@ -33,12 +32,6 @@ public class QueryConfig<T> {
         this.entityClass = entityClass;
         this.holder = holder;
         this.rootRelation = rootRelations;
-        try {
-            this.contructor = entityClass.getDeclaredConstructor();
-        } catch (NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        }
-        this.contructor.setAccessible(true);
         this.paramsCount = paramTypes.size();
     }
 
@@ -58,7 +51,7 @@ public class QueryConfig<T> {
         return paramTypes;
     }
 
-    boolean isUsePaging() {
+    public boolean isUsePaging() {
         return usePaging;
     }
 

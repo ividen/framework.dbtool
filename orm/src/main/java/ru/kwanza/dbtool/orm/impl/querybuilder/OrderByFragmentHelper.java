@@ -9,14 +9,14 @@ import java.util.StringTokenizer;
 /**
  * @author Alexander Guzanov
  */
-public class OrderByFragmentHelper {
+class OrderByFragmentHelper {
     private AbstractQueryBuilder builder;
 
     public OrderByFragmentHelper(AbstractQueryBuilder builder) {
         this.builder = builder;
     }
 
-    public static List<OrderBy> parse(String orderByClause) {
+    static List<OrderBy> parse(String orderByClause) {
         StringTokenizer tokenizer = new StringTokenizer(orderByClause, ",");
         List<OrderBy> result = new ArrayList<OrderBy>();
         while (tokenizer.hasMoreTokens()) {
@@ -38,7 +38,7 @@ public class OrderByFragmentHelper {
         return result;
     }
 
-    protected String createOrderByFragment() {
+    String createOrderByFragment() {
         StringBuilder orderBy = new StringBuilder();
         final List<OrderBy> orderByList = builder.getOrderBy();
         if (orderByList != null && !orderByList.isEmpty()) {
