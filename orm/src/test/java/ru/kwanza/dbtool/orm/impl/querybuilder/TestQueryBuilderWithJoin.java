@@ -5,13 +5,13 @@ import org.junit.Test;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
+import ru.kwanza.dbtool.orm.api.Condition;
 import ru.kwanza.dbtool.orm.api.IEntityManager;
 import ru.kwanza.dbtool.orm.api.Join;
 import ru.kwanza.dbtool.orm.impl.fetcher.*;
 import ru.kwanza.dbtool.orm.impl.mapping.EntityMappingRegistryImpl;
 
 import javax.annotation.Resource;
-import java.util.List;
 
 /**
  * @author Alexander Guzanov
@@ -47,18 +47,10 @@ public class TestQueryBuilderWithJoin extends AbstractJUnit4SpringContextTests {
 
     @Test
     public void test2() {
-        AbstractQuery<TestEntity> query1 = (AbstractQuery<TestEntity>) em.queryBuilder(TestEntity.class)
+        AbstractQuery<TestEntity> query1 = (AbstractQuery<TestEntity>) em.queryBuilder(TestEntity.class).orderBy("id ASC")
                 .join("#entityA, #entityB, #entityC {#entityE{#entityG},#entityF} ,#entityD").create();
 
         System.out.println(query1.getConfig().getSql());
-
-
-        AbstractQuery<TestEntity> query2 = (AbstractQuery<TestEntity>) em.queryBuilder(TestEntity.class)
-                .usePaging(true)
-                .join("#entityA, #entityB, #entityC {#entityE{#entityG},#entityF} ,#entityD").create();
-
-        final List<TestEntity> result = query2.prepare().paging(0, 10000).selectList();
-        System.out.println(result.size());
     }
 
     @Test
@@ -87,11 +79,44 @@ public class TestQueryBuilderWithJoin extends AbstractJUnit4SpringContextTests {
         System.out.println(query1.getConfig().getSql());
     }
 
-
     @Test
     public void test6() {
         AbstractQuery<TestEntity> query1 = (AbstractQuery<TestEntity>) em.queryBuilder(TestEntity.class)
                 .join("#entityA, #entityB, #entityC {entityE{entityG},entityF} ,#entityD").usePaging(true).create();
+
+        System.out.println(query1.getConfig().getSql());
+    }
+
+    @Test
+    public void test7() {
+        AbstractQuery<TestEntity> query1 = (AbstractQuery<TestEntity>) em.queryBuilder(TestEntity.class)
+                .join("entityA, entityB, entityC {entityE{entityG},entityF} ,entityD")
+                .where(Condition.and(Condition.between("dateField"), Condition.isEqual("id"))).orderBy("dateField ASC").create();
+
+        System.out.println(query1.getConfig().getSql());
+    }
+
+    @Test
+    public void test8() {
+        AbstractQuery<TestEntity> query1 = (AbstractQuery<TestEntity>) em.queryBuilder(TestEntity.class)
+                .join("entityA, entityB, entityC {entityE{entityG},entityF} ,entityD").where(Condition
+                        .and(Condition.isEqual("entityA.title"), Condition.isEqual("entityB.title"), Condition.isEqual("entityC.title")))
+                .orderBy("dateField ASC").create();
+
+        System.out.println(query1.getConfig().getSql());
+    }
+
+
+
+    @Test
+    public void test9() {
+        AbstractQuery<TestEntity> query1 = (AbstractQuery<TestEntity>) em.queryBuilder(TestEntity.class)
+                .where(Condition
+                        .and(Condition.isEqual("entityA.title"),
+                                Condition.isEqual("entityB.title"),
+                                Condition.isEqual("entityC.title"),
+                                Condition.isEqual("entityA.entityB.entityC.entityE.entityG.title")))
+                .orderBy("entityA.entityB.entityC.entityE.entityF.title ASC").create();
 
         System.out.println(query1.getConfig().getSql());
     }

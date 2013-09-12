@@ -8,7 +8,6 @@ import ru.kwanza.dbtool.orm.api.IQuery;
 import ru.kwanza.dbtool.orm.api.IQueryBuilder;
 import ru.kwanza.dbtool.orm.api.Join;
 import ru.kwanza.dbtool.orm.impl.RelationPathScanner;
-import ru.kwanza.dbtool.orm.impl.mapping.FetchMapping;
 import ru.kwanza.dbtool.orm.impl.mapping.FieldMapping;
 import ru.kwanza.dbtool.orm.impl.mapping.IEntityMappingRegistry;
 
@@ -28,14 +27,13 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
     //todo aguzanov эта ссылка не должна передавать в Query
     protected Map<String, List<Integer>> namedParams = new HashMap<String, List<Integer>>();
     //todo aguzanov эта ссылка не должна передавать в Query
-    protected JoinRelation rootRelations;
-    private int aliasCounter = 0;
+    protected JoinRelation rootRelations ;
 
     public AbstractQueryBuilder(DBTool dbTool, IEntityMappingRegistry registry, Class entityClass) {
         this.registry = registry;
         this.entityClass = entityClass;
         this.dbTool = dbTool;
-
+        this.rootRelations = new JoinRelation(registry.getTableName(this.entityClass));
         if (!registry.isRegisteredEntityClass(entityClass)) {
             throw new RuntimeException("Not registered entity class: " + entityClass);
         }
@@ -46,10 +44,10 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
         List<Integer> paramsTypes = new ArrayList<Integer>();
 
         namedParams.clear();
-        String from = createFrom();
-        String fieldsString = createFields(rootRelations);
         String where = createWhere(this.condition, paramsTypes);
         String orderBy = createOrderBy();
+        String from = createFrom();
+        String fieldsString = createFields(rootRelations);
 
         sql = createSQLString(fieldsString, from, where, orderBy);
 
@@ -74,12 +72,7 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
             for (JoinRelation joinRelation : rootRelations.getAllChilds().values()) {
                 final Class relationClass = joinRelation.getFetchMapping().getRelationClass();
                 fromPart.append(joinRelation.getType() == Join.Type.LEFT ? "\n\tLEFT JOIN " : "\n\tINNER JOIN ")
-                        .append(registry.getTableName(relationClass));
-
-                if (joinRelation.getAlias() != null) {
-                    fromPart.append(' ').append(joinRelation.getAlias());
-                }
-                fromPart.append(" ON ")
+                        .append(registry.getTableName(relationClass)).append(' ').append(joinRelation.getAlias()).append(" ON ")
                         .append(rootRelations.getAlias() == null ? registry.getTableName(this.entityClass) : rootRelations.getAlias())
                         .append('.').append(joinRelation.getFetchMapping().getPropertyMapping().getColumn()).append('=')
                         .append(joinRelation.getAlias()).append('.')
@@ -93,7 +86,6 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
     public IQueryBuilder<T> join(String string) {
         final Map<String, Object> scan = new RelationPathScanner(string).scan();
 
-        checkJoins();
         for (Join join : processScanRelations(scan)) {
             processJoin(rootRelations, join);
         }
@@ -126,8 +118,6 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
     }
 
     public IQueryBuilder<T> join(Join joinClause) {
-        checkJoins();
-
         processJoin(rootRelations, joinClause);
 
         return this;
@@ -135,29 +125,17 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
 
     private void processJoin(JoinRelation root, Join joinClause) {
         JoinRelation joinRelation = root.getChild(joinClause.getPropertyName());
-        Class entityClass = root.getFetchMapping() == null ? this.entityClass : root.getFetchMapping().getRelationClass();
 
         if (joinRelation == null) {
-            aliasCounter++;
-            final FetchMapping fetchMapping = registry.getFetchMappingByPropertyName(entityClass, joinClause.getPropertyName());
-            if (fetchMapping == null) {
-                throw new IllegalArgumentException(
-                        "Wrong relation name for " + entityClass.getName() + " : " + joinClause.getPropertyName() + " !");
-            }
-            joinRelation = new JoinRelation(joinClause.getType(), "t_" + aliasCounter, fetchMapping);
-            root.addChild(joinClause.getPropertyName(), joinRelation);
+            joinRelation = JoinRelation.createJoinRelation(registry, root, joinClause.getType(),
+                    root.getFetchMapping() == null ? this.entityClass : root.getFetchMapping().getRelationClass(),
+                    joinClause.getPropertyName());
         }
 
         if (joinClause != null) {
             for (Join join : joinClause.getSubJoins()) {
                 processJoin(joinRelation, join);
             }
-        }
-    }
-
-    private void checkJoins() {
-        if (rootRelations == null) {
-            rootRelations = new JoinRelation(null, null, null);
         }
     }
 
@@ -269,42 +247,42 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
         } else if (type == Condition.Type.NATIVE) {
             where.append(parseSql(condition.getSql(), paramsTypes));
         } else {
-            FieldMapping fieldMapping = registry.getFieldMappingByPropertyName(entityClass, condition.getPropertyName());
-            if (fieldMapping == null) {
-                throw new IllegalArgumentException("Unknown field!");
-            }
-            where.append(fieldMapping.getColumn());
+
+            final Column column = Column.findColumn(registry, entityClass, rootRelations, condition.getPropertyName());
+            where.append(column.getFullColumnName());
+            final int fieldType = column.getType();
+
             if (type == Condition.Type.IS_EQUAL) {
-                addParam(condition, paramsTypes, fieldMapping.getType());
+                addParam(condition, paramsTypes, fieldType);
                 where.append(" = ?");
             } else if (type == Condition.Type.NOT_EQUAL) {
-                addParam(condition, paramsTypes, fieldMapping.getType());
+                addParam(condition, paramsTypes, fieldType);
                 where.append(" <> ?");
             } else if (type == Condition.Type.IS_NOT_NULL) {
                 where.append(" IS NOT NULL");
             } else if (type == Condition.Type.IS_NULL) {
                 where.append(" IS NULL");
             } else if (type == Condition.Type.IS_GREATER) {
-                addParam(condition, paramsTypes, fieldMapping.getType());
+                addParam(condition, paramsTypes, fieldType);
                 where.append(" > ?");
             } else if (type == Condition.Type.IS_GREATER_OR_EQUAL) {
-                addParam(condition, paramsTypes, fieldMapping.getType());
+                addParam(condition, paramsTypes, fieldType);
                 where.append(" >= ?");
             } else if (type == Condition.Type.IS_LESS) {
-                addParam(condition, paramsTypes, fieldMapping.getType());
+                addParam(condition, paramsTypes, fieldType);
                 where.append(" < ?");
             } else if (type == Condition.Type.IS_LESS_OR_EQUAL) {
-                addParam(condition, paramsTypes, fieldMapping.getType());
+                addParam(condition, paramsTypes, fieldType);
                 where.append(" <= ?");
             } else if (type == Condition.Type.IN) {
-                addParam(condition, paramsTypes, fieldMapping.getType());
+                addParam(condition, paramsTypes, fieldType);
                 where.append(" IN (?)");
             } else if (type == Condition.Type.LIKE) {
-                addParam(condition, paramsTypes, fieldMapping.getType());
+                addParam(condition, paramsTypes, fieldType);
                 where.append(" LIKE ?");
             } else if (type == Condition.Type.BETWEEN) {
-                addParam(condition, paramsTypes, fieldMapping.getType());
-                addParam(condition, paramsTypes, fieldMapping.getType());
+                addParam(condition, paramsTypes, fieldType);
+                addParam(condition, paramsTypes, fieldType);
                 where.append(" BETWEEN ? AND ?");
             } else {
                 throw new IllegalArgumentException("Unknown condition type!");
@@ -316,11 +294,8 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
         StringBuilder orderBy = new StringBuilder();
         if (this.orderBy != null && this.orderBy.size() > 0) {
             for (OrderBy ob : this.orderBy) {
-                FieldMapping fieldMapping = registry.getFieldMappingByPropertyName(entityClass, ob.getPropertyName());
-                if (fieldMapping == null) {
-                    throw new IllegalArgumentException("Unknown field!");
-                }
-                orderBy.append(fieldMapping.getColumn()).append(' ').append(ob.getType()).append(", ");
+                orderBy.append(Column.findColumn(registry, entityClass, rootRelations, ob.getPropertyName()).getFullColumnName())
+                        .append(' ').append(ob.getType()).append(", ");
             }
 
             orderBy.deleteCharAt(orderBy.length() - 2);
@@ -372,7 +347,8 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
                 result.append("\n\t");
 
                 if (alias != null) {
-                    result.append(alias).append('.').append(fm.getColumn()).append(' ').append(alias).append('_').append(fm.getColumn()).append(",");
+                    result.append(alias).append('.').append(fm.getColumn()).append(' ').append(alias).append('_').append(fm.getColumn())
+                            .append(",");
                 } else {
                     result.append(fm.getColumn()).append(",");
                 }

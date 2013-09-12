@@ -216,9 +216,7 @@ public abstract class StatementImpl<T> implements IStatement<T> {
                 }
             }
             ArrayList<TYPE> objects = new ArrayList<TYPE>();
-            Collection<FieldMapping> fieldMapping = config.getRegistry().getFieldMappings(config.getEntityClass());
 
-            int fieldIndex = 1;
             while (rs.next()) {
                 T result;
                 try {
@@ -227,8 +225,8 @@ public abstract class StatementImpl<T> implements IStatement<T> {
                     throw new RuntimeException(e);
                 }
 
-                fieldIndex = readAndFill(rs, fieldMapping, result, fieldIndex);
-                readRelation(result, config.getRootRelation(), rs, fieldIndex);
+                readAndFill(rs, config.getEntityClass(), config.getRootRelation(), result);
+                readRelation(result, config.getRootRelation(), rs);
 
                 objects.add(getValue(result));
             }
@@ -238,43 +236,57 @@ public abstract class StatementImpl<T> implements IStatement<T> {
 
         public abstract TYPE getValue(Object e);
 
-        private void readRelation(Object parentObj, JoinRelation relation, ResultSet rs, int fieldIndex) throws SQLException {
+        private void readRelation(Object parentObj, JoinRelation relation, ResultSet rs) throws SQLException {
             if (relation == null) {
                 return;
             }
 
             Object obj;
-            if (relation.getAlias() != null) {
+            if (!relation.isRoot()) {
                 final Class relationClass = relation.getFetchMapping().getRelationClass();
-
+                if (!hasIdValue(relation, rs, relationClass)) {
+                    return;
+                }
                 try {
                     obj = relationClass.newInstance();
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
 
-                fieldIndex = readAndFill(rs, config.getRegistry().getFieldMappings(relationClass), obj, fieldIndex);
+                readAndFill(rs, relationClass, relation, obj);
             } else {
                 obj = parentObj;
             }
+
             if (relation.getAllChilds() != null) {
                 for (JoinRelation joinRelation : relation.getAllChilds().values()) {
-                    readRelation(obj, joinRelation, rs, fieldIndex);
+                    readRelation(obj, joinRelation, rs);
                 }
             }
+
             if (relation.getFetchMapping() != null) {
                 relation.getFetchMapping().getFetchField().setValue(parentObj, obj);
             }
         }
 
-        private int readAndFill(ResultSet rs, Collection<FieldMapping> fields, Object obj, int fieldIndex) throws SQLException {
-            for (FieldMapping idf : fields) {
-                Object value = FieldValueExtractor.getValue(rs, fieldIndex++, idf.getEntityFiled().getType());
+        private boolean hasIdValue(JoinRelation relation, ResultSet rs, Class relationClass) throws SQLException {
+            FieldMapping idField = config.getRegistry().getIdFields(relationClass).iterator().next();
+            if (FieldValueExtractor.getValue(rs, relation.getAlias()+"_" + idField.getColumn(), idField.getEntityFiled().getType())
+                    == null) {
+                return false;
+            }
+            return true;
+        }
+
+        private void readAndFill(ResultSet rs, Class entityClass, JoinRelation relation, Object obj) throws SQLException {
+            String alias = relation.getAlias();
+            for (FieldMapping idf : config.getRegistry().getFieldMappings(entityClass)) {
+                Object value = FieldValueExtractor.getValue(rs, alias + idf.getColumn(), idf.getEntityFiled().getType());
                 idf.getEntityFiled().setValue(obj, value);
             }
 
-            return fieldIndex;
         }
+
     }
 
     private class SingleObjectObjectExtractor<T> extends ObjectExtractor<T> {
