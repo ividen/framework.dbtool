@@ -21,7 +21,7 @@ class ColumnFactory {
         JoinRelation root = builder.getRelationFactory().getRoot();
         Class entityClass = builder.getEntityClass();
         if (index > 0) {
-            final String path = propertyName.substring(0, index - 1);
+            final String path = propertyName.substring(0, index);
             propertyName = propertyName.substring(index + 1);
 
             StringTokenizer st = new StringTokenizer(path, ".");

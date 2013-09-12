@@ -115,8 +115,8 @@ public class TestQueryBuilderWithJoin extends AbstractJUnit4SpringContextTests {
                         .and(Condition.isEqual("entityA.title"),
                                 Condition.isEqual("entityB.title"),
                                 Condition.isEqual("entityC.title"),
-                                Condition.isEqual("entityA.entityB.entityC.entityE.entityG.title")))
-                .orderBy("entityA.entityB.entityC.entityE.entityF.title ASC").create();
+                                Condition.isEqual("entityC.entityE.entityG.title")))
+                .orderBy("entityC.entityF.title ASC").create();
 
         System.out.println(query1.getConfig().getSql());
     }
