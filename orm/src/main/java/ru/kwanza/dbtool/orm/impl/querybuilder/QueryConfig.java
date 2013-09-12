@@ -10,7 +10,7 @@ import java.util.Map;
 /**
  * @author Alexander Guzanov
  */
-class QueryConfig<T> {
+public class QueryConfig<T> {
     private final DBTool dbTool;
     private final String sql;
     private final List<Integer> paramTypes;
@@ -19,19 +19,19 @@ class QueryConfig<T> {
     private final Constructor<T> contructor;
     private final boolean usePaging;
     private final JoinRelation rootRelation;
-    private Map<String, List<Integer>> namedParams;
+    private ParamsHolder holder;
     private int paramsCount;
 
 
     QueryConfig(DBTool dbTool, IEntityMappingRegistry registry, Class<T> entityClass, String sql, JoinRelation rootRelations, boolean usePaging,
-                List<Integer> paramTypes, Map<String, List<Integer>> namedParams) {
+                List<Integer> paramTypes, ParamsHolder holder) {
         this.dbTool = dbTool;
         this.sql = sql;
         this.usePaging = usePaging;
         this.paramTypes = paramTypes;
         this.registry = registry;
         this.entityClass = entityClass;
-        this.namedParams = namedParams;
+        this.holder = holder;
         this.rootRelation = rootRelations;
         try {
             this.contructor = entityClass.getDeclaredConstructor();
@@ -70,15 +70,11 @@ class QueryConfig<T> {
         return entityClass;
     }
 
-    public Constructor<T> getContructor() {
-        return contructor;
-    }
-
     public int getParamsCount() {
         return paramsCount;
     }
 
-    public Map<String, List<Integer>> getNamedParams() {
-        return namedParams;
+     ParamsHolder getHolder() {
+        return holder;
     }
 }

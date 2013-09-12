@@ -8,7 +8,10 @@ import ru.kwanza.dbtool.orm.impl.RelationPathScanner;
 import ru.kwanza.dbtool.orm.impl.mapping.FieldMapping;
 import ru.kwanza.dbtool.orm.impl.mapping.IEntityMappingRegistry;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Alexander Guzanov
@@ -21,11 +24,10 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
     private Condition condition;
     private List<OrderBy> orderBy = null;
     private boolean usePaging = false;
-    //todo aguzanov эта ссылка не должна передавать в Query
-    private Map<String, List<Integer>> namedParams = new HashMap<String, List<Integer>>();
 
     private JoinRelationFactory relationFactory;
     private ColumnFactory columnFactory;
+    private WhereFragmentHelper whereFragmentHelper;
 
     public AbstractQueryBuilder(DBTool dbTool, IEntityMappingRegistry registry, Class entityClass) {
         if (!registry.isRegisteredEntityClass(entityClass)) {
@@ -36,6 +38,7 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
         this.dbTool = dbTool;
         this.relationFactory = new JoinRelationFactory(this);
         this.columnFactory = new ColumnFactory(this);
+        this.whereFragmentHelper = new WhereFragmentHelper(this);
     }
 
     protected boolean isUsePaging() {
@@ -62,8 +65,8 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
         StringBuilder sql;
         List<Integer> paramsTypes = new ArrayList<Integer>();
 
-        namedParams.clear();
-        String where = createWhere(this.condition, paramsTypes);
+        ParamsHolder holder = new ParamsHolder();
+        String where = whereFragmentHelper.createWhere(this.condition, paramsTypes, holder);
         String orderBy = createOrderBy();
         String from = createFrom();
         String fieldsString = createFields(relationFactory.getRoot());
@@ -73,7 +76,7 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
         String sqlString = sql.toString();
         logger.debug("Creating query {}", sqlString);
 
-        return createQuery(createConfig(paramsTypes, relationFactory.getRoot(), sqlString));
+        return createQuery(createConfig(paramsTypes, relationFactory.getRoot(), sqlString, holder));
     }
 
     private String createFrom() {
@@ -165,154 +168,22 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
     protected abstract IQuery<T> createQuery(QueryConfig config);
 
     public IQuery<T> createNative(String sql) {
-        namedParams.clear();
-        LinkedList<Integer> paramTypes = new LinkedList<Integer>();
-        String preparedSql = parseSql(sql, paramTypes);
-        return createQuery(createConfig(paramTypes, relationFactory.getRoot(), preparedSql));
+        ParamsHolder holder = new ParamsHolder();
+        List<Integer> paramTypes = new ArrayList<Integer>();
+        String preparedSql = SQLParser.prepareSQL(sql, paramTypes, holder);
+        return createQuery(createConfig(paramTypes, relationFactory.getRoot(), preparedSql, holder));
     }
 
-    private QueryConfig<T> createConfig(List<Integer> paramsTypes, JoinRelation rootRelations, String sqlString) {
-        return new QueryConfig<T>(dbTool, registry, entityClass, sqlString, rootRelations, usePaging, paramsTypes, namedParams);
-    }
-
-    private String parseSql(String sql, List<Integer> paramTypes) {
-        StringBuilder sqlBuilder = new StringBuilder();
-        StringBuilder paramBuilder = null;
-        char[] chars = sql.toCharArray();
-        boolean variableMatch = false;
-        for (int i = 0; i < chars.length; i++) {
-            char c = chars[i];
-            if (c == '?') {
-                paramTypes.add(Integer.MAX_VALUE);
-                paramBuilder = new StringBuilder();
-                variableMatch = false;
-                sqlBuilder.append('?');
-            } else if (c == ':') {
-                variableMatch = true;
-                sqlBuilder.append('?');
-                paramTypes.add(Integer.MAX_VALUE);
-                paramBuilder = new StringBuilder();
-            } else if (variableMatch) {
-                if (isDelimiter(c)) {
-                    String paramName = paramBuilder.toString();
-                    List<Integer> indexes = namedParams.get(paramName);
-                    if (indexes == null) {
-                        indexes = new LinkedList<Integer>();
-                        namedParams.put(paramName, indexes);
-                    }
-                    indexes.add(paramTypes.size());
-                    variableMatch = false;
-
-                    sqlBuilder.append(c);
-                } else {
-                    paramBuilder.append(c);
-                }
-            } else {
-                sqlBuilder.append(c);
-            }
-        }
-
-        if (variableMatch) {
-            String paramName = paramBuilder.toString();
-            List<Integer> indexes = namedParams.get(paramName);
-            if (indexes == null) {
-                indexes = new LinkedList<Integer>();
-                namedParams.put(paramName, indexes);
-            }
-            indexes.add(paramTypes.size());
-        }
-
-        return sqlBuilder.toString();
-    }
-
-    private boolean isDelimiter(char c) {
-        return c == '+' || c == '-' || c == ' ' || c == ')' || c == '(' || c == '\n' || c == '\t' || c == ',';
-    }
-
-    private String createWhere(Condition condition, List<Integer> paramsTypes) {
-        StringBuilder result = new StringBuilder();
-
-        createConditionString(condition, paramsTypes, result);
-
-        return result.toString();
-    }
-
-    private void createConditionString(Condition condition, List<Integer> paramsTypes, StringBuilder where) {
-        if (condition == null) {
-            return;
-        }
-
-        Condition[] childs = condition.getChilds();
-        Condition.Type type = condition.getType();
-        if (childs != null && childs.length > 0) {
-            if (type != Condition.Type.NOT) {
-                where.append('(');
-                createConditionString(childs[0], paramsTypes, where);
-                where.append(')');
-
-                for (int i = 1; i < childs.length; i++) {
-                    Condition c = childs[i];
-                    where.append(' ').append(type.name()).append(" (");
-                    createConditionString(c, paramsTypes, where);
-                    where.append(')');
-                }
-            } else {
-                where.append("NOT (");
-                createConditionString(childs[0], paramsTypes, where);
-                where.append(')');
-            }
-        } else if (type == Condition.Type.NATIVE) {
-            where.append(parseSql(condition.getSql(), paramsTypes));
-        } else {
-
-            final Column column = columnFactory.findColumn(condition.getPropertyName());
-            where.append(column.getFullColumnName());
-            final int fieldType = column.getType();
-
-            if (type == Condition.Type.IS_EQUAL) {
-                addParam(condition, paramsTypes, fieldType);
-                where.append(" = ?");
-            } else if (type == Condition.Type.NOT_EQUAL) {
-                addParam(condition, paramsTypes, fieldType);
-                where.append(" <> ?");
-            } else if (type == Condition.Type.IS_NOT_NULL) {
-                where.append(" IS NOT NULL");
-            } else if (type == Condition.Type.IS_NULL) {
-                where.append(" IS NULL");
-            } else if (type == Condition.Type.IS_GREATER) {
-                addParam(condition, paramsTypes, fieldType);
-                where.append(" > ?");
-            } else if (type == Condition.Type.IS_GREATER_OR_EQUAL) {
-                addParam(condition, paramsTypes, fieldType);
-                where.append(" >= ?");
-            } else if (type == Condition.Type.IS_LESS) {
-                addParam(condition, paramsTypes, fieldType);
-                where.append(" < ?");
-            } else if (type == Condition.Type.IS_LESS_OR_EQUAL) {
-                addParam(condition, paramsTypes, fieldType);
-                where.append(" <= ?");
-            } else if (type == Condition.Type.IN) {
-                addParam(condition, paramsTypes, fieldType);
-                where.append(" IN (?)");
-            } else if (type == Condition.Type.LIKE) {
-                addParam(condition, paramsTypes, fieldType);
-                where.append(" LIKE ?");
-            } else if (type == Condition.Type.BETWEEN) {
-                addParam(condition, paramsTypes, fieldType);
-                addParam(condition, paramsTypes, fieldType);
-                where.append(" BETWEEN ? AND ?");
-            } else {
-                throw new IllegalArgumentException("Unknown condition type!");
-            }
-        }
+    private QueryConfig<T> createConfig(List<Integer> paramsTypes, JoinRelation rootRelations, String sqlString, ParamsHolder holder) {
+        return new QueryConfig<T>(dbTool, registry, entityClass, sqlString, rootRelations, usePaging, paramsTypes, holder);
     }
 
     protected String createOrderBy() {
         StringBuilder orderBy = new StringBuilder();
         if (this.orderBy != null && this.orderBy.size() > 0) {
             for (OrderBy ob : this.orderBy) {
-                orderBy.append(columnFactory.findColumn(ob.getPropertyName()).getFullColumnName()).append(' ')
-                        .append(ob.getType()).append(", ");
+                orderBy.append(columnFactory.findColumn(ob.getPropertyName()).getFullColumnName()).append(' ').append(ob.getType())
+                        .append(", ");
             }
 
             orderBy.deleteCharAt(orderBy.length() - 2);
@@ -332,19 +203,6 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
             sql.append("\nORDER BY ").append(orderBy);
         }
         return sql;
-    }
-
-    private void addParam(Condition condition, List<Integer> paramsTypes, int type) {
-        paramsTypes.add(type);
-        String paramName = condition.getParamName();
-        if (paramName != null) {
-            List<Integer> indexes = namedParams.get(paramName);
-            if (indexes == null) {
-                indexes = new ArrayList<Integer>();
-                namedParams.put(paramName, indexes);
-            }
-            indexes.add(paramsTypes.size());
-        }
     }
 
     protected String createFields(JoinRelation root) {

@@ -159,7 +159,7 @@ public abstract class StatementImpl<T> implements IStatement<T> {
     }
 
     public IStatement<T> setParameter(String name, Object value) {
-        List<Integer> indexes = config.getNamedParams().get(name);
+        List<Integer> indexes = config.getHolder().get(name);
         if (indexes == null) {
             throw new IllegalStateException("Query doesn't constain named param!");
         }
@@ -271,7 +271,7 @@ public abstract class StatementImpl<T> implements IStatement<T> {
 
         private boolean hasIdValue(JoinRelation relation, ResultSet rs, Class relationClass) throws SQLException {
             FieldMapping idField = config.getRegistry().getIdFields(relationClass).iterator().next();
-            if (FieldValueExtractor.getValue(rs, relation.getAlias()+"_" + idField.getColumn(), idField.getEntityFiled().getType())
+            if (FieldValueExtractor.getValue(rs, relation.getAlias() + "_" + idField.getColumn(), idField.getEntityFiled().getType())
                     == null) {
                 return false;
             }
