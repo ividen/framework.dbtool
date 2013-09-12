@@ -26,17 +26,35 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
     protected boolean usePaging = false;
     //todo aguzanov эта ссылка не должна передавать в Query
     protected Map<String, List<Integer>> namedParams = new HashMap<String, List<Integer>>();
-    //todo aguzanov эта ссылка не должна передавать в Query
-    protected JoinRelation rootRelations ;
+
+    private JoinRelationFactory relationFactory;
+    private ColumnFactory columnFactory;
 
     public AbstractQueryBuilder(DBTool dbTool, IEntityMappingRegistry registry, Class entityClass) {
-        this.registry = registry;
-        this.entityClass = entityClass;
-        this.dbTool = dbTool;
-        this.rootRelations = new JoinRelation(registry.getTableName(this.entityClass));
         if (!registry.isRegisteredEntityClass(entityClass)) {
             throw new RuntimeException("Not registered entity class: " + entityClass);
         }
+        this.registry = registry;
+        this.entityClass = entityClass;
+        this.dbTool = dbTool;
+        this.relationFactory = new JoinRelationFactory(this);
+        this.columnFactory = new ColumnFactory(this);
+    }
+
+    JoinRelationFactory getRelationFactory() {
+        return relationFactory;
+    }
+
+    ColumnFactory getColumnFactory() {
+        return columnFactory;
+    }
+
+    Class getEntityClass() {
+        return entityClass;
+    }
+
+    IEntityMappingRegistry getRegistry() {
+        return registry;
     }
 
     public final IQuery<T> create() {
@@ -47,20 +65,20 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
         String where = createWhere(this.condition, paramsTypes);
         String orderBy = createOrderBy();
         String from = createFrom();
-        String fieldsString = createFields(rootRelations);
+        String fieldsString = createFields(relationFactory.getRoot());
 
         sql = createSQLString(fieldsString, from, where, orderBy);
 
         String sqlString = sql.toString();
         logger.debug("Creating query {}", sqlString);
 
-        return createQuery(createConfig(paramsTypes, rootRelations, sqlString));
+        return createQuery(createConfig(paramsTypes, relationFactory.getRoot(), sqlString));
     }
 
     private String createFrom() {
         final StringBuilder fromPart = new StringBuilder(registry.getTableName(entityClass));
 
-        final JoinRelation rootRelations = this.rootRelations;
+        final JoinRelation rootRelations = relationFactory.getRoot();
         if (rootRelations != null) {
             processJoinRelation(fromPart, rootRelations);
         }
@@ -87,7 +105,7 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
         final Map<String, Object> scan = new RelationPathScanner(string).scan();
 
         for (Join join : processScanRelations(scan)) {
-            processJoin(rootRelations, join);
+            processJoin(relationFactory.getRoot(), join);
         }
 
         return this;
@@ -118,7 +136,7 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
     }
 
     public IQueryBuilder<T> join(Join joinClause) {
-        processJoin(rootRelations, joinClause);
+        processJoin(relationFactory.getRoot(), joinClause);
 
         return this;
     }
@@ -127,9 +145,7 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
         JoinRelation joinRelation = root.getChild(joinClause.getPropertyName());
 
         if (joinRelation == null) {
-            joinRelation = JoinRelation.createJoinRelation(registry, root, joinClause.getType(),
-                    root.getFetchMapping() == null ? this.entityClass : root.getFetchMapping().getRelationClass(),
-                    joinClause.getPropertyName());
+            joinRelation = relationFactory.createJoinRelation(root, joinClause.getType(), joinClause.getPropertyName());
         }
 
         if (joinClause != null) {
@@ -151,7 +167,7 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
         namedParams.clear();
         LinkedList<Integer> paramTypes = new LinkedList<Integer>();
         String preparedSql = parseSql(sql, paramTypes);
-        return createQuery(createConfig(paramTypes, rootRelations, preparedSql));
+        return createQuery(createConfig(paramTypes, relationFactory.getRoot(), preparedSql));
     }
 
     private QueryConfig<T> createConfig(List<Integer> paramsTypes, JoinRelation rootRelations, String sqlString) {
@@ -248,7 +264,7 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
             where.append(parseSql(condition.getSql(), paramsTypes));
         } else {
 
-            final Column column = Column.findColumn(registry, entityClass, rootRelations, condition.getPropertyName());
+            final Column column = columnFactory.findColumn(condition.getPropertyName());
             where.append(column.getFullColumnName());
             final int fieldType = column.getType();
 
@@ -294,8 +310,8 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
         StringBuilder orderBy = new StringBuilder();
         if (this.orderBy != null && this.orderBy.size() > 0) {
             for (OrderBy ob : this.orderBy) {
-                orderBy.append(Column.findColumn(registry, entityClass, rootRelations, ob.getPropertyName()).getFullColumnName())
-                        .append(' ').append(ob.getType()).append(", ");
+                orderBy.append(columnFactory.findColumn(ob.getPropertyName()).getFullColumnName()).append(' ')
+                        .append(ob.getType()).append(", ");
             }
 
             orderBy.deleteCharAt(orderBy.length() - 2);

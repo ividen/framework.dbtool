@@ -12,36 +12,19 @@ import java.util.Map;
  */
 class JoinRelation {
     private String alias;
-    private int aliasIndex;
     private Join.Type type;
     private FetchMapping fetchMapping;
     private Map<String, JoinRelation> childs;
 
-    JoinRelation(Join.Type type, JoinRelation root, FetchMapping fetchMapping) {
+    JoinRelation(Join.Type type, String alias, FetchMapping fetchMapping) {
         this.type = type;
-        this.aliasIndex = 1;
-        this.alias = (root.isRoot() ? "t" : root.getAlias()) + root.aliasIndex++;
+        this.alias = alias;
         this.fetchMapping = fetchMapping;
 
     }
 
     JoinRelation(String alias) {
         this.alias = alias;
-        this.aliasIndex = 1;
-    }
-
-    static JoinRelation createJoinRelation(IEntityMappingRegistry registry, JoinRelation root, Join.Type type, Class entityClass,
-                                           String propertyName) {
-        JoinRelation joinRelation;
-
-        final FetchMapping fetchMapping = registry.getFetchMappingByPropertyName(entityClass, propertyName);
-        if (fetchMapping == null) {
-            throw new IllegalArgumentException("Wrong relation name for " + entityClass.getName() + " : " + propertyName + " !");
-        }
-
-        joinRelation = new JoinRelation(type, root, fetchMapping);
-        root.addChild(propertyName, joinRelation);
-        return joinRelation;
     }
 
     boolean isRoot() {
@@ -75,4 +58,5 @@ class JoinRelation {
     Map<String, JoinRelation> getAllChilds() {
         return childs;
     }
+
 }
