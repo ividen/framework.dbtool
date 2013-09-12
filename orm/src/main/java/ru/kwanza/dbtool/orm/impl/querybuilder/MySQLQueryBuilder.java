@@ -19,7 +19,7 @@ public class MySQLQueryBuilder<T> extends AbstractQueryBuilder<T> {
 
     protected StringBuilder createSQLString(String fieldsString, String from, String where, String orderBy) {
         StringBuilder sql = createSQLString(fieldsString, from, where, orderBy); ;
-        if (usePaging) {
+        if (isUsePaging()) {
             sql.append("LIMIT ?,?");
         } else {
 

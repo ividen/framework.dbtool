@@ -1,4 +1,4 @@
-package ru.kwanza.dbtool.orm.impl.querybuilder;
+package ru.kwanza.dbtool.orm.api;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,9 +54,5 @@ public class OrderBy {
         }
 
         return result;
-    }
-
-    public static void main(String[] args) {
-        parse("name");
     }
 }

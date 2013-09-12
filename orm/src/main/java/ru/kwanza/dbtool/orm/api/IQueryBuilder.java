@@ -1,7 +1,5 @@
 package ru.kwanza.dbtool.orm.api;
 
-import ru.kwanza.dbtool.orm.impl.querybuilder.OrderBy;
-
 /**
  * @author Alexander Guzanov
  */

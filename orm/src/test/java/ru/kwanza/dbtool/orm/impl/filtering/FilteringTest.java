@@ -16,7 +16,6 @@ import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
 import ru.kwanza.dbtool.orm.api.Condition;
 import ru.kwanza.dbtool.orm.api.IEntityManager;
 import ru.kwanza.dbtool.orm.api.IFiltering;
-import ru.kwanza.dbtool.orm.impl.querybuilder.OrderBy;
 import ru.kwanza.dbtool.orm.impl.fetcher.TestEntity;
 import ru.kwanza.dbtool.orm.impl.mapping.EntityMappingRegistryImpl;
 

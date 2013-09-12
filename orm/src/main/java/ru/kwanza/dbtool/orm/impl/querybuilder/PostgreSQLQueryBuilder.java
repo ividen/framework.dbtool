@@ -20,7 +20,7 @@ public class PostgreSQLQueryBuilder<T> extends AbstractQueryBuilder<T> {
 
     protected StringBuilder createSQLString(String fieldsString, String from, String where, String orderBy) {
         StringBuilder sql = super.createSQLString(fieldsString, from, where, orderBy);
-        if (usePaging) {
+        if (isUsePaging()) {
             sql.append(" LIMIT ?");
             sql.append(" OFFSET ?");
         }

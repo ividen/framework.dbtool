@@ -7,8 +7,8 @@ import ru.kwanza.dbtool.orm.entity.TestEntity1;
 import java.util.List;
 
 import static ru.kwanza.dbtool.orm.api.Condition.*;
-import static ru.kwanza.dbtool.orm.impl.querybuilder.OrderBy.ASC;
-import static ru.kwanza.dbtool.orm.impl.querybuilder.OrderBy.DESC;
+import static ru.kwanza.dbtool.orm.api.OrderBy.ASC;
+import static ru.kwanza.dbtool.orm.api.OrderBy.DESC;
 
 /**
  * @author Alexander Guzanov

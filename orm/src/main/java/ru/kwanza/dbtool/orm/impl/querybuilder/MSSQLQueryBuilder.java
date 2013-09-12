@@ -20,7 +20,7 @@ public class MSSQLQueryBuilder<T> extends AbstractQueryBuilder<T> {
     }
 
     protected StringBuilder createSQLString(String fieldsString, String from, String where, String orderBy) {
-        return super.createSQLString(usePaging ? " TOP " + $_TOP + " " + fieldsString : fieldsString, from, where, orderBy);
+        return super.createSQLString(isUsePaging() ? " TOP " + $_TOP + " " + fieldsString : fieldsString, from, where, orderBy);
     }
 
     static String replaceTop(String sql, Long top) {

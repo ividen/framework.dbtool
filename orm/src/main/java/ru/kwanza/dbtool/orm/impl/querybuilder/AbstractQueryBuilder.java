@@ -3,10 +3,7 @@ package ru.kwanza.dbtool.orm.impl.querybuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.kwanza.dbtool.core.DBTool;
-import ru.kwanza.dbtool.orm.api.Condition;
-import ru.kwanza.dbtool.orm.api.IQuery;
-import ru.kwanza.dbtool.orm.api.IQueryBuilder;
-import ru.kwanza.dbtool.orm.api.Join;
+import ru.kwanza.dbtool.orm.api.*;
 import ru.kwanza.dbtool.orm.impl.RelationPathScanner;
 import ru.kwanza.dbtool.orm.impl.mapping.FieldMapping;
 import ru.kwanza.dbtool.orm.impl.mapping.IEntityMappingRegistry;
@@ -17,15 +14,15 @@ import java.util.*;
  * @author Alexander Guzanov
  */
 public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
-    protected static final Logger logger = LoggerFactory.getLogger(AbstractQuery.class);
-    protected IEntityMappingRegistry registry;
-    protected DBTool dbTool;
-    protected Class entityClass;
-    protected Condition condition;
-    protected List<OrderBy> orderBy = null;
-    protected boolean usePaging = false;
+    private static final Logger logger = LoggerFactory.getLogger(AbstractQuery.class);
+    private IEntityMappingRegistry registry;
+    private DBTool dbTool;
+    private Class entityClass;
+    private Condition condition;
+    private List<OrderBy> orderBy = null;
+    private boolean usePaging = false;
     //todo aguzanov эта ссылка не должна передавать в Query
-    protected Map<String, List<Integer>> namedParams = new HashMap<String, List<Integer>>();
+    private Map<String, List<Integer>> namedParams = new HashMap<String, List<Integer>>();
 
     private JoinRelationFactory relationFactory;
     private ColumnFactory columnFactory;
@@ -39,6 +36,10 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
         this.dbTool = dbTool;
         this.relationFactory = new JoinRelationFactory(this);
         this.columnFactory = new ColumnFactory(this);
+    }
+
+    protected boolean isUsePaging() {
+        return usePaging;
     }
 
     JoinRelationFactory getRelationFactory() {
@@ -228,7 +229,7 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
         return c == '+' || c == '-' || c == ' ' || c == ')' || c == '(' || c == '\n' || c == '\t' || c == ',';
     }
 
-    protected String createWhere(Condition condition, List<Integer> paramsTypes) {
+    private String createWhere(Condition condition, List<Integer> paramsTypes) {
         StringBuilder result = new StringBuilder();
 
         createConditionString(condition, paramsTypes, result);
