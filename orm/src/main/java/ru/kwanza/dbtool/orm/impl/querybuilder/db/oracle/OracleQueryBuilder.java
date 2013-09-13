@@ -19,15 +19,4 @@ public class OracleQueryBuilder<T> extends AbstractQueryBuilder<T> {
         return new OracleQuery<T>(config);
     }
 
-    protected StringBuilder createSQLString(String fieldsString, String from, String where, String orderBy) {
-        StringBuilder sql = super.createSQLString(fieldsString,from , where, orderBy );
-        if (isUsePaging()) {
-            sql = new StringBuilder("SELECT  * FROM (")
-                    .append(sql)
-                    .append(") WHERE rownum <= ?");
-        }
-        return sql;
-    }
-
-
 }

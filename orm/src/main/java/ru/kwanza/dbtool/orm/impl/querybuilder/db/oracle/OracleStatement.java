@@ -3,6 +3,8 @@ package ru.kwanza.dbtool.orm.impl.querybuilder.db.oracle;
 import ru.kwanza.dbtool.orm.impl.querybuilder.QueryConfig;
 import ru.kwanza.dbtool.orm.impl.querybuilder.StatementImpl;
 
+import java.util.Arrays;
+
 /**
  * @author Alexander Guzanov
  */
@@ -12,19 +14,22 @@ public class OracleStatement<T> extends StatementImpl<T> {
     }
 
     @Override
-    protected Object[] createParamsArray(QueryConfig<T> config, int paramsCount) {
-        Object[] params;
-        if (config.isUsePaging()) {
-            params = new Object[paramsCount + 1];
-        } else {
-            params = new Object[paramsCount];
+    protected String prepareSql(String sql) {
+        if (isUsePaging()) {
+            sql = "SELECT  * FROM (" + sql + ") WHERE rownum <= ?";
         }
-
-        return params;
+        return sql;
     }
 
     @Override
-    protected void installPagingParams(Object[] params, int maxSize, int offset) {
-        params[params.length - 1] = (long) maxSize + (long) offset;
+    protected Object[] prepareParams(Object[] params) {
+        if (!isUsePaging()) {
+            return params;
+        }
+
+        final Object[] result = Arrays.copyOf(params, params.length + 1);
+        result[result.length - 1] = getMaxSize() + getOffset();
+
+        return result;
     }
 }

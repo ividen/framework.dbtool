@@ -32,47 +32,53 @@ public abstract class StatementImpl<T> implements IStatement<T> {
 
     public StatementImpl(QueryConfig<T> config) {
         this.config = config;
-        int paramsCount = config.getParamsCount();
-        params = createParamsArray(config, paramsCount);
+        this.params = new Object[config.getParamsCount()];
     }
-
-    protected abstract Object[] createParamsArray(QueryConfig<T> config, int paramsCount);
 
     public T select() {
         final Object[] result = new Object[1];
 
-        SelectUtil.batchSelect(config.getDbTool().getJdbcTemplate(), prepareSql(), new SingleObjectObjectExtractor<T>(),
+        SelectUtil.batchSelect(config.getDbTool().getJdbcTemplate(), prepareSql(config.getSql()), new SingleObjectObjectExtractor<T>(),
                 new SelectUtil.Container<Collection<T>>() {
                     public void add(Collection<T> objects) {
                         if (objects != null && !objects.isEmpty()) {
                             result[0] = objects.iterator().next();
                         }
                     }
-                }, params, getResultSetType());
+                }, prepareParams(params), getResultSetType());
 
         return (T) result[0];
     }
 
     public IStatement<T> paging(int offset, int maxSize) {
-        if (!config.isUsePaging()) {
-            throw new IllegalStateException("Query don't build with paging");
-        }
         this.maxSize = maxSize;
         this.offset = offset;
-
-        installPagingParams(params, maxSize, offset);
 
         return this;
     }
 
-    protected abstract void installPagingParams(Object[] params, int maxSize, int offset);
+    protected boolean isUsePaging(){
+        return maxSize!=null && offset!=null;
+    }
+
+    protected Integer getMaxSize() {
+        return maxSize;
+    }
+
+    protected Integer getOffset() {
+        return offset;
+    }
 
     public QueryConfig<T> getConfig() {
         return config;
     }
 
-    protected String prepareSql() {
-        return config.getSql();
+    protected String prepareSql(String sql) {
+        return sql;
+    }
+
+    protected Object[] prepareParams(Object[] params){
+        return params;
     }
 
     public List<T> selectList() {
@@ -82,15 +88,14 @@ public abstract class StatementImpl<T> implements IStatement<T> {
     }
 
     public void selectList(final List<T> result) {
-        SelectUtil.batchSelect(config.getDbTool().getJdbcTemplate(), prepareSql(), new ObjectExtractor<T>(),
+        SelectUtil.batchSelect(config.getDbTool().getJdbcTemplate(), prepareSql(config.getSql()), new ObjectExtractor<T>(),
                 new SelectUtil.Container<Collection<T>>() {
                     public void add(Collection<T> objects) {
                         if (objects != null) {
                             result.addAll(objects);
                         }
                     }
-                }, params, getResultSetType());
-
+                }, prepareParams(params), getResultSetType());
     }
 
     public <F> void selectMapList(String propertyName, final Map<F, List<T>> result, final ListProducer<T> listProducer) {
@@ -99,7 +104,7 @@ public abstract class StatementImpl<T> implements IStatement<T> {
             throw new IllegalArgumentException("Unknown field name!");
         }
 
-        SelectUtil.batchSelect(config.getDbTool().getJdbcTemplate(), prepareSql(), new MapExtractor(fieldMapping),
+        SelectUtil.batchSelect(config.getDbTool().getJdbcTemplate(), prepareSql(config.getSql()), new MapExtractor(fieldMapping),
                 new SelectUtil.Container<Collection<KeyValue<F, T>>>() {
                     public void add(Collection<KeyValue<F, T>> objects) {
                         for (KeyValue<F, T> kv : objects) {
@@ -111,7 +116,7 @@ public abstract class StatementImpl<T> implements IStatement<T> {
                             vs.add(kv.getValue());
                         }
                     }
-                }, params, getResultSetType());
+                }, prepareParams(params), getResultSetType());
     }
 
     public <F> void selectMap(String propertyName, final Map<F, T> result) {
@@ -120,14 +125,14 @@ public abstract class StatementImpl<T> implements IStatement<T> {
             throw new IllegalArgumentException("Unknown field name!");
         }
 
-        SelectUtil.batchSelect(config.getDbTool().getJdbcTemplate(), prepareSql(), new MapExtractor(fieldMapping),
+        SelectUtil.batchSelect(config.getDbTool().getJdbcTemplate(), prepareSql(config.getSql()), new MapExtractor(fieldMapping),
                 new SelectUtil.Container<Collection<KeyValue<F, T>>>() {
                     public void add(Collection<KeyValue<F, T>> objects) {
                         for (KeyValue<F, T> kv : objects) {
                             result.put(kv.getKey(), kv.getValue());
                         }
                     }
-                }, params, getResultSetType());
+                }, prepareParams(params), getResultSetType());
 
     }
 
@@ -174,12 +179,12 @@ public abstract class StatementImpl<T> implements IStatement<T> {
     @Override
     public String toString() {
         return "Statement{" +
-                "query='" + prepareSql() + '\'' +
+                "query='" + prepareSql(config.getSql()) + '\'' +
                 '}';
     }
 
     private int getResultSetType() {
-        return !config.isUsePaging() ? ResultSet.TYPE_FORWARD_ONLY : ResultSet.TYPE_SCROLL_INSENSITIVE;
+        return !isUsePaging() ? ResultSet.TYPE_FORWARD_ONLY : ResultSet.TYPE_SCROLL_INSENSITIVE;
     }
 
     private class ObjectExtractor<T> extends BaseExtractor<T> {

@@ -127,7 +127,6 @@ public class PostgreSQLQueryBuilderTest extends AbstractJUnit4SpringContextTests
     @Test
     public void testBuildConditionsWithLimit() {
         AbstractQuery<TestEntity> query1 = (AbstractQuery<TestEntity>) em.queryBuilder(TestEntity.class)
-                .usePaging(true)
                 .where(
                         Condition.and(
                                 Condition.in("id"),
@@ -155,7 +154,6 @@ public class PostgreSQLQueryBuilderTest extends AbstractJUnit4SpringContextTests
         assertEquals(query1.getConfig().getParamsCount(), 11);
 
         AbstractQuery<TestEntity> query2 = (AbstractQuery<TestEntity>) em.queryBuilder(TestEntity.class)
-                .usePaging(true)
                 .where(
                         Condition.or(
                                 Condition.in("id"),
@@ -182,7 +180,6 @@ public class PostgreSQLQueryBuilderTest extends AbstractJUnit4SpringContextTests
         assertEquals(query1.getConfig().getParamsCount(), 11);
 
         AbstractQuery<TestEntity> query3 = (AbstractQuery<TestEntity>) em.queryBuilder(TestEntity.class)
-                .usePaging(true)
                 .where(
                         Condition.and(
                                 Condition.or(
@@ -221,7 +218,6 @@ public class PostgreSQLQueryBuilderTest extends AbstractJUnit4SpringContextTests
     @Test
     public void testBuildWithouCondition() {
         AbstractQuery<TestEntity> query1 = (AbstractQuery<TestEntity>) em.queryBuilder(TestEntity.class)
-                .usePaging(true)
                 .orderBy("id").orderBy("stringField DESC").create();
         assertEquals(
                 query1.getConfig().getSql(),
@@ -234,7 +230,6 @@ public class PostgreSQLQueryBuilderTest extends AbstractJUnit4SpringContextTests
     @Test(expected = IllegalStateException.class)
     public void testBadBuild_where() {
         AbstractQuery<TestEntity> query1 = (AbstractQuery<TestEntity>) em.queryBuilder(TestEntity.class)
-                .usePaging(true)
                 .where(Condition.like("id"))
                 .where(Condition.like("id"))
                 .orderBy("id").orderBy("stringField DESC").create();
