@@ -44,7 +44,6 @@ public class Main {
                     "entity_eid=\"" + (i - 1500) + "\"  entity_fid=\"" + (i - 4500) + "\" />");
         }
 
-
         for (int j = 0; j < 1500; j++) {
             writer.println("<test_entity id=\"" + j + "\" " +
                     "int_field=\"10\" " +
@@ -70,7 +69,6 @@ public class Main {
                     "entity_cid=\"" + (j + 9000) + "\" " +
                     "entity_did=\"" + (j + 3000) + "\"/>");
         }
-
 
         writer.println("</dataset>");
         writer.flush();

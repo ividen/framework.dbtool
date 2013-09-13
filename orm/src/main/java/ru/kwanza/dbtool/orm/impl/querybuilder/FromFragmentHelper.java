@@ -26,13 +26,13 @@ class FromFragmentHelper {
         if (rootRelations.getAllChilds() != null) {
             for (JoinRelation joinRelation : rootRelations.getAllChilds().values()) {
                 final Class relationClass = joinRelation.getFetchMapping().getRelationClass();
-                fromPart.append(joinRelation.getType() == Join.Type.LEFT ? "\n\tLEFT JOIN " : "\n\tINNER JOIN ")
+                fromPart.append(joinRelation.getType() == Join.Type.LEFT ? " LEFT JOIN " : " INNER JOIN ")
                         .append(builder.getRegistry().getTableName(relationClass)).append(' ').append(joinRelation.getAlias())
                         .append(" ON ").append(rootRelations.getAlias() == null
                         ? builder.getRegistry().getTableName(builder.getEntityClass())
                         : rootRelations.getAlias()).append('.').append(joinRelation.getFetchMapping().getPropertyMapping().getColumn())
                         .append('=').append(joinRelation.getAlias()).append('.')
-                        .append(joinRelation.getFetchMapping().getRelationPropertyMapping().getColumn());
+                        .append(joinRelation.getFetchMapping().getRelationPropertyMapping().getColumn()).append(' ');
 
                 processJoinRelation(fromPart, joinRelation);
             }

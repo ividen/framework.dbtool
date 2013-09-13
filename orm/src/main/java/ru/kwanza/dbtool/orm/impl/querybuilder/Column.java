@@ -14,11 +14,17 @@ class Column {
         this.fieldMapping = fieldMapping;
     }
 
-    static String getFullColumnName(JoinRelation relation,FieldMapping fieldMapping) {
+    static String getFullColumnName(JoinRelation relation, FieldMapping fieldMapping) {
+        if (relation.isRoot() && relation.getAllChilds() == null) {
+            return fieldMapping.getColumn();
+        }
         return relation.getAlias() + "_" + fieldMapping.getColumn();
     }
 
     String getColumnName() {
+        if (relation.isRoot() && relation.getAllChilds() == null) {
+            return fieldMapping.getColumn();
+        }
         return relation.getAlias() + "." + fieldMapping.getColumn();
     }
 

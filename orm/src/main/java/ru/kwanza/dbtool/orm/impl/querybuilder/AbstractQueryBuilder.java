@@ -151,13 +151,13 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
 
     protected StringBuilder createSQLString(String fieldsString, String from, String where, String orderBy) {
         StringBuilder sql;
-        sql = new StringBuilder("SELECT ").append(fieldsString).append("\nFROM ").append(from);
+        sql = new StringBuilder("SELECT ").append(fieldsString).append(" FROM ").append(from);
         if (where.length() > 0) {
-            sql.append("\nWHERE ").append(where);
+            sql.append(" WHERE ").append(where);
         }
 
         if (orderBy.length() > 0) {
-            sql.append("\nORDER BY ").append(orderBy);
+            sql.append(" ORDER BY ").append(orderBy);
         }
         return sql;
     }
@@ -180,6 +180,7 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
     }
 
     public IQueryBuilder<T> orderBy(OrderBy orderBy) {
+        checkOrderBy();
         this.orderBy.add(orderBy);
         return this;
     }

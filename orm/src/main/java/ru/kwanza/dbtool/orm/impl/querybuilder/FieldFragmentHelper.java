@@ -24,13 +24,11 @@ class FieldFragmentHelper {
     }
 
     private void processFields(String alias, JoinRelation root, StringBuilder result) {
-        Collection<FieldMapping> fields = root == null || root.getFetchMapping() == null
+        Collection<FieldMapping> fields = root.getFetchMapping() == null
                 ? builder.getRegistry().getFieldMappings(builder.getEntityClass())
                 : builder.getRegistry().getFieldMappings(root.getFetchMapping().getRelationClass());
         if (fields != null) {
             for (FieldMapping fm : fields) {
-                result.append("\n\t");
-
                 if (alias != null) {
                     result.append(alias).append('.').append(fm.getColumn()).append(' ').append(alias).append('_').append(fm.getColumn())
                             .append(",");

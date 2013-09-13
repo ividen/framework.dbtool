@@ -1,18 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:dbtool-orm="http://www.kwanza-systems.ru/schema/dbtool-orm"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:dbtool-orm="http://www.kwanza-systems.ru/schema/dbtool-orm"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.kwanza-systems.ru/schema/dbtool-orm http://www.kwanza-systems.ru/schema/dbtool-orm.xsd">
-
-
-    <bean id="propertyPlaceholderConfigurer"
-          class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-        <property name="locations">
-            <list>
-                <value>classpath:db_mssql.properties</value>
-            </list>
-        </property>
-    </bean>
-
 
     <import resource="classpath:dbtool-config.xml"/>
     <import resource="classpath:dbtool-orm-config.xml"/>
@@ -27,5 +17,7 @@
         <property name="url" value="${jdbc.connectionUrl}"/>
         <property name="username" value="${jdbc.username}"/>
         <property name="password" value="${jdbc.password}"/>
+        <property name="defaultCatalog" value="${jdbc.schema}" />
     </bean>
+
 </beans>

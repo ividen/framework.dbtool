@@ -57,8 +57,8 @@ public abstract class StatementImpl<T> implements IStatement<T> {
         return this;
     }
 
-    protected boolean isUsePaging(){
-        return maxSize!=null && offset!=null;
+    protected boolean isUsePaging() {
+        return maxSize != null && offset != null;
     }
 
     protected Integer getMaxSize() {
@@ -77,7 +77,7 @@ public abstract class StatementImpl<T> implements IStatement<T> {
         return sql;
     }
 
-    protected Object[] prepareParams(Object[] params){
+    protected Object[] prepareParams(Object[] params) {
         return params;
     }
 
@@ -283,9 +283,8 @@ public abstract class StatementImpl<T> implements IStatement<T> {
         }
 
         private void readAndFill(ResultSet rs, Class entityClass, JoinRelation relation, Object obj) throws SQLException {
-            String alias = relation.getAlias();
             for (FieldMapping idf : config.getRegistry().getFieldMappings(entityClass)) {
-                Object value = FieldValueExtractor.getValue(rs, alias + idf.getColumn(), idf.getEntityFiled().getType());
+                Object value = FieldValueExtractor.getValue(rs, Column.getFullColumnName(relation,idf), idf.getEntityFiled().getType());
                 idf.getEntityFiled().setValue(obj, value);
             }
 

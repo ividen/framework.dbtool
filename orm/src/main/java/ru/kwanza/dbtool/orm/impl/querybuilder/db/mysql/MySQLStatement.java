@@ -23,13 +23,13 @@ public class MySQLStatement<T> extends StatementImpl<T> {
 
     @Override
     protected Object[] prepareParams(Object[] params) {
-        if (isUsePaging()) {
+        if (!isUsePaging()) {
             return params;
         }
 
         final Object[] result = Arrays.copyOf(params, params.length + 2);
-        params[params.length - 2] = getOffset();
-        params[params.length - 1] = getMaxSize();
+        result[result.length - 2] = getOffset();
+        result[result.length - 1] = getMaxSize();
 
         return result;
 

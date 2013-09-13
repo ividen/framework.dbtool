@@ -44,10 +44,10 @@ class OrderByFragmentHelper {
         if (orderByList != null && !orderByList.isEmpty()) {
             for (OrderBy ob : orderByList) {
                 orderBy.append(builder.getColumnFactory().findColumn(ob.getPropertyName()).getColumnName()).append(' ').append(ob.getType())
-                        .append(", ");
+                        .append(',');
             }
 
-            orderBy.deleteCharAt(orderBy.length() - 2);
+            orderBy.deleteCharAt(orderBy.length() - 1);
         }
 
         return orderBy.toString();

@@ -29,8 +29,8 @@ public class PostgreSQLStatement<T> extends StatementImpl<T> {
         }
 
         final Object[] result = Arrays.copyOf(params, params.length + 2);
-        params[params.length - 2] = getMaxSize();
-        params[params.length - 1] = getOffset();
+        result[result.length - 2] = getMaxSize();
+        result[result.length - 1] = getOffset();
 
         return result;
     }
