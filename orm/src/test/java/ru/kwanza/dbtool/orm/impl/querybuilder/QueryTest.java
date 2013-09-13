@@ -90,7 +90,6 @@ public abstract class QueryTest extends AbstractJUnit4SpringContextTests {
     @Test
     public void testSelectIn() {
         IQuery<TestEntity> query = em.queryBuilder(TestEntity.class)
-                .usePaging(true)
                 .where(Condition.in("id"))
                 .orderBy("id").create();
         System.out.println(query);
@@ -109,7 +108,6 @@ public abstract class QueryTest extends AbstractJUnit4SpringContextTests {
     @Test
     public void testSelect_With_NamedParams() {
         IQuery<TestEntity> query = em.queryBuilder(TestEntity.class)
-                .usePaging(true)
                 .where(Condition.and(
                         Condition.isGreaterOrEqual("id", "id"),
                         Condition.isLessOrEqual("id", "id"))
@@ -130,7 +128,6 @@ public abstract class QueryTest extends AbstractJUnit4SpringContextTests {
     @Test(expected = java.lang.IllegalArgumentException.class)
     public void testSelect_WrongParams_1() {
         IQuery<TestEntity> query = em.queryBuilder(TestEntity.class)
-                .usePaging(true)
                 .orderBy("id").create();
 
         query.prepare().paging(0,1000).setParameter(1, Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
@@ -139,7 +136,6 @@ public abstract class QueryTest extends AbstractJUnit4SpringContextTests {
     @Test(expected = java.lang.IllegalArgumentException.class)
     public void testSelect_WrongParams_2() {
         IQuery<TestEntity> query = em.queryBuilder(TestEntity.class)
-                .usePaging(true)
                 .where(Condition.in("id"))
                 .orderBy("id").create();
 
@@ -151,7 +147,6 @@ public abstract class QueryTest extends AbstractJUnit4SpringContextTests {
     @Test(expected = java.lang.IllegalArgumentException.class)
     public void testSelect_WrongParams_3() {
         IQuery<TestEntity> query = em.queryBuilder(TestEntity.class)
-                .usePaging(true)
                 .where(Condition.in("id1"))
                 .orderBy("id").create();
         IStatement<TestEntity> statement = query.prepare().paging(0,1000);
@@ -161,7 +156,6 @@ public abstract class QueryTest extends AbstractJUnit4SpringContextTests {
     @Test(expected = java.lang.IllegalArgumentException.class)
     public void testSelect_WrongParams_4() {
         IQuery<TestEntity> query = em.queryBuilder(TestEntity.class)
-                .usePaging(true)
                 .where(Condition.in("id"))
                 .orderBy("id1").create();
         IStatement<TestEntity> statement = query.prepare().paging(0,1000);
@@ -172,7 +166,6 @@ public abstract class QueryTest extends AbstractJUnit4SpringContextTests {
     @Test(expected = java.lang.IllegalArgumentException.class)
     public void testSelect_groupField_5() {
         IQuery<TestEntity> query = em.queryBuilder(TestEntity.class)
-                .usePaging(true)
                 .orderBy("id").create();
         IStatement<TestEntity> statement = query.prepare().paging(0,1000);
         statement.selectMap("title");
@@ -181,7 +174,6 @@ public abstract class QueryTest extends AbstractJUnit4SpringContextTests {
     @Test(expected = java.lang.IllegalArgumentException.class)
     public void testSelect_groupField_6() {
         IQuery<TestEntity> query = em.queryBuilder(TestEntity.class)
-                .usePaging(true)
                 .orderBy("id").create();
         IStatement<TestEntity> statement = query.prepare().paging(0,1000);
         statement.selectMapList("title");
@@ -190,7 +182,6 @@ public abstract class QueryTest extends AbstractJUnit4SpringContextTests {
     @Test
     public void testSelect_offset_0() {
         IQuery<TestEntity> query = em.queryBuilder(TestEntity.class)
-                .usePaging(true)
                 .orderBy("id").create();
 
         IStatement<TestEntity> statement = query.prepare().paging(99,1);
@@ -207,7 +198,6 @@ public abstract class QueryTest extends AbstractJUnit4SpringContextTests {
     @Test
     public void testSelect_offset_1() {
         IQuery<TestEntity> query = em.queryBuilder(TestEntity.class)
-                .usePaging(true)
                 .orderBy("id").create();
 
         IStatement<TestEntity> statement = query.prepare().paging(0,1);
@@ -223,7 +213,6 @@ public abstract class QueryTest extends AbstractJUnit4SpringContextTests {
     @Test
     public void testSelect_offset_2() {
         IQuery<TestEntity> query = em.queryBuilder(TestEntity.class)
-                .usePaging(true)
                 .orderBy("id").create();
 
         IStatement<TestEntity> statement = query.prepare().paging(99,101);
@@ -235,7 +224,6 @@ public abstract class QueryTest extends AbstractJUnit4SpringContextTests {
     @Test
     public void testSelect_offset_noteixts() {
         IQuery<TestEntity> query = em.queryBuilder(TestEntity.class)
-                .usePaging(true)
                 .where(Condition.isNull("id"))
 
                 .orderBy("id").create();
@@ -250,7 +238,6 @@ public abstract class QueryTest extends AbstractJUnit4SpringContextTests {
     @Test
     public void testSelect_offset_greater() {
         IQuery<TestEntity> query = em.queryBuilder(TestEntity.class)
-                .usePaging(true)
                 .where(Condition.isEqual("id"))
                 .orderBy("id").create();
         IStatement<TestEntity> statement = query.prepare().paging(99,1);

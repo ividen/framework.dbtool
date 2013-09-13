@@ -18,15 +18,4 @@ public class MySQLQueryBuilder<T> extends AbstractQueryBuilder<T> {
     protected IQuery<T> createQuery(QueryConfig config) {
         return new MySQLQuery<T>(config);
     }
-
-    protected StringBuilder createSQLString(String fieldsString, String from, String where, String orderBy) {
-        StringBuilder sql = createSQLString(fieldsString, from, where, orderBy); ;
-        if (isUsePaging()) {
-            sql.append("LIMIT ?,?");
-        } else {
-
-        }
-        return sql;
-    }
-
 }

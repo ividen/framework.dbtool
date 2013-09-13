@@ -83,9 +83,6 @@ public class FilteringImpl<T> implements IFiltering<T> {
     private IStatement<T> createStatement() {
         IQueryBuilder<T> queryBuilder = em.queryBuilder(entityClass);
         final boolean usePaging = maxSize != null && offset != null;
-        if (usePaging) {
-            queryBuilder.usePaging(true);
-        }
 
         LinkedList params = new LinkedList();
         LinkedList<Condition> conditions = new LinkedList<Condition>();

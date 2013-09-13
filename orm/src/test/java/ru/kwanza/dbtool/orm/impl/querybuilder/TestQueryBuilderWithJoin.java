@@ -82,7 +82,7 @@ public class TestQueryBuilderWithJoin extends AbstractJUnit4SpringContextTests {
     @Test
     public void test6() {
         AbstractQuery<TestEntity> query1 = (AbstractQuery<TestEntity>) em.queryBuilder(TestEntity.class)
-                .join("#entityA, #entityB, #entityC {entityE{entityG},entityF} ,#entityD").usePaging(true).create();
+                .join("#entityA, #entityB, #entityC {entityE{entityG},entityF} ,#entityD").create();
 
         System.out.println(query1.getConfig().getSql());
     }

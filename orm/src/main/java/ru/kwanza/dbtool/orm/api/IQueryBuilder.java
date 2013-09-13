@@ -9,8 +9,6 @@ public interface IQueryBuilder<T> {
 
     IQuery<T> createNative(String sql);
 
-    IQueryBuilder<T> usePaging(boolean userPaging);
-
     IQueryBuilder<T> join(Join joinClause);
 
     IQueryBuilder<T> join(String string);

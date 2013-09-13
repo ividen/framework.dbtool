@@ -19,15 +19,4 @@ public class PostgreSQLQueryBuilder<T> extends AbstractQueryBuilder<T> {
     protected IQuery<T> createQuery(QueryConfig config) {
         return new PostgreSQLQuery<T>(config);
     }
-
-    protected StringBuilder createSQLString(String fieldsString, String from, String where, String orderBy) {
-        StringBuilder sql = super.createSQLString(fieldsString, from, where, orderBy);
-        if (isUsePaging()) {
-            sql.append(" LIMIT ?");
-            sql.append(" OFFSET ?");
-        }
-
-        return sql;
-    }
-
 }

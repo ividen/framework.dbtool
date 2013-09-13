@@ -16,17 +16,15 @@ public class QueryConfig<T> {
     private final List<Integer> paramTypes;
     private final IEntityMappingRegistry registry;
     private final Class<T> entityClass;
-    private final boolean usePaging;
     private final JoinRelation rootRelation;
     private ParamsHolder holder;
     private int paramsCount;
 
 
-    QueryConfig(DBTool dbTool, IEntityMappingRegistry registry, Class<T> entityClass, String sql, JoinRelation rootRelations, boolean usePaging,
+    QueryConfig(DBTool dbTool, IEntityMappingRegistry registry, Class<T> entityClass, String sql, JoinRelation rootRelations,
                 List<Integer> paramTypes, ParamsHolder holder) {
         this.dbTool = dbTool;
         this.sql = sql;
-        this.usePaging = usePaging;
         this.paramTypes = paramTypes;
         this.registry = registry;
         this.entityClass = entityClass;
@@ -49,10 +47,6 @@ public class QueryConfig<T> {
 
     public List<Integer> getParamTypes() {
         return paramTypes;
-    }
-
-    public boolean isUsePaging() {
-        return usePaging;
     }
 
     public IEntityMappingRegistry getRegistry() {

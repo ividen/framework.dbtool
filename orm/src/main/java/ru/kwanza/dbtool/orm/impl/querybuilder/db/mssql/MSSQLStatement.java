@@ -15,22 +15,12 @@ public class MSSQLStatement<T> extends StatementImpl<T> {
     }
 
     @Override
-    protected Object[] createParamsArray(QueryConfig<T> config, int paramsCount) {
-        return new Object[paramsCount];
-    }
-
-    @Override
-    protected void installPagingParams(Object[] params, int maxSize, int offset) {
-        this.top = (long) maxSize + (long) offset;
-    }
-
-    @Override
-    protected String prepareSql() {
-        String sql = getConfig().getSql();
-        if (getConfig().isUsePaging()) {
-            sql = MSSQLQueryBuilder.replaceTop(sql, top);
+    protected String prepareSql(String sql) {
+        if (isUsePaging()) {
+            sql = "SELECT TOP " + (getMaxSize()+getOffset()) + " * FROM ("+sql+")";
         }
 
         return sql;
     }
+
 }

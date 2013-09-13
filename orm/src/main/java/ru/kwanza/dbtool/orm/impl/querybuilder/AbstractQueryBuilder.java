@@ -21,7 +21,6 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
     private Class entityClass;
     private Condition condition;
     private List<OrderBy> orderBy = null;
-    private boolean usePaging = false;
 
     private JoinRelationFactory relationFactory;
     private ColumnFactory columnFactory;
@@ -44,10 +43,6 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
         this.fieldFragmentHelper = new FieldFragmentHelper(this);
         this.fromFragmentHelper = new FromFragmentHelper(this);
         this.orderByFragmentHelper = new OrderByFragmentHelper(this);
-    }
-
-    protected boolean isUsePaging() {
-        return usePaging;
     }
 
     JoinRelationFactory getRelationFactory() {
@@ -140,12 +135,6 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
         }
     }
 
-    public IQueryBuilder<T> usePaging(boolean userPaging) {
-        this.usePaging = userPaging;
-
-        return this;
-    }
-
     protected abstract IQuery<T> createQuery(QueryConfig config);
 
     public IQuery<T> createNative(String sql) {
@@ -156,7 +145,7 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
     }
 
     private QueryConfig<T> createConfig(List<Integer> paramsTypes, JoinRelation rootRelations, String sqlString, ParamsHolder holder) {
-        return new QueryConfig<T>(dbTool, registry, entityClass, sqlString, rootRelations, usePaging, paramsTypes, holder);
+        return new QueryConfig<T>(dbTool, registry, entityClass, sqlString, rootRelations, paramsTypes, holder);
     }
 
 
