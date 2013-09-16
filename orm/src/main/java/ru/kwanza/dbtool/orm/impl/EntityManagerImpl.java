@@ -3,7 +3,10 @@ package ru.kwanza.dbtool.orm.impl;
 import ru.kwanza.dbtool.core.DBTool;
 import ru.kwanza.dbtool.core.UpdateException;
 import ru.kwanza.dbtool.core.VersionGenerator;
-import ru.kwanza.dbtool.orm.api.*;
+import ru.kwanza.dbtool.orm.api.IEntityBatcher;
+import ru.kwanza.dbtool.orm.api.IEntityManager;
+import ru.kwanza.dbtool.orm.api.IFiltering;
+import ru.kwanza.dbtool.orm.api.IQueryBuilder;
 import ru.kwanza.dbtool.orm.impl.fetcher.FetcherImpl;
 import ru.kwanza.dbtool.orm.impl.filtering.FilteringImpl;
 import ru.kwanza.dbtool.orm.impl.mapping.FieldMapping;
@@ -28,7 +31,7 @@ public class EntityManagerImpl implements IEntityManager {
 
     private OperationFactory operationFactory;
 
-    private IFetcher fetcher;
+    private FetcherImpl fetcher;
 
     public void init() {
         this.operationFactory = new OperationFactory(mappingRegistry, dbTool);
@@ -120,8 +123,12 @@ public class EntityManagerImpl implements IEntityManager {
         return new EntityBatcherImpl(this);
     }
 
-    public IFetcher getFetcher() {
-        return fetcher;
+    public <T> void fetch(Class<T> entityClass, Collection<T> items, String relationPath) {
+        fetcher.fetch(entityClass, items, relationPath);
+    }
+
+    public <T> void fetch(T object, String relationPath) {
+        fetcher.fetch(object, relationPath);
     }
 
     public void setDbTool(DBTool dbTool) {

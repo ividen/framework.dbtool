@@ -10,7 +10,7 @@ public class FetchMapping {
     private FieldMapping relationFieldMapping;
     private EntityField fetchField;
 
-    FetchMapping(String name,
+    public FetchMapping(String name,
                  Class relationClass,
                  FieldMapping propertyFieldMapping,
                  FieldMapping relationFieldMapping,
