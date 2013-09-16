@@ -11,6 +11,7 @@ import ru.kwanza.dbtool.core.util.FieldValueExtractor;
 import ru.kwanza.dbtool.core.util.SelectUtil;
 import ru.kwanza.dbtool.orm.api.IStatement;
 import ru.kwanza.dbtool.orm.api.ListProducer;
+import ru.kwanza.dbtool.orm.impl.ObjectAllocator;
 import ru.kwanza.dbtool.orm.impl.mapping.EntityField;
 import ru.kwanza.dbtool.orm.impl.mapping.FieldMapping;
 
@@ -225,7 +226,7 @@ public abstract class StatementImpl<T> implements IStatement<T> {
             while (rs.next()) {
                 T result;
                 try {
-                    result = config.getEntityClass().newInstance();
+                    result = ObjectAllocator.newInstance(config.getEntityClass());
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
@@ -253,7 +254,7 @@ public abstract class StatementImpl<T> implements IStatement<T> {
                     return;
                 }
                 try {
-                    obj = relationClass.newInstance();
+                    obj = ObjectAllocator.newInstance(relationClass);
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
@@ -284,7 +285,7 @@ public abstract class StatementImpl<T> implements IStatement<T> {
 
         private void readAndFill(ResultSet rs, Class entityClass, JoinRelation relation, Object obj) throws SQLException {
             for (FieldMapping idf : config.getRegistry().getFieldMappings(entityClass)) {
-                Object value = FieldValueExtractor.getValue(rs, Column.getFullColumnName(relation,idf), idf.getEntityFiled().getType());
+                Object value = FieldValueExtractor.getValue(rs, Column.getFullColumnName(relation, idf), idf.getEntityFiled().getType());
                 idf.getEntityFiled().setValue(obj, value);
             }
 
