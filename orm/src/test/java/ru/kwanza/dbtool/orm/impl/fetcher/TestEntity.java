@@ -2,13 +2,14 @@ package ru.kwanza.dbtool.orm.impl.fetcher;
 
 import ru.kwanza.dbtool.orm.annotations.*;
 
+import java.io.Serializable;
 import java.util.Date;
 
 /**
  * @author Alexander Guzanov
  */
 @Entity(name = "TestEntity", table = "test_entity")
-public class TestEntity {
+public class TestEntity  implements Serializable{
     @IdField(column = "id")
     private Long id;
     @Field(column = "int_field")
@@ -40,6 +41,13 @@ public class TestEntity {
     private TestEntityC entityC;
     @ManyToOne(property = "entityDID")
     private TestEntityD entityD;
+
+    public TestEntity(Long id, Integer intField, String stringField, Date dateField) {
+        this.id = id;
+        this.intField = intField;
+        this.stringField = stringField;
+        this.dateField = dateField;
+    }
 
     public Long getId() {
         return id;

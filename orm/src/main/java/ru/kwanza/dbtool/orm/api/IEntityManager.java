@@ -46,4 +46,8 @@ public interface IEntityManager {
     <T> void fetch(Class<T> entityClass, Collection<T> items, String relationPath);
 
     <T> void fetch(T object, String relationPath);
+
+    <T> void fetchLazy(Class<T> entityClass, Collection<T> items);
+
+    <T> void fetchLazy(T object);
 }

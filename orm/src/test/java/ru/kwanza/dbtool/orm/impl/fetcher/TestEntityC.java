@@ -2,13 +2,14 @@ package ru.kwanza.dbtool.orm.impl.fetcher;
 
 import ru.kwanza.dbtool.orm.annotations.*;
 
+import java.io.Serializable;
 import java.util.Collection;
 
 /**
  * @author Alexander Guzanov
  */
 @Entity(name = "TestEntityC", table = "test_entity_c")
-public class TestEntityC {
+public class TestEntityC   implements Serializable {
     @IdField(column = "id")
     private Long id;
     @Field(column = "title")

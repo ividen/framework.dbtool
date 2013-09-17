@@ -11,6 +11,7 @@ public final class Join {
     public enum Type {
         INNER,
         LEFT,
+        FETCH
     }
 
     //todo aguzanov конструктор с ArrayList
@@ -38,5 +39,9 @@ public final class Join {
 
     public static Join inner(String property, Join... subJoins) {
         return new Join(Type.INNER, property, subJoins);
+    }
+
+    public static Join fetch(String property, Join... subJoins) {
+        return new Join(Type.FETCH, property, subJoins);
     }
 }

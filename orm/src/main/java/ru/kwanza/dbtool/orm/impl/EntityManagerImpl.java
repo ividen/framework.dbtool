@@ -7,13 +7,16 @@ import ru.kwanza.dbtool.orm.api.IEntityBatcher;
 import ru.kwanza.dbtool.orm.api.IEntityManager;
 import ru.kwanza.dbtool.orm.api.IFiltering;
 import ru.kwanza.dbtool.orm.api.IQueryBuilder;
-import ru.kwanza.dbtool.orm.impl.fetcher.FetcherImpl;
+import ru.kwanza.dbtool.orm.impl.fetcher.Fetcher;
 import ru.kwanza.dbtool.orm.impl.filtering.FilteringImpl;
 import ru.kwanza.dbtool.orm.impl.mapping.FieldMapping;
 import ru.kwanza.dbtool.orm.impl.mapping.IEntityMappingRegistry;
 import ru.kwanza.dbtool.orm.impl.operation.OperationFactory;
 import ru.kwanza.dbtool.orm.impl.querybuilder.QueryBuilderFactory;
+import ru.kwanza.toolbox.SpringSerializable;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -21,21 +24,25 @@ import java.util.Map;
 /**
  * @author Kiryl Karatsetski
  */
-public class EntityManagerImpl implements IEntityManager {
+public class EntityManagerImpl  extends SpringSerializable implements IEntityManager{
 
+    @Resource(name="dbtool.DBTool")
     private DBTool dbTool;
 
+    @Resource(name="dbtool.VersionGenerator")
     private VersionGenerator versionGenerator;
 
+    @Resource(name="dbtool.IEntityMappingRegistry")
     private IEntityMappingRegistry mappingRegistry;
 
     private OperationFactory operationFactory;
 
-    private FetcherImpl fetcher;
+    @Resource(name="dbtool.Fetcher")
+    private Fetcher fetcher;
 
+    @PostConstruct
     public void init() {
         this.operationFactory = new OperationFactory(mappingRegistry, dbTool);
-        this.fetcher = new FetcherImpl(mappingRegistry, this);
     }
 
     public <T> T create(T object) throws UpdateException {
@@ -131,15 +138,12 @@ public class EntityManagerImpl implements IEntityManager {
         fetcher.fetch(object, relationPath);
     }
 
-    public void setDbTool(DBTool dbTool) {
-        this.dbTool = dbTool;
+    public <T> void fetchLazy(Class<T> entityClass, Collection<T> items) {
+        fetcher.fetchLazy(entityClass,items);
     }
 
-    public void setVersionGenerator(VersionGenerator versionGenerator) {
-        this.versionGenerator = versionGenerator;
+    public <T> void fetchLazy(T object) {
+        fetcher.fetchLazy(object);
     }
 
-    public void setMappingRegistry(IEntityMappingRegistry mappingRegistry) {
-        this.mappingRegistry = mappingRegistry;
-    }
 }

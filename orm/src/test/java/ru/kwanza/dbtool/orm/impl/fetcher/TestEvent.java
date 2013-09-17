@@ -2,10 +2,12 @@ package ru.kwanza.dbtool.orm.impl.fetcher;
 
 import ru.kwanza.dbtool.orm.annotations.ManyToOne;
 
+import java.io.Serializable;
+
 /**
  * @author Alexander Guzanov
  */
-public class TestEvent {
+public class TestEvent   implements Serializable {
     private Long entityId;
 
     public TestEvent(Long entityId) {

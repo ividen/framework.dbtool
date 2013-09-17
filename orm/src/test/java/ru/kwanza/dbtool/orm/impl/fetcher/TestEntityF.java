@@ -5,12 +5,14 @@ import ru.kwanza.dbtool.orm.annotations.Field;
 import ru.kwanza.dbtool.orm.annotations.IdField;
 import ru.kwanza.dbtool.orm.annotations.VersionField;
 
+import java.io.Serializable;
+
 /**
  * @author Alexander Guzanov
  */
 
 @Entity(name="TestEntityF", table = "test_entity_f")
-public class TestEntityF {
+public class TestEntityF   implements Serializable {
     @IdField(column = "id")
     private Long id;
     @Field(column = "title")

@@ -3,10 +3,12 @@ package ru.kwanza.dbtool.orm.impl.fetcher;
 import junit.framework.Assert;
 import org.junit.Test;
 
+import java.io.Serializable;
+
 /**
  * @author Alexander Guzanov
  */
-public class TestPathKey {
+public class TestPathKey implements Serializable {
 
     @Test
     public void testPathKey() {

@@ -2,6 +2,7 @@ package ru.kwanza.dbtool.orm.impl.fetcher;
 
 import ru.kwanza.dbtool.orm.annotations.*;
 
+import java.io.Serializable;
 import java.util.Collection;
 
 /**
@@ -9,7 +10,7 @@ import java.util.Collection;
  */
 
 @Entity(name = "TestEntityG", table = "test_entity_g")
-public class TestEntityG {
+public class TestEntityG   implements Serializable {
     @IdField(column = "id")
     private Long id;
     @Field(column = "title")

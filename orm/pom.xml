@@ -18,6 +18,11 @@
     <dependencies>
 
         <dependency>
+            <groupId>ru.kwanza.toolbox</groupId>
+            <artifactId>toolbox</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>ru.kwanza.dbtool</groupId>
             <artifactId>dbtool-core</artifactId>
         </dependency>
@@ -62,6 +67,11 @@
         <dependency>
             <groupId>postgresql</groupId>
             <artifactId>postgresql</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>cglib</groupId>
+            <artifactId>cglib</artifactId>
         </dependency>
 
     </dependencies>
