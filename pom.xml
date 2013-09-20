@@ -17,7 +17,12 @@
     </modules>
 
     <properties>
+        <!-- KWANZA Framweorks -->
         <dbtool.version>1.0-SNAPSHOT</dbtool.version>
+        <toolbox.version>1.0-SNAPSHOT</toolbox.version>
+        <txn.version>1.0-SNAPSHOT</txn.version>
+
+        <!-- Thirdparty Framweorks -->
         <junit.version>4.10</junit.version>
         <slf4j.version>1.6.3</slf4j.version>
         <oracle.jdbc.version>11.2.0.2.0</oracle.jdbc.version>
@@ -27,23 +32,32 @@
         <dbunit.version>2.4.8</dbunit.version>
         <springframework.version>3.2.0.RELEASE</springframework.version>
         <commons.dbcp.version>1.4</commons.dbcp.version>
-        <toolbox.version>1.0-SNAPSHOT</toolbox.version>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <toolbox.version>1.0-SNAPSHOT</toolbox.version>
-        <txn.version>1.0-SNAPSHOT</txn.version>
-        <maven.surefire.plugin.version>2.12</maven.surefire.plugin.version>
+        <asm-all.version>2.1</asm-all.version>
         <cglib.version>2.2.2</cglib.version>
-        <targetJdk>1.6</targetJdk>
+
+        <!-- Maven Plugins -->
+        <maven.surefire.plugin.version>2.12</maven.surefire.plugin.version>
+        <maven-source-plugin.version>2.1.2</maven-source-plugin.version>
+        <maven-compiler-plugin.version>2.3.2</maven-compiler-plugin.version>
+        <maven-pmd-plugin.version>2.5</maven-pmd-plugin.version>
+        <findbugs-maven-plugin.version>2.3.2</findbugs-maven-plugin.version>
+        <cobertura-maven-plugin.version>2.5.1</cobertura-maven-plugin.version>
+
+        <!-- Project config -->
+        <project.sourceEncoding>UTF-8</project.sourceEncoding>
+        <project.source.version>1.5</project.source.version>
+        <project.target.version>1.6</project.target.version>
+
     </properties>
 
     <build>
         <plugins>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.3.2</version>
+                <version>${maven-compiler-plugin.version}</version>
                 <configuration>
-                    <source>1.5</source>
-                    <target>1.6</target>
+                    <source>${project.source.version}</source>
+                    <target>${project.target.version}</target>
                 </configuration>
                 <executions>
                     <execution>
@@ -57,7 +71,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
-                <version>2.1.2</version>
+                <version>${maven-source-plugin.version}</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
@@ -84,11 +98,11 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-pmd-plugin</artifactId>
-                        <version>2.5</version>
+                        <version>${maven-pmd-plugin.version}</version>
                         <configuration>
-                            <sourceEncoding>utf-8</sourceEncoding>
+                            <sourceEncoding>${project.sourceEncoding}}</sourceEncoding>
                             <minimumTokens>100</minimumTokens>
-                            <targetJdk>1.6</targetJdk>
+                            <targetJdk>${project.target.version}</targetJdk>
                             <excludes>
                                 <exclude>*/generated/.java</exclude>
                             </excludes>
@@ -112,7 +126,7 @@
                             <effort>Max</effort>
                             <threshold>Low</threshold>
                         </configuration>
-                        <version>2.3.2</version>
+                        <version>${findbugs-maven-plugin.version}</version>
                         <executions>
                             <execution>
                                 <phase>compile</phase>
@@ -138,7 +152,7 @@
                     <plugin>
                         <groupId>org.codehaus.mojo</groupId>
                         <artifactId>cobertura-maven-plugin</artifactId>
-                        <version>2.5.1</version>
+                        <version>${cobertura-maven-plugin.version}</version>
                         <configuration>
                             <instrumentation>
                                 <excludes>
@@ -209,11 +223,17 @@
 
     <dependencyManagement>
         <dependencies>
-
+            <!-- Kwanza Frameworks -->
             <dependency>
                 <groupId>ru.kwanza.dbtool</groupId>
                 <artifactId>dbtool-core</artifactId>
                 <version>${dbtool.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>ru.kwanza.toolbox</groupId>
+                <artifactId>toolbox</artifactId>
+                <version>${toolbox.version}</version>
             </dependency>
 
             <dependency>
@@ -223,6 +243,7 @@
                 <scope>test</scope>
             </dependency>
 
+            <!-- Thrirdparty Frameworks -->
 
             <dependency>
                 <groupId>junit</groupId>
@@ -272,6 +293,7 @@
                 <scope>compile</scope>
             </dependency>
 
+            <!-- Spring libs -->
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-jdbc</artifactId>
@@ -319,12 +341,6 @@
             </dependency>
 
             <dependency>
-                <groupId>ru.kwanza.toolbox</groupId>
-                <artifactId>toolbox</artifactId>
-                <version>${toolbox.version}</version>
-            </dependency>
-
-            <dependency>
                 <groupId>cglib</groupId>
                 <artifactId>cglib</artifactId>
                 <version>${cglib.version}</version>
@@ -333,7 +349,7 @@
             <dependency>
                 <groupId>asm</groupId>
                 <artifactId>asm-all</artifactId>
-                <version>2.1</version>
+                <version>${asm-all.version}</version>
             </dependency>
 
         </dependencies>
