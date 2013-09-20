@@ -4,12 +4,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.kwanza.dbtool.core.DBTool;
 import ru.kwanza.dbtool.orm.api.*;
-import ru.kwanza.dbtool.orm.impl.RelationPathScanner;
 import ru.kwanza.dbtool.orm.impl.mapping.IEntityMappingRegistry;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author Alexander Guzanov
@@ -86,37 +84,11 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
 
 
     public IQueryBuilder<T> join(String string) {
-        final Map<String, Object> scan = new RelationPathScanner(string).scan();
-
-        for (Join join : processScanRelations(scan)) {
+        for (Join join : JoinClauseHelper.parse(string)) {
             processJoin(relationFactory.getRoot(), join);
         }
 
         return this;
-    }
-
-    private ArrayList<Join> processScanRelations(Map<String, Object> scan) {
-        final ArrayList<Join> result = new ArrayList<Join>();
-
-        for (Map.Entry<String, Object> entry : scan.entrySet()) {
-            if (entry.getValue() instanceof Map) {
-                if (entry.getKey().startsWith("#")) {
-                    result.add(Join.left(entry.getKey().substring(1).trim(),
-                            processScanRelations((Map<String, Object>) entry.getValue()).toArray(new Join[]{})));
-                } else {
-                    result.add(
-                            Join.inner(entry.getKey(), processScanRelations((Map<String, Object>) entry.getValue()).toArray(new Join[]{})));
-                }
-            } else {
-                if (entry.getKey().startsWith("#")) {
-                    result.add(Join.left(entry.getKey().substring(1).trim()));
-                } else {
-                    result.add(Join.inner(entry.getKey()));
-                }
-            }
-        }
-
-        return result;
     }
 
     public IQueryBuilder<T> join(Join joinClause) {

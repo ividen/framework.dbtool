@@ -7,13 +7,23 @@ public interface IFiltering<T> extends ISelectOperationProvider<T> {
 
     IFiltering<T> paging(Integer offset, Integer maxSize);
 
-//    IFiltering<T> join(String joinClause);
-//
-//    IFiltering<T> join(Join join);
+    IFiltering<T> join(String joinClause);
 
-    IFiltering<T> filter(boolean use, Condition condition, Object ...params);
+    IFiltering<T> join(Join join);
 
-    IFiltering<T> filter(Condition condition, Object ...params);
+    IFiltering<T> join(boolean use, String joinClause);
+
+    IFiltering<T> join(boolean use, Join join);
+
+    IFiltering<T> filter(boolean use, Condition condition, Object... params);
+
+    IFiltering<T> filter(Condition condition, Object... params);
 
     IFiltering<T> orderBy(String orderByClause);
+
+    IFiltering<T> orderBy(OrderBy orderBy);
+
+    IFiltering<T> orderBy(boolean use, String orderByClause);
+
+    IFiltering<T> orderBy(boolean use, OrderBy orderBy);
 }

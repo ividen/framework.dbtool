@@ -1,6 +1,8 @@
 package ru.kwanza.dbtool.orm.impl.filtering;
 
 import ru.kwanza.dbtool.orm.api.*;
+import ru.kwanza.dbtool.orm.impl.querybuilder.JoinClauseHelper;
+import ru.kwanza.dbtool.orm.impl.querybuilder.OrderByFragmentHelper;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -16,8 +18,9 @@ public class FilteringImpl<T> implements IFiltering<T> {
     private Class<T> entityClass;
     private Integer offset;
     private Integer maxSize;
-    private ArrayList<Filter> filters = new ArrayList<Filter>();
-    private StringBuilder orderByClause;
+    private List<Filter> filters = null;
+    private List<Join> joins = null;
+    private List<OrderBy> orderBys = null;
 
     public FilteringImpl(IEntityManager em, Class<T> entityClass) {
         this.em = em;
@@ -31,12 +34,59 @@ public class FilteringImpl<T> implements IFiltering<T> {
         return this;
     }
 
+    public IFiltering<T> join(String joinClause) {
+        getJoins().addAll(JoinClauseHelper.parse(joinClause));
+        return this;
+    }
+
+    public IFiltering<T> join(Join join) {
+        getJoins().add(join);
+        return this;
+    }
+
+    public IFiltering<T> join(boolean use, String joinClause) {
+        if (!use) {
+            return this;
+        }
+
+        return join(joinClause);
+    }
+
+    public IFiltering<T> join(boolean use, Join join) {
+        if (!use) {
+            return this;
+        }
+
+        return join(join);
+    }
+
     public IFiltering<T> filter(boolean use, Condition condition, Object... params) {
         if (use) {
-            filters.add(new Filter(condition, params));
+            getFilters().add(new Filter(condition, params));
         }
 
         return this;
+    }
+
+    private List<Filter> getFilters() {
+        if (filters == null) {
+            filters = new ArrayList<Filter>();
+        }
+        return filters;
+    }
+
+    private List<Join> getJoins() {
+        if (joins == null) {
+            joins = new ArrayList<Join>();
+        }
+        return joins;
+    }
+
+    private List<OrderBy> getOrderBys() {
+        if (orderBys == null) {
+            orderBys = new ArrayList<OrderBy>();
+        }
+        return orderBys;
     }
 
     public IFiltering<T> filter(Condition condition, Object... params) {
@@ -44,12 +94,29 @@ public class FilteringImpl<T> implements IFiltering<T> {
     }
 
     public IFiltering<T> orderBy(String orderByClause) {
-        if (this.orderByClause == null) {
-            this.orderByClause = new StringBuilder(orderByClause);
-        } else {
-            this.orderByClause.append(',').append(orderByClause);
-        }
+        getOrderBys().addAll(OrderByFragmentHelper.parse(orderByClause));
         return this;
+    }
+
+    public IFiltering<T> orderBy(OrderBy orderBy) {
+        getOrderBys().add(orderBy);
+        return this;
+    }
+
+    public IFiltering<T> orderBy(boolean use, String orderByClause) {
+        if (!use) {
+            return this;
+        }
+
+        return orderBy(orderByClause);
+    }
+
+    public IFiltering<T> orderBy(boolean use, OrderBy orderBy) {
+        if (!use) {
+            return this;
+        }
+
+        return orderBy(orderBy);
     }
 
     public T select() {
@@ -103,8 +170,16 @@ public class FilteringImpl<T> implements IFiltering<T> {
             queryBuilder.where(Condition.and(conditions.toArray(cns)));
         }
 
-        if (orderByClause != null) {
-            queryBuilder.orderBy(orderByClause.toString());
+        if (joins != null) {
+            for (Join join : joins) {
+                queryBuilder.join(join);
+            }
+        }
+
+        if (orderBys != null) {
+            for (OrderBy orderBy : orderBys) {
+                queryBuilder.orderBy(orderBy);
+            }
         }
 
         IStatement<T> statement = queryBuilder.create().prepare();
