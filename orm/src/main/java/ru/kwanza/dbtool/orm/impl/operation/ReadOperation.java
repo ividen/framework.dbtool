@@ -1,8 +1,9 @@
 package ru.kwanza.dbtool.orm.impl.operation;
 
 import ru.kwanza.dbtool.core.DBTool;
-import ru.kwanza.dbtool.orm.api.Condition;
+import ru.kwanza.dbtool.orm.api.If;
 import ru.kwanza.dbtool.orm.api.IQuery;
+import ru.kwanza.dbtool.orm.api.If;
 import ru.kwanza.dbtool.orm.impl.mapping.FieldMapping;
 import ru.kwanza.dbtool.orm.impl.mapping.IEntityMappingRegistry;
 import ru.kwanza.dbtool.orm.impl.querybuilder.QueryBuilderFactory;
@@ -34,10 +35,10 @@ public class ReadOperation extends Operation implements IReadOperation {
         final String propertyName = idFieldMapping.getName();
 
         this.queryForObject =
-                QueryBuilderFactory.createBuilder(dbTool, entityMappingRegistry, entityClass).where(Condition.isEqual(propertyName))
+                QueryBuilderFactory.createBuilder(dbTool, entityMappingRegistry, entityClass).where(If.isEqual(propertyName))
                         .create();
         this.queryForCollection =
-                QueryBuilderFactory.createBuilder(dbTool, entityMappingRegistry, entityClass).where(Condition.in(propertyName)).create();
+                QueryBuilderFactory.createBuilder(dbTool, entityMappingRegistry, entityClass).where(If.in(propertyName)).create();
     }
 
     public Object selectByKey(Object key) {

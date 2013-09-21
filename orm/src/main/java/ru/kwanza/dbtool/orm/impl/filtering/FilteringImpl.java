@@ -60,7 +60,7 @@ public class FilteringImpl<T> implements IFiltering<T> {
         return join(join);
     }
 
-    public IFiltering<T> filter(boolean use, Condition condition, Object... params) {
+    public IFiltering<T> filter(boolean use, If condition, Object... params) {
         if (use) {
             getFilters().add(new Filter(condition, params));
         }
@@ -89,7 +89,7 @@ public class FilteringImpl<T> implements IFiltering<T> {
         return orderBys;
     }
 
-    public IFiltering<T> filter(Condition condition, Object... params) {
+    public IFiltering<T> filter(If condition, Object... params) {
         return filter(true, condition, params);
     }
 
@@ -152,7 +152,7 @@ public class FilteringImpl<T> implements IFiltering<T> {
         final boolean usePaging = maxSize != null && offset != null;
 
         LinkedList params = new LinkedList();
-        LinkedList<Condition> conditions = new LinkedList<Condition>();
+        LinkedList<If> conditions = new LinkedList<If>();
         if (filters != null) {
             for (Filter f : filters) {
                 if (f.isHasParams()) {
@@ -166,8 +166,8 @@ public class FilteringImpl<T> implements IFiltering<T> {
         }
 
         if (!conditions.isEmpty()) {
-            Condition[] cns = new Condition[conditions.size()];
-            queryBuilder.where(Condition.and(conditions.toArray(cns)));
+            If[] cns = new If[conditions.size()];
+            queryBuilder.where(If.and(conditions.toArray(cns)));
         }
 
         if (joins != null) {

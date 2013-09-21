@@ -33,7 +33,7 @@ public abstract class StatementImpl<T> implements IStatement<T> {
 
     public StatementImpl(QueryConfig<T> config) {
         this.config = config;
-        this.params = new Object[config.getParamsCount()];
+        this.params = config.getParamsHolder().createParamsArray();
     }
 
     public T select() {
@@ -150,11 +150,11 @@ public abstract class StatementImpl<T> implements IStatement<T> {
     }
 
     public IStatement<T> setParameter(int index, Object value) {
-        if (index <= 0 || index > config.getParamsCount()) {
+        if (index <= 0 || index > config.getParamsHolder().getCount()) {
             throw new IllegalArgumentException("Index of parameter is wrong");
         }
 
-        int type = config.getParamTypes().get(index - 1);
+        int type = config.getParamsHolder().getParamType(index - 1);
         this.params[index - 1] = type == Integer.MAX_VALUE
                 ? value
                 : ((value instanceof Collection)
@@ -165,7 +165,7 @@ public abstract class StatementImpl<T> implements IStatement<T> {
     }
 
     public IStatement<T> setParameter(String name, Object value) {
-        List<Integer> indexes = config.getHolder().get(name);
+        List<Integer> indexes = config.getParamsHolder().getIndexes(name);
         if (indexes == null) {
             throw new IllegalStateException("Query doesn't constain named param!");
         }

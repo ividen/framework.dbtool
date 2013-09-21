@@ -15,9 +15,9 @@ public interface IFiltering<T> extends ISelectOperationProvider<T> {
 
     IFiltering<T> join(boolean use, Join join);
 
-    IFiltering<T> filter(boolean use, Condition condition, Object... params);
+    IFiltering<T> filter(boolean use, If condition, Object... params);
 
-    IFiltering<T> filter(Condition condition, Object... params);
+    IFiltering<T> filter(If condition, Object... params);
 
     IFiltering<T> orderBy(String orderByClause);
 

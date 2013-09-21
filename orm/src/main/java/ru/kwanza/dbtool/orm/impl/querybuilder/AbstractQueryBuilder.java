@@ -17,7 +17,7 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
     private IEntityMappingRegistry registry;
     private DBTool dbTool;
     private Class entityClass;
-    private Condition condition;
+    private If condition;
     private List<OrderBy> orderBy = null;
 
     private JoinRelationFactory relationFactory;
@@ -64,21 +64,18 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
     }
 
     public final IQuery<T> create() {
-        StringBuilder sql;
-        List<Integer> paramsTypes = new ArrayList<Integer>();
-
         ParamsHolder holder = new ParamsHolder();
-        String where = whereFragmentHelper.createWhereFragment(this.condition, paramsTypes, holder);
+        String where = whereFragmentHelper.createWhereFragment(this.condition,  holder);
         String orderBy = orderByFragmentHelper.createOrderByFragment();
         String from = fromFragmentHelper.createFromFragment();
         String fieldsString = fieldFragmentHelper.createFieldsFragment();
 
-        sql = createSQLString(fieldsString, from, where, orderBy);
+        StringBuilder sql = createSQLString(fieldsString, from, where, orderBy);
 
         String sqlString = sql.toString();
         logger.debug("Creating query {}", sqlString);
 
-        return createQuery(createConfig(paramsTypes, relationFactory.getRoot(), sqlString, holder));
+        return createQuery(createConfig(relationFactory.getRoot(), sqlString, holder));
     }
 
 
@@ -111,13 +108,12 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
 
     public IQuery<T> createNative(String sql) {
         ParamsHolder holder = new ParamsHolder();
-        List<Integer> paramTypes = new ArrayList<Integer>();
-        String preparedSql = SQLParser.prepareSQL(sql, paramTypes, holder);
-        return createQuery(createConfig(paramTypes, relationFactory.getRoot(), preparedSql, holder));
+        String preparedSql = SQLParser.prepareSQL(sql, holder);
+        return createQuery(createConfig(relationFactory.getRoot(), preparedSql, holder));
     }
 
-    private QueryConfig<T> createConfig(List<Integer> paramsTypes, JoinRelation rootRelations, String sqlString, ParamsHolder holder) {
-        return new QueryConfig<T>(dbTool, registry, entityClass, sqlString, rootRelations, paramsTypes, holder);
+    private QueryConfig<T> createConfig(JoinRelation rootRelations, String sqlString, ParamsHolder holder) {
+        return new QueryConfig<T>(dbTool, registry, entityClass, sqlString, rootRelations, holder);
     }
 
 
@@ -134,7 +130,7 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
         return sql;
     }
 
-    public IQueryBuilder<T> where(Condition condition) {
+    public IQueryBuilder<T> where(If condition) {
         if (this.condition != null) {
             throw new IllegalStateException("Condition statement is set already in WHERE clause!");
         }

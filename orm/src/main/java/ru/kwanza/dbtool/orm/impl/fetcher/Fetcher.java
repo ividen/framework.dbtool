@@ -1,8 +1,9 @@
 package ru.kwanza.dbtool.orm.impl.fetcher;
 
-import ru.kwanza.dbtool.orm.api.Condition;
+import ru.kwanza.dbtool.orm.api.If;
 import ru.kwanza.dbtool.orm.api.IEntityManager;
 import ru.kwanza.dbtool.orm.api.IQueryBuilder;
+import ru.kwanza.dbtool.orm.api.If;
 import ru.kwanza.dbtool.orm.api.ListProducer;
 import ru.kwanza.dbtool.orm.impl.fetcher.proxy.ProxyCallback;
 import ru.kwanza.dbtool.orm.impl.fetcher.proxy.ProxyEntry;
@@ -267,7 +268,7 @@ public class Fetcher extends SpringSerializable {
         if (relationValue == null) {
             FetchMapping fm = getFetchMapping(entityClass, propertyName);
             FieldMapping relation = fm.getRelationPropertyMapping();
-            IQueryBuilder queryBuilder = em.queryBuilder(fm.getRelationClass()).where(Condition.in(relation.getName()));
+            IQueryBuilder queryBuilder = em.queryBuilder(fm.getRelationClass()).where(If.in(relation.getName()));
 
             relationValue = new RelationValue(relation, fm, queryBuilder.create());
             relationCache.putIfAbsent(relationKey, relationValue);
@@ -281,7 +282,7 @@ public class Fetcher extends SpringSerializable {
         RelationValue relationValue = relationCache.get(relationKey);
         if (relationValue == null) {
             FieldMapping relation = fm.getRelationPropertyMapping();
-            IQueryBuilder queryBuilder = em.queryBuilder(fm.getRelationClass()).where(Condition.in(relation.getName()));
+            IQueryBuilder queryBuilder = em.queryBuilder(fm.getRelationClass()).where(If.in(relation.getName()));
 
             relationValue = new RelationValue(relation, fm, queryBuilder.create());
             relationCache.putIfAbsent(relationKey, relationValue);

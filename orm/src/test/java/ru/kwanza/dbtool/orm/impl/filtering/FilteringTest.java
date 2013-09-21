@@ -13,9 +13,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
-import ru.kwanza.dbtool.orm.api.Condition;
+import ru.kwanza.dbtool.orm.api.If;
 import ru.kwanza.dbtool.orm.api.IEntityManager;
 import ru.kwanza.dbtool.orm.api.IFiltering;
+import ru.kwanza.dbtool.orm.api.If;
 import ru.kwanza.dbtool.orm.impl.fetcher.TestEntity;
 import ru.kwanza.dbtool.orm.impl.mapping.EntityMappingRegistryImpl;
 
@@ -89,7 +90,7 @@ public abstract class FilteringTest extends AbstractJUnit4SpringContextTests {
 
         filtering
                 .paging(0, 100)
-                .filter(true, Condition.in("id"), Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10))
+                .filter(true, If.in("id"), Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10))
                 .orderBy("id");
 
         List<TestEntity> testEntities = filtering.selectList();
@@ -107,7 +108,7 @@ public abstract class FilteringTest extends AbstractJUnit4SpringContextTests {
 
         filtering
                 .paging(0, 100)
-                .filter(true, Condition.between("id"), 0, 9)
+                .filter(true, If.between("id"), 0, 9)
                 .orderBy("id");
 
         List<TestEntity> testEntities = filtering.selectList();
@@ -125,8 +126,8 @@ public abstract class FilteringTest extends AbstractJUnit4SpringContextTests {
 
         filtering
                 .paging(0, 100)
-                .filter(true, Condition.between("id"), 0, 9)
-                .filter(Condition.isEqual("intField"), 10)
+                .filter(true, If.between("id"), 0, 9)
+                .filter(If.isEqual("intField"), 10)
                 .orderBy("id");
 
         List<TestEntity> testEntities = filtering.selectList();
@@ -144,8 +145,8 @@ public abstract class FilteringTest extends AbstractJUnit4SpringContextTests {
 
         filtering
                 .paging(100, 100)
-                .filter(false, Condition.between("id"), 0, 10)
-                .filter(false, Condition.isEqual("intField"), 1)
+                .filter(false, If.between("id"), 0, 10)
+                .filter(false, If.isEqual("intField"), 1)
                 .orderBy("id");
 
         List<TestEntity> testEntities = filtering.selectList();

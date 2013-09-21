@@ -3,8 +3,9 @@ package ru.kwanza.dbtool.orm.impl.querybuilder;
 import org.junit.Test;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
-import ru.kwanza.dbtool.orm.api.Condition;
+import ru.kwanza.dbtool.orm.api.If;
 import ru.kwanza.dbtool.orm.api.IEntityManager;
+import ru.kwanza.dbtool.orm.api.If;
 import ru.kwanza.dbtool.orm.api.Join;
 import ru.kwanza.dbtool.orm.impl.fetcher.TestEntity;
 import ru.kwanza.dbtool.orm.impl.mapping.EntityMappingRegistryImpl;
@@ -160,7 +161,7 @@ public abstract class QueryBuilderWithJoinTest extends AbstractJUnit4SpringConte
     public void test7() {
         AbstractQuery<TestEntity> query1 = (AbstractQuery<TestEntity>) em.queryBuilder(TestEntity.class)
                 .join("entityA, entityB, entityC {entityE{entityG},entityF} ,entityD")
-                .where(Condition.and(Condition.between("dateField"), Condition.isEqual("id"))).orderBy("dateField ASC").create();
+                .where(If.and(If.between("dateField"), If.isEqual("id"))).orderBy("dateField ASC").create();
 
         assertEquals(query1.getConfig().getSql(), "SELECT test_entity.id test_entity_id,test_entity.int_field test_entity_int_field,"
                 + "test_entity.string_field test_entity_string_field,test_entity.date_field test_entity_date_field,"
@@ -183,8 +184,8 @@ public abstract class QueryBuilderWithJoinTest extends AbstractJUnit4SpringConte
     @Test
     public void test8() {
         AbstractQuery<TestEntity> query1 = (AbstractQuery<TestEntity>) em.queryBuilder(TestEntity.class)
-                .join("entityA, entityB, entityC {entityE{entityG},entityF} ,entityD").where(Condition
-                        .and(Condition.isEqual("entityA.title"), Condition.isEqual("entityB.title"), Condition.isEqual("entityC.title")))
+                .join("entityA, entityB, entityC {entityE{entityG},entityF} ,entityD").where(If
+                        .and(If.isEqual("entityA.title"), If.isEqual("entityB.title"), If.isEqual("entityC.title")))
                 .orderBy("dateField ASC").create();
 
         assertEquals(query1.getConfig().getSql(), "SELECT test_entity.id test_entity_id,test_entity.int_field test_entity_int_field,"
@@ -206,9 +207,9 @@ public abstract class QueryBuilderWithJoinTest extends AbstractJUnit4SpringConte
 
     @Test
     public void test9() {
-        AbstractQuery<TestEntity> query1 = (AbstractQuery<TestEntity>) em.queryBuilder(TestEntity.class).where(Condition
-                .and(Condition.isEqual("entityA.title"), Condition.isEqual("entityB.title"), Condition.isEqual("entityC.title"),
-                        Condition.isEqual("entityC.entityE.entityG.title"))).orderBy("entityC.entityF.title ASC").create();
+        AbstractQuery<TestEntity> query1 = (AbstractQuery<TestEntity>) em.queryBuilder(TestEntity.class).where(If
+                .and(If.isEqual("entityA.title"), If.isEqual("entityB.title"), If.isEqual("entityC.title"),
+                        If.isEqual("entityC.entityE.entityG.title"))).orderBy("entityC.entityF.title ASC").create();
 
         assertEquals(query1.getConfig().getSql(), "SELECT test_entity.id test_entity_id,test_entity.int_field test_entity_int_field,"
                 + "test_entity.string_field test_entity_string_field,test_entity.date_field test_entity_date_field,"

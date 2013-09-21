@@ -13,7 +13,7 @@ public interface IQueryBuilder<T> {
 
     IQueryBuilder<T> join(String string);
 
-    IQueryBuilder<T> where(Condition condition);
+    IQueryBuilder<T> where(If condition);
 
     IQueryBuilder<T> orderBy(String orderByClause);
 

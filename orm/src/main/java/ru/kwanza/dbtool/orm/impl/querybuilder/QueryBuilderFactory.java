@@ -11,7 +11,7 @@ import ru.kwanza.dbtool.orm.impl.querybuilder.db.postgresql.PostgreSQLQueryBuild
 /**
  * @author Alexander Guzanov
  */
-public class QueryBuilderFactory {
+public abstract class QueryBuilderFactory {
 
     public static  <T> IQueryBuilder<T> createBuilder(DBTool dbTool, IEntityMappingRegistry mappingRegistry, Class<T> entityClass) {
         DBTool.DBType dbType = dbTool.getDbType();

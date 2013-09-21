@@ -1,21 +1,22 @@
 package ru.kwanza.dbtool.orm.impl.filtering;
 
-import ru.kwanza.dbtool.orm.api.Condition;
+import ru.kwanza.dbtool.orm.api.If;
+import ru.kwanza.dbtool.orm.api.If;
 
 /**
  * @author Alexander Guzanov
  */
 public class Filter {
-    private Condition condition;
+    private If condition;
     private Object[] value;
     private boolean hasParams = true;
 
-    public Filter(Condition condition, Object ... value) {
+    public Filter(If condition, Object ... value) {
         this.condition = condition;
         this.value = value;
     }
 
-    public Filter(Condition condition) {
+    public Filter(If condition) {
         this(condition, null);
         this.hasParams = false;
     }
@@ -24,7 +25,7 @@ public class Filter {
         return hasParams;
     }
 
-    public Condition getCondition() {
+    public If getCondition() {
         return condition;
     }
 

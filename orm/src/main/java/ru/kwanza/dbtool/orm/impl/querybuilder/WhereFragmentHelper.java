@@ -1,6 +1,6 @@
 package ru.kwanza.dbtool.orm.impl.querybuilder;
 
-import ru.kwanza.dbtool.orm.api.Condition;
+import ru.kwanza.dbtool.orm.api.If;
 
 import java.util.List;
 
@@ -14,77 +14,77 @@ class WhereFragmentHelper {
         this.builder = builder;
     }
 
-    public String createWhereFragment(Condition condition, List<Integer> paramsTypes, ParamsHolder paramsHolder) {
+    public String createWhereFragment(If condition,ParamsHolder paramsHolder) {
         StringBuilder result = new StringBuilder();
 
-        createConditionString(condition, paramsTypes, result,paramsHolder);
+        createConditionString(condition,  result, paramsHolder);
 
         return result.toString();
     }
 
-    private void createConditionString(Condition condition, List<Integer> paramsTypes, StringBuilder where, ParamsHolder holder) {
+    private void createConditionString(If condition, StringBuilder where, ParamsHolder holder) {
         if (condition == null) {
             return;
         }
 
-        Condition[] childs = condition.getChilds();
-        Condition.Type type = condition.getType();
+        If[] childs = condition.getChilds();
+        If.Type type = condition.getType();
         if (childs != null && childs.length > 0) {
-            if (type != Condition.Type.NOT) {
+            if (type != If.Type.NOT) {
                 where.append('(');
-                createConditionString(childs[0], paramsTypes, where, holder);
+                createConditionString(childs[0], where, holder);
                 where.append(')');
 
                 for (int i = 1; i < childs.length; i++) {
-                    Condition c = childs[i];
+                    If c = childs[i];
                     where.append(' ').append(type.name()).append(" (");
-                    createConditionString(c, paramsTypes, where, holder);
+                    createConditionString(c, where, holder);
                     where.append(')');
                 }
             } else {
                 where.append("NOT (");
-                createConditionString(childs[0], paramsTypes, where, holder);
+                createConditionString(childs[0], where, holder);
                 where.append(')');
             }
-        } else if (type == Condition.Type.NATIVE) {
-            where.append(SQLParser.prepareSQL(condition.getSql(), paramsTypes,holder));
+        } else if (type == If.Type.NATIVE) {
+            where.append(SQLParser.prepareSQL(condition.getSql(), holder));
         } else {
 
             final Column column = builder.getColumnFactory().findColumn(condition.getPropertyName());
             where.append(column.getColumnName());
             final int fieldType = column.getType();
 
-            if (type == Condition.Type.IS_EQUAL) {
-                holder.addParam(condition, paramsTypes, fieldType);
+            if (type == If.Type.IS_EQUAL) {
+                holder.addParam(condition, fieldType);
                 where.append(" = ?");
-            } else if (type == Condition.Type.NOT_EQUAL) {
-                holder.addParam(condition, paramsTypes, fieldType);
+            } else if (type == If.Type.NOT_EQUAL) {
+                holder.addParam(condition, fieldType);
                 where.append(" <> ?");
-            } else if (type == Condition.Type.IS_NOT_NULL) {
+            } else if (type == If.Type.IS_NOT_NULL) {
                 where.append(" IS NOT NULL");
-            } else if (type == Condition.Type.IS_NULL) {
+            } else if (type == If.Type.IS_NULL) {
                 where.append(" IS NULL");
-            } else if (type == Condition.Type.IS_GREATER) {
-                holder.addParam(condition, paramsTypes, fieldType);
+            } else if (type == If.Type.IS_GREATER) {
+                holder.addParam(condition, fieldType);
                 where.append(" > ?");
-            } else if (type == Condition.Type.IS_GREATER_OR_EQUAL) {
-                holder.addParam(condition, paramsTypes, fieldType);
+            } else if (type == If.Type.IS_GREATER_OR_EQUAL) {
+                holder.addParam(condition, fieldType);
                 where.append(" >= ?");
-            } else if (type == Condition.Type.IS_LESS) {
-                holder.addParam(condition, paramsTypes, fieldType);
+            } else if (type == If.Type.IS_LESS) {
+                holder.addParam(condition, fieldType);
                 where.append(" < ?");
-            } else if (type == Condition.Type.IS_LESS_OR_EQUAL) {
-                holder.addParam(condition, paramsTypes, fieldType);
+            } else if (type == If.Type.IS_LESS_OR_EQUAL) {
+                holder.addParam(condition, fieldType);
                 where.append(" <= ?");
-            } else if (type == Condition.Type.IN) {
-                holder.addParam(condition, paramsTypes, fieldType);
+            } else if (type == If.Type.IN) {
+                holder.addParam(condition, fieldType);
                 where.append(" IN (?)");
-            } else if (type == Condition.Type.LIKE) {
-                holder.addParam(condition, paramsTypes, fieldType);
+            } else if (type == If.Type.LIKE) {
+                holder.addParam(condition, fieldType);
                 where.append(" LIKE ?");
-            } else if (type == Condition.Type.BETWEEN) {
-                holder.addParam(condition, paramsTypes, fieldType);
-                holder.addParam(condition, paramsTypes, fieldType);
+            } else if (type == If.Type.BETWEEN) {
+                holder.addParam(condition, fieldType);
+                holder.addParam(condition, fieldType);
                 where.append(" BETWEEN ? AND ?");
             } else {
                 throw new IllegalArgumentException("Unknown condition type!");

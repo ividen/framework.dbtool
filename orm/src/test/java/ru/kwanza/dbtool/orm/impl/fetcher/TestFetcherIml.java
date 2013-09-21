@@ -4,9 +4,10 @@ import junit.framework.Assert;
 import org.junit.Test;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
-import ru.kwanza.dbtool.orm.api.Condition;
+import ru.kwanza.dbtool.orm.api.If;
 import ru.kwanza.dbtool.orm.api.IEntityManager;
 import ru.kwanza.dbtool.orm.api.IQuery;
+import ru.kwanza.dbtool.orm.api.If;
 import ru.kwanza.dbtool.orm.impl.mapping.EntityMappingRegistryImpl;
 import ru.kwanza.toolbox.SerializationHelper;
 
@@ -166,7 +167,7 @@ public abstract class TestFetcherIml extends AbstractJUnit4SpringContextTests {
 
     @Test
     public void testFetch6() {
-        IQuery<TestEntity> query = em.queryBuilder(TestEntity.class).where(Condition.isLess("id")).create();
+        IQuery<TestEntity> query = em.queryBuilder(TestEntity.class).where(If.isLess("id")).create();
         List<TestEntity> testEntities = query.prepare().setParameter(1, 0l).selectList();
         em.fetch(TestEntity.class, testEntities, "entityA,entityB,entityC{entityF,entityE{entityG}},entityD");
     }
