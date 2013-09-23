@@ -81,8 +81,8 @@ public class EntityMappingTest extends AbstractJUnit4SpringContextTests {
         entityMappingRegistry.validateEntityMapping();
     }
 
-    @Test(expected = RuntimeException.class)
-    public void validateIncorrectEntityMappingTest() throws Exception {
+    @Test()
+    public void validateCorrectEntityMappingTest() throws Exception {
         entityMappingRegistry.registerEntityClass(Agent.class);
         entityMappingRegistry.validateEntityMapping();
     }
@@ -95,7 +95,7 @@ public class EntityMappingTest extends AbstractJUnit4SpringContextTests {
         assertEquals(PAYMENT_TRX_TABLE_NAME, entityMappingRegistry.getTableName(PAYMENT_TRX_NAME));
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test()
     public void registerDuplicateEntityTest() throws Exception {
         registerPaymentTrx();
     }

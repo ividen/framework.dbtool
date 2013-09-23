@@ -1,6 +1,5 @@
 package ru.kwanza.dbtool.orm.impl.fetcher;
 
-import ru.kwanza.dbtool.orm.api.If;
 import ru.kwanza.dbtool.orm.api.IEntityManager;
 import ru.kwanza.dbtool.orm.api.IQueryBuilder;
 import ru.kwanza.dbtool.orm.api.If;
@@ -70,7 +69,9 @@ public class Fetcher extends SpringSerializable {
                     ProxyCallback batch =
                             new ProxyCallback(this, entityClass, items, fetchMapping.getFetchField().getType(), fetchMapping.getName());
                     for (T item : items) {
-                        fetchMapping.getFetchField().setValue(item, factory.newInstance(fetchMapping.getFetchField().getType(), batch));
+                        if (fetchMapping.getFetchField().getValue(item) == null) {
+                            fetchMapping.getFetchField().setValue(item, factory.newInstance(fetchMapping.getFetchField().getType(), batch));
+                        }
                     }
                 }
             }
@@ -171,6 +172,10 @@ public class Fetcher extends SpringSerializable {
     public <T> Map queryRelation(Collection<T> items, RelationValue relationValue) {
         final FetchMapping fm = relationValue.getFetchMapping();
         final Class type = fm.getFetchField().getType();
+        final Set relationIds = relationValue.getRelationIds(items);
+        if (relationIds.isEmpty()) {
+            return Collections.emptyMap();
+        }
         if (Collection.class.isAssignableFrom(type)) {
             Map<Object, List<T>> result = new HashMap<Object, List<T>>();
             ListProducer<T> producer;
@@ -190,13 +195,12 @@ public class Fetcher extends SpringSerializable {
                     }
                 };
             }
-            relationValue.getFetchQuery().prepare().setParameter(1, relationValue.getRelationIds(items))
+            relationValue.getFetchQuery().prepare().setParameter(1, relationIds)
                     .selectMapList(relationValue.getIDGroupingField(), result, producer);
             return result;
         } else {
             Map<Object, T> result = new HashMap<Object, T>();
-            relationValue.getFetchQuery().prepare().setParameter(1, relationValue.getRelationIds(items))
-                    .selectMap(relationValue.getIDGroupingField(), result);
+            relationValue.getFetchQuery().prepare().setParameter(1, relationIds).selectMap(relationValue.getIDGroupingField(), result);
             return result;
         }
     }
@@ -267,11 +271,7 @@ public class Fetcher extends SpringSerializable {
         RelationValue relationValue = relationCache.get(relationKey);
         if (relationValue == null) {
             FetchMapping fm = getFetchMapping(entityClass, propertyName);
-            FieldMapping relation = fm.getRelationPropertyMapping();
-            IQueryBuilder queryBuilder = em.queryBuilder(fm.getRelationClass()).where(If.in(relation.getName()));
-
-            relationValue = new RelationValue(relation, fm, queryBuilder.create());
-            relationCache.putIfAbsent(relationKey, relationValue);
+            relationValue = createRealtionValue(relationKey, fm);
         }
 
         return relationValue;
@@ -281,13 +281,23 @@ public class Fetcher extends SpringSerializable {
         RelationKey relationKey = new RelationKey(entityClass, propertyName);
         RelationValue relationValue = relationCache.get(relationKey);
         if (relationValue == null) {
-            FieldMapping relation = fm.getRelationPropertyMapping();
-            IQueryBuilder queryBuilder = em.queryBuilder(fm.getRelationClass()).where(If.in(relation.getName()));
-
-            relationValue = new RelationValue(relation, fm, queryBuilder.create());
-            relationCache.putIfAbsent(relationKey, relationValue);
+            createRealtionValue(relationKey, fm);
         }
 
         return relationKey;
+    }
+
+    private RelationValue createRealtionValue(RelationKey relationKey, FetchMapping fm) {
+        RelationValue relationValue;
+        FieldMapping relation = fm.getRelationPropertyMapping();
+        If condition = If.in(relation.getName());
+        if (fm.getCondition() != null) {
+            condition = If.and(condition, fm.getCondition());
+        }
+        IQueryBuilder queryBuilder = em.queryBuilder(fm.getRelationClass()).where(condition);
+
+        relationValue = new RelationValue(relation, fm, queryBuilder.create());
+        relationCache.putIfAbsent(relationKey, relationValue);
+        return relationValue;
     }
 }

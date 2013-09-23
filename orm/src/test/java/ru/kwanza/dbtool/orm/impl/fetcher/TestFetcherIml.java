@@ -7,8 +7,7 @@ import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
 import ru.kwanza.dbtool.orm.api.If;
 import ru.kwanza.dbtool.orm.api.IEntityManager;
 import ru.kwanza.dbtool.orm.api.IQuery;
-import ru.kwanza.dbtool.orm.api.If;
-import ru.kwanza.dbtool.orm.impl.mapping.EntityMappingRegistryImpl;
+import ru.kwanza.dbtool.orm.impl.mapping.EntityMappingRegistry;
 import ru.kwanza.toolbox.SerializationHelper;
 
 import javax.annotation.Resource;
@@ -26,7 +25,7 @@ public abstract class TestFetcherIml extends AbstractJUnit4SpringContextTests {
     @Resource(name = "dbtool.IEntityManager")
     private IEntityManager em;
     @Resource(name = "dbtool.IEntityMappingRegistry")
-    private EntityMappingRegistryImpl registry;
+    private EntityMappingRegistry registry;
     @Resource(name = "initTests")
     private InitRegistryAndDB initTests;
 
@@ -396,5 +395,63 @@ public abstract class TestFetcherIml extends AbstractJUnit4SpringContextTests {
         }
 
     }
+
+
+    @Test
+    public void testAssociationWithCondition_1() {
+        List<TestEntity> testEntities = query().prepare().selectList();
+
+        List<TestEventWithIfAssociation> testEvents = new ArrayList<TestEventWithIfAssociation>(testEntities.size());
+
+        for (TestEntity testEntity : testEntities) {
+            testEvents.add(new TestEventWithIfAssociation(testEntity.getId()));
+        }
+
+        em.fetchLazy(TestEventWithIfAssociation.class, testEvents);
+
+        for (TestEventWithIfAssociation testEvent : testEvents) {
+            final TestEntity testEntity = testEvent.getEntity();
+            Assert.assertEquals(testEntity.getEntityAID(), testEntity.getEntityA().getId());
+            Assert.assertEquals(testEntity.getEntityBID(), testEntity.getEntityB().getId());
+            Assert.assertEquals(testEntity.getEntityCID(), testEntity.getEntityC().getId());
+            Assert.assertEquals(testEntity.getEntityDID(), testEntity.getEntityD().getId());
+
+            Assert.assertEquals(testEntity.getEntityC().getEntityEID(), testEntity.getEntityC().getEntityE().getId());
+            Assert.assertEquals(testEntity.getEntityC().getEntityFID(), testEntity.getEntityC().getEntityF().getId());
+
+            Assert.assertEquals(testEntity.getEntityC().getEntityE().getEntityGID(),
+                    testEntity.getEntityC().getEntityE().getEntityG().getId());
+        }
+
+    }
+
+    @Test
+    public void testAssociationWithCondition_2() {
+        List<TestEntity> testEntities = query().prepare().selectList();
+
+        List<TestEventWithIfAssociation> testEvents = new ArrayList<TestEventWithIfAssociation>(testEntities.size());
+
+        for (TestEntity testEntity : testEntities) {
+            testEvents.add(new TestEventWithIfAssociation(testEntity.getId()));
+        }
+
+        em.fetch(TestEventWithIfAssociation.class, testEvents, "entity{entityA,entityB,entityC{entityF,entityE{entityG}},entityD}");
+
+        for (TestEventWithIfAssociation testEvent : testEvents) {
+            final TestEntity testEntity = testEvent.getEntity();
+            Assert.assertEquals(testEntity.getEntityAID(), testEntity.getEntityA().getId());
+            Assert.assertEquals(testEntity.getEntityBID(), testEntity.getEntityB().getId());
+            Assert.assertEquals(testEntity.getEntityCID(), testEntity.getEntityC().getId());
+            Assert.assertEquals(testEntity.getEntityDID(), testEntity.getEntityD().getId());
+
+            Assert.assertEquals(testEntity.getEntityC().getEntityEID(), testEntity.getEntityC().getEntityE().getId());
+            Assert.assertEquals(testEntity.getEntityC().getEntityFID(), testEntity.getEntityC().getEntityF().getId());
+
+            Assert.assertEquals(testEntity.getEntityC().getEntityE().getEntityGID(),
+                    testEntity.getEntityC().getEntityE().getEntityG().getId());
+        }
+
+    }
+
 
 }

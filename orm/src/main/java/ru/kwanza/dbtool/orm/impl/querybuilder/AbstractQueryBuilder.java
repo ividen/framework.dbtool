@@ -59,15 +59,33 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
         return registry;
     }
 
+     WhereFragmentHelper getWhereFragmentHelper() {
+        return whereFragmentHelper;
+    }
+
+     FieldFragmentHelper getFieldFragmentHelper() {
+        return fieldFragmentHelper;
+    }
+
+     FromFragmentHelper getFromFragmentHelper() {
+        return fromFragmentHelper;
+    }
+
+     OrderByFragmentHelper getOrderByFragmentHelper() {
+        return orderByFragmentHelper;
+    }
+
     public List<OrderBy> getOrderBy() {
         return orderBy;
     }
 
     public final IQuery<T> create() {
-        ParamsHolder holder = new ParamsHolder();
-        String where = whereFragmentHelper.createWhereFragment(this.condition,  holder);
+        Parameters whereParams = new Parameters();
+        Parameters joinParams = new Parameters();
+
+        String where = whereFragmentHelper.createWhereFragment(this.condition,  whereParams);
         String orderBy = orderByFragmentHelper.createOrderByFragment();
-        String from = fromFragmentHelper.createFromFragment();
+        String from = fromFragmentHelper.createFromFragment(joinParams);
         String fieldsString = fieldFragmentHelper.createFieldsFragment();
 
         StringBuilder sql = createSQLString(fieldsString, from, where, orderBy);
@@ -75,7 +93,7 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
         String sqlString = sql.toString();
         logger.debug("Creating query {}", sqlString);
 
-        return createQuery(createConfig(relationFactory.getRoot(), sqlString, holder));
+        return createQuery(createConfig(relationFactory.getRoot(), sqlString, joinParams.join(whereParams)));
     }
 
 
@@ -107,12 +125,12 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
     protected abstract IQuery<T> createQuery(QueryConfig config);
 
     public IQuery<T> createNative(String sql) {
-        ParamsHolder holder = new ParamsHolder();
+        Parameters holder = new Parameters();
         String preparedSql = SQLParser.prepareSQL(sql, holder);
         return createQuery(createConfig(relationFactory.getRoot(), preparedSql, holder));
     }
 
-    private QueryConfig<T> createConfig(JoinRelation rootRelations, String sqlString, ParamsHolder holder) {
+    private QueryConfig<T> createConfig(JoinRelation rootRelations, String sqlString, Parameters holder) {
         return new QueryConfig<T>(dbTool, registry, entityClass, sqlString, rootRelations, holder);
     }
 

@@ -19,7 +19,7 @@ import java.util.concurrent.ConcurrentMap;
  */
 class NonEntityMapping {
     @Resource(name="dbtool.IEntityMappingRegistry")
-    private IEntityMappingRegistry registry;
+    private EntityMappingRegistry registry;
 
     private ConcurrentMap<Class, Map<String, FetchMapping>> cache =
             new ConcurrentHashMap<Class, Map<String, FetchMapping>>();
@@ -62,33 +62,13 @@ class NonEntityMapping {
         }
     }
 
-    private void processAssociation(Class aClass, Map<String, FetchMapping> mappings, AnnotatedElement field) {
-        final String propertyName = EntityMappingHelper.getPropertyName(field);
-        final EntityField fetchField = EntityMappingHelper.createEntityField(field);
-
-        final Association association = field.getAnnotation(Association.class);
-        final String property = association.property();
-        final String relationProperty = association.relationProperty();
-        final Class relationClass =
-                Collection.class.isAssignableFrom(fetchField.getType()) ? association.relationClass() : fetchField.getType();
-        final AnnotatedElement propertyField = EntityMappingHelper.findField(aClass, property);
-
-        mappings.put(propertyName, new FetchMapping(propertyName, relationClass,
-                new FieldMapping(property, null, Types.BIGINT, false, EntityMappingHelper.createEntityField(propertyField)),
-                registry.getFieldMappingByPropertyName(relationClass, relationProperty), fetchField));
+    private void processAssociation(Class aClass, Map<String, FetchMapping> mappings, AnnotatedElement annotatedElement) {
+        final FetchMapping fetchMapping = registry.parseAssociation(aClass, annotatedElement);
+        mappings.put(fetchMapping.getName(),fetchMapping);
     }
 
-    private void processManyToOne(Class aClass, Map<String, FetchMapping> mappings, AnnotatedElement field) {
-        final String propertyName = EntityMappingHelper.getPropertyName(field);
-        final EntityField fetchField = EntityMappingHelper.createEntityField(field);
-
-        final ManyToOne manyToOne = field.getAnnotation(ManyToOne.class);
-        final String property = manyToOne.property();
-        final AnnotatedElement propertyField = EntityMappingHelper.findField(aClass, property);
-        final Class relationClass = fetchField.getType();
-
-        mappings.put(propertyName, new FetchMapping(propertyName, relationClass,
-                new FieldMapping(property, null, Types.BIGINT, false, EntityMappingHelper.createEntityField(propertyField)),
-                registry.getIdFields(relationClass).iterator().next(), fetchField));
+    private void processManyToOne(Class aClass, Map<String, FetchMapping> mappings, AnnotatedElement annotatedElement) {
+        final FetchMapping fetchMapping = registry.parseManyToOne(aClass, annotatedElement);
+        mappings.put(fetchMapping.getName(),fetchMapping);
     }
 }

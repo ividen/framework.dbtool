@@ -4,6 +4,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.SqlParameterValue;
+import org.springframework.jdbc.core.SqlTypeValue;
 import ru.kwanza.dbtool.core.DBTool;
 import ru.kwanza.dbtool.core.KeyValue;
 import ru.kwanza.dbtool.core.SqlCollectionParameterValue;
@@ -46,9 +47,13 @@ public abstract class StatementImpl<T> implements IStatement<T> {
                             result[0] = objects.iterator().next();
                         }
                     }
-                }, prepareParams(params), getResultSetType());
+                }, getParamValues(), getResultSetType());
 
         return (T) result[0];
+    }
+
+    private Object[] getParamValues() {
+        return prepareParams(config.getParamsHolder().fullParamsArray(params));
     }
 
     public IStatement<T> paging(int offset, int maxSize) {
@@ -96,7 +101,7 @@ public abstract class StatementImpl<T> implements IStatement<T> {
                             result.addAll(objects);
                         }
                     }
-                }, prepareParams(params), getResultSetType());
+                }, getParamValues(), getResultSetType());
     }
 
     public <F> void selectMapList(String propertyName, final Map<F, List<T>> result, final ListProducer<T> listProducer) {
@@ -117,7 +122,7 @@ public abstract class StatementImpl<T> implements IStatement<T> {
                             vs.add(kv.getValue());
                         }
                     }
-                }, prepareParams(params), getResultSetType());
+                }, getParamValues(), getResultSetType());
     }
 
     public <F> void selectMap(String propertyName, final Map<F, T> result) {
@@ -133,7 +138,7 @@ public abstract class StatementImpl<T> implements IStatement<T> {
                             result.put(kv.getKey(), kv.getValue());
                         }
                     }
-                }, prepareParams(params), getResultSetType());
+                }, getParamValues(), getResultSetType());
 
     }
 
@@ -155,7 +160,7 @@ public abstract class StatementImpl<T> implements IStatement<T> {
         }
 
         int type = config.getParamsHolder().getParamType(index - 1);
-        this.params[index - 1] = type == Integer.MAX_VALUE
+        this.params[index - 1] = type == SqlTypeValue.TYPE_UNKNOWN
                 ? value
                 : ((value instanceof Collection)
                         ? new SqlCollectionParameterValue(type, (Collection) value)

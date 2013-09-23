@@ -1,25 +1,33 @@
 package ru.kwanza.dbtool.orm.impl.mapping;
 
+import ru.kwanza.dbtool.orm.api.If;
+
+import java.util.concurrent.locks.Condition;
+
 /**
  * @author Kiryl Karatsetski
  */
 public class FetchMapping {
-    private String name;
-    private Class relationClass;
-    private FieldMapping propertyFieldMapping;
-    private FieldMapping relationFieldMapping;
-    private EntityField fetchField;
+    private final String name;
+    private final Class relationClass;
+    private final FieldMapping propertyFieldMapping;
+    private final FieldMapping relationFieldMapping;
+    private final EntityField fetchField;
+    private final If condition;
 
-    public FetchMapping(String name,
-                 Class relationClass,
-                 FieldMapping propertyFieldMapping,
-                 FieldMapping relationFieldMapping,
-                 EntityField fetchField) {
+    public FetchMapping(String name, Class relationClass, FieldMapping propertyFieldMapping, FieldMapping relationFieldMapping,
+                        EntityField fetchField, If condition) {
         this.name = name;
         this.relationClass = relationClass;
         this.propertyFieldMapping = propertyFieldMapping;
         this.relationFieldMapping = relationFieldMapping;
         this.fetchField = fetchField;
+        this.condition = condition;
+    }
+
+    public FetchMapping(String name, Class relationClass, FieldMapping propertyFieldMapping, FieldMapping relationFieldMapping,
+                        EntityField fetchField) {
+        this(name, relationClass, propertyFieldMapping, relationFieldMapping, fetchField, null);
     }
 
     public FieldMapping getPropertyMapping() {
@@ -56,6 +64,10 @@ public class FetchMapping {
 
     public String getName() {
         return name;
+    }
+
+    public If getCondition() {
+        return condition;
     }
 
     @Override

@@ -1,13 +1,12 @@
 package ru.kwanza.dbtool.orm.impl.querybuilder;
 
-import java.util.LinkedList;
-import java.util.List;
+import org.springframework.jdbc.core.SqlTypeValue;
 
 /**
  * @author Alexander Guzanov
  */
 class SQLParser {
-    static String prepareSQL(String sql, ParamsHolder holder) {
+    static String prepareSQL(String sql, Parameters holder) {
         StringBuilder sqlBuilder = new StringBuilder();
         StringBuilder paramBuilder = null;
         char[] chars = sql.toCharArray();
@@ -15,7 +14,7 @@ class SQLParser {
         for (int i = 0; i < chars.length; i++) {
             char c = chars[i];
             if (c == '?') {
-                holder.addParam(Integer.MAX_VALUE);
+                holder.addParam(SqlTypeValue.TYPE_UNKNOWN);
 
                 paramBuilder = new StringBuilder();
                 variableMatch = false;
@@ -27,7 +26,7 @@ class SQLParser {
             } else if (variableMatch) {
                 if (isDelimiter(c)) {
                     String paramName = paramBuilder.toString();
-                    holder.addParam(paramName,Integer.MAX_VALUE);
+                    holder.addParam(paramName,SqlTypeValue.TYPE_UNKNOWN);
                     variableMatch = false;
 
                     sqlBuilder.append(c);
@@ -41,7 +40,7 @@ class SQLParser {
 
         if (variableMatch) {
             String paramName = paramBuilder.toString();
-            holder.addParam(paramName,Integer.MAX_VALUE);
+            holder.addParam(paramName,SqlTypeValue.TYPE_UNKNOWN);
         }
 
         return sqlBuilder.toString();

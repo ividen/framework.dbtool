@@ -2,8 +2,6 @@ package ru.kwanza.dbtool.orm.impl.querybuilder;
 
 import ru.kwanza.dbtool.orm.api.If;
 
-import java.util.List;
-
 /**
  * @author Alexander Guzanov
  */
@@ -14,15 +12,19 @@ class WhereFragmentHelper {
         this.builder = builder;
     }
 
-    public String createWhereFragment(If condition,ParamsHolder paramsHolder) {
+    public String createWhereFragment(If condition, Parameters parameters) {
         StringBuilder result = new StringBuilder();
 
-        createConditionString(condition,  result, paramsHolder);
+        createConditionString(condition, result, parameters);
 
         return result.toString();
     }
 
-    private void createConditionString(If condition, StringBuilder where, ParamsHolder holder) {
+    public void createConditionString(If condition, StringBuilder where, Parameters holder) {
+        createConditionString(builder.getRelationFactory().getRoot(), condition, where, holder);
+    }
+
+    public void createConditionString(JoinRelation root, If condition, StringBuilder where, Parameters holder) {
         if (condition == null) {
             return;
         }
@@ -32,25 +34,25 @@ class WhereFragmentHelper {
         if (childs != null && childs.length > 0) {
             if (type != If.Type.NOT) {
                 where.append('(');
-                createConditionString(childs[0], where, holder);
+                createConditionString(root,childs[0], where, holder);
                 where.append(')');
 
                 for (int i = 1; i < childs.length; i++) {
                     If c = childs[i];
                     where.append(' ').append(type.name()).append(" (");
-                    createConditionString(c, where, holder);
+                    createConditionString(root,c, where, holder);
                     where.append(')');
                 }
             } else {
                 where.append("NOT (");
-                createConditionString(childs[0], where, holder);
+                createConditionString(root,childs[0], where, holder);
                 where.append(')');
             }
         } else if (type == If.Type.NATIVE) {
             where.append(SQLParser.prepareSQL(condition.getSql(), holder));
         } else {
 
-            final Column column = builder.getColumnFactory().findColumn(condition.getPropertyName());
+            final Column column = builder.getColumnFactory().findColumn(root,condition.getPropertyName());
             where.append(column.getColumnName());
             final int fieldType = column.getType();
 

@@ -1,6 +1,7 @@
 package ru.kwanza.dbtool.orm.impl.fetcher;
 
 import ru.kwanza.dbtool.orm.api.IQuery;
+import ru.kwanza.dbtool.orm.impl.fetcher.proxy.IProxy;
 import ru.kwanza.dbtool.orm.impl.mapping.FetchMapping;
 import ru.kwanza.dbtool.orm.impl.mapping.FieldMapping;
 import ru.kwanza.toolbox.fieldhelper.FieldHelper;
@@ -37,7 +38,6 @@ class RelationValue {
         return fetchQuery;
     }
 
-
     public Set getRelationIds(Collection objs) {
         HashSet result = new HashSet();
         iterate(objs, result);
@@ -47,13 +47,19 @@ class RelationValue {
     private void iterate(Collection objs, HashSet result) {
         for (Object o : objs) {
             if (o instanceof Collection) {
-                iterate((Collection) o,result);
+                iterate((Collection) o, result);
             } else {
-                result.add(relationField.value(o));
+                if (isWaitingForLoad(o)) {
+                    result.add(relationField.value(o));
+                }
             }
         }
     }
 
+    private boolean isWaitingForLoad(Object o) {
+        final Object value = fetchMapping.getFetchField().getValue(o);
+        return value == null || value instanceof IProxy;
+    }
 
     public String getIDGroupingField() {
         return idField.getName();

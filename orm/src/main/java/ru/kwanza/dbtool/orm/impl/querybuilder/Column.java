@@ -22,9 +22,6 @@ class Column {
     }
 
     String getColumnName() {
-        if (relation.isRoot() && relation.getAllChilds() == null) {
-            return fieldMapping.getColumn();
-        }
         return relation.getAlias() + "." + fieldMapping.getColumn();
     }
 

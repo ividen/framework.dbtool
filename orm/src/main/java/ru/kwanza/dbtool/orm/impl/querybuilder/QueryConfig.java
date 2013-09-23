@@ -15,13 +15,13 @@ public class QueryConfig<T> {
     private final ParamsHolder holder;
 
     QueryConfig(DBTool dbTool, IEntityMappingRegistry registry,
-                Class<T> entityClass, String sql, JoinRelation rootRelations, ParamsHolder holder) {
+                Class<T> entityClass, String sql, JoinRelation rootRelations, Parameters parameters) {
         this.dbTool = dbTool;
         this.sql = sql;
         this.registry = registry;
         this.entityClass = entityClass;
-        this.holder = holder.complete();
         this.rootRelation = rootRelations;
+        this.holder = parameters.createHolder();
     }
 
     public JoinRelation getRootRelation() {

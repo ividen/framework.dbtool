@@ -2,11 +2,18 @@ package ru.kwanza.dbtool.orm.impl.mapping;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.expression.EvaluationContext;
+import org.springframework.expression.Expression;
+import org.springframework.expression.ExpressionParser;
+import org.springframework.expression.spel.standard.SpelExpressionParser;
+import org.springframework.expression.spel.support.StandardEvaluationContext;
 import ru.kwanza.dbtool.orm.annotations.*;
+import ru.kwanza.dbtool.orm.api.If;
 
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Member;
 import java.lang.reflect.Modifier;
+import java.sql.Types;
 import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -16,9 +23,9 @@ import static ru.kwanza.dbtool.orm.impl.mapping.EntityMappingHelper.*;
 /**
  * @author Kiryl Karatsetski
  */
-public class EntityMappingRegistryImpl implements IEntityMappingRegistry {
+public class EntityMappingRegistry implements IEntityMappingRegistry {
 
-    private static final Logger log = LoggerFactory.getLogger(EntityMappingRegistryImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(EntityMappingRegistry.class);
 
     private Lock registerLock = new ReentrantLock();
 
@@ -49,43 +56,20 @@ public class EntityMappingRegistryImpl implements IEntityMappingRegistry {
     private Map<Class, Map<String, FetchMapping>> fetchMappingByPropertyNameEntityClass = new HashMap<Class, Map<String, FetchMapping>>();
     private Map<String, Map<String, FetchMapping>> fetchMappingByPropertyNameEntityName = new HashMap<String, Map<String, FetchMapping>>();
 
-    private Map<Class, Collection<WaitingCallback>> waiting = new HashMap<Class, Collection<WaitingCallback>>();
-
-    static interface WaitingCallback {
-        public void registered(Class entityClass);
-    }
-
-    private void waitForEntity(Class entityClass, WaitingCallback callback) {
-        Collection<WaitingCallback> waitingCallbacks = waiting.get(entityClass);
-        if (waitingCallbacks == null) {
-            waitingCallbacks = new LinkedList<WaitingCallback>();
-            waiting.put(entityClass, waitingCallbacks);
-        }
-
-        waitingCallbacks.add(callback);
-    }
-
-    private void wakeUpWaiting(Class entityClass) {
-        Collection<WaitingCallback> waitingCallbacks = waiting.get(entityClass);
-        if (waitingCallbacks != null) {
-            for (WaitingCallback waitingCallback : waitingCallbacks) {
-                waitingCallback.registered(entityClass);
-            }
-            waiting.remove(entityClass);
-        }
-    }
+    private ExpressionParser conditionParser = new SpelExpressionParser();
 
     public void registerEntityClass(Class entityClass) {
         registerLock.lock();
         try {
-            processRegisterEntityClass(entityClass, entityClass);
+            if (!entityNameByEntityClass.containsKey(entityClass)) {
+                processRegisterEntityClass(entityClass, entityClass);
+            }
         } finally {
             registerLock.unlock();
         }
     }
 
     public void processRegisterEntityClass(Class entityClass, Class targetClass) {
-
         if (Object.class.equals(targetClass)) {
             return;
         }
@@ -105,9 +89,6 @@ public class EntityMappingRegistryImpl implements IEntityMappingRegistry {
         processFetches(entityClass, declaredFields);
         processFetches(entityClass, methods);
 
-        if (entityClass == targetClass) {
-            wakeUpWaiting(entityClass);
-        }
     }
 
     public boolean isRegisteredEntityClass(Class entityClass) {
@@ -130,15 +111,6 @@ public class EntityMappingRegistryImpl implements IEntityMappingRegistry {
             }
         }
 
-        boolean incompleteMapping = false;
-        for (Map.Entry<Class, Collection<WaitingCallback>> w : waiting.entrySet()) {
-            incompleteMapping = true;
-            log.error("Has incomplete mapping in relations. Expecting entity " + w.getKey().getName());
-        }
-
-        if (incompleteMapping) {
-            throw new RuntimeException("Has incomplete mappings!");
-        }
     }
 
     private void processFields(Class entityClass, AnnotatedElement[] annotatedElements) {
@@ -179,109 +151,100 @@ public class EntityMappingRegistryImpl implements IEntityMappingRegistry {
     }
 
     private void processAssociation(final Class entityClass, AnnotatedElement annotatedElement) {
-        final Association association = annotatedElement.getAnnotation(Association.class);
-        final String name = getPropertyName(annotatedElement);
-        final FieldMapping propertyMapping = fieldMappingByPropertyNameEntityClass.get(entityClass).get(association.property());
-        final EntityField fetchField = createEntityField(annotatedElement);
-        final Class relationClass = Collection.class.isAssignableFrom(fetchField.getType()) ?
-                association.relationClass() : fetchField.getType();
-        if (relationClass == Object.class) {
-            throw new RuntimeException("Relation @OneToMany in  "
-                    + entityClass.getName() + "." + name
-                    + " must have relativeClass() specified!");
-        }
-
-        if (entityNameByEntityClass.containsKey(relationClass)) {
-            registerAssociationFetchMapping(relationClass, association, entityClass, name, propertyMapping, fetchField);
-        } else {
-            waitForEntity(relationClass, new WaitingCallback() {
-                public void registered(Class type) {
-                    registerAssociationFetchMapping(relationClass, association, entityClass, name, propertyMapping, fetchField);
-                }
-            });
-        }
-    }
-
-    private void registerAssociationFetchMapping(Class relationClass, Association association, Class entityClass,
-                                                 String name, FieldMapping propertyMapping, EntityField fetchField) {
-        FieldMapping relationPropertyMapping = getPropertyFieldMapping(relationClass, association.relationProperty());
-        if (relationPropertyMapping == null) {
-            throw new RuntimeException("Not found relational property mapping "
-                    + relationClass.getName() + "." + association.relationProperty() + " for @Association "
-                    + entityClass.getName() + "." + name + "!");
-        }
-        registerFetchMapping(relationPropertyMapping, name, relationClass, propertyMapping, fetchField, entityClass);
+        addFetchMapping(entityClass, parseAssociation(entityClass, annotatedElement));
     }
 
     private void processOneToMany(final Class entityClass, final AnnotatedElement annotatedElement) {
+        addFetchMapping(entityClass, parseOneToMany(entityClass, annotatedElement));
+    }
+
+    private void processManyToOne(final Class entityClass, final AnnotatedElement annotatedElement) {
+        addFetchMapping(entityClass, parseManyToOne(entityClass, annotatedElement));
+    }
+
+    public FetchMapping parseAssociation(final Class entityClass, final AnnotatedElement element) {
+        final Association association = element.getAnnotation(Association.class);
+        final String name = getPropertyName(element);
+        final Map<String, FieldMapping> mapping = fieldMappingByPropertyNameEntityClass.get(entityClass);
+        final FieldMapping propertyMapping = mapping != null
+                ? mapping.get(association.property())
+                : new FieldMapping(name, null, Types.BIGINT, false,
+                        EntityMappingHelper.createEntityField(EntityMappingHelper.findField(entityClass, association.property())));
+        final EntityField fetchField = createEntityField(element);
+        final Class relationClass =
+                Collection.class.isAssignableFrom(fetchField.getType()) ? association.relationClass() : fetchField.getType();
+        if (relationClass == Object.class) {
+            throw new RuntimeException(
+                    "Relation @OneToMany in  " + entityClass.getName() + "." + name + " must have relativeClass() specified!");
+        }
+        final If condition = association.condition().isEmpty() ? null : parseCondition(association);
+
+        if (!entityNameByEntityClass.containsKey(relationClass)) {
+            this.registerEntityClass(relationClass);
+        }
+
+        FieldMapping relationPropertyMapping = getPropertyFieldMapping(relationClass, association.relationProperty());
+        if (relationPropertyMapping == null) {
+            throw new RuntimeException(
+                    "Not found relational property mapping " + relationClass.getName() + "." + association.relationProperty()
+                            + " for @Association " + entityClass.getName() + "." + name + "!");
+        }
+
+        return new FetchMapping(name, relationClass, propertyMapping, relationPropertyMapping, fetchField, condition);
+    }
+
+    public FetchMapping parseOneToMany(final Class entityClass, final AnnotatedElement annotatedElement) {
         final OneToMany oneToMany = annotatedElement.getAnnotation(OneToMany.class);
         final String name = getPropertyName(annotatedElement);
         final FieldMapping propertyMapping = idFieldMappingsByEntityClass.get(entityClass).iterator().next();
         final EntityField fetchField = createEntityField(annotatedElement);
-        final Class relationClass = Collection.class.isAssignableFrom(fetchField.getType()) ?
-                oneToMany.relationClass() : fetchField.getType();
+        final Class relationClass =
+                Collection.class.isAssignableFrom(fetchField.getType()) ? oneToMany.relationClass() : fetchField.getType();
         if (relationClass == Object.class) {
-            throw new RuntimeException("Relation @OneToMany in  "
-                    + entityClass.getName() + "." + name
-                    + " must have relativeClass() specified!");
+            throw new RuntimeException(
+                    "Relation @OneToMany in  " + entityClass.getName() + "." + name + " must have relativeClass() specified!");
         }
 
-        if (entityNameByEntityClass.containsKey(relationClass)) {
-            registerOneToManyFetchMapping(relationClass, oneToMany, entityClass, name, propertyMapping, fetchField);
-        } else {
-            waitForEntity(relationClass, new WaitingCallback() {
-                public void registered(Class type) {
-                    registerOneToManyFetchMapping(relationClass, oneToMany, entityClass, name, propertyMapping, fetchField);
-                }
-            });
+        if (!entityNameByEntityClass.containsKey(relationClass)) {
+            registerEntityClass(relationClass);
         }
-    }
-
-    private void registerOneToManyFetchMapping(Class relationClass, OneToMany oneToMany, Class entityClass,
-                                               String name, FieldMapping propertyMapping, EntityField fetchField) {
         FieldMapping relationPropertyMapping = getPropertyFieldMapping(relationClass, oneToMany.relationProperty());
         if (relationPropertyMapping == null) {
-            throw new RuntimeException("Not found relational property mapping "
-                    + relationClass.getName() + "." + oneToMany.relationProperty() + " for @OneToMany "
-                    + entityClass.getName() + "." + name + "!");
+            throw new RuntimeException(
+                    "Not found relational property mapping " + relationClass.getName() + "." + oneToMany.relationProperty()
+                            + " for @OneToMany " + entityClass.getName() + "." + name + "!");
         }
-        registerFetchMapping(relationPropertyMapping, name, relationClass, propertyMapping, fetchField, entityClass);
+
+        return new FetchMapping(name, relationClass, propertyMapping, relationPropertyMapping, fetchField, null);
     }
 
-    private void processManyToOne(final Class entityClass, final AnnotatedElement annotatedElement) {
+    public FetchMapping parseManyToOne(final Class entityClass, final AnnotatedElement annotatedElement) {
         final ManyToOne manyToOne = annotatedElement.getAnnotation(ManyToOne.class);
         final String name = getPropertyName(annotatedElement);
-        final FieldMapping propertyMapping = getPropertyFieldMapping(entityClass, manyToOne.property());
+        final Map<String, FieldMapping> mapping = fieldMappingByPropertyNameEntityClass.get(entityClass);
+        final FieldMapping propertyMapping = mapping != null
+                ? mapping.get(manyToOne.property())
+                : new FieldMapping(name, null, Types.BIGINT, false,
+                        EntityMappingHelper.createEntityField(EntityMappingHelper.findField(entityClass, manyToOne.property())));
         if (propertyMapping == null) {
-            throw new RuntimeException("Not found property "
-                    + manyToOne.property() + "for @ManyToOne "
-                    + entityClass.getName() + "." + getPropertyName(annotatedElement) + "!");
+            throw new RuntimeException(
+                    "Not found property " + manyToOne.property() + "for @ManyToOne " + entityClass.getName() + "." + getPropertyName(
+                            annotatedElement) + "!");
         }
 
         final EntityField fetchField = createEntityField(annotatedElement);
         final Class relationClass = fetchField.getType();
-        if (entityNameByEntityClass.containsKey(relationClass)) {
-            registerFetchMappingWithIDField(entityClass, name, propertyMapping, fetchField, relationClass);
-        } else {
-            waitForEntity(relationClass, new WaitingCallback() {
-                public void registered(Class type) {
-                    registerFetchMappingWithIDField(entityClass, name, propertyMapping, fetchField, relationClass);
-                }
-            });
+        if (!entityNameByEntityClass.containsKey(relationClass)) {
+            registerEntityClass(relationClass);
         }
-    }
-
-    private void registerFetchMappingWithIDField(Class entityClass, String name, FieldMapping propertyMapping,
-                                                 EntityField fetchField, Class relationClass) {
         final FieldMapping relationPropertyMapping = idFieldMappingsByEntityClass.get(relationClass).iterator().next();
-        registerFetchMapping(relationPropertyMapping, name, relationClass, propertyMapping, fetchField, entityClass);
+        return new FetchMapping(name, relationClass, propertyMapping, relationPropertyMapping, fetchField, null);
     }
 
-    private void registerFetchMapping(FieldMapping relationPropertyMapping, String name, Class relationClass,
-                                      FieldMapping propertyMapping, EntityField fetchField, Class entityClass) {
-        final FetchMapping fetchMapping = new FetchMapping(name, relationClass,
-                propertyMapping, relationPropertyMapping, fetchField);
-        addFetchMapping(entityClass, fetchMapping);
+    private If parseCondition(Association association) {
+        final Expression expression = conditionParser.parseExpression(association.condition());
+        EvaluationContext ctx = new StandardEvaluationContext(If.class);
+        return (If) expression.getValue(ctx, (Object) If.class);
     }
 
     private boolean isTransient(AnnotatedElement annotatedElement) {

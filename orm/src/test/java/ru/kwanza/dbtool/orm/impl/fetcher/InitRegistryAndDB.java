@@ -9,7 +9,7 @@ import org.dbunit.dataset.SortedDataSet;
 import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
 import org.dbunit.operation.DatabaseOperation;
 import org.springframework.beans.factory.annotation.Value;
-import ru.kwanza.dbtool.orm.impl.mapping.EntityMappingRegistryImpl;
+import ru.kwanza.dbtool.orm.impl.mapping.EntityMappingRegistry;
 
 import javax.annotation.Resource;
 import javax.sql.DataSource;
@@ -22,7 +22,7 @@ import java.sql.SQLException;
 
 public class InitRegistryAndDB {
     @Resource(name = "dbtool.IEntityMappingRegistry")
-    private EntityMappingRegistryImpl registry;
+    private EntityMappingRegistry registry;
     @Resource(name = "dataSource")
     private DataSource dataSource;
 

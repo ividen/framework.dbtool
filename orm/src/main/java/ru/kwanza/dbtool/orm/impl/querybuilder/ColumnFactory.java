@@ -16,9 +16,8 @@ class ColumnFactory {
         this.builder = builder;
     }
 
-    Column findColumn(String propertyName) {
+    Column findColumn(JoinRelation root,String propertyName) {
         final int index = propertyName.lastIndexOf(DOT_CHAR);
-        JoinRelation root = builder.getRelationFactory().getRoot();
         Class entityClass = builder.getEntityClass();
         if (index > 0) {
             final String path = propertyName.substring(0, index);

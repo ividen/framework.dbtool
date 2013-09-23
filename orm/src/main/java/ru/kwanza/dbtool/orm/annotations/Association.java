@@ -13,10 +13,12 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Retention(RUNTIME)
 @Target({FIELD, METHOD})
 public @interface Association {
-    
+
     String property();
-    
+
     String relationProperty();
-    
+
     Class relationClass() default Object.class;
+
+    String condition() default "";
 }

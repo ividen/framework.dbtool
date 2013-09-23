@@ -42,6 +42,12 @@ public class TestEntity  implements Serializable{
     @ManyToOne(property = "entityDID")
     private TestEntityD entityD;
 
+    @Association(property = "entityAID", relationProperty = "id" ,condition="and(isNotNull('version'),isGreater('version',valueOf(-1)))")
+    private TestEntityA associatedEntityA;
+
+    @Association(property = "entityCID", relationProperty = "id" ,condition="and(isNotNull('entityE.version'),isGreater('entityF.version',valueOf(-1)))")
+    private TestEntityC associatedEntityC;
+
     public TestEntity(Long id, Integer intField, String stringField, Date dateField) {
         this.id = id;
         this.intField = intField;
@@ -127,5 +133,13 @@ public class TestEntity  implements Serializable{
 
     public TestEntityD getEntityD() {
         return entityD;
+    }
+
+    public TestEntityA getAssociatedEntityA() {
+        return associatedEntityA;
+    }
+
+    public TestEntityC getAssociatedEntityC() {
+        return associatedEntityC;
     }
 }

@@ -43,8 +43,9 @@ public class OrderByFragmentHelper {
         final List<OrderBy> orderByList = builder.getOrderBy();
         if (orderByList != null && !orderByList.isEmpty()) {
             for (OrderBy ob : orderByList) {
-                orderBy.append(builder.getColumnFactory().findColumn(ob.getPropertyName()).getColumnName()).append(' ').append(ob.getType())
-                        .append(',');
+                orderBy.append(
+                        builder.getColumnFactory().findColumn(builder.getRelationFactory().getRoot(), ob.getPropertyName()).getColumnName())
+                        .append(' ').append(ob.getType()).append(',');
             }
 
             orderBy.deleteCharAt(orderBy.length() - 1);

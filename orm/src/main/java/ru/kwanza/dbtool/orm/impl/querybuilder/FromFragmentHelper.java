@@ -12,29 +12,47 @@ class FromFragmentHelper {
         this.builder = builder;
     }
 
-     String createFromFragment() {
+    String createFromFragment(Parameters holder) {
         final JoinRelation rootRelations = builder.getRelationFactory().getRoot();
         final StringBuilder fromPart = new StringBuilder(rootRelations.getAlias());
 
         if (rootRelations != null) {
-            processJoinRelation(fromPart, rootRelations);
+            processJoinRelation(fromPart, rootRelations, holder);
         }
         return fromPart.toString();
     }
 
-    private void processJoinRelation(StringBuilder fromPart, JoinRelation rootRelations) {
-        if (rootRelations.getAllChilds() != null) {
+    private void processJoinRelation(StringBuilder fromPart, JoinRelation rootRelations, Parameters holder) {
+        if (rootRelations.hasChilds()) {
             for (JoinRelation joinRelation : rootRelations.getAllChilds().values()) {
                 final Class relationClass = joinRelation.getFetchMapping().getRelationClass();
-                fromPart.append(joinRelation.getType() == Join.Type.LEFT ? " LEFT JOIN " : " INNER JOIN ")
-                        .append(builder.getRegistry().getTableName(relationClass)).append(' ').append(joinRelation.getAlias())
-                        .append(" ON ").append(rootRelations.getAlias() == null
+                StringBuilder extConditionPart = null;
+                Parameters joinHolder = null;
+                if (joinRelation.getFetchMapping().getCondition() != null) {
+                    joinHolder = new Parameters();
+                    extConditionPart = new StringBuilder();
+                    builder.getWhereFragmentHelper()
+                            .createConditionString(joinRelation, joinRelation.getFetchMapping().getCondition(), extConditionPart, joinHolder);
+                }
+                fromPart.append(joinRelation.getType() == Join.Type.LEFT ? " LEFT JOIN " : " INNER JOIN ");
+                if (joinRelation.hasChilds()) {
+                    fromPart.append('(').append(builder.getRegistry().getTableName(relationClass)).append(' ')
+                            .append(joinRelation.getAlias());
+                    processJoinRelation(fromPart, joinRelation, holder);
+                    fromPart.append(')');
+                } else {
+                    fromPart.append(builder.getRegistry().getTableName(relationClass)).append(' ').append(joinRelation.getAlias());
+                }
+
+                fromPart.append(" ON ").append(rootRelations.getAlias() == null
                         ? builder.getRegistry().getTableName(builder.getEntityClass())
                         : rootRelations.getAlias()).append('.').append(joinRelation.getFetchMapping().getPropertyMapping().getColumn())
                         .append('=').append(joinRelation.getAlias()).append('.')
                         .append(joinRelation.getFetchMapping().getRelationPropertyMapping().getColumn()).append(' ');
-
-                processJoinRelation(fromPart, joinRelation);
+                if (extConditionPart != null) {
+                    fromPart.append(" AND (").append(extConditionPart).append(')');
+                    holder.join(joinHolder);
+                }
             }
         }
     }

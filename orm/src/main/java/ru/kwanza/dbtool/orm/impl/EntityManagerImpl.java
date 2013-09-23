@@ -35,15 +35,13 @@ public class EntityManagerImpl  extends SpringSerializable implements IEntityMan
     @Resource(name="dbtool.IEntityMappingRegistry")
     private IEntityMappingRegistry mappingRegistry;
 
+    @Resource(name="dbtool.OperationFactory")
     private OperationFactory operationFactory;
 
     @Resource(name="dbtool.Fetcher")
     private Fetcher fetcher;
 
-    @PostConstruct
-    public void init() {
-        this.operationFactory = new OperationFactory(mappingRegistry, dbTool);
-    }
+
 
     public <T> T create(T object) throws UpdateException {
         final Class entityClass = object.getClass();

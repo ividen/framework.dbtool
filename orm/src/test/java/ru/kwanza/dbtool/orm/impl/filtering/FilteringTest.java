@@ -16,9 +16,8 @@ import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
 import ru.kwanza.dbtool.orm.api.If;
 import ru.kwanza.dbtool.orm.api.IEntityManager;
 import ru.kwanza.dbtool.orm.api.IFiltering;
-import ru.kwanza.dbtool.orm.api.If;
 import ru.kwanza.dbtool.orm.impl.fetcher.TestEntity;
-import ru.kwanza.dbtool.orm.impl.mapping.EntityMappingRegistryImpl;
+import ru.kwanza.dbtool.orm.impl.mapping.EntityMappingRegistry;
 
 import javax.annotation.Resource;
 import javax.sql.DataSource;
@@ -37,7 +36,7 @@ public abstract class FilteringTest extends AbstractJUnit4SpringContextTests {
     @Resource(name = "dbtool.IEntityManager")
     private IEntityManager em;
     @Resource(name = "dbtool.IEntityMappingRegistry")
-    private EntityMappingRegistryImpl registry;
+    private EntityMappingRegistry registry;
     @Resource(name = "dataSource")
     private DataSource dataSource;
 

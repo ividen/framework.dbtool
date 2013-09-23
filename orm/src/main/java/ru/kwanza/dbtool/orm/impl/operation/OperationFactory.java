@@ -4,6 +4,7 @@ import ru.kwanza.dbtool.core.DBTool;
 import ru.kwanza.dbtool.core.VersionGenerator;
 import ru.kwanza.dbtool.orm.impl.mapping.IEntityMappingRegistry;
 
+import javax.annotation.Resource;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -17,14 +18,11 @@ public final class OperationFactory {
     private Map<Class, IUpdateOperation> updateOperationCache = new ConcurrentHashMap<Class, IUpdateOperation>();
     private Map<Class, IDeleteOperation> deleteOperationCache = new ConcurrentHashMap<Class, IDeleteOperation>();
 
+    @Resource(name="dbtool.IEntityMappingRegistry")
     private IEntityMappingRegistry entityMappingRegistry;
-
+    @Resource(name="dbtool.DBTool")
     private DBTool dbTool;
 
-    public OperationFactory(IEntityMappingRegistry entityMappingRegistry, DBTool dbTool) {
-        this.entityMappingRegistry = entityMappingRegistry;
-        this.dbTool = dbTool;
-    }
 
     public ICreateOperation getCreateOperation(Class entityClass) {
         if (!createOperationCache.containsKey(entityClass)) {

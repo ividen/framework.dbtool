@@ -5,7 +5,6 @@
 
     <import resource="classpath:dbtool-config.xml"/>
     <import resource="classpath:dbtool-orm-config.xml"/>
-    <context:annotation-config></context:annotation-config>
 
     <bean id="propertyPlaceholderConfigurer"
           class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">

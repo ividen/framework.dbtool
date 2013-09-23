@@ -1,5 +1,7 @@
 package ru.kwanza.dbtool.orm.annotations;
 
+import org.springframework.jdbc.core.SqlTypeValue;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
@@ -25,7 +27,7 @@ public @interface Field {
      * Тип колонки в таблице. Это должна быть одна из констант в  of java.sql.Types
      *
      */
-    int type() default Integer.MAX_VALUE;
+    int type() default SqlTypeValue.TYPE_UNKNOWN;
 
     /**
      * Указывает на то, генерируется ли значение этого поля базой банных при выполнении INSERT

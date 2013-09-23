@@ -59,4 +59,8 @@ class JoinRelation {
         return childs;
     }
 
+    boolean hasChilds(){
+        return childs!=null && !childs.isEmpty();
+    }
+
 }

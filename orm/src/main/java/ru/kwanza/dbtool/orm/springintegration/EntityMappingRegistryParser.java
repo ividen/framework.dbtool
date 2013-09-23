@@ -12,7 +12,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Element;
 import ru.kwanza.dbtool.orm.impl.EntityManagerImpl;
-import ru.kwanza.dbtool.orm.impl.mapping.EntityMappingRegistryImpl;
+import ru.kwanza.dbtool.orm.impl.mapping.EntityMappingRegistry;
 import ru.kwanza.dbtool.orm.impl.mapping.SpringEntityMappingRegistryImpl;
 
 /**
@@ -40,7 +40,7 @@ public class EntityMappingRegistryParser implements BeanDefinitionParser {
         final BeanDefinitionRegistry beanDefinitionRegistry = readerContext.getRegistry();
 
         if (!beanDefinitionRegistry.containsBeanDefinition(ENTITY_MAPPING_REGISTRY)) {
-            final BeanDefinitionBuilder beanDefinitionBuilder = createBeanDefinitionBuilder(EntityMappingRegistryImpl.class);
+            final BeanDefinitionBuilder beanDefinitionBuilder = createBeanDefinitionBuilder(EntityMappingRegistry.class);
             beanDefinitionRegistry.registerBeanDefinition(ENTITY_MAPPING_REGISTRY, beanDefinitionBuilder.getBeanDefinition());
         }
 

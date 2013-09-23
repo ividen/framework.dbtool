@@ -1,15 +1,13 @@
 package ru.kwanza.dbtool.orm.impl.querybuilder;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
 import ru.kwanza.dbtool.orm.api.If;
 import ru.kwanza.dbtool.orm.api.IEntityManager;
-import ru.kwanza.dbtool.orm.api.If;
 import ru.kwanza.dbtool.orm.impl.fetcher.TestEntity;
-import ru.kwanza.dbtool.orm.impl.mapping.EntityMappingRegistryImpl;
+import ru.kwanza.dbtool.orm.impl.mapping.EntityMappingRegistry;
 
 import javax.annotation.Resource;
 
@@ -25,7 +23,7 @@ public class MySQLQueryBuilderTest extends AbstractJUnit4SpringContextTests {
     @Resource(name = "dbtool.IEntityManager")
     private IEntityManager em;
     @Resource(name = "dbtool.IEntityMappingRegistry")
-    private EntityMappingRegistryImpl registry;
+    private EntityMappingRegistry registry;
 
     @Test
     public void testBuildConditions() {
@@ -38,9 +36,9 @@ public class MySQLQueryBuilderTest extends AbstractJUnit4SpringContextTests {
         assertEquals(query1.getConfig().getSql(),
                 "SELECT id,int_field,string_field,date_field,short_field,version,entity_aid,entity_bid,entity_cid,entity_did " +
                         "FROM test_entity " +
-                        "WHERE (id IN (?)) AND (id LIKE ?) AND (id = ?) AND (id > ?) AND (id >= ?) AND (id < ?)" +
-                        " AND (id <= ?) AND (id IS NOT NULL) AND (id IS NULL) AND (id BETWEEN ? AND ?) AND (id <> ?)" +
-                        " AND (NOT (id <> ?)) AND (Exists(select * from test_entity where id=?)) ORDER BY id ASC,string_field DESC");
+                        "WHERE (test_entity.id IN (?)) AND (test_entity.id LIKE ?) AND (test_entity.id = ?) AND (test_entity.id > ?) AND (test_entity.id >= ?) AND (test_entity.id < ?)" +
+                        " AND (test_entity.id <= ?) AND (test_entity.id IS NOT NULL) AND (test_entity.id IS NULL) AND (test_entity.id BETWEEN ? AND ?) AND (test_entity.id <> ?)" +
+                        " AND (NOT (test_entity.id <> ?)) AND (Exists(select * from test_entity where id=?)) ORDER BY test_entity.id ASC,test_entity.string_field DESC");
 
         assertEquals(query1.getConfig().getParamsHolder().getCount(),12);
         AbstractQuery<TestEntity> query2 = (AbstractQuery<TestEntity>) em.queryBuilder(TestEntity.class).where(If
@@ -50,9 +48,9 @@ public class MySQLQueryBuilderTest extends AbstractJUnit4SpringContextTests {
 
         assertEquals(query2.getConfig().getSql(),"SELECT id,int_field,string_field,date_field,short_field," +
                 "version,entity_aid,entity_bid,entity_cid,entity_did FROM test_entity " +
-                "WHERE (id IN (?)) OR (id LIKE ?) OR (id = ?) OR (id > ?) " +
-                "OR (id >= ?) OR (id < ?) OR (id <= ?) OR (id IS NOT NULL) OR (id IS NULL) " +
-                "OR (id BETWEEN ? AND ?) OR (id <> ?) OR (id <> ?) ORDER BY id ASC,string_field DESC");
+                "WHERE (test_entity.id IN (?)) OR (test_entity.id LIKE ?) OR (test_entity.id = ?) OR (test_entity.id > ?) " +
+                "OR (test_entity.id >= ?) OR (test_entity.id < ?) OR (test_entity.id <= ?) OR (test_entity.id IS NOT NULL) OR (test_entity.id IS NULL) " +
+                "OR (test_entity.id BETWEEN ? AND ?) OR (test_entity.id <> ?) OR (test_entity.id <> ?) ORDER BY test_entity.id ASC,test_entity.string_field DESC");
 
         assertEquals(query1.getConfig().getParamsHolder().getCount(),12);
         AbstractQuery<TestEntity> query3 = (AbstractQuery<TestEntity>) em.queryBuilder(TestEntity.class).where(
@@ -64,14 +62,14 @@ public class MySQLQueryBuilderTest extends AbstractJUnit4SpringContextTests {
                 "version,entity_aid,entity_bid,entity_cid,entity_did " +
                 "FROM test_entity " +
                 "WHERE " +
-                "(NOT ((id IN (?)) OR (id LIKE ?) OR (id = ?) OR (id > ?))) " +
+                "(NOT ((test_entity.id IN (?)) OR (test_entity.id LIKE ?) OR (test_entity.id = ?) OR (test_entity.id > ?))) " +
                 "AND" +
-                " ((id >= ?) OR (id < ?) OR (id <= ?) OR (id IS NOT NULL) OR (id IS NULL)) " +
+                " ((test_entity.id >= ?) OR (test_entity.id < ?) OR (test_entity.id <= ?) OR (test_entity.id IS NOT NULL) OR (test_entity.id IS NULL)) " +
                 "AND" +
-                " (id BETWEEN ? AND ?) " +
+                " (test_entity.id BETWEEN ? AND ?) " +
                 "AND" +
-                " ((id <> ?) OR (id <> ?)) " +
-                "ORDER BY id ASC,string_field DESC");
+                " ((test_entity.id <> ?) OR (test_entity.id <> ?)) " +
+                "ORDER BY test_entity.id ASC,test_entity.string_field DESC");
         assertEquals(query3.getConfig().getParamsHolder().getCount(),11);
     }
 
@@ -85,9 +83,9 @@ public class MySQLQueryBuilderTest extends AbstractJUnit4SpringContextTests {
         assertEquals(query1.getConfig().getSql(),
                 "SELECT id,int_field,string_field,date_field,short_field,version,entity_aid,entity_bid,entity_cid,entity_did " +
                         "FROM test_entity " +
-                        "WHERE (id IN (?)) AND (id LIKE ?) AND (id = ?) AND (id > ?) AND (id >= ?) AND (id < ?)" +
-                        " AND (id <= ?) AND (id IS NOT NULL) AND (id IS NULL) AND (id BETWEEN ? AND ?) AND (id <> ?)" +
-                        " AND (id <> ?) ORDER BY id ASC,string_field DESC");
+                        "WHERE (test_entity.id IN (?)) AND (test_entity.id LIKE ?) AND (test_entity.id = ?) AND (test_entity.id > ?) AND (test_entity.id >= ?) AND (test_entity.id < ?)" +
+                        " AND (test_entity.id <= ?) AND (test_entity.id IS NOT NULL) AND (test_entity.id IS NULL) AND (test_entity.id BETWEEN ? AND ?) AND (test_entity.id <> ?)" +
+                        " AND (test_entity.id <> ?) ORDER BY test_entity.id ASC,test_entity.string_field DESC");
 
         assertEquals(query1.getConfig().getParamsHolder().getCount(),11);
 
@@ -98,9 +96,9 @@ public class MySQLQueryBuilderTest extends AbstractJUnit4SpringContextTests {
 
         assertEquals(query2.getConfig().getSql(),"SELECT id,int_field,string_field,date_field,short_field," +
                 "version,entity_aid,entity_bid,entity_cid,entity_did FROM test_entity " +
-                "WHERE (id IN (?)) OR (id LIKE ?) OR (id = ?) OR (id > ?) " +
-                "OR (id >= ?) OR (id < ?) OR (id <= ?) OR (id IS NOT NULL) OR (id IS NULL) " +
-                "OR (id BETWEEN ? AND ?) OR (id <> ?) OR (id <> ?) ORDER BY id ASC,string_field DESC");
+                "WHERE (test_entity.id IN (?)) OR (test_entity.id LIKE ?) OR (test_entity.id = ?) OR (test_entity.id > ?) " +
+                "OR (test_entity.id >= ?) OR (test_entity.id < ?) OR (test_entity.id <= ?) OR (test_entity.id IS NOT NULL) OR (test_entity.id IS NULL) " +
+                "OR (test_entity.id BETWEEN ? AND ?) OR (test_entity.id <> ?) OR (test_entity.id <> ?) ORDER BY test_entity.id ASC,test_entity.string_field DESC");
         assertEquals(query1.getConfig().getParamsHolder().getCount(),11);
 
         AbstractQuery<TestEntity> query3 = (AbstractQuery<TestEntity>) em.queryBuilder(TestEntity.class).where(If
@@ -112,14 +110,14 @@ public class MySQLQueryBuilderTest extends AbstractJUnit4SpringContextTests {
                 "version,entity_aid,entity_bid,entity_cid,entity_did " +
                 "FROM test_entity " +
                 "WHERE " +
-                "((id IN (?)) OR (id LIKE ?) OR (id = ?) OR (id > ?)) " +
+                "((test_entity.id IN (?)) OR (test_entity.id LIKE ?) OR (test_entity.id = ?) OR (test_entity.id > ?)) " +
                 "AND" +
-                " ((id >= ?) OR (id < ?) OR (id <= ?) OR (id IS NOT NULL) OR (id IS NULL)) " +
+                " ((test_entity.id >= ?) OR (test_entity.id < ?) OR (test_entity.id <= ?) OR (test_entity.id IS NOT NULL) OR (test_entity.id IS NULL)) " +
                 "AND" +
-                " (id BETWEEN ? AND ?) " +
+                " (test_entity.id BETWEEN ? AND ?) " +
                 "AND" +
-                " ((id <> ?) OR (id <> ?)) " +
-                "ORDER BY id ASC,string_field DESC");
+                " ((test_entity.id <> ?) OR (test_entity.id <> ?)) " +
+                "ORDER BY test_entity.id ASC,test_entity.string_field DESC");
         assertEquals(query1.getConfig().getParamsHolder().getCount(),11);
     }
 
@@ -130,7 +128,7 @@ public class MySQLQueryBuilderTest extends AbstractJUnit4SpringContextTests {
         assertEquals(query1.getConfig().getSql(),"SELECT id,int_field,string_field,date_field,short_field," +
                 "version,entity_aid,entity_bid,entity_cid,entity_did " +
                 "FROM test_entity " +
-                "ORDER BY id ASC,string_field DESC");
+                "ORDER BY test_entity.id ASC,test_entity.string_field DESC");
     }
 
     @Test(expected = IllegalStateException.class)
