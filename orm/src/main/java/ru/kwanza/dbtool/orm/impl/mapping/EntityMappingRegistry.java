@@ -31,32 +31,15 @@ public class EntityMappingRegistry implements IEntityMappingRegistry {
 
     private Lock registerLock = new ReentrantLock();
 
-    private Map<Class, String> tableNameByEntityClass = new HashMap<Class, String>();
-    private Map<String, String> tableNameByEntityName = new HashMap<String, String>();
-
+    private Map<Class, String> tableNames = new HashMap<Class, String>();
     private Map<String, Class> entityClassByEntityName = new HashMap<String, Class>();
     private Map<Class, String> entityNameByEntityClass = new HashMap<Class, String>();
 
-    private Map<Class, Collection<String>> columnNamesByEntityClass = new HashMap<Class, Collection<String>>();
-    private Map<String, Collection<String>> columnNamesByEntityName = new HashMap<String, Collection<String>>();
-
-    private Map<Class, Collection<FieldMapping>> fieldMappingsByEntityClass = new HashMap<Class, Collection<FieldMapping>>();
-    private Map<String, Collection<FieldMapping>> fieldMappingsByEntityName = new HashMap<String, Collection<FieldMapping>>();
-
-    private Map<Class, Collection<FieldMapping>> idFieldMappingsByEntityClass = new HashMap<Class, Collection<FieldMapping>>();
-    private Map<String, Collection<FieldMapping>> idFieldMappingsByEntityName = new HashMap<String, Collection<FieldMapping>>();
-
-    private Map<Class, FieldMapping> versionFieldMappingByEntityClass = new HashMap<Class, FieldMapping>();
-    private Map<String, FieldMapping> versionFieldMappingByEntityName = new HashMap<String, FieldMapping>();
-
-    private Map<Class, Collection<RelationMapping>> fetchMappingByEntityClass = new HashMap<Class, Collection<RelationMapping>>();
-    private Map<String, Collection<RelationMapping>> fetchMappingByEntityName = new HashMap<String, Collection<RelationMapping>>();
-
-    private Map<Class, Map<String, FieldMapping>> fieldMappingByPropertyNameEntityClass = new HashMap<Class, Map<String, FieldMapping>>();
-    private Map<String, Map<String, FieldMapping>> fieldMappingByPropertyNameEntityName = new HashMap<String, Map<String, FieldMapping>>();
-
-    private Map<Class, Map<String, RelationMapping>> fetchMappingByPropertyNameEntityClass = new HashMap<Class, Map<String, RelationMapping>>();
-    private Map<String, Map<String, RelationMapping>> fetchMappingByPropertyNameEntityName = new HashMap<String, Map<String, RelationMapping>>();
+    private Map<Class, Collection<String>> columnNames = new HashMap<Class, Collection<String>>();
+    private Map<Class, Collection<FieldMapping>> idFieldMappings = new HashMap<Class, Collection<FieldMapping>>();
+    private Map<Class, FieldMapping> versionFieldMappings = new HashMap<Class, FieldMapping>();
+    private Map<Class, Map<String, FieldMapping>> fieldMappings = new LinkedHashMap<Class, Map<String, FieldMapping>>();
+    private Map<Class, Map<String, RelationMapping>> relationMappings = new LinkedHashMap<Class, Map<String, RelationMapping>>();
 
     private ExpressionParser conditionParser = new SpelExpressionParser();
 
@@ -99,20 +82,6 @@ public class EntityMappingRegistry implements IEntityMappingRegistry {
 
     public boolean isRegisteredEntityName(String entityName) {
         return entityClassByEntityName.containsKey(entityName);
-    }
-
-    public void validateEntityMapping() {
-        final Collection<RelationMapping> relationMappings = new LinkedHashSet<RelationMapping>();
-        for (Collection<RelationMapping> relationMappingCollection : fetchMappingByEntityClass.values()) {
-            relationMappings.addAll(relationMappingCollection);
-        }
-        for (RelationMapping relationMapping : relationMappings) {
-            final Class fetchFieldClass = relationMapping.getProperty().getType();
-            if (!entityNameByEntityClass.containsKey(fetchFieldClass)) {
-                throw new RuntimeException("Unknown class relation in mapping registry: " + fetchFieldClass);
-            }
-        }
-
     }
 
     private void processFields(Class entityClass, AnnotatedElement[] annotatedElements) {
@@ -170,7 +139,7 @@ public class EntityMappingRegistry implements IEntityMappingRegistry {
     public RelationMapping parseAssociation(final Class entityClass, final AnnotatedElement element) {
         final Association association = element.getAnnotation(Association.class);
         final String name = getPropertyName(element);
-        final Map<String, FieldMapping> mapping = fieldMappingByPropertyNameEntityClass.get(entityClass);
+        final Map<String, FieldMapping> mapping = fieldMappings.get(entityClass);
         final FieldMapping propertyMapping = mapping != null
                 ? mapping.get(association.property())
                 : new FieldMapping(name, null, Types.BIGINT, false, FieldHelper.constructProperty(entityClass, association.property()));
@@ -201,7 +170,7 @@ public class EntityMappingRegistry implements IEntityMappingRegistry {
     public RelationMapping parseOneToMany(final Class entityClass, final AnnotatedElement annotatedElement) {
         final OneToMany oneToMany = annotatedElement.getAnnotation(OneToMany.class);
         final String name = getPropertyName(annotatedElement);
-        final FieldMapping propertyMapping = idFieldMappingsByEntityClass.get(entityClass).iterator().next();
+        final FieldMapping propertyMapping = idFieldMappings.get(entityClass).iterator().next();
         final Property fetchField = FieldHelper.constructProperty(entityClass, name);
         final Class relationClass =
                 Collection.class.isAssignableFrom(fetchField.getType()) ? oneToMany.relationClass() : fetchField.getType();
@@ -226,7 +195,7 @@ public class EntityMappingRegistry implements IEntityMappingRegistry {
     public RelationMapping parseManyToOne(final Class entityClass, final AnnotatedElement annotatedElement) {
         final ManyToOne manyToOne = annotatedElement.getAnnotation(ManyToOne.class);
         final String name = getPropertyName(annotatedElement);
-        final Map<String, FieldMapping> mapping = fieldMappingByPropertyNameEntityClass.get(entityClass);
+        final Map<String, FieldMapping> mapping = fieldMappings.get(entityClass);
         final FieldMapping propertyMapping = mapping != null
                 ? mapping.get(manyToOne.property())
                 : new FieldMapping(name, null, Types.BIGINT, false, FieldHelper.constructProperty(entityClass, manyToOne.property()));
@@ -236,12 +205,12 @@ public class EntityMappingRegistry implements IEntityMappingRegistry {
                             annotatedElement) + "!");
         }
 
-        final Property fetchField = FieldHelper.constructProperty(entityClass,name);
+        final Property fetchField = FieldHelper.constructProperty(entityClass, name);
         final Class relationClass = fetchField.getType();
         if (!entityNameByEntityClass.containsKey(relationClass)) {
             registerEntityClass(relationClass);
         }
-        final FieldMapping relationPropertyMapping = idFieldMappingsByEntityClass.get(relationClass).iterator().next();
+        final FieldMapping relationPropertyMapping = idFieldMappings.get(relationClass).iterator().next();
         return new RelationMapping(name, relationClass, propertyMapping, relationPropertyMapping, fetchField, null, null);
     }
 
@@ -256,7 +225,7 @@ public class EntityMappingRegistry implements IEntityMappingRegistry {
     }
 
     private FieldMapping getPropertyFieldMapping(Class entityClass, String fetchedPropertyName) {
-        final Map<String, FieldMapping> fieldMappingByPropertyName = fieldMappingByPropertyNameEntityClass.get(entityClass);
+        final Map<String, FieldMapping> fieldMappingByPropertyName = fieldMappings.get(entityClass);
         return fieldMappingByPropertyName != null ? fieldMappingByPropertyName.get(fetchedPropertyName) : null;
     }
 
@@ -271,9 +240,7 @@ public class EntityMappingRegistry implements IEntityMappingRegistry {
         if (!entityNameByEntityClass.containsKey(entityClass) && !entityClassByEntityName.containsKey(entityName)) {
             entityNameByEntityClass.put(entityClass, entityName);
             entityClassByEntityName.put(entityName, entityClass);
-            tableNameByEntityClass.put(entityClass, tableName);
-            tableNameByEntityName.put(getEntityName(entityClass), tableName);
-
+            tableNames.put(entityClass, tableName);
             logRegisterEntity(entityClass, entityName, tableName);
         } else {
             throw new RuntimeException("Duplicate entity class " + entityClass + " or entity name class " + entityName);
@@ -281,11 +248,10 @@ public class EntityMappingRegistry implements IEntityMappingRegistry {
     }
 
     private void registerColumnName(Class entityClass, String columnName) {
-        Collection<String> columnNames = columnNamesByEntityClass.get(entityClass);
+        Collection<String> columnNames = this.columnNames.get(entityClass);
         if (columnNames == null) {
             columnNames = new LinkedHashSet<String>();
-            columnNamesByEntityClass.put(entityClass, columnNames);
-            columnNamesByEntityName.put(getEntityName(entityClass), columnNames);
+            this.columnNames.put(entityClass, columnNames);
         }
 
         if (columnNames.contains(columnName)) {
@@ -298,27 +264,17 @@ public class EntityMappingRegistry implements IEntityMappingRegistry {
     }
 
     private void addFieldMapping(Class entityClass, FieldMapping fieldMapping) {
-        Collection<FieldMapping> fieldMappings = fieldMappingsByEntityClass.get(entityClass);
-        if (fieldMappings == null) {
-            fieldMappings = new LinkedHashSet<FieldMapping>();
-            fieldMappingsByEntityClass.put(entityClass, fieldMappings);
-            fieldMappingsByEntityName.put(getEntityName(entityClass), fieldMappings);
-        }
-
         registerColumnName(entityClass, fieldMapping.getColumn());
         addFieldMappingByPropertyName(entityClass, fieldMapping);
-
-        fieldMappings.add(fieldMapping);
 
         logRegisterFieldMapping(entityClass, fieldMapping);
     }
 
     private void addIdFieldMapping(Class entityClass, FieldMapping fieldMapping) {
-        Collection<FieldMapping> fieldMappings = idFieldMappingsByEntityClass.get(entityClass);
+        Collection<FieldMapping> fieldMappings = idFieldMappings.get(entityClass);
         if (fieldMappings == null) {
             fieldMappings = new LinkedHashSet<FieldMapping>();
-            idFieldMappingsByEntityClass.put(entityClass, fieldMappings);
-            idFieldMappingsByEntityName.put(getEntityName(entityClass), fieldMappings);
+            idFieldMappings.put(entityClass, fieldMappings);
         }
         fieldMappings.add(fieldMapping);
 
@@ -326,33 +282,22 @@ public class EntityMappingRegistry implements IEntityMappingRegistry {
     }
 
     private void addVersionFieldMapping(Class entityClass, FieldMapping fieldMapping) {
-        versionFieldMappingByEntityClass.put(entityClass, fieldMapping);
-        versionFieldMappingByEntityName.put(getEntityName(entityClass), fieldMapping);
+        versionFieldMappings.put(entityClass, fieldMapping);
 
         addFieldMapping(entityClass, fieldMapping);
     }
 
     private void addFetchMapping(Class entityClass, RelationMapping relationMapping) {
-        Collection<RelationMapping> relationMappings = fetchMappingByEntityClass.get(entityClass);
-        if (relationMappings == null) {
-            relationMappings = new LinkedHashSet<RelationMapping>();
-            fetchMappingByEntityClass.put(entityClass, relationMappings);
-            fetchMappingByEntityName.put(getEntityName(entityClass), relationMappings);
-        }
-
         addFetchMappingByPropertyName(entityClass, relationMapping);
-
-        relationMappings.add(relationMapping);
 
         logRegisterFetchMapping(entityClass, relationMapping);
     }
 
     private void addFieldMappingByPropertyName(Class entityClass, FieldMapping fieldMapping) {
-        Map<String, FieldMapping> fieldMappingByPropertyName = fieldMappingByPropertyNameEntityClass.get(entityClass);
+        Map<String, FieldMapping> fieldMappingByPropertyName = fieldMappings.get(entityClass);
         if (fieldMappingByPropertyName == null) {
             fieldMappingByPropertyName = new LinkedHashMap<String, FieldMapping>();
-            fieldMappingByPropertyNameEntityClass.put(entityClass, fieldMappingByPropertyName);
-            fieldMappingByPropertyNameEntityName.put(getEntityName(entityClass), fieldMappingByPropertyName);
+            fieldMappings.put(entityClass, fieldMappingByPropertyName);
         }
 
         final String propertyName = fieldMapping.getName();
@@ -365,11 +310,10 @@ public class EntityMappingRegistry implements IEntityMappingRegistry {
     }
 
     private void addFetchMappingByPropertyName(Class entityClass, RelationMapping relationMapping) {
-        Map<String, RelationMapping> fetchMappingByPropertyName = fetchMappingByPropertyNameEntityClass.get(entityClass);
+        Map<String, RelationMapping> fetchMappingByPropertyName = relationMappings.get(entityClass);
         if (fetchMappingByPropertyName == null) {
             fetchMappingByPropertyName = new LinkedHashMap<String, RelationMapping>();
-            fetchMappingByPropertyNameEntityClass.put(entityClass, fetchMappingByPropertyName);
-            fetchMappingByPropertyNameEntityName.put(getEntityName(entityClass), fetchMappingByPropertyName);
+            relationMappings.put(entityClass, fetchMappingByPropertyName);
         }
 
         final String propertyName = relationMapping.getName();
@@ -393,11 +337,11 @@ public class EntityMappingRegistry implements IEntityMappingRegistry {
     }
 
     public String getTableName(Class entityClass) {
-        return tableNameByEntityClass.get(entityClass);
+        return tableNames.get(entityClass);
     }
 
     public String getTableName(String entityName) {
-        return tableNameByEntityName.get(entityName);
+        return tableNames.get(getEntityClass(entityName));
     }
 
     public Class getEntityClass(String entityName) {
@@ -409,63 +353,63 @@ public class EntityMappingRegistry implements IEntityMappingRegistry {
     }
 
     public Collection<String> getColumnNames(Class entityClass) {
-        return columnNamesByEntityClass.get(entityClass);
+        return columnNames.get(entityClass);
     }
 
     public Collection<String> getColumnNames(String entityName) {
-        return columnNamesByEntityName.get(entityName);
+        return columnNames.get(getEntityClass(entityName));
     }
 
     public Collection<FieldMapping> getFieldMappings(Class entityClass) {
-        return fieldMappingsByEntityClass.get(entityClass);
+        final Map<String, FieldMapping> result = fieldMappings.get(entityClass);
+        return result != null ? result.values() : null;
     }
 
     public Collection<FieldMapping> getFieldMappings(String entityName) {
-        return fieldMappingsByEntityName.get(entityName);
+        return getFieldMappings(getEntityClass(entityName));
     }
 
     public Collection<FieldMapping> getIdFields(Class entityClass) {
-        return idFieldMappingsByEntityClass.get(entityClass);
+        return idFieldMappings.get(entityClass);
     }
 
     public Collection<FieldMapping> getIdFields(String entityName) {
-        return idFieldMappingsByEntityName.get(entityName);
+        return getIdFields(getEntityClass(entityName));
     }
 
     public FieldMapping getVersionField(Class entityClass) {
-        return versionFieldMappingByEntityClass.get(entityClass);
+        return versionFieldMappings.get(entityClass);
     }
 
     public FieldMapping getVersionField(String entityName) {
-        return versionFieldMappingByEntityName.get(entityName);
+        return getVersionField(getEntityClass(entityName));
     }
 
-    public Collection<RelationMapping> getFetchMapping(Class entityClass) {
-        return fetchMappingByEntityClass.get(entityClass);
+    public Collection<RelationMapping> getRelationMappings(Class entityClass) {
+        final Map<String, RelationMapping> result = relationMappings.get(entityClass);
+        return result != null ? result.values() : null;
     }
 
-    public Collection<RelationMapping> getFetchMapping(String entityName) {
-        return fetchMappingByEntityName.get(entityName);
+    public Collection<RelationMapping> getRelationMappings(String entityName) {
+        return getRelationMappings(getEntityClass(entityName));
     }
 
-    public FieldMapping getFieldMappingByPropertyName(Class entityClass, String propertyName) {
-        final Map<String, FieldMapping> fieldMappingByPropertyName = fieldMappingByPropertyNameEntityClass.get(entityClass);
+    public FieldMapping getFieldMapping(Class entityClass, String propertyName) {
+        final Map<String, FieldMapping> fieldMappingByPropertyName = fieldMappings.get(entityClass);
         return fieldMappingByPropertyName != null ? fieldMappingByPropertyName.get(propertyName) : null;
     }
 
-    public FieldMapping getFieldMappingByPropertyName(String entityName, String propertyName) {
-        final Map<String, FieldMapping> fieldMappingByPropertyName = fieldMappingByPropertyNameEntityName.get(entityName);
-        return fieldMappingByPropertyName != null ? fieldMappingByPropertyName.get(propertyName) : null;
+    public FieldMapping getFieldMapping(String entityName, String propertyName) {
+        return getFieldMapping(getEntityClass(entityName), propertyName);
     }
 
-    public RelationMapping getFetchMappingByPropertyName(Class entityClass, String fieldName) {
-        final Map<String, RelationMapping> fieldMappingByPropertyName = fetchMappingByPropertyNameEntityClass.get(entityClass);
+    public RelationMapping getRelationMapping(Class entityClass, String fieldName) {
+        final Map<String, RelationMapping> fieldMappingByPropertyName = relationMappings.get(entityClass);
         return fieldMappingByPropertyName != null ? fieldMappingByPropertyName.get(fieldName) : null;
     }
 
-    public RelationMapping getFetchMappingByPropertyName(String entityName, String fieldName) {
-        final Map<String, RelationMapping> fieldMappingByPropertyName = fetchMappingByPropertyNameEntityName.get(entityName);
-        return fieldMappingByPropertyName != null ? fieldMappingByPropertyName.get(fieldName) : null;
+    public RelationMapping getRelationMapping(String entityName, String fieldName) {
+        return getRelationMapping(getEntityClass(entityName), fieldName);
     }
 
     private static void logRegisterEntity(Class entityClass, String entityName, String tableName) {

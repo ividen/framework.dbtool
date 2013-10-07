@@ -77,15 +77,10 @@ public class EntityMappingTest extends AbstractJUnit4SpringContextTests {
         entityMappingRegistry.registerEntityClass(Agent.class);
     }
 
-    @Test
-    public void validateEntityMappingTest() throws Exception {
-        entityMappingRegistry.validateEntityMapping();
-    }
 
     @Test()
     public void validateCorrectEntityMappingTest() throws Exception {
         entityMappingRegistry.registerEntityClass(Agent.class);
-        entityMappingRegistry.validateEntityMapping();
     }
 
     @Test
@@ -174,8 +169,8 @@ public class EntityMappingTest extends AbstractJUnit4SpringContextTests {
 
     @Test
     public void getFetchMappingTest() throws Exception {
-        final Collection<RelationMapping> relationMappingByEntityClases = entityMappingRegistry.getFetchMapping(PAYMENT_TRX_CLASS);
-        final Collection<RelationMapping> relationMappingByEntityName = entityMappingRegistry.getFetchMapping(PAYMENT_TRX_NAME);
+        final Collection<RelationMapping> relationMappingByEntityClases = entityMappingRegistry.getRelationMappings(PAYMENT_TRX_CLASS);
+        final Collection<RelationMapping> relationMappingByEntityName = entityMappingRegistry.getRelationMappings(PAYMENT_TRX_NAME);
 
         assertNotNull(relationMappingByEntityClases);
         assertNotNull(relationMappingByEntityName);
@@ -206,9 +201,9 @@ public class EntityMappingTest extends AbstractJUnit4SpringContextTests {
             assertEquals(propertyName, expectedFieldMappingByEntityName.getName());
 
             final FieldMapping fieldMappingByPropertyNameByEntityClass =
-                    entityMappingRegistry.getFieldMappingByPropertyName(PAYMENT_TRX_CLASS, propertyName);
+                    entityMappingRegistry.getFieldMapping(PAYMENT_TRX_CLASS, propertyName);
             final FieldMapping fieldMappingByPropertyNameByEntityName =
-                    entityMappingRegistry.getFieldMappingByPropertyName(PAYMENT_TRX_NAME, propertyName);
+                    entityMappingRegistry.getFieldMapping(PAYMENT_TRX_NAME, propertyName);
 
             assertNotNull(fieldMappingByPropertyNameByEntityClass);
             assertNotNull(fieldMappingByPropertyNameByEntityName);
@@ -222,8 +217,8 @@ public class EntityMappingTest extends AbstractJUnit4SpringContextTests {
 
     @Test
     public void getFetchMappingByPropertyNameTest() throws Exception {
-        final Collection<RelationMapping> relationMappingByEntityClases = entityMappingRegistry.getFetchMapping(PAYMENT_TRX_CLASS);
-        final Collection<RelationMapping> relationMappingByEntityName = entityMappingRegistry.getFetchMapping(PAYMENT_TRX_NAME);
+        final Collection<RelationMapping> relationMappingByEntityClases = entityMappingRegistry.getRelationMappings(PAYMENT_TRX_CLASS);
+        final Collection<RelationMapping> relationMappingByEntityName = entityMappingRegistry.getRelationMappings(PAYMENT_TRX_NAME);
 
         assertNotNull(relationMappingByEntityClases);
         assertNotNull(relationMappingByEntityName);
@@ -240,9 +235,9 @@ public class EntityMappingTest extends AbstractJUnit4SpringContextTests {
             assertEquals(propertyName, expectedRelationMappingByEntityName.getName());
 
             final RelationMapping relationMappingByPropertyNameByEntityClass =
-                    entityMappingRegistry.getFetchMappingByPropertyName(PAYMENT_TRX_CLASS, propertyName);
+                    entityMappingRegistry.getRelationMapping(PAYMENT_TRX_CLASS, propertyName);
             final RelationMapping relationMappingByPropertyNameByEntityName =
-                    entityMappingRegistry.getFetchMappingByPropertyName(PAYMENT_TRX_NAME, propertyName);
+                    entityMappingRegistry.getRelationMapping(PAYMENT_TRX_NAME, propertyName);
 
             assertNotNull(relationMappingByPropertyNameByEntityClass);
             assertNotNull(relationMappingByPropertyNameByEntityName);
@@ -256,14 +251,14 @@ public class EntityMappingTest extends AbstractJUnit4SpringContextTests {
 
     @Test
     public void fieldMappingTest() throws Exception {
-        final FieldMapping fieldMapping = entityMappingRegistry.getFieldMappingByPropertyName(PAYMENT_TRX_CLASS, AMOUNT);
+        final FieldMapping fieldMapping = entityMappingRegistry.getFieldMapping(PAYMENT_TRX_CLASS, AMOUNT);
         assertNotNull(fieldMapping);
         assertFieldMapping(fieldMapping, AMOUNT, AMOUNT, Types.BIGINT, true,  Long.class);
     }
 
     @Test
     public void fetchMappingTest() throws Exception {
-        final RelationMapping relationMapping = entityMappingRegistry.getFetchMappingByPropertyName(PAYMENT_TRX_CLASS, AGENT);
+        final RelationMapping relationMapping = entityMappingRegistry.getRelationMapping(PAYMENT_TRX_CLASS, AGENT);
         assertNotNull(relationMapping);
         assertFetchMapping(relationMapping, AGENT);
     }

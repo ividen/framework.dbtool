@@ -239,7 +239,7 @@ public class Fetcher extends SpringSerializable {
     private RelationMapping getFetchMapping(Class entityClass, String propertyName) {
         RelationMapping fm;
         if (registry.isRegisteredEntityClass(entityClass)) {
-            fm = registry.getFetchMappingByPropertyName(entityClass, propertyName);
+            fm = registry.getRelationMapping(entityClass, propertyName);
             if (fm == null) {
                 throw new IllegalArgumentException("Wrong relation name! ManyToOne/OneToMany/Association field mapping not found!");
             }
@@ -255,7 +255,7 @@ public class Fetcher extends SpringSerializable {
     private Collection<RelationMapping> getFetchMappings(Class entityClass) {
         Collection<RelationMapping> result;
         if (registry.isRegisteredEntityClass(entityClass)) {
-            result = registry.getFetchMapping(entityClass);
+            result = registry.getRelationMappings(entityClass);
         } else {
             result = nonEntityMapping.get(entityClass).values();
         }
@@ -313,7 +313,7 @@ public class Fetcher extends SpringSerializable {
 //        if (groupByField == null) {
 //            return null;
 //        }
-//        final RelationMapping fetch = registry.getFetchMappingByPropertyName(fm.getRelationClass(), groupByField.getProperty());
+//        final RelationMapping fetch = registry.getRelationMapping(fm.getRelationClass(), groupByField.getProperty());
 //
 //        if (fm == null && groupByField.getNextField() != null) {
 //            throw new RuntimeException();

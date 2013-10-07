@@ -135,24 +135,6 @@ public class EntityMappingHelper {
         }
     }
 
-    private static java.lang.reflect.Method getSetMethod(java.lang.reflect.Method getMethod) {
-        final String setMethodName = getMethod.getName().replaceFirst("get", "set");
-        final Class declaringClass = getMethod.getDeclaringClass();
-        try {
-            final Method setMethod = declaringClass.getDeclaredMethod(setMethodName, getMethod.getReturnType());
-            isPublicMethod(setMethod);
-            return setMethod;
-        } catch (NoSuchMethodException e) {
-            throw new RuntimeException("Method " + setMethodName + " not found for Class: " + declaringClass);
-        }
-    }
-
-    private static void isPublicMethod(Method method) {
-        if (!Modifier.isPublic(method.getModifiers())) {
-            throw new RuntimeException("Method is not public: " + method);
-        }
-    }
-
     private static String uncapitalize(String str) {
         return changeFirstCharacterCase(str, false);
     }

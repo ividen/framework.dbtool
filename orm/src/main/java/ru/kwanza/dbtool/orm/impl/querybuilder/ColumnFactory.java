@@ -31,7 +31,7 @@ class ColumnFactory {
             }
         }
 
-        final FieldMapping fieldMapping = builder.getRegistry().getFieldMappingByPropertyName(entityClass, propertyName);
+        final FieldMapping fieldMapping = builder.getRegistry().getFieldMapping(entityClass, propertyName);
         if (fieldMapping == null) {
             throw new IllegalArgumentException("Unknown field " + propertyName + " in " + entityClass.getName() + "!");
         }

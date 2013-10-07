@@ -93,10 +93,6 @@ public class SpringEntityMappingRegistryImpl implements IEntityMappingRegistry {
         return delegate.isRegisteredEntityName(entityName);
     }
 
-    public void validateEntityMapping() {
-        delegate.validateEntityMapping();
-    }
-
     public String getTableName(Class entityClass) {
         return delegate.getTableName(entityClass);
     }
@@ -145,27 +141,27 @@ public class SpringEntityMappingRegistryImpl implements IEntityMappingRegistry {
         return delegate.getVersionField(entityName);
     }
 
-    public Collection<RelationMapping> getFetchMapping(Class entityClass) {
-        return delegate.getFetchMapping(entityClass);
+    public Collection<RelationMapping> getRelationMappings(Class entityClass) {
+        return delegate.getRelationMappings(entityClass);
     }
 
-    public Collection<RelationMapping> getFetchMapping(String entityName) {
-        return delegate.getFetchMapping(entityName);
+    public Collection<RelationMapping> getRelationMappings(String entityName) {
+        return delegate.getRelationMappings(entityName);
     }
 
-    public FieldMapping getFieldMappingByPropertyName(Class entityClass, String propertyName) {
-        return delegate.getFieldMappingByPropertyName(entityClass, propertyName);
+    public FieldMapping getFieldMapping(Class entityClass, String propertyName) {
+        return delegate.getFieldMapping(entityClass, propertyName);
     }
 
-    public FieldMapping getFieldMappingByPropertyName(String entityName, String propertyName) {
-        return delegate.getFieldMappingByPropertyName(entityName, propertyName);
+    public FieldMapping getFieldMapping(String entityName, String propertyName) {
+        return delegate.getFieldMapping(entityName, propertyName);
     }
 
-    public RelationMapping getFetchMappingByPropertyName(Class entityClass, String propertyName) {
-        return delegate.getFetchMappingByPropertyName(entityClass, propertyName);
+    public RelationMapping getRelationMapping(Class entityClass, String propertyName) {
+        return delegate.getRelationMapping(entityClass, propertyName);
     }
 
-    public RelationMapping getFetchMappingByPropertyName(String entityName, String propertyName) {
-        return delegate.getFetchMappingByPropertyName(entityName, propertyName);
+    public RelationMapping getRelationMapping(String entityName, String propertyName) {
+        return delegate.getRelationMapping(entityName, propertyName);
     }
 }

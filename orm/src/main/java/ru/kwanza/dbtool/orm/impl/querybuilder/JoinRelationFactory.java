@@ -32,7 +32,7 @@ class JoinRelationFactory {
 
         Class entityClass = root.isRoot() ? builder.getEntityClass() : root.getRelationMapping().getRelationClass();
 
-        final RelationMapping relationMapping = builder.getRegistry().getFetchMappingByPropertyName(entityClass, propertyName);
+        final RelationMapping relationMapping = builder.getRegistry().getRelationMapping(entityClass, propertyName);
         if (relationMapping == null) {
             throw new IllegalArgumentException("Wrong relation name for " + entityClass.getName() + " : " + propertyName + " !");
         }

@@ -13,8 +13,6 @@ public interface IEntityMappingRegistry {
 
     boolean isRegisteredEntityName(String entityName);
 
-    void validateEntityMapping();
-
     String getTableName(Class entityClass);
 
     String getTableName(String entityName);
@@ -39,15 +37,15 @@ public interface IEntityMappingRegistry {
 
     FieldMapping getVersionField(String entityName);
 
-    Collection<RelationMapping> getFetchMapping(Class entityClass);
+    Collection<RelationMapping> getRelationMappings(Class entityClass);
 
-    Collection<RelationMapping> getFetchMapping(String entityName);
+    Collection<RelationMapping> getRelationMappings(String entityName);
 
-    FieldMapping getFieldMappingByPropertyName(Class entityClass, String propertyName);
+    FieldMapping getFieldMapping(Class entityClass, String propertyName);
 
-    FieldMapping getFieldMappingByPropertyName(String entityName, String propertyName);
+    FieldMapping getFieldMapping(String entityName, String propertyName);
 
-    RelationMapping getFetchMappingByPropertyName(Class entityClass, String propertyName);
+    RelationMapping getRelationMapping(Class entityClass, String propertyName);
 
-    RelationMapping getFetchMappingByPropertyName(String entityName, String propertyName);
+    RelationMapping getRelationMapping(String entityName, String propertyName);
 }

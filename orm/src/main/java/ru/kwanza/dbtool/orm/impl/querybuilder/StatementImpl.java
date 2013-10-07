@@ -105,7 +105,7 @@ public abstract class StatementImpl<T> implements IStatement<T> {
     }
 
     public <F> void selectMapList(String propertyName, final Map<F, List<T>> result, final ListProducer<T> listProducer) {
-        FieldMapping fieldMapping = config.getRegistry().getFieldMappingByPropertyName(config.getEntityClass(), propertyName);
+        FieldMapping fieldMapping = config.getRegistry().getFieldMapping(config.getEntityClass(), propertyName);
         if (fieldMapping == null) {
             throw new IllegalArgumentException("Unknown field name!");
         }
@@ -126,7 +126,7 @@ public abstract class StatementImpl<T> implements IStatement<T> {
     }
 
     public <F> void selectMap(String propertyName, final Map<F, T> result) {
-        FieldMapping fieldMapping = config.getRegistry().getFieldMappingByPropertyName(config.getEntityClass(), propertyName);
+        FieldMapping fieldMapping = config.getRegistry().getFieldMapping(config.getEntityClass(), propertyName);
         if (fieldMapping == null) {
             throw new IllegalArgumentException("Unknown field name!");
         }
