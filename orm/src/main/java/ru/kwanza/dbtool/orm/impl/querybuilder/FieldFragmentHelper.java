@@ -24,9 +24,9 @@ class FieldFragmentHelper {
     }
 
     private void processFields(String alias, JoinRelation root, StringBuilder result) {
-        Collection<FieldMapping> fields = root.getFetchMapping() == null
+        Collection<FieldMapping> fields = root.getRelationMapping() == null
                 ? builder.getRegistry().getFieldMappings(builder.getEntityClass())
-                : builder.getRegistry().getFieldMappings(root.getFetchMapping().getRelationClass());
+                : builder.getRegistry().getFieldMappings(root.getRelationMapping().getRelationClass());
         if (fields != null) {
             for (FieldMapping fm : fields) {
                 if (alias != null) {

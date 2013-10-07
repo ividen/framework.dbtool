@@ -7,8 +7,6 @@ import ru.kwanza.dbtool.orm.impl.mapping.*;
 
 import javax.annotation.Resource;
 import java.lang.reflect.AnnotatedElement;
-import java.sql.Types;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -21,14 +19,14 @@ class NonEntityMapping {
     @Resource(name="dbtool.IEntityMappingRegistry")
     private EntityMappingRegistry registry;
 
-    private ConcurrentMap<Class, Map<String, FetchMapping>> cache =
-            new ConcurrentHashMap<Class, Map<String, FetchMapping>>();
+    private ConcurrentMap<Class, Map<String, RelationMapping>> cache =
+            new ConcurrentHashMap<Class, Map<String, RelationMapping>>();
 
 
-    public Map<String, FetchMapping> get(Class entityClass) {
-        Map<String, FetchMapping> mappings = cache.get(entityClass);
+    public Map<String, RelationMapping> get(Class entityClass) {
+        Map<String, RelationMapping> mappings = cache.get(entityClass);
         if (mappings == null) {
-            mappings = new HashMap<String, FetchMapping>();
+            mappings = new HashMap<String, RelationMapping>();
             parseClass(entityClass, mappings);
             if (null != cache.putIfAbsent(entityClass, mappings)) {
                 mappings = cache.get(entityClass);
@@ -38,7 +36,7 @@ class NonEntityMapping {
         return mappings;
     }
 
-    private void parseClass(Class aClass, Map<String, FetchMapping> mappings) {
+    private void parseClass(Class aClass, Map<String, RelationMapping> mappings) {
         if (aClass == Object.class) {
             return;
         }
@@ -49,7 +47,7 @@ class NonEntityMapping {
         parseClass(aClass.getSuperclass(), mappings);
     }
 
-    private void processElements(Class aClass, Map<String, FetchMapping> mappings, AnnotatedElement[] elements) {
+    private void processElements(Class aClass, Map<String, RelationMapping> mappings, AnnotatedElement[] elements) {
         for (AnnotatedElement field : elements) {
             if (field.isAnnotationPresent(ManyToOne.class)) {
                 processManyToOne(aClass, mappings, field);
@@ -62,13 +60,13 @@ class NonEntityMapping {
         }
     }
 
-    private void processAssociation(Class aClass, Map<String, FetchMapping> mappings, AnnotatedElement annotatedElement) {
-        final FetchMapping fetchMapping = registry.parseAssociation(aClass, annotatedElement);
-        mappings.put(fetchMapping.getName(),fetchMapping);
+    private void processAssociation(Class aClass, Map<String, RelationMapping> mappings, AnnotatedElement annotatedElement) {
+        final RelationMapping relationMapping = registry.parseAssociation(aClass, annotatedElement);
+        mappings.put(relationMapping.getName(), relationMapping);
     }
 
-    private void processManyToOne(Class aClass, Map<String, FetchMapping> mappings, AnnotatedElement annotatedElement) {
-        final FetchMapping fetchMapping = registry.parseManyToOne(aClass, annotatedElement);
-        mappings.put(fetchMapping.getName(),fetchMapping);
+    private void processManyToOne(Class aClass, Map<String, RelationMapping> mappings, AnnotatedElement annotatedElement) {
+        final RelationMapping relationMapping = registry.parseManyToOne(aClass, annotatedElement);
+        mappings.put(relationMapping.getName(), relationMapping);
     }
 }

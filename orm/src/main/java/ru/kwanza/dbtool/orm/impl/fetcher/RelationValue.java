@@ -2,7 +2,7 @@ package ru.kwanza.dbtool.orm.impl.fetcher;
 
 import ru.kwanza.dbtool.orm.api.IQuery;
 import ru.kwanza.dbtool.orm.impl.fetcher.proxy.IProxy;
-import ru.kwanza.dbtool.orm.impl.mapping.FetchMapping;
+import ru.kwanza.dbtool.orm.impl.mapping.RelationMapping;
 import ru.kwanza.dbtool.orm.impl.mapping.FieldMapping;
 import ru.kwanza.toolbox.fieldhelper.FieldHelper;
 
@@ -15,23 +15,23 @@ import java.util.Set;
  */
 class RelationValue {
     private FieldMapping idField;
-    private FetchMapping fetchMapping;
+    private RelationMapping relationMapping;
     private IQuery fetchQuery;
     private FieldHelper.Field relationField;
 
-    RelationValue(FieldMapping idField, FetchMapping fetchMapping, IQuery fetchQuery) {
+    RelationValue(FieldMapping idField, RelationMapping relationMapping, IQuery fetchQuery) {
         this.idField = idField;
-        this.fetchMapping = fetchMapping;
+        this.relationMapping = relationMapping;
         this.fetchQuery = fetchQuery;
         this.relationField = new FieldHelper.Field() {
             public Object value(Object object) {
-                return RelationValue.this.fetchMapping.getPropertyField().getValue(object);
+                return RelationValue.this.relationMapping.getKeyProperty().value(object);
             }
         };
     }
 
-    public FetchMapping getFetchMapping() {
-        return fetchMapping;
+    public RelationMapping getRelationMapping() {
+        return relationMapping;
     }
 
     public IQuery getFetchQuery() {
@@ -57,7 +57,7 @@ class RelationValue {
     }
 
     private boolean isWaitingForLoad(Object o) {
-        final Object value = fetchMapping.getFetchField().getValue(o);
+        final Object value = relationMapping.getProperty().value(o);
         return value == null || value instanceof IProxy;
     }
 

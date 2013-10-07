@@ -25,14 +25,14 @@ class FromFragmentHelper {
     private void processJoinRelation(StringBuilder fromPart, JoinRelation rootRelations, Parameters holder) {
         if (rootRelations.hasChilds()) {
             for (JoinRelation joinRelation : rootRelations.getAllChilds().values()) {
-                final Class relationClass = joinRelation.getFetchMapping().getRelationClass();
+                final Class relationClass = joinRelation.getRelationMapping().getRelationClass();
                 StringBuilder extConditionPart = null;
                 Parameters joinHolder = null;
-                if (joinRelation.getFetchMapping().getCondition() != null) {
+                if (joinRelation.getRelationMapping().getCondition() != null) {
                     joinHolder = new Parameters();
                     extConditionPart = new StringBuilder();
                     builder.getWhereFragmentHelper()
-                            .createConditionString(joinRelation, joinRelation.getFetchMapping().getCondition(), extConditionPart, joinHolder);
+                            .createConditionString(joinRelation, joinRelation.getRelationMapping().getCondition(), extConditionPart, joinHolder);
                 }
                 fromPart.append(joinRelation.getType() == Join.Type.LEFT ? " LEFT JOIN " : " INNER JOIN ");
                 if (joinRelation.hasChilds()) {
@@ -46,9 +46,9 @@ class FromFragmentHelper {
 
                 fromPart.append(" ON ").append(rootRelations.getAlias() == null
                         ? builder.getRegistry().getTableName(builder.getEntityClass())
-                        : rootRelations.getAlias()).append('.').append(joinRelation.getFetchMapping().getPropertyMapping().getColumn())
+                        : rootRelations.getAlias()).append('.').append(joinRelation.getRelationMapping().getKeyMapping().getColumn())
                         .append('=').append(joinRelation.getAlias()).append('.')
-                        .append(joinRelation.getFetchMapping().getRelationPropertyMapping().getColumn()).append(' ');
+                        .append(joinRelation.getRelationMapping().getRelationKeyMapping().getColumn()).append(' ');
                 if (extConditionPart != null) {
                     fromPart.append(" AND (").append(extConditionPart).append(')');
                     holder.join(joinHolder);

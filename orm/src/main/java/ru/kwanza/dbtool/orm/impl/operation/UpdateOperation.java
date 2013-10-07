@@ -6,10 +6,10 @@ import org.springframework.jdbc.core.RowMapper;
 import ru.kwanza.dbtool.core.*;
 import ru.kwanza.dbtool.core.util.FieldValueExtractor;
 import ru.kwanza.dbtool.core.util.UpdateUtil;
-import ru.kwanza.dbtool.orm.impl.mapping.EntityField;
 import ru.kwanza.dbtool.orm.impl.mapping.FieldMapping;
 import ru.kwanza.dbtool.orm.impl.mapping.IEntityMappingRegistry;
 import ru.kwanza.toolbox.fieldhelper.FieldHelper;
+import ru.kwanza.toolbox.fieldhelper.Property;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -27,10 +27,10 @@ public class UpdateOperation extends Operation implements IUpdateOperation {
     private Collection<FieldMapping> fieldMappings;
 
     private FieldMapping idFieldMapping;
-    private EntityField idEntityField;
+    private Property idEntityField;
 
     private FieldMapping versionFieldMapping;
-    private EntityField versionEntityField;
+    private Property versionEntityField;
 
     private boolean versionSupport;
 
@@ -62,10 +62,10 @@ public class UpdateOperation extends Operation implements IUpdateOperation {
         }
 
         this.idFieldMapping = idFieldMappings.iterator().next();
-        this.idEntityField = idFieldMapping != null ? idFieldMapping.getEntityFiled() : null;
+        this.idEntityField = idFieldMapping != null ? idFieldMapping.getProperty() : null;
 
         this.versionFieldMapping = entityMappingRegistry.getVersionField(entityClass);
-        this.versionEntityField = versionFieldMapping != null ? versionFieldMapping.getEntityFiled() : null;
+        this.versionEntityField = versionFieldMapping != null ? versionFieldMapping.getProperty() : null;
 
         this.versionSupport = versionEntityField != null;
 
@@ -132,10 +132,10 @@ public class UpdateOperation extends Operation implements IUpdateOperation {
             try {
                 int index = 0;
                 for (FieldMapping fieldMapping : fieldMappings) {
-                    final EntityField entityFiled = fieldMapping.getEntityFiled();
-                    FieldSetter.setValue(pst, ++index, entityFiled.getType(), entityFiled.getValue(object));
+                    final Property entityFiled = fieldMapping.getProperty();
+                    FieldSetter.setValue(pst, ++index, entityFiled.getType(), entityFiled.value(object));
                 }
-                FieldSetter.setValue(pst, ++index, idEntityField.getType(), idEntityField.getValue(object));
+                FieldSetter.setValue(pst, ++index, idEntityField.getType(), idEntityField.value(object));
             } catch (SQLException e) {
                 throw e;
             } catch (Exception e) {
@@ -148,14 +148,14 @@ public class UpdateOperation extends Operation implements IUpdateOperation {
             try {
                 int index = 0;
                 for (FieldMapping fieldMapping : fieldMappings) {
-                    final EntityField entityFiled = fieldMapping.getEntityFiled();
+                    final Property entityFiled = fieldMapping.getProperty();
                     if (fieldMapping.getColumn().equals(versionFieldMapping.getColumn())) {
                         FieldSetter.setLong(pst, ++index, newVersion);
                     } else {
-                        FieldSetter.setValue(pst, ++index, entityFiled.getType(), entityFiled.getValue(object));
+                        FieldSetter.setValue(pst, ++index, entityFiled.getType(), entityFiled.value(object));
                     }
                 }
-                FieldSetter.setValue(pst, ++index, idEntityField.getType(), idEntityField.getValue(object));
+                FieldSetter.setValue(pst, ++index, idEntityField.getType(), idEntityField.value(object));
                 FieldSetter.setLong(pst, ++index, oldVersion);
             } catch (SQLException e) {
                 throw e;
@@ -176,21 +176,21 @@ public class UpdateOperation extends Operation implements IUpdateOperation {
 
     private class KeyField implements FieldHelper.Field<Object, Comparable> {
         public Comparable value(Object object) {
-            return (Comparable) idEntityField.getValue(object);
+            return (Comparable) idEntityField.value(object);
         }
     }
 
     private class VersionField implements FieldHelper.VersionField<Object, Long> {
         public Long value(Object object) {
-            return (Long) versionEntityField.getValue(object);
+            return (Long) versionEntityField.value(object);
         }
 
         public Long generateNewValue(Object object) {
-            return versionGenerator.generate(entityClass.getName(), (Long) versionEntityField.getValue(object));
+            return versionGenerator.generate(entityClass.getName(), (Long) versionEntityField.value(object));
         }
 
         public void setValue(Object object, Long value) {
-            versionEntityField.setValue(object, value);
+            versionEntityField.set(object, value);
         }
     }
 }

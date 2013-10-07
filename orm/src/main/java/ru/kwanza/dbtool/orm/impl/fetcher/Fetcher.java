@@ -1,16 +1,14 @@
 package ru.kwanza.dbtool.orm.impl.fetcher;
 
-import ru.kwanza.dbtool.orm.api.IEntityManager;
-import ru.kwanza.dbtool.orm.api.IQueryBuilder;
-import ru.kwanza.dbtool.orm.api.If;
-import ru.kwanza.dbtool.orm.api.ListProducer;
+import ru.kwanza.dbtool.orm.api.*;
 import ru.kwanza.dbtool.orm.impl.fetcher.proxy.ProxyCallback;
 import ru.kwanza.dbtool.orm.impl.fetcher.proxy.ProxyEntry;
 import ru.kwanza.dbtool.orm.impl.fetcher.proxy.ProxyFactory;
-import ru.kwanza.dbtool.orm.impl.mapping.FetchMapping;
+import ru.kwanza.dbtool.orm.impl.mapping.RelationMapping;
 import ru.kwanza.dbtool.orm.impl.mapping.FieldMapping;
 import ru.kwanza.dbtool.orm.impl.mapping.IEntityMappingRegistry;
 import ru.kwanza.toolbox.SpringSerializable;
+import ru.kwanza.toolbox.fieldhelper.Property;
 
 import javax.annotation.Resource;
 import java.util.*;
@@ -63,14 +61,14 @@ public class Fetcher extends SpringSerializable {
     public <T> void fetchLazy(Class<T> entityClass, Collection<T> items) {
         ProxyCallback.enterSafe();
         try {
-            final Collection<FetchMapping> fetchMappings = getFetchMappings(entityClass);
-            if (fetchMappings != null) {
-                for (FetchMapping fetchMapping : fetchMappings) {
+            final Collection<RelationMapping> relationMappings = getFetchMappings(entityClass);
+            if (relationMappings != null) {
+                for (RelationMapping relationMapping : relationMappings) {
                     ProxyCallback batch =
-                            new ProxyCallback(this, entityClass, items, fetchMapping.getFetchField().getType(), fetchMapping.getName());
+                            new ProxyCallback(this, entityClass, items, relationMapping.getProperty().getType(), relationMapping.getName());
                     for (T item : items) {
-                        if (fetchMapping.getFetchField().getValue(item) == null) {
-                            fetchMapping.getFetchField().setValue(item, factory.newInstance(fetchMapping.getFetchField().getType(), batch));
+                        if (relationMapping.getProperty().value(item) == null) {
+                            relationMapping.getProperty().set(item, factory.newInstance(relationMapping.getProperty().getType(), batch));
                         }
                     }
                 }
@@ -93,22 +91,22 @@ public class Fetcher extends SpringSerializable {
             final Map<Object, Object> map = queryRelation(items, relationValue);
             ArrayList relationItems = new ArrayList();
             for (T item : items) {
-                final Object dest = relationValue.getFetchMapping().getFetchField().getValue(item);
-                final Object key = relationValue.getFetchMapping().getPropertyField().getValue(item);
+                final Object dest = relationValue.getRelationMapping().getProperty().value(item);
+                final Object key = relationValue.getRelationMapping().getKeyProperty().value(item);
                 if (key != null) {
                     final Object src = map.get(key);
                     if (src != null) {
-                        if (Collection.class.isAssignableFrom(relationValue.getFetchMapping().getFetchField().getType())) {
+                        if (relationValue.getRelationMapping().isCollection()) {
                             relationItems.addAll((Collection) src);
                         } else {
                             relationItems.add(src);
                         }
-                        final ProxyEntry proxy = factory.get(relationValue.getFetchMapping().getFetchField().getType());
+                        final ProxyEntry proxy = factory.get(relationValue.getRelationMapping().getProperty().getType());
                         proxy.setDelegate(dest, src);
                     }
                 }
             }
-            fetchLazy(relationValue.getFetchMapping().getRelationClass(), relationItems);
+            fetchLazy(relationValue.getRelationMapping().getRelationClass(), relationItems);
         } finally {
             ProxyCallback.exitSafe();
         }
@@ -144,24 +142,29 @@ public class Fetcher extends SpringSerializable {
                 RelationKey key = entry.getKey();
                 Map realtion = entry.getValue();
                 RelationValue relationValue = relationCache.get(key);
-                FetchMapping fetchMapping = relationValue.getFetchMapping();
+                RelationMapping relationMapping = relationValue.getRelationMapping();
+                //todo aguzanov isCollection
                 if (object instanceof Collection) {
                     Collection c = (Collection) object;
                     for (Object o : c) {
-                        Object relationIDValue = fetchMapping.getPropertyField().getValue(o);
+                        Object relationIDValue = relationMapping.getKeyProperty().value(o);
                         if (relationIDValue != null) {
                             Object relationObjValue = realtion.get(relationIDValue);
                             if (relationObjValue != null) {
-                                fetchMapping.getFetchField().setValue(o, relationObjValue);
+                                //todo aguzanov setValue with Splitter
+                                if(relationMapping.getGroupBy()!=null){
+//                                    relationObjValue = fetchMap
+                                }
+                                relationMapping.getProperty().set(o, relationObjValue);
                             }
                         }
                     }
                 } else {
-                    Object relationIDValue = fetchMapping.getPropertyField().getValue(object);
+                    Object relationIDValue = relationMapping.getKeyProperty().value(object);
                     if (relationIDValue != null) {
                         Object relationObjValue = realtion.get(relationIDValue);
                         if (relationObjValue != null) {
-                            fetchMapping.getFetchField().setValue(object, relationObjValue);
+                            relationMapping.getProperty().set(object, relationObjValue);
                         }
                     }
                 }
@@ -170,30 +173,22 @@ public class Fetcher extends SpringSerializable {
     }
 
     public <T> Map queryRelation(Collection<T> items, RelationValue relationValue) {
-        final FetchMapping fm = relationValue.getFetchMapping();
-        final Class type = fm.getFetchField().getType();
+        final RelationMapping fm = relationValue.getRelationMapping();
+        final Class type = fm.getProperty().getType();
         final Set relationIds = relationValue.getRelationIds(items);
         if (relationIds.isEmpty()) {
             return Collections.emptyMap();
         }
-        if (Collection.class.isAssignableFrom(type)) {
+
+        if (fm.isCollection()) {
             Map<Object, List<T>> result = new HashMap<Object, List<T>>();
             ListProducer<T> producer;
-            if (Collection.class == type || LinkedList.class == type || List.class == type) {
-                producer = ListProducer.LINKED_LIST;
-            } else if (ArrayList.class == type) {
+            if (Collection.class == type || ArrayList.class == type || List.class == type || Map.class.isAssignableFrom(type)) {
                 producer = ListProducer.ARRAY_LIST;
+            } else if (LinkedList.class == type) {
+                producer = ListProducer.LINKED_LIST;
             } else {
-                producer = new ListProducer<T>() {
-                    @Override
-                    public List<T> create() {
-                        try {
-                            return (List<T>) type.newInstance();
-                        } catch (Exception e) {
-                            throw new RuntimeException("Can't instantiate list for relation " + fm.toString());
-                        }
-                    }
-                };
+                producer = ListProducer.create(type);
             }
             relationValue.getFetchQuery().prepare().setParameter(1, relationIds)
                     .selectMapList(relationValue.getIDGroupingField(), result, producer);
@@ -201,6 +196,7 @@ public class Fetcher extends SpringSerializable {
         } else {
             Map<Object, T> result = new HashMap<Object, T>();
             relationValue.getFetchQuery().prepare().setParameter(1, relationIds).selectMap(relationValue.getIDGroupingField(), result);
+
             return result;
         }
     }
@@ -223,7 +219,7 @@ public class Fetcher extends SpringSerializable {
         for (Map.Entry<String, Object> e : scan.entrySet()) {
             String propertyName = e.getKey();
 
-            FetchMapping fm;
+            RelationMapping fm;
 
             fm = getFetchMapping(entityClass, propertyName);
 
@@ -240,8 +236,8 @@ public class Fetcher extends SpringSerializable {
         }
     }
 
-    private FetchMapping getFetchMapping(Class entityClass, String propertyName) {
-        FetchMapping fm;
+    private RelationMapping getFetchMapping(Class entityClass, String propertyName) {
+        RelationMapping fm;
         if (registry.isRegisteredEntityClass(entityClass)) {
             fm = registry.getFetchMappingByPropertyName(entityClass, propertyName);
             if (fm == null) {
@@ -256,8 +252,8 @@ public class Fetcher extends SpringSerializable {
         return fm;
     }
 
-    private Collection<FetchMapping> getFetchMappings(Class entityClass) {
-        Collection<FetchMapping> result;
+    private Collection<RelationMapping> getFetchMappings(Class entityClass) {
+        Collection<RelationMapping> result;
         if (registry.isRegisteredEntityClass(entityClass)) {
             result = registry.getFetchMapping(entityClass);
         } else {
@@ -270,14 +266,14 @@ public class Fetcher extends SpringSerializable {
         RelationKey relationKey = new RelationKey(entityClass, propertyName);
         RelationValue relationValue = relationCache.get(relationKey);
         if (relationValue == null) {
-            FetchMapping fm = getFetchMapping(entityClass, propertyName);
+            RelationMapping fm = getFetchMapping(entityClass, propertyName);
             relationValue = createRealtionValue(relationKey, fm);
         }
 
         return relationValue;
     }
 
-    private RelationKey getRelationKey(Class entityClass, String propertyName, FetchMapping fm) {
+    private RelationKey getRelationKey(Class entityClass, String propertyName, RelationMapping fm) {
         RelationKey relationKey = new RelationKey(entityClass, propertyName);
         RelationValue relationValue = relationCache.get(relationKey);
         if (relationValue == null) {
@@ -287,17 +283,44 @@ public class Fetcher extends SpringSerializable {
         return relationKey;
     }
 
-    private RelationValue createRealtionValue(RelationKey relationKey, FetchMapping fm) {
+    private RelationValue createRealtionValue(RelationKey relationKey, RelationMapping fm) {
         RelationValue relationValue;
-        FieldMapping relation = fm.getRelationPropertyMapping();
+        FieldMapping relation = fm.getRelationKeyMapping();
         If condition = If.in(relation.getName());
         if (fm.getCondition() != null) {
             condition = If.and(condition, fm.getCondition());
         }
         IQueryBuilder queryBuilder = em.queryBuilder(fm.getRelationClass()).where(condition);
+        if (fm.getGroupBy() != null) {
+            processGroupBy(queryBuilder, fm);
+        }
 
         relationValue = new RelationValue(relation, fm, queryBuilder.create());
         relationCache.putIfAbsent(relationKey, relationValue);
         return relationValue;
     }
+
+    private void processGroupBy(IQueryBuilder queryBuilder, RelationMapping fm) {
+        for (Property groupByField : fm.getGroupBy()) {
+            final Join[] joins = processGroupByField(fm, groupByField);
+            for (Join join : joins) {
+                queryBuilder.join(join);
+            }
+        }
+    }
+
+    private Join[] processGroupByField(RelationMapping fm, Property groupByField) {
+//        if (groupByField == null) {
+//            return null;
+//        }
+//        final RelationMapping fetch = registry.getFetchMappingByPropertyName(fm.getRelationClass(), groupByField.getProperty());
+//
+//        if (fm == null && groupByField.getNextField() != null) {
+//            throw new RuntimeException();
+//        }
+//
+//        return new Join[]{Join.inner(groupByField.getProperty(), processGroupByField(fetch, groupByField.getNextField()))};
+        return null;
+    }
+
 }

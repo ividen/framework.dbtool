@@ -39,15 +39,15 @@ public interface IEntityMappingRegistry {
 
     FieldMapping getVersionField(String entityName);
 
-    Collection<FetchMapping> getFetchMapping(Class entityClass);
+    Collection<RelationMapping> getFetchMapping(Class entityClass);
 
-    Collection<FetchMapping> getFetchMapping(String entityName);
+    Collection<RelationMapping> getFetchMapping(String entityName);
 
     FieldMapping getFieldMappingByPropertyName(Class entityClass, String propertyName);
 
     FieldMapping getFieldMappingByPropertyName(String entityName, String propertyName);
 
-    FetchMapping getFetchMappingByPropertyName(Class entityClass, String propertyName);
+    RelationMapping getFetchMappingByPropertyName(Class entityClass, String propertyName);
 
-    FetchMapping getFetchMappingByPropertyName(String entityName, String propertyName);
+    RelationMapping getFetchMappingByPropertyName(String entityName, String propertyName);
 }

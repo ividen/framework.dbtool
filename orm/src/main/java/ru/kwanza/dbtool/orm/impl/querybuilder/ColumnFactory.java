@@ -27,7 +27,7 @@ class ColumnFactory {
             while (st.hasMoreElements()) {
                 final String token = st.nextToken();
                 root = builder.getRelationFactory().registerRelation(root, Join.Type.INNER, token);
-                entityClass = root.getFetchMapping().getRelationClass();
+                entityClass = root.getRelationMapping().getRelationClass();
             }
         }
 

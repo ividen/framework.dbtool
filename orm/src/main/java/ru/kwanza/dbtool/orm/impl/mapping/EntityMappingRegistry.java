@@ -9,6 +9,8 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import ru.kwanza.dbtool.orm.annotations.*;
 import ru.kwanza.dbtool.orm.api.If;
+import ru.kwanza.toolbox.fieldhelper.FieldHelper;
+import ru.kwanza.toolbox.fieldhelper.Property;
 
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Member;
@@ -47,14 +49,14 @@ public class EntityMappingRegistry implements IEntityMappingRegistry {
     private Map<Class, FieldMapping> versionFieldMappingByEntityClass = new HashMap<Class, FieldMapping>();
     private Map<String, FieldMapping> versionFieldMappingByEntityName = new HashMap<String, FieldMapping>();
 
-    private Map<Class, Collection<FetchMapping>> fetchMappingByEntityClass = new HashMap<Class, Collection<FetchMapping>>();
-    private Map<String, Collection<FetchMapping>> fetchMappingByEntityName = new HashMap<String, Collection<FetchMapping>>();
+    private Map<Class, Collection<RelationMapping>> fetchMappingByEntityClass = new HashMap<Class, Collection<RelationMapping>>();
+    private Map<String, Collection<RelationMapping>> fetchMappingByEntityName = new HashMap<String, Collection<RelationMapping>>();
 
     private Map<Class, Map<String, FieldMapping>> fieldMappingByPropertyNameEntityClass = new HashMap<Class, Map<String, FieldMapping>>();
     private Map<String, Map<String, FieldMapping>> fieldMappingByPropertyNameEntityName = new HashMap<String, Map<String, FieldMapping>>();
 
-    private Map<Class, Map<String, FetchMapping>> fetchMappingByPropertyNameEntityClass = new HashMap<Class, Map<String, FetchMapping>>();
-    private Map<String, Map<String, FetchMapping>> fetchMappingByPropertyNameEntityName = new HashMap<String, Map<String, FetchMapping>>();
+    private Map<Class, Map<String, RelationMapping>> fetchMappingByPropertyNameEntityClass = new HashMap<Class, Map<String, RelationMapping>>();
+    private Map<String, Map<String, RelationMapping>> fetchMappingByPropertyNameEntityName = new HashMap<String, Map<String, RelationMapping>>();
 
     private ExpressionParser conditionParser = new SpelExpressionParser();
 
@@ -100,12 +102,12 @@ public class EntityMappingRegistry implements IEntityMappingRegistry {
     }
 
     public void validateEntityMapping() {
-        final Collection<FetchMapping> fetchMappings = new LinkedHashSet<FetchMapping>();
-        for (Collection<FetchMapping> fetchMappingCollection : fetchMappingByEntityClass.values()) {
-            fetchMappings.addAll(fetchMappingCollection);
+        final Collection<RelationMapping> relationMappings = new LinkedHashSet<RelationMapping>();
+        for (Collection<RelationMapping> relationMappingCollection : fetchMappingByEntityClass.values()) {
+            relationMappings.addAll(relationMappingCollection);
         }
-        for (FetchMapping fetchMapping : fetchMappings) {
-            final Class fetchFieldClass = fetchMapping.getFetchField().getType();
+        for (RelationMapping relationMapping : relationMappings) {
+            final Class fetchFieldClass = relationMapping.getProperty().getType();
             if (!entityNameByEntityClass.containsKey(fetchFieldClass)) {
                 throw new RuntimeException("Unknown class relation in mapping registry: " + fetchFieldClass);
             }
@@ -121,13 +123,16 @@ public class EntityMappingRegistry implements IEntityMappingRegistry {
             }
 
             if (annotatedElement.isAnnotationPresent(Field.class)) {
-                final FieldMapping fieldMapping = createFieldMapping(annotatedElement, annotatedElement.getAnnotation(Field.class));
+                final FieldMapping fieldMapping =
+                        createFieldMapping(entityClass, annotatedElement, annotatedElement.getAnnotation(Field.class));
                 addFieldMapping(entityClass, fieldMapping);
             } else if (annotatedElement.isAnnotationPresent(IdField.class)) {
-                final FieldMapping fieldMapping = createFieldMapping(annotatedElement, annotatedElement.getAnnotation(IdField.class));
+                final FieldMapping fieldMapping =
+                        createFieldMapping(entityClass, annotatedElement, annotatedElement.getAnnotation(IdField.class));
                 addIdFieldMapping(entityClass, fieldMapping);
             } else if (annotatedElement.isAnnotationPresent(VersionField.class)) {
-                final FieldMapping fieldMapping = createFieldMapping(annotatedElement, annotatedElement.getAnnotation(VersionField.class));
+                final FieldMapping fieldMapping =
+                        createFieldMapping(entityClass, annotatedElement, annotatedElement.getAnnotation(VersionField.class));
                 addVersionFieldMapping(entityClass, fieldMapping);
             }
         }
@@ -162,15 +167,14 @@ public class EntityMappingRegistry implements IEntityMappingRegistry {
         addFetchMapping(entityClass, parseManyToOne(entityClass, annotatedElement));
     }
 
-    public FetchMapping parseAssociation(final Class entityClass, final AnnotatedElement element) {
+    public RelationMapping parseAssociation(final Class entityClass, final AnnotatedElement element) {
         final Association association = element.getAnnotation(Association.class);
         final String name = getPropertyName(element);
         final Map<String, FieldMapping> mapping = fieldMappingByPropertyNameEntityClass.get(entityClass);
         final FieldMapping propertyMapping = mapping != null
                 ? mapping.get(association.property())
-                : new FieldMapping(name, null, Types.BIGINT, false,
-                        EntityMappingHelper.createEntityField(EntityMappingHelper.findField(entityClass, association.property())));
-        final EntityField fetchField = createEntityField(element);
+                : new FieldMapping(name, null, Types.BIGINT, false, FieldHelper.constructProperty(entityClass, association.property()));
+        final Property fetchField = FieldHelper.constructProperty(entityClass, name);
         final Class relationClass =
                 Collection.class.isAssignableFrom(fetchField.getType()) ? association.relationClass() : fetchField.getType();
         if (relationClass == Object.class) {
@@ -178,6 +182,7 @@ public class EntityMappingRegistry implements IEntityMappingRegistry {
                     "Relation @OneToMany in  " + entityClass.getName() + "." + name + " must have relativeClass() specified!");
         }
         final If condition = association.condition().isEmpty() ? null : parseCondition(association);
+        final Property[] groupBy = association.groupBy().isEmpty() ? null : parseGroupBy(entityClass, association);
 
         if (!entityNameByEntityClass.containsKey(relationClass)) {
             this.registerEntityClass(relationClass);
@@ -190,14 +195,14 @@ public class EntityMappingRegistry implements IEntityMappingRegistry {
                             + " for @Association " + entityClass.getName() + "." + name + "!");
         }
 
-        return new FetchMapping(name, relationClass, propertyMapping, relationPropertyMapping, fetchField, condition);
+        return new RelationMapping(name, relationClass, propertyMapping, relationPropertyMapping, fetchField, condition, groupBy);
     }
 
-    public FetchMapping parseOneToMany(final Class entityClass, final AnnotatedElement annotatedElement) {
+    public RelationMapping parseOneToMany(final Class entityClass, final AnnotatedElement annotatedElement) {
         final OneToMany oneToMany = annotatedElement.getAnnotation(OneToMany.class);
         final String name = getPropertyName(annotatedElement);
         final FieldMapping propertyMapping = idFieldMappingsByEntityClass.get(entityClass).iterator().next();
-        final EntityField fetchField = createEntityField(annotatedElement);
+        final Property fetchField = FieldHelper.constructProperty(entityClass, name);
         final Class relationClass =
                 Collection.class.isAssignableFrom(fetchField.getType()) ? oneToMany.relationClass() : fetchField.getType();
         if (relationClass == Object.class) {
@@ -215,30 +220,29 @@ public class EntityMappingRegistry implements IEntityMappingRegistry {
                             + " for @OneToMany " + entityClass.getName() + "." + name + "!");
         }
 
-        return new FetchMapping(name, relationClass, propertyMapping, relationPropertyMapping, fetchField, null);
+        return new RelationMapping(name, relationClass, propertyMapping, relationPropertyMapping, fetchField, null, null);
     }
 
-    public FetchMapping parseManyToOne(final Class entityClass, final AnnotatedElement annotatedElement) {
+    public RelationMapping parseManyToOne(final Class entityClass, final AnnotatedElement annotatedElement) {
         final ManyToOne manyToOne = annotatedElement.getAnnotation(ManyToOne.class);
         final String name = getPropertyName(annotatedElement);
         final Map<String, FieldMapping> mapping = fieldMappingByPropertyNameEntityClass.get(entityClass);
         final FieldMapping propertyMapping = mapping != null
                 ? mapping.get(manyToOne.property())
-                : new FieldMapping(name, null, Types.BIGINT, false,
-                        EntityMappingHelper.createEntityField(EntityMappingHelper.findField(entityClass, manyToOne.property())));
+                : new FieldMapping(name, null, Types.BIGINT, false, FieldHelper.constructProperty(entityClass, manyToOne.property()));
         if (propertyMapping == null) {
             throw new RuntimeException(
                     "Not found property " + manyToOne.property() + "for @ManyToOne " + entityClass.getName() + "." + getPropertyName(
                             annotatedElement) + "!");
         }
 
-        final EntityField fetchField = createEntityField(annotatedElement);
+        final Property fetchField = FieldHelper.constructProperty(entityClass,name);
         final Class relationClass = fetchField.getType();
         if (!entityNameByEntityClass.containsKey(relationClass)) {
             registerEntityClass(relationClass);
         }
         final FieldMapping relationPropertyMapping = idFieldMappingsByEntityClass.get(relationClass).iterator().next();
-        return new FetchMapping(name, relationClass, propertyMapping, relationPropertyMapping, fetchField, null);
+        return new RelationMapping(name, relationClass, propertyMapping, relationPropertyMapping, fetchField, null, null);
     }
 
     private If parseCondition(Association association) {
@@ -328,19 +332,19 @@ public class EntityMappingRegistry implements IEntityMappingRegistry {
         addFieldMapping(entityClass, fieldMapping);
     }
 
-    private void addFetchMapping(Class entityClass, FetchMapping fetchMapping) {
-        Collection<FetchMapping> fetchMappings = fetchMappingByEntityClass.get(entityClass);
-        if (fetchMappings == null) {
-            fetchMappings = new LinkedHashSet<FetchMapping>();
-            fetchMappingByEntityClass.put(entityClass, fetchMappings);
-            fetchMappingByEntityName.put(getEntityName(entityClass), fetchMappings);
+    private void addFetchMapping(Class entityClass, RelationMapping relationMapping) {
+        Collection<RelationMapping> relationMappings = fetchMappingByEntityClass.get(entityClass);
+        if (relationMappings == null) {
+            relationMappings = new LinkedHashSet<RelationMapping>();
+            fetchMappingByEntityClass.put(entityClass, relationMappings);
+            fetchMappingByEntityName.put(getEntityName(entityClass), relationMappings);
         }
 
-        addFetchMappingByPropertyName(entityClass, fetchMapping);
+        addFetchMappingByPropertyName(entityClass, relationMapping);
 
-        fetchMappings.add(fetchMapping);
+        relationMappings.add(relationMapping);
 
-        logRegisterFetchMapping(entityClass, fetchMapping);
+        logRegisterFetchMapping(entityClass, relationMapping);
     }
 
     private void addFieldMappingByPropertyName(Class entityClass, FieldMapping fieldMapping) {
@@ -360,21 +364,32 @@ public class EntityMappingRegistry implements IEntityMappingRegistry {
         fieldMappingByPropertyName.put(propertyName, fieldMapping);
     }
 
-    private void addFetchMappingByPropertyName(Class entityClass, FetchMapping fetchMapping) {
-        Map<String, FetchMapping> fetchMappingByPropertyName = fetchMappingByPropertyNameEntityClass.get(entityClass);
+    private void addFetchMappingByPropertyName(Class entityClass, RelationMapping relationMapping) {
+        Map<String, RelationMapping> fetchMappingByPropertyName = fetchMappingByPropertyNameEntityClass.get(entityClass);
         if (fetchMappingByPropertyName == null) {
-            fetchMappingByPropertyName = new LinkedHashMap<String, FetchMapping>();
+            fetchMappingByPropertyName = new LinkedHashMap<String, RelationMapping>();
             fetchMappingByPropertyNameEntityClass.put(entityClass, fetchMappingByPropertyName);
             fetchMappingByPropertyNameEntityName.put(getEntityName(entityClass), fetchMappingByPropertyName);
         }
 
-        final String propertyName = fetchMapping.getName();
+        final String propertyName = relationMapping.getName();
 
         if (fetchMappingByPropertyName.containsKey(propertyName)) {
             throw new RuntimeException("Duplicate property name '" + propertyName + "' in class " + entityClass);
         }
 
-        fetchMappingByPropertyName.put(propertyName, fetchMapping);
+        fetchMappingByPropertyName.put(propertyName, relationMapping);
+    }
+
+    private Property[] parseGroupBy(Class entityClass, Association association) {
+        StringTokenizer st = new StringTokenizer(association.groupBy(), ",");
+        ArrayList<Property> fields = new ArrayList<Property>();
+        while (st.hasMoreTokens()) {
+            String field = st.nextToken();
+            fields.add(FieldHelper.constructProperty(entityClass, field));
+        }
+
+        return (Property[]) fields.toArray();
     }
 
     public String getTableName(Class entityClass) {
@@ -425,11 +440,11 @@ public class EntityMappingRegistry implements IEntityMappingRegistry {
         return versionFieldMappingByEntityName.get(entityName);
     }
 
-    public Collection<FetchMapping> getFetchMapping(Class entityClass) {
+    public Collection<RelationMapping> getFetchMapping(Class entityClass) {
         return fetchMappingByEntityClass.get(entityClass);
     }
 
-    public Collection<FetchMapping> getFetchMapping(String entityName) {
+    public Collection<RelationMapping> getFetchMapping(String entityName) {
         return fetchMappingByEntityName.get(entityName);
     }
 
@@ -443,13 +458,13 @@ public class EntityMappingRegistry implements IEntityMappingRegistry {
         return fieldMappingByPropertyName != null ? fieldMappingByPropertyName.get(propertyName) : null;
     }
 
-    public FetchMapping getFetchMappingByPropertyName(Class entityClass, String fieldName) {
-        final Map<String, FetchMapping> fieldMappingByPropertyName = fetchMappingByPropertyNameEntityClass.get(entityClass);
+    public RelationMapping getFetchMappingByPropertyName(Class entityClass, String fieldName) {
+        final Map<String, RelationMapping> fieldMappingByPropertyName = fetchMappingByPropertyNameEntityClass.get(entityClass);
         return fieldMappingByPropertyName != null ? fieldMappingByPropertyName.get(fieldName) : null;
     }
 
-    public FetchMapping getFetchMappingByPropertyName(String entityName, String fieldName) {
-        final Map<String, FetchMapping> fieldMappingByPropertyName = fetchMappingByPropertyNameEntityName.get(entityName);
+    public RelationMapping getFetchMappingByPropertyName(String entityName, String fieldName) {
+        final Map<String, RelationMapping> fieldMappingByPropertyName = fetchMappingByPropertyNameEntityName.get(entityName);
         return fieldMappingByPropertyName != null ? fieldMappingByPropertyName.get(fieldName) : null;
     }
 
@@ -465,7 +480,7 @@ public class EntityMappingRegistry implements IEntityMappingRegistry {
         log.trace("{}: Register Field Mapping {}", new Object[]{entityClass, fieldMapping});
     }
 
-    private static void logRegisterFetchMapping(Class entityClass, FetchMapping fetchMapping) {
-        log.trace("{}: Register ManyToOne Mapping {}", new Object[]{entityClass, fetchMapping});
+    private static void logRegisterFetchMapping(Class entityClass, RelationMapping relationMapping) {
+        log.trace("{}: Register ManyToOne Mapping {}", new Object[]{entityClass, relationMapping});
     }
 }

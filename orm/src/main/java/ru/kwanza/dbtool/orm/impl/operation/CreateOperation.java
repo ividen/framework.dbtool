@@ -7,9 +7,9 @@ import ru.kwanza.dbtool.core.FieldSetter;
 import ru.kwanza.dbtool.core.UpdateException;
 import ru.kwanza.dbtool.core.UpdateSetter;
 import ru.kwanza.dbtool.core.util.UpdateUtil;
-import ru.kwanza.dbtool.orm.impl.mapping.EntityField;
 import ru.kwanza.dbtool.orm.impl.mapping.FieldMapping;
 import ru.kwanza.dbtool.orm.impl.mapping.IEntityMappingRegistry;
+import ru.kwanza.toolbox.fieldhelper.Property;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -81,11 +81,11 @@ public class CreateOperation extends Operation implements ICreateOperation {
             try {
                 int index = 0;
                 for (FieldMapping fieldMapping : fieldMappings) {
-                    final EntityField entityFiled = fieldMapping.getEntityFiled();
+                    final Property entityFiled = fieldMapping.getProperty();
                     if (versionFieldMapping != null && fieldMapping.getColumn().equals(versionFieldMapping.getColumn())) {
-                        entityFiled.setValue(object, 1L);
+                        entityFiled.set(object, 1L);
                     }
-                    FieldSetter.setValue(pst, ++index, entityFiled.getType(), entityFiled.getValue(object));
+                    FieldSetter.setValue(pst, ++index, entityFiled.getType(), entityFiled.value(object));
                 }
             } catch (SQLException e) {
                 throw e;

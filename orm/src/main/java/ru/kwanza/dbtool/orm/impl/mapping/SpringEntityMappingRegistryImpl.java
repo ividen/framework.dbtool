@@ -145,11 +145,11 @@ public class SpringEntityMappingRegistryImpl implements IEntityMappingRegistry {
         return delegate.getVersionField(entityName);
     }
 
-    public Collection<FetchMapping> getFetchMapping(Class entityClass) {
+    public Collection<RelationMapping> getFetchMapping(Class entityClass) {
         return delegate.getFetchMapping(entityClass);
     }
 
-    public Collection<FetchMapping> getFetchMapping(String entityName) {
+    public Collection<RelationMapping> getFetchMapping(String entityName) {
         return delegate.getFetchMapping(entityName);
     }
 
@@ -161,11 +161,11 @@ public class SpringEntityMappingRegistryImpl implements IEntityMappingRegistry {
         return delegate.getFieldMappingByPropertyName(entityName, propertyName);
     }
 
-    public FetchMapping getFetchMappingByPropertyName(Class entityClass, String propertyName) {
+    public RelationMapping getFetchMappingByPropertyName(Class entityClass, String propertyName) {
         return delegate.getFetchMappingByPropertyName(entityClass, propertyName);
     }
 
-    public FetchMapping getFetchMappingByPropertyName(String entityName, String propertyName) {
+    public RelationMapping getFetchMappingByPropertyName(String entityName, String propertyName) {
         return delegate.getFetchMappingByPropertyName(entityName, propertyName);
     }
 }

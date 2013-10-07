@@ -1,10 +1,7 @@
 package ru.kwanza.dbtool.orm.impl.querybuilder;
 
 import ru.kwanza.dbtool.orm.api.Join;
-import ru.kwanza.dbtool.orm.impl.mapping.FetchMapping;
-import ru.kwanza.dbtool.orm.impl.mapping.FieldMapping;
-
-import java.util.Collection;
+import ru.kwanza.dbtool.orm.impl.mapping.RelationMapping;
 
 /**
  * @author Alexander Guzanov
@@ -33,14 +30,14 @@ class JoinRelationFactory {
             return joinRelation;
         }
 
-        Class entityClass = root.isRoot() ? builder.getEntityClass() : root.getFetchMapping().getRelationClass();
+        Class entityClass = root.isRoot() ? builder.getEntityClass() : root.getRelationMapping().getRelationClass();
 
-        final FetchMapping fetchMapping = builder.getRegistry().getFetchMappingByPropertyName(entityClass, propertyName);
-        if (fetchMapping == null) {
+        final RelationMapping relationMapping = builder.getRegistry().getFetchMappingByPropertyName(entityClass, propertyName);
+        if (relationMapping == null) {
             throw new IllegalArgumentException("Wrong relation name for " + entityClass.getName() + " : " + propertyName + " !");
         }
 
-        joinRelation = new JoinRelation(type, "t" + aliasCounter++, fetchMapping);
+        joinRelation = new JoinRelation(type, "t" + aliasCounter++, relationMapping);
         root.addChild(propertyName, joinRelation);
         return joinRelation;
     }

@@ -7,9 +7,9 @@ import ru.kwanza.dbtool.core.FieldSetter;
 import ru.kwanza.dbtool.core.UpdateException;
 import ru.kwanza.dbtool.core.UpdateSetter;
 import ru.kwanza.dbtool.core.util.UpdateUtil;
-import ru.kwanza.dbtool.orm.impl.mapping.EntityField;
 import ru.kwanza.dbtool.orm.impl.mapping.FieldMapping;
 import ru.kwanza.dbtool.orm.impl.mapping.IEntityMappingRegistry;
+import ru.kwanza.toolbox.fieldhelper.Property;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -23,7 +23,7 @@ public class DeleteOperation extends Operation implements IDeleteOperation {
 
     private static final Logger log = LoggerFactory.getLogger(UpdateOperation.class);
 
-    private EntityField idEntityFiled;
+    private Property idEntityFiled;
 
     private String deleteQuery;
 
@@ -43,7 +43,7 @@ public class DeleteOperation extends Operation implements IDeleteOperation {
         }
 
         final FieldMapping idFieldMapping = idFieldMappings.iterator().next();
-        this.idEntityFiled = idFieldMapping.getEntityFiled();
+        this.idEntityFiled = idFieldMapping.getProperty();
 
         final String tableName = entityMappingRegistry.getTableName(entityClass);
         final String idColumnName = idFieldMapping.getColumn();
@@ -85,7 +85,7 @@ public class DeleteOperation extends Operation implements IDeleteOperation {
     private class UpdateSetterByObject implements UpdateSetter {
         public boolean setValues(PreparedStatement pst, Object object) throws SQLException {
             try {
-                FieldSetter.setValue(pst, 1, idEntityFiled.getType(), idEntityFiled.getValue(object));
+                FieldSetter.setValue(pst, 1, idEntityFiled.getType(), idEntityFiled.value(object));
             } catch (SQLException e) {
                 throw e;
             } catch (Exception e) {

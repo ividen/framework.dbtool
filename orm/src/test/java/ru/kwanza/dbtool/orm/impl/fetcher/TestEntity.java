@@ -48,6 +48,7 @@ public class TestEntity  implements Serializable{
     @Association(property = "entityCID", relationProperty = "id" ,condition="and(isNotNull('entityE.version'),isGreater('entityF.version',valueOf(-1)))")
     private TestEntityC associatedEntityC;
 
+
     public TestEntity(Long id, Integer intField, String stringField, Date dateField) {
         this.id = id;
         this.intField = intField;

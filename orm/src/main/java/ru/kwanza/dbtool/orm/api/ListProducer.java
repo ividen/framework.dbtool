@@ -23,4 +23,17 @@ public abstract class ListProducer<T> {
     };
 
     public abstract List<T> create();
+
+    public static <T> ListProducer<T> create(final Class type){
+        return new ListProducer<T>() {
+            @Override
+            public List<T> create() {
+                try {
+                    return (List<T>) type.newInstance();
+                } catch (Exception e) {
+                    throw new RuntimeException("Can't instantiate list " + type.getName());
+                }
+            }
+        };
+    }
 }

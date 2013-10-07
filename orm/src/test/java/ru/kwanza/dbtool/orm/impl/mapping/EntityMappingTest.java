@@ -6,6 +6,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
 import ru.kwanza.dbtool.orm.impl.mapping.entities.*;
+import ru.kwanza.toolbox.fieldhelper.Property;
 
 import javax.annotation.Resource;
 import java.sql.Types;
@@ -173,16 +174,16 @@ public class EntityMappingTest extends AbstractJUnit4SpringContextTests {
 
     @Test
     public void getFetchMappingTest() throws Exception {
-        final Collection<FetchMapping> fetchMappingByEntityClass = entityMappingRegistry.getFetchMapping(PAYMENT_TRX_CLASS);
-        final Collection<FetchMapping> fetchMappingByEntityName = entityMappingRegistry.getFetchMapping(PAYMENT_TRX_NAME);
+        final Collection<RelationMapping> relationMappingByEntityClases = entityMappingRegistry.getFetchMapping(PAYMENT_TRX_CLASS);
+        final Collection<RelationMapping> relationMappingByEntityName = entityMappingRegistry.getFetchMapping(PAYMENT_TRX_NAME);
 
-        assertNotNull(fetchMappingByEntityClass);
-        assertNotNull(fetchMappingByEntityName);
+        assertNotNull(relationMappingByEntityClases);
+        assertNotNull(relationMappingByEntityName);
 
-        assertEquals(fetchMappingByEntityClass, fetchMappingByEntityName);
+        assertEquals(relationMappingByEntityClases, relationMappingByEntityName);
 
-        assertEquals(PAYMENT_TRX_FETCH_MAPPING_COUNT, fetchMappingByEntityClass.size());
-        assertEquals(PAYMENT_TRX_FETCH_MAPPING_COUNT, fetchMappingByEntityName.size());
+        assertEquals(PAYMENT_TRX_FETCH_MAPPING_COUNT, relationMappingByEntityClases.size());
+        assertEquals(PAYMENT_TRX_FETCH_MAPPING_COUNT, relationMappingByEntityName.size());
     }
 
     @Test
@@ -221,35 +222,35 @@ public class EntityMappingTest extends AbstractJUnit4SpringContextTests {
 
     @Test
     public void getFetchMappingByPropertyNameTest() throws Exception {
-        final Collection<FetchMapping> fetchMappingByEntityClass = entityMappingRegistry.getFetchMapping(PAYMENT_TRX_CLASS);
-        final Collection<FetchMapping> fetchMappingByEntityName = entityMappingRegistry.getFetchMapping(PAYMENT_TRX_NAME);
+        final Collection<RelationMapping> relationMappingByEntityClases = entityMappingRegistry.getFetchMapping(PAYMENT_TRX_CLASS);
+        final Collection<RelationMapping> relationMappingByEntityName = entityMappingRegistry.getFetchMapping(PAYMENT_TRX_NAME);
 
-        assertNotNull(fetchMappingByEntityClass);
-        assertNotNull(fetchMappingByEntityName);
+        assertNotNull(relationMappingByEntityClases);
+        assertNotNull(relationMappingByEntityName);
 
-        final Iterator<FetchMapping> iteratorByEntityClass = fetchMappingByEntityClass.iterator();
-        final Iterator<FetchMapping> iteratorByEntityName = fetchMappingByEntityName.iterator();
+        final Iterator<RelationMapping> iteratorByEntityClass = relationMappingByEntityClases.iterator();
+        final Iterator<RelationMapping> iteratorByEntityName = relationMappingByEntityName.iterator();
 
         for (String propertyName : PAYMENT_TRX_FETCH_PROPERTY_NAMES) {
 
-            final FetchMapping expectedFetchMappingByEntityClass = iteratorByEntityClass.next();
-            final FetchMapping expectedFetchMappingByEntityName = iteratorByEntityName.next();
+            final RelationMapping expectedRelationMappingByEntityClass = iteratorByEntityClass.next();
+            final RelationMapping expectedRelationMappingByEntityName = iteratorByEntityName.next();
 
-            assertEquals(propertyName, expectedFetchMappingByEntityClass.getName());
-            assertEquals(propertyName, expectedFetchMappingByEntityName.getName());
+            assertEquals(propertyName, expectedRelationMappingByEntityClass.getName());
+            assertEquals(propertyName, expectedRelationMappingByEntityName.getName());
 
-            final FetchMapping fetchMappingByPropertyNameByEntityClass =
+            final RelationMapping relationMappingByPropertyNameByEntityClass =
                     entityMappingRegistry.getFetchMappingByPropertyName(PAYMENT_TRX_CLASS, propertyName);
-            final FetchMapping fetchMappingByPropertyNameByEntityName =
+            final RelationMapping relationMappingByPropertyNameByEntityName =
                     entityMappingRegistry.getFetchMappingByPropertyName(PAYMENT_TRX_NAME, propertyName);
 
-            assertNotNull(fetchMappingByPropertyNameByEntityClass);
-            assertNotNull(fetchMappingByPropertyNameByEntityName);
+            assertNotNull(relationMappingByPropertyNameByEntityClass);
+            assertNotNull(relationMappingByPropertyNameByEntityName);
 
-            assertEquals(fetchMappingByPropertyNameByEntityClass, fetchMappingByPropertyNameByEntityName);
+            assertEquals(relationMappingByPropertyNameByEntityClass, relationMappingByPropertyNameByEntityName);
 
-            assertEquals(expectedFetchMappingByEntityClass, fetchMappingByPropertyNameByEntityClass);
-            assertEquals(expectedFetchMappingByEntityName, fetchMappingByPropertyNameByEntityName);
+            assertEquals(expectedRelationMappingByEntityClass, relationMappingByPropertyNameByEntityClass);
+            assertEquals(expectedRelationMappingByEntityName, relationMappingByPropertyNameByEntityName);
         }
     }
 
@@ -257,42 +258,38 @@ public class EntityMappingTest extends AbstractJUnit4SpringContextTests {
     public void fieldMappingTest() throws Exception {
         final FieldMapping fieldMapping = entityMappingRegistry.getFieldMappingByPropertyName(PAYMENT_TRX_CLASS, AMOUNT);
         assertNotNull(fieldMapping);
-        assertFieldMapping(fieldMapping, AMOUNT, AMOUNT, Types.BIGINT, true, FieldImpl.class, Long.class);
+        assertFieldMapping(fieldMapping, AMOUNT, AMOUNT, Types.BIGINT, true,  Long.class);
     }
 
     @Test
     public void fetchMappingTest() throws Exception {
-        final FetchMapping fetchMapping = entityMappingRegistry.getFetchMappingByPropertyName(PAYMENT_TRX_CLASS, AGENT);
-        assertNotNull(fetchMapping);
-        assertFetchMapping(fetchMapping, AGENT, FieldImpl.class, MethodImpl.class);
+        final RelationMapping relationMapping = entityMappingRegistry.getFetchMappingByPropertyName(PAYMENT_TRX_CLASS, AGENT);
+        assertNotNull(relationMapping);
+        assertFetchMapping(relationMapping, AGENT);
     }
 
     private void assertFieldMapping(FieldMapping fieldMapping, String propertyName, String columnName, int type, boolean autoGenerated,
-                                    Class fieldClass, Class fieldType) {
+                                    Class fieldType) {
         assertNotNull(fieldMapping);
         assertEquals(propertyName, fieldMapping.getName());
         assertEquals(columnName, fieldMapping.getColumn());
         assertEquals(type, fieldMapping.getType());
         assertEquals(autoGenerated, fieldMapping.isAutoGenerated());
 
-        final EntityField entityFiled = fieldMapping.getEntityFiled();
+        final Property entityFiled = fieldMapping.getProperty();
 
         assertNotNull(entityFiled);
         assertEquals(fieldType, entityFiled.getType());
-        assertEquals(fieldClass, entityFiled.getClass());
     }
 
-    private void assertFetchMapping(FetchMapping fetchMapping, String propertyName, Class propertyFieldClass, Class fetchFieldClass) {
-        assertNotNull(fetchMapping);
-        assertEquals(propertyName, fetchMapping.getName());
+    private void assertFetchMapping(RelationMapping relationMapping, String propertyName) {
+        assertNotNull(relationMapping);
+        assertEquals(propertyName, relationMapping.getName());
 
-        final EntityField propertyField = fetchMapping.getPropertyField();
-        final EntityField fetchField = fetchMapping.getFetchField();
+        final Property propertyField = relationMapping.getKeyProperty();
+        final Property fetchField = relationMapping.getProperty();
 
         assertNotNull(propertyField);
         assertNotNull(fetchField);
-
-        assertEquals(propertyFieldClass, propertyField.getClass());
-        assertEquals(fetchFieldClass, fetchField.getClass());
     }
 }

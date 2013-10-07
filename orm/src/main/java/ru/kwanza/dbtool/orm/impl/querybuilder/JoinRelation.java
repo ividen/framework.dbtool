@@ -1,8 +1,7 @@
 package ru.kwanza.dbtool.orm.impl.querybuilder;
 
 import ru.kwanza.dbtool.orm.api.Join;
-import ru.kwanza.dbtool.orm.impl.mapping.FetchMapping;
-import ru.kwanza.dbtool.orm.impl.mapping.IEntityMappingRegistry;
+import ru.kwanza.dbtool.orm.impl.mapping.RelationMapping;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -13,13 +12,13 @@ import java.util.Map;
 class JoinRelation {
     private String alias;
     private Join.Type type;
-    private FetchMapping fetchMapping;
+    private RelationMapping relationMapping;
     private Map<String, JoinRelation> childs;
 
-    JoinRelation(Join.Type type, String alias, FetchMapping fetchMapping) {
+    JoinRelation(Join.Type type, String alias, RelationMapping relationMapping) {
         this.type = type;
         this.alias = alias;
-        this.fetchMapping = fetchMapping;
+        this.relationMapping = relationMapping;
 
     }
 
@@ -39,8 +38,8 @@ class JoinRelation {
         return alias;
     }
 
-    FetchMapping getFetchMapping() {
-        return fetchMapping;
+    RelationMapping getRelationMapping() {
+        return relationMapping;
     }
 
     void addChild(String name, JoinRelation relation) {

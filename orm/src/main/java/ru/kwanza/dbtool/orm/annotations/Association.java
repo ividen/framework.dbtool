@@ -21,4 +21,6 @@ public @interface Association {
     Class relationClass() default Object.class;
 
     String condition() default "";
+
+    String groupBy() default "";
 }

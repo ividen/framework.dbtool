@@ -13,8 +13,8 @@ import ru.kwanza.dbtool.core.util.SelectUtil;
 import ru.kwanza.dbtool.orm.api.IStatement;
 import ru.kwanza.dbtool.orm.api.ListProducer;
 import ru.kwanza.dbtool.orm.impl.ObjectAllocator;
-import ru.kwanza.dbtool.orm.impl.mapping.EntityField;
 import ru.kwanza.dbtool.orm.impl.mapping.FieldMapping;
+import ru.kwanza.toolbox.fieldhelper.Property;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -201,15 +201,15 @@ public abstract class StatementImpl<T> implements IStatement<T> {
     }
 
     private class MapExtractor extends BaseExtractor<KeyValue<Object, T>> {
-        private EntityField field;
+        private Property field;
 
         private MapExtractor(FieldMapping mapping) {
-            this.field = mapping.getEntityFiled();
+            this.field = mapping.getProperty();
         }
 
         @Override
         public KeyValue<Object, T> getValue(Object e) {
-            return new KeyValue<Object, T>(field.getValue(e), (T) e);
+            return new KeyValue<Object, T>(field.value(e), (T) e);
         }
     }
 
@@ -254,7 +254,7 @@ public abstract class StatementImpl<T> implements IStatement<T> {
 
             Object obj;
             if (!relation.isRoot()) {
-                final Class relationClass = relation.getFetchMapping().getRelationClass();
+                final Class relationClass = relation.getRelationMapping().getRelationClass();
                 if (!hasIdValue(relation, rs, relationClass)) {
                     return;
                 }
@@ -275,14 +275,14 @@ public abstract class StatementImpl<T> implements IStatement<T> {
                 }
             }
 
-            if (relation.getFetchMapping() != null) {
-                relation.getFetchMapping().getFetchField().setValue(parentObj, obj);
+            if (relation.getRelationMapping() != null) {
+                relation.getRelationMapping().getProperty().set(parentObj, obj);
             }
         }
 
         private boolean hasIdValue(JoinRelation relation, ResultSet rs, Class relationClass) throws SQLException {
             FieldMapping idField = config.getRegistry().getIdFields(relationClass).iterator().next();
-            if (FieldValueExtractor.getValue(rs, Column.getFullColumnName(relation, idField), idField.getEntityFiled().getType()) == null) {
+            if (FieldValueExtractor.getValue(rs, Column.getFullColumnName(relation, idField), idField.getProperty().getType()) == null) {
                 return false;
             }
             return true;
@@ -290,8 +290,8 @@ public abstract class StatementImpl<T> implements IStatement<T> {
 
         private void readAndFill(ResultSet rs, Class entityClass, JoinRelation relation, Object obj) throws SQLException {
             for (FieldMapping idf : config.getRegistry().getFieldMappings(entityClass)) {
-                Object value = FieldValueExtractor.getValue(rs, Column.getFullColumnName(relation, idf), idf.getEntityFiled().getType());
-                idf.getEntityFiled().setValue(obj, value);
+                Object value = FieldValueExtractor.getValue(rs, Column.getFullColumnName(relation, idf), idf.getProperty().getType());
+                idf.getProperty().set(obj, value);
             }
 
         }
