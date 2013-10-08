@@ -1,7 +1,6 @@
 package ru.kwanza.dbtool.orm.impl.filtering;
 
 import ru.kwanza.dbtool.orm.api.If;
-import ru.kwanza.dbtool.orm.api.If;
 
 /**
  * @author Alexander Guzanov
@@ -11,7 +10,7 @@ public class Filter {
     private Object[] value;
     private boolean hasParams = true;
 
-    public Filter(If condition, Object ... value) {
+    public Filter(If condition, Object... value) {
         this.condition = condition;
         this.value = value;
     }

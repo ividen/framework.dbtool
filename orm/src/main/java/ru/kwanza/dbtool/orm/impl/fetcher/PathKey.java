@@ -22,13 +22,21 @@ class PathKey {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
         PathKey pathKey = (PathKey) o;
 
-        if (!entityClass.equals(pathKey.entityClass)) return false;
-        if (!path.equals(pathKey.path)) return false;
+        if (!entityClass.equals(pathKey.entityClass)) {
+            return false;
+        }
+        if (!path.equals(pathKey.path)) {
+            return false;
+        }
 
         return true;
     }

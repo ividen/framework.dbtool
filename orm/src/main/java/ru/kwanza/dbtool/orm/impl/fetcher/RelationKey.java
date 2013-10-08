@@ -14,13 +14,21 @@ class RelationKey {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
         RelationKey that = (RelationKey) o;
 
-        if (!entityClass.equals(that.entityClass)) return false;
-        if (!relationPropertyName.equals(that.relationPropertyName)) return false;
+        if (!entityClass.equals(that.entityClass)) {
+            return false;
+        }
+        if (!relationPropertyName.equals(that.relationPropertyName)) {
+            return false;
+        }
 
         return true;
     }

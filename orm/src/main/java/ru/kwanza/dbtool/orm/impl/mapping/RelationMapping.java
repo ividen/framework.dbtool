@@ -18,8 +18,8 @@ public class RelationMapping {
     private final If condition;
     private final Property[] groupBy;
 
-    public RelationMapping(String name, Class relationClass, FieldMapping keyMapping, FieldMapping relationKeyMapping,
-                           Property property, If condition, Property[] groupBy) {
+    public RelationMapping(String name, Class relationClass, FieldMapping keyMapping, FieldMapping relationKeyMapping, Property property,
+                           If condition, Property[] groupBy) {
         this.name = name;
         this.relationClass = relationClass;
         this.keyMapping = keyMapping;
@@ -28,6 +28,15 @@ public class RelationMapping {
         this.condition = condition;
         this.groupBy = groupBy;
 
+    }
+
+    public void validate(IEntityMappingRegistry registry) {
+        if (groupBy != null) {
+            for (Property p : groupBy) {
+                final int index = p.getName().indexOf('.');
+
+            }
+        }
     }
 
     public FieldMapping getKeyMapping() {
@@ -45,7 +54,6 @@ public class RelationMapping {
     public String getRelationKeyMappingName() {
         return relationKeyMapping != null ? relationKeyMapping.getName() : null;
     }
-
 
     public Property getKeyProperty() {
         return keyMapping != null ? keyMapping.getProperty() : null;

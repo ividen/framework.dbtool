@@ -1,12 +1,9 @@
 package ru.kwanza.dbtool.orm.impl.querybuilder;
 
-import org.springframework.jdbc.core.SqlParameterValue;
-import ru.kwanza.dbtool.core.KeyValue;
 import ru.kwanza.dbtool.orm.api.If;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author Alexander Guzanov
@@ -63,14 +60,14 @@ class Parameters {
     }
 
     public Parameters join(Parameters whereParams) {
-        if(whereParams.rawParams!=null){
+        if (whereParams.rawParams != null) {
             getRawParams().addAll(whereParams.rawParams);
         }
 
         return this;
     }
 
-    public ParamsHolder createHolder(){
+    public ParamsHolder createHolder() {
         return new ParamsHolder(rawParams);
     }
 }

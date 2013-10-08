@@ -32,7 +32,8 @@ class FromFragmentHelper {
                     joinHolder = new Parameters();
                     extConditionPart = new StringBuilder();
                     builder.getWhereFragmentHelper()
-                            .createConditionString(joinRelation, joinRelation.getRelationMapping().getCondition(), extConditionPart, joinHolder);
+                            .createConditionString(joinRelation, joinRelation.getRelationMapping().getCondition(), extConditionPart,
+                                    joinHolder);
                 }
                 fromPart.append(joinRelation.getType() == Join.Type.LEFT ? " LEFT JOIN " : " INNER JOIN ");
                 if (joinRelation.hasChilds()) {

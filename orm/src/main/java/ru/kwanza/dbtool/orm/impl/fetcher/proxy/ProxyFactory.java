@@ -19,7 +19,7 @@ import java.util.concurrent.ConcurrentMap;
 /**
  * @author Alexander Guzanov
  */
-public class ProxyFactory extends SpringSerializable{
+public class ProxyFactory extends SpringSerializable {
     private ConcurrentMap<Class, ProxyEntry> generatedClasses = new ConcurrentHashMap<Class, ProxyEntry>();
 
     public <T> T newInstance(final Class<T> clazz, ProxyCallback callback)
@@ -38,10 +38,9 @@ public class ProxyFactory extends SpringSerializable{
             enhancer.setStrategy(new DefaultGeneratorStrategy() {
                 @Override
                 protected ClassGenerator transform(ClassGenerator cg) throws Exception {
-                    return new TransformingClassGenerator(cg, new ClassTransformerChain(
-                            new ClassTransformer[]{new AddPropertyTransformer(new String[]{ProxyEntry.DELEGATE}, new Type[]{Type.getType(clazz)}),
-                                    new FieldProviderTransformer()
-                            }));
+                    return new TransformingClassGenerator(cg, new ClassTransformerChain(new ClassTransformer[]{
+                            new AddPropertyTransformer(new String[]{ProxyEntry.DELEGATE}, new Type[]{Type.getType(clazz)}),
+                            new FieldProviderTransformer()}));
                 }
             });
             enhancer.setInterceptDuringConstruction(false);
@@ -51,7 +50,7 @@ public class ProxyFactory extends SpringSerializable{
                 enhancer.setSuperclass(clazz);
                 enhancer.setInterfaces(new Class[]{IProxy.class});
             } else {
-                enhancer.setInterfaces(new Class[]{IProxy.class,Serializable.class, clazz});
+                enhancer.setInterfaces(new Class[]{IProxy.class, Serializable.class, clazz});
             }
 
             result = new ProxyEntry(enhancer.createClass());

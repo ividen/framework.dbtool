@@ -13,7 +13,7 @@ import ru.kwanza.dbtool.orm.impl.querybuilder.db.postgresql.PostgreSQLQueryBuild
  */
 public abstract class QueryBuilderFactory {
 
-    public static  <T> IQueryBuilder<T> createBuilder(DBTool dbTool, IEntityMappingRegistry mappingRegistry, Class<T> entityClass) {
+    public static <T> IQueryBuilder<T> createBuilder(DBTool dbTool, IEntityMappingRegistry mappingRegistry, Class<T> entityClass) {
         DBTool.DBType dbType = dbTool.getDbType();
         if (dbType == DBTool.DBType.ORACLE) {
             return new OracleQueryBuilder<T>(dbTool, mappingRegistry, entityClass);

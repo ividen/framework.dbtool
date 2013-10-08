@@ -34,25 +34,25 @@ class WhereFragmentHelper {
         if (childs != null && childs.length > 0) {
             if (type != If.Type.NOT) {
                 where.append('(');
-                createConditionString(root,childs[0], where, holder);
+                createConditionString(root, childs[0], where, holder);
                 where.append(')');
 
                 for (int i = 1; i < childs.length; i++) {
                     If c = childs[i];
                     where.append(' ').append(type.name()).append(" (");
-                    createConditionString(root,c, where, holder);
+                    createConditionString(root, c, where, holder);
                     where.append(')');
                 }
             } else {
                 where.append("NOT (");
-                createConditionString(root,childs[0], where, holder);
+                createConditionString(root, childs[0], where, holder);
                 where.append(')');
             }
         } else if (type == If.Type.NATIVE) {
             where.append(SQLParser.prepareSQL(condition.getSql(), holder));
         } else {
 
-            final Column column = builder.getColumnFactory().findColumn(root,condition.getPropertyName());
+            final Column column = builder.getColumnFactory().findColumn(root, condition.getPropertyName());
             where.append(column.getColumnName());
             final int fieldType = column.getType();
 

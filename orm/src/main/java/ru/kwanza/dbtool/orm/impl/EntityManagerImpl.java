@@ -15,7 +15,6 @@ import ru.kwanza.dbtool.orm.impl.operation.OperationFactory;
 import ru.kwanza.dbtool.orm.impl.querybuilder.QueryBuilderFactory;
 import ru.kwanza.toolbox.SpringSerializable;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.util.Collection;
 import java.util.List;
@@ -24,24 +23,22 @@ import java.util.Map;
 /**
  * @author Kiryl Karatsetski
  */
-public class EntityManagerImpl  extends SpringSerializable implements IEntityManager{
+public class EntityManagerImpl extends SpringSerializable implements IEntityManager {
 
-    @Resource(name="dbtool.DBTool")
+    @Resource(name = "dbtool.DBTool")
     private DBTool dbTool;
 
-    @Resource(name="dbtool.VersionGenerator")
+    @Resource(name = "dbtool.VersionGenerator")
     private VersionGenerator versionGenerator;
 
-    @Resource(name="dbtool.IEntityMappingRegistry")
+    @Resource(name = "dbtool.IEntityMappingRegistry")
     private IEntityMappingRegistry mappingRegistry;
 
-    @Resource(name="dbtool.OperationFactory")
+    @Resource(name = "dbtool.OperationFactory")
     private OperationFactory operationFactory;
 
-    @Resource(name="dbtool.Fetcher")
+    @Resource(name = "dbtool.Fetcher")
     private Fetcher fetcher;
-
-
 
     public <T> T create(T object) throws UpdateException {
         final Class entityClass = object.getClass();
@@ -137,7 +134,7 @@ public class EntityManagerImpl  extends SpringSerializable implements IEntityMan
     }
 
     public <T> void fetchLazy(Class<T> entityClass, Collection<T> items) {
-        fetcher.fetchLazy(entityClass,items);
+        fetcher.fetchLazy(entityClass, items);
     }
 
     public <T> void fetchLazy(T object) {

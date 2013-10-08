@@ -26,7 +26,7 @@ class SQLParser {
             } else if (variableMatch) {
                 if (isDelimiter(c)) {
                     String paramName = paramBuilder.toString();
-                    holder.addParam(paramName,SqlTypeValue.TYPE_UNKNOWN);
+                    holder.addParam(paramName, SqlTypeValue.TYPE_UNKNOWN);
                     variableMatch = false;
 
                     sqlBuilder.append(c);
@@ -40,7 +40,7 @@ class SQLParser {
 
         if (variableMatch) {
             String paramName = paramBuilder.toString();
-            holder.addParam(paramName,SqlTypeValue.TYPE_UNKNOWN);
+            holder.addParam(paramName, SqlTypeValue.TYPE_UNKNOWN);
         }
 
         return sqlBuilder.toString();

@@ -4,9 +4,9 @@ import ru.kwanza.dbtool.orm.api.*;
 import ru.kwanza.dbtool.orm.impl.fetcher.proxy.ProxyCallback;
 import ru.kwanza.dbtool.orm.impl.fetcher.proxy.ProxyEntry;
 import ru.kwanza.dbtool.orm.impl.fetcher.proxy.ProxyFactory;
-import ru.kwanza.dbtool.orm.impl.mapping.RelationMapping;
 import ru.kwanza.dbtool.orm.impl.mapping.FieldMapping;
 import ru.kwanza.dbtool.orm.impl.mapping.IEntityMappingRegistry;
+import ru.kwanza.dbtool.orm.impl.mapping.RelationMapping;
 import ru.kwanza.toolbox.SpringSerializable;
 import ru.kwanza.toolbox.fieldhelper.Property;
 
@@ -152,7 +152,7 @@ public class Fetcher extends SpringSerializable {
                             Object relationObjValue = realtion.get(relationIDValue);
                             if (relationObjValue != null) {
                                 //todo aguzanov setValue with Splitter
-                                if(relationMapping.getGroupBy()!=null){
+                                if (relationMapping.getGroupBy() != null) {
 //                                    relationObjValue = fetchMap
                                 }
                                 relationMapping.getProperty().set(o, relationObjValue);

@@ -93,8 +93,7 @@ public class ParamsHolder {
             }
         }
 
-        for (int i = 0; i < defaultValues.size(); i++) {
-            final KeyValue<Integer, SqlParameterValue> defaultValue = defaultValues.get(i);
+        for (final KeyValue<Integer, SqlParameterValue> defaultValue : defaultValues) {
             result[defaultValue.getKey()] = defaultValue.getValue();
         }
 

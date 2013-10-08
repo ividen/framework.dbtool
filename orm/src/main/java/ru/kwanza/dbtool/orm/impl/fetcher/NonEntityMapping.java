@@ -3,7 +3,9 @@ package ru.kwanza.dbtool.orm.impl.fetcher;
 import ru.kwanza.dbtool.orm.annotations.Association;
 import ru.kwanza.dbtool.orm.annotations.ManyToOne;
 import ru.kwanza.dbtool.orm.annotations.OneToMany;
-import ru.kwanza.dbtool.orm.impl.mapping.*;
+import ru.kwanza.dbtool.orm.impl.mapping.EntityMappingHelper;
+import ru.kwanza.dbtool.orm.impl.mapping.EntityMappingRegistry;
+import ru.kwanza.dbtool.orm.impl.mapping.RelationMapping;
 
 import javax.annotation.Resource;
 import java.lang.reflect.AnnotatedElement;
@@ -16,12 +18,10 @@ import java.util.concurrent.ConcurrentMap;
  * @author Alexander Guzanov
  */
 class NonEntityMapping {
-    @Resource(name="dbtool.IEntityMappingRegistry")
+    @Resource(name = "dbtool.IEntityMappingRegistry")
     private EntityMappingRegistry registry;
 
-    private ConcurrentMap<Class, Map<String, RelationMapping>> cache =
-            new ConcurrentHashMap<Class, Map<String, RelationMapping>>();
-
+    private ConcurrentMap<Class, Map<String, RelationMapping>> cache = new ConcurrentHashMap<Class, Map<String, RelationMapping>>();
 
     public Map<String, RelationMapping> get(Class entityClass) {
         Map<String, RelationMapping> mappings = cache.get(entityClass);

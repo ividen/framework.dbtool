@@ -59,19 +59,19 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
         return registry;
     }
 
-     WhereFragmentHelper getWhereFragmentHelper() {
+    WhereFragmentHelper getWhereFragmentHelper() {
         return whereFragmentHelper;
     }
 
-     FieldFragmentHelper getFieldFragmentHelper() {
+    FieldFragmentHelper getFieldFragmentHelper() {
         return fieldFragmentHelper;
     }
 
-     FromFragmentHelper getFromFragmentHelper() {
+    FromFragmentHelper getFromFragmentHelper() {
         return fromFragmentHelper;
     }
 
-     OrderByFragmentHelper getOrderByFragmentHelper() {
+    OrderByFragmentHelper getOrderByFragmentHelper() {
         return orderByFragmentHelper;
     }
 
@@ -83,7 +83,7 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
         Parameters whereParams = new Parameters();
         Parameters joinParams = new Parameters();
 
-        String where = whereFragmentHelper.createWhereFragment(this.condition,  whereParams);
+        String where = whereFragmentHelper.createWhereFragment(this.condition, whereParams);
         String orderBy = orderByFragmentHelper.createOrderByFragment();
         String from = fromFragmentHelper.createFromFragment(joinParams);
         String fieldsString = fieldFragmentHelper.createFieldsFragment();
@@ -95,8 +95,6 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
 
         return createQuery(createConfig(relationFactory.getRoot(), sqlString, joinParams.join(whereParams)));
     }
-
-
 
     public IQueryBuilder<T> join(String string) {
         for (Join join : JoinClauseHelper.parse(string)) {
@@ -133,7 +131,6 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
     private QueryConfig<T> createConfig(JoinRelation rootRelations, String sqlString, Parameters holder) {
         return new QueryConfig<T>(dbTool, registry, entityClass, sqlString, rootRelations, holder);
     }
-
 
     protected StringBuilder createSQLString(String fieldsString, String from, String where, String orderBy) {
         StringBuilder sql;

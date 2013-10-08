@@ -13,7 +13,7 @@ import java.lang.reflect.InvocationTargetException;
 public class ProxyEntry<T> {
     public static final String DELEGATE = "delegate";
     private static final String CGLIB_$_CONSTRUCTED = "CGLIB$CONSTRUCTED";
-    private static final String DELEGATE_FIELD = "$cglib_prop_"+DELEGATE;
+    private static final String DELEGATE_FIELD = "$cglib_prop_" + DELEGATE;
     private Class<T> theClass;
 
     public ProxyEntry(Class<T> theClass) {
@@ -29,7 +29,7 @@ public class ProxyEntry<T> {
         return result;
     }
 
-    public static <T>  T getDelegate(T object) {
+    public static <T> T getDelegate(T object) {
         return (T) ((FieldProvider) object).getField(DELEGATE_FIELD);
     }
 

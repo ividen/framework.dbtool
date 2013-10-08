@@ -17,7 +17,7 @@ public class MSSQLStatement<T> extends StatementImpl<T> {
     @Override
     protected String prepareSql(String sql) {
         if (isUsePaging()) {
-            sql = "SELECT TOP "+ (getOffset()+getMaxSize()) + " " + sql.substring("SELECT".length());
+            sql = "SELECT TOP " + (getOffset() + getMaxSize()) + " " + sql.substring("SELECT".length());
         }
 
         return sql;

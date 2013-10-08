@@ -14,8 +14,8 @@ public class QueryConfig<T> {
     private final JoinRelation rootRelation;
     private final ParamsHolder holder;
 
-    QueryConfig(DBTool dbTool, IEntityMappingRegistry registry,
-                Class<T> entityClass, String sql, JoinRelation rootRelations, Parameters parameters) {
+    QueryConfig(DBTool dbTool, IEntityMappingRegistry registry, Class<T> entityClass, String sql, JoinRelation rootRelations,
+                Parameters parameters) {
         this.dbTool = dbTool;
         this.sql = sql;
         this.registry = registry;
@@ -35,7 +35,6 @@ public class QueryConfig<T> {
     public String getSql() {
         return sql;
     }
-
 
     public IEntityMappingRegistry getRegistry() {
         return registry;

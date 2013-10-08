@@ -18,11 +18,10 @@ public final class OperationFactory {
     private Map<Class, IUpdateOperation> updateOperationCache = new ConcurrentHashMap<Class, IUpdateOperation>();
     private Map<Class, IDeleteOperation> deleteOperationCache = new ConcurrentHashMap<Class, IDeleteOperation>();
 
-    @Resource(name="dbtool.IEntityMappingRegistry")
+    @Resource(name = "dbtool.IEntityMappingRegistry")
     private IEntityMappingRegistry entityMappingRegistry;
-    @Resource(name="dbtool.DBTool")
+    @Resource(name = "dbtool.DBTool")
     private DBTool dbTool;
-
 
     public ICreateOperation getCreateOperation(Class entityClass) {
         if (!createOperationCache.containsKey(entityClass)) {

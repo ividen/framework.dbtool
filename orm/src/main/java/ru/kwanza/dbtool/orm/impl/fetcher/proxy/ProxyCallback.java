@@ -12,7 +12,7 @@ import java.util.concurrent.locks.ReentrantLock;
 /**
  * @author Alexander Guzanov
  */
-public class ProxyCallback implements MethodInterceptor,Serializable {
+public class ProxyCallback implements MethodInterceptor, Serializable {
 
     private static final ThreadLocal<Boolean> safeMode = new ThreadLocal<Boolean>() {
         @Override
@@ -34,7 +34,7 @@ public class ProxyCallback implements MethodInterceptor,Serializable {
         this.fetcher = fetcher;
         this.holderClass = holderClass;
         this.holders = holders;
-        this.relationClass  = relationClass;
+        this.relationClass = relationClass;
         this.relationProperty = relationProperty;
     }
 
@@ -94,7 +94,7 @@ public class ProxyCallback implements MethodInterceptor,Serializable {
 
     public Object intercept(Object obj, Method method, Object[] args, MethodProxy proxy) throws Throwable {
         if (isWriteReplace(method)) {
-            return new ProxyHolder(relationClass, (IProxy) obj,this);
+            return new ProxyHolder(relationClass, (IProxy) obj, this);
         }
         if (!safeMode.get()) {
             load();

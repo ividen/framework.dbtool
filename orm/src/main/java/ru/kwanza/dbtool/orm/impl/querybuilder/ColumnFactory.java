@@ -16,7 +16,7 @@ class ColumnFactory {
         this.builder = builder;
     }
 
-    Column findColumn(JoinRelation root,String propertyName) {
+    Column findColumn(JoinRelation root, String propertyName) {
         final int index = propertyName.lastIndexOf(DOT_CHAR);
         Class entityClass = builder.getEntityClass();
         if (index > 0) {
