@@ -1,7 +1,10 @@
 package ru.kwanza.dbtool.orm.impl.mapping;
 
+import ru.kwanza.dbtool.orm.annotations.GroupByType;
 import ru.kwanza.dbtool.orm.api.If;
+import ru.kwanza.dbtool.orm.api.Join;
 import ru.kwanza.toolbox.fieldhelper.Property;
+import ru.kwanza.toolbox.splitter.Splitter;
 
 import java.util.Collection;
 import java.util.Map;
@@ -16,27 +19,29 @@ public class RelationMapping {
     private final FieldMapping relationKeyMapping;
     private final Property property;
     private final If condition;
-    private final Property[] groupBy;
+    private final Splitter groupBy;
+    private final GroupByType groupByType;
+    private Join[] joins = null;
+
+    public RelationMapping(String name, Class relationClass, FieldMapping keyMapping, FieldMapping relationKeyMapping, Property property) {
+        this(name, relationClass, keyMapping, relationKeyMapping, property, null, null, null, null);
+    }
 
     public RelationMapping(String name, Class relationClass, FieldMapping keyMapping, FieldMapping relationKeyMapping, Property property,
-                           If condition, Property[] groupBy) {
+                           If condition, Property[] groupBy, GroupByType groupByType, Join[] joins) {
         this.name = name;
         this.relationClass = relationClass;
         this.keyMapping = keyMapping;
         this.relationKeyMapping = relationKeyMapping;
         this.property = property;
         this.condition = condition;
-        this.groupBy = groupBy;
-
+        this.groupBy = groupBy == null ? null : new Splitter(groupBy);
+        this.groupByType = groupByType;
+        this.joins = joins;
     }
 
-    public void validate(IEntityMappingRegistry registry) {
-        if (groupBy != null) {
-            for (Property p : groupBy) {
-                final int index = p.getName().indexOf('.');
-
-            }
-        }
+    public Join[] getJoins() {
+        return joins;
     }
 
     public FieldMapping getKeyMapping() {
@@ -75,8 +80,12 @@ public class RelationMapping {
         return condition;
     }
 
-    public Property[] getGroupBy() {
+    public Splitter getGroupBy() {
         return groupBy;
+    }
+
+    public GroupByType getGroupByType() {
+        return groupByType;
     }
 
     public boolean isCollection() {

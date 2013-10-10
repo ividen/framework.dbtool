@@ -9,6 +9,7 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import ru.kwanza.dbtool.orm.annotations.*;
 import ru.kwanza.dbtool.orm.api.If;
+import ru.kwanza.dbtool.orm.api.Join;
 import ru.kwanza.toolbox.fieldhelper.FieldHelper;
 import ru.kwanza.toolbox.fieldhelper.Property;
 
@@ -144,14 +145,13 @@ public class EntityMappingRegistry implements IEntityMappingRegistry {
                 ? mapping.get(association.property())
                 : new FieldMapping(name, null, Types.BIGINT, false, FieldHelper.constructProperty(entityClass, association.property()));
         final Property fetchField = FieldHelper.constructProperty(entityClass, name);
-        final Class relationClass =
-                Collection.class.isAssignableFrom(fetchField.getType()) ? association.relationClass() : fetchField.getType();
+        final Class relationClass = association.relationClass() != Object.class ? association.relationClass() : fetchField.getType();
         if (relationClass == Object.class) {
             throw new RuntimeException(
                     "Relation @OneToMany in  " + entityClass.getName() + "." + name + " must have relativeClass() specified!");
         }
         final If condition = association.condition().isEmpty() ? null : parseCondition(association);
-        final Property[] groupBy = association.groupBy().isEmpty() ? null : parseGroupBy(entityClass, association);
+        final Property[] groupBy = association.groupBy().isEmpty() ? null : parseGroupBy(relationClass, association);
 
         if (!entityNameByEntityClass.containsKey(relationClass)) {
             this.registerEntityClass(relationClass);
@@ -164,7 +164,8 @@ public class EntityMappingRegistry implements IEntityMappingRegistry {
                             + " for @Association " + entityClass.getName() + "." + name + "!");
         }
 
-        return new RelationMapping(name, relationClass, propertyMapping, relationPropertyMapping, fetchField, condition, groupBy);
+        return new RelationMapping(name, relationClass, propertyMapping, relationPropertyMapping, fetchField, condition, groupBy,
+                association.groupByType(), getJoinsForGroupBy(relationClass, groupBy));
     }
 
     public RelationMapping parseOneToMany(final Class entityClass, final AnnotatedElement annotatedElement) {
@@ -172,8 +173,7 @@ public class EntityMappingRegistry implements IEntityMappingRegistry {
         final String name = getPropertyName(annotatedElement);
         final FieldMapping propertyMapping = idFieldMappings.get(entityClass).iterator().next();
         final Property fetchField = FieldHelper.constructProperty(entityClass, name);
-        final Class relationClass =
-                Collection.class.isAssignableFrom(fetchField.getType()) ? oneToMany.relationClass() : fetchField.getType();
+        final Class relationClass = oneToMany.relationClass() != Object.class ? oneToMany.relationClass() : fetchField.getType();
         if (relationClass == Object.class) {
             throw new RuntimeException(
                     "Relation @OneToMany in  " + entityClass.getName() + "." + name + " must have relativeClass() specified!");
@@ -189,7 +189,7 @@ public class EntityMappingRegistry implements IEntityMappingRegistry {
                             + " for @OneToMany " + entityClass.getName() + "." + name + "!");
         }
 
-        return new RelationMapping(name, relationClass, propertyMapping, relationPropertyMapping, fetchField, null, null);
+        return new RelationMapping(name, relationClass, propertyMapping, relationPropertyMapping, fetchField);
     }
 
     public RelationMapping parseManyToOne(final Class entityClass, final AnnotatedElement annotatedElement) {
@@ -211,7 +211,50 @@ public class EntityMappingRegistry implements IEntityMappingRegistry {
             registerEntityClass(relationClass);
         }
         final FieldMapping relationPropertyMapping = idFieldMappings.get(relationClass).iterator().next();
-        return new RelationMapping(name, relationClass, propertyMapping, relationPropertyMapping, fetchField, null, null);
+        return new RelationMapping(name, relationClass, propertyMapping, relationPropertyMapping, fetchField);
+    }
+
+    private Join[] getJoinsForGroupBy(Class relationClass, Property[] groupBy) {
+        if (groupBy == null || groupBy.length == 0) {
+            return null;
+        }
+        final Collection<Join> joins = new ArrayList<Join>();
+        if (groupBy != null) {
+            for (Property p : groupBy) {
+                final Join[] j = parseGroupBy(relationClass, p.getName());
+                if (j != null) {
+                    joins.add(j[0]);
+                }
+            }
+        }
+
+        if (!joins.isEmpty()) {
+            return joins.toArray(new Join[]{});
+        }
+
+        return null;
+    }
+
+    private Join[] parseGroupBy(Class relationClass, String name) {
+        if (!entityNameByEntityClass.containsKey(relationClass)) {
+            registerEntityClass(relationClass);
+        }
+        final int index = name.indexOf('.');
+        if (index > 0) {
+            final String propertyName = name.substring(0, index);
+            final RelationMapping relationMapping = getRelationMapping(relationClass, propertyName);
+            if (relationMapping == null) {
+                throw new IllegalArgumentException("Can't process groupBy for relation " + propertyName + " in " + relationClass.getName());
+            }
+
+            return new Join[]{Join.inner(propertyName, parseGroupBy(relationMapping.getRelationClass(), name.substring(index + 1)))};
+        } else {
+            final RelationMapping relationMapping = getRelationMapping(relationClass, name);
+            if (relationMapping != null) {
+                return new Join[]{Join.inner(name, parseGroupBy(relationMapping.getRelationClass(), name.substring(index + 1)))};
+            }
+            return null;
+        }
     }
 
     private If parseCondition(Association association) {
@@ -333,7 +376,7 @@ public class EntityMappingRegistry implements IEntityMappingRegistry {
             fields.add(FieldHelper.constructProperty(entityClass, field));
         }
 
-        return (Property[]) fields.toArray();
+        return fields.toArray(new Property[]{});
     }
 
     public String getTableName(Class entityClass) {

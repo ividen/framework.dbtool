@@ -23,4 +23,6 @@ public @interface Association {
     String condition() default "";
 
     String groupBy() default "";
+
+    GroupByType groupByType() default GroupByType.ONE_TO_ONE;
 }

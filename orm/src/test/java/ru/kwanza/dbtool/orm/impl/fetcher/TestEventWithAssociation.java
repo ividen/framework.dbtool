@@ -1,18 +1,33 @@
 package ru.kwanza.dbtool.orm.impl.fetcher;
 
 import ru.kwanza.dbtool.orm.annotations.Association;
+import ru.kwanza.dbtool.orm.annotations.GroupByType;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Alexander Guzanov
  */
-public class TestEventWithAssociation   implements Serializable {
+public class TestEventWithAssociation implements Serializable {
     private Long entityAID;
 
-    @Association(property = "entityAID", relationProperty = "entityAID",relationClass = TestEntity.class)
+    @Association(property = "entityAID", relationProperty = "entityAID", relationClass = TestEntity.class)
     private Collection<TestEntity> entities;
+
+    @Association(property = "entityAID", relationProperty = "entityAID", relationClass = TestEntity.class, groupBy = "entityA",
+            groupByType = GroupByType.ONE_TO_MANY)
+    private Map<TestEntityA, List<TestEntity>> entitiesByEntityA;
+
+    @Association(property = "entityAID", relationProperty = "entityAID", relationClass = TestEntity.class,
+            groupBy = "entityA, entityC.entityE.id",
+            groupByType = GroupByType.ONE_TO_MANY)
+    private Map<TestEntityA, Map<Long, List<TestEntity>>> entitiesByACEId;
+
+    @Association(property = "entityAID", relationProperty = "entityAID", relationClass = TestEntity.class, groupBy = "id")
+    private Map<Long, TestEntity> entitiesById;
 
     public TestEventWithAssociation(Long entityAID) {
         this.entityAID = entityAID;
@@ -24,6 +39,18 @@ public class TestEventWithAssociation   implements Serializable {
 
     public Collection<TestEntity> getEntities() {
         return entities;
+    }
+
+    public Map<TestEntityA, List<TestEntity>> getEntitiesByEntityA() {
+        return entitiesByEntityA;
+    }
+
+    public Map<TestEntityA, Map<Long, List<TestEntity>>> getEntitiesByACEId() {
+        return entitiesByACEId;
+    }
+
+    public Map<Long, TestEntity> getEntitiesById() {
+        return entitiesById;
     }
 }
 

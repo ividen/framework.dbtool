@@ -34,4 +34,32 @@ public class TestEntityA   implements Serializable {
     public Collection<TestEntity> getTestEntities() {
         return testEntities;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        TestEntityA that = (TestEntityA) o;
+
+        if (!id.equals(that.id)) {
+            return false;
+        }
+        if (!version.equals(that.version)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id.hashCode();
+        result = 31 * result + version.hashCode();
+        return result;
+    }
 }

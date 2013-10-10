@@ -113,7 +113,7 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
     private void processJoin(JoinRelation root, Join joinClause) {
         JoinRelation joinRelation = relationFactory.registerRelation(root, joinClause.getType(), joinClause.getPropertyName());
 
-        if (joinClause != null) {
+        if (joinClause != null && joinClause.getSubJoins()!=null) {
             for (Join join : joinClause.getSubJoins()) {
                 processJoin(joinRelation, join);
             }
