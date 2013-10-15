@@ -15,7 +15,7 @@ class JoinRelationFactory {
         this.builder = builder;
         this.aliasCounter = 1;
 
-        this.root = new JoinRelation(builder.getRegistry().getTableName(builder.getEntityClass()));
+        this.root = new JoinRelation(builder.getRegistry().getEntityType(builder.getEntityClass()).getTableName());
     }
 
     JoinRelation getRoot() {
@@ -32,7 +32,7 @@ class JoinRelationFactory {
 
         Class entityClass = root.isRoot() ? builder.getEntityClass() : root.getRelationMapping().getRelationClass();
 
-        final IRelationMapping relationMapping = builder.getRegistry().getRelationMapping(entityClass, propertyName);
+        final IRelationMapping relationMapping = builder.getRegistry().getEntityType(entityClass).getRelation(propertyName);
         if (relationMapping == null) {
             throw new IllegalArgumentException("Wrong relation name for " + entityClass.getName() + " : " + propertyName + " !");
         }

@@ -36,17 +36,16 @@ public class DeleteOperation extends Operation implements IDeleteOperation {
 
     @Override
     protected void initOperation() {
-        final Collection<IFieldMapping> idFieldMappings = entityMappingRegistry.getIdFields(entityClass);
+        final IFieldMapping idField = entityMappingRegistry.getEntityType(entityClass).getIdField();
 
-        if (idFieldMappings == null || idFieldMappings.isEmpty()) {
+        if (idField == null ) {
             throw new RuntimeException("IdFieldMapping for entity class" + entityClass + " not found");
         }
 
-        final IFieldMapping idFieldMapping = idFieldMappings.iterator().next();
-        this.idEntityFiled = idFieldMapping.getProperty();
+        this.idEntityFiled = idField.getProperty();
 
-        final String tableName = entityMappingRegistry.getTableName(entityClass);
-        final String idColumnName = idFieldMapping.getColumn();
+        final String tableName = entityMappingRegistry.getEntityType(entityClass).getTableName();
+        final String idColumnName = idField.getColumn();
 
         this.deleteQuery = buildQuery(tableName, idColumnName);
 
@@ -57,10 +56,10 @@ public class DeleteOperation extends Operation implements IDeleteOperation {
 
     private String buildQuery(String tableName, String idColumnName) {
         final StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("delete from ");
+        stringBuilder.append("DELETE FROM ");
         stringBuilder.append(tableName);
-        stringBuilder.append(" where ");
-        stringBuilder.append(idColumnName).append(" in (?)");
+        stringBuilder.append(" WHERE ");
+        stringBuilder.append(idColumnName).append(" IN (?)");
         return stringBuilder.toString();
     }
 

@@ -1,6 +1,6 @@
 package ru.kwanza.dbtool.orm.impl.mapping;
 
-import ru.kwanza.dbtool.orm.api.internal.IEntity;
+import ru.kwanza.dbtool.orm.api.internal.IEntityType;
 import ru.kwanza.dbtool.orm.api.internal.IFieldMapping;
 
 import java.util.ArrayList;
@@ -11,12 +11,17 @@ import java.util.Set;
 /**
  * @author Alexander Guzanov
  */
-public class UnionEntity extends AbstractEntity {
+public class UnionEntityType extends AbstractEntityType {
     private static final String UNION_ALL = " UNION ALL ";
     private static final String CLAZZ_ = "clazz_";
     private int aliasCounter;
 
-    private List<SubUnionEntity> entities = new ArrayList<SubUnionEntity>();
+    private List<SubUnionEntityType> entities = new ArrayList<SubUnionEntityType>();
+
+    public UnionEntityType(String name, Class entityClass) {
+        setName(name);
+        setEntityClass(entityClass);
+    }
 
     public String getNextAlias() {
         return "f_" + (aliasCounter++);
@@ -26,7 +31,7 @@ public class UnionEntity extends AbstractEntity {
         if (getSql() != null) {
             return;
         }
-        for (SubUnionEntity entity : entities) {
+        for (SubUnionEntityType entity : entities) {
             entity.validate();
         }
 
@@ -40,8 +45,8 @@ public class UnionEntity extends AbstractEntity {
         Set<String> fields = new LinkedHashSet<String>();
 
         for (int i = 0; i < entities.size(); i++) {
-            SubUnionEntity entity = entities.get(i);
-            IEntity baseEntity = entity.getEntity();
+            SubUnionEntityType entity = entities.get(i);
+            IEntityType baseEntity = entity.getEntity();
             sql.append(commonFields);
             sql.append(i).append(" ").append(CLAZZ_).append(',');
 
@@ -71,15 +76,19 @@ public class UnionEntity extends AbstractEntity {
     }
 
     public boolean isAbstract() {
-        return false;
+        return true;
     }
 
-    public void addEntity(IEntity entity) {
-        entities.add(new SubUnionEntity(entity, this));
+    public void addEntity(IEntityType entity) {
+        entities.add(new SubUnionEntityType(entity, this));
     }
 
     public static final String getClassColumnName() {
         return CLAZZ_;
+    }
+
+    public IEntityType getEntity(int index) {
+        return entities.get(index);
     }
 
 }

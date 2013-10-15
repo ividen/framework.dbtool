@@ -13,12 +13,10 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.SystemPropertyUtils;
 import ru.kwanza.dbtool.orm.annotations.Entity;
 import ru.kwanza.dbtool.orm.api.internal.IEntityMappingRegistry;
-import ru.kwanza.dbtool.orm.api.internal.IFieldMapping;
-import ru.kwanza.dbtool.orm.api.internal.IRelationMapping;
+import ru.kwanza.dbtool.orm.api.internal.IEntityType;
 import ru.kwanza.dbtool.orm.springintegration.DBToolOrmNamespaceHandler;
 
 import java.io.IOException;
-import java.util.Collection;
 
 /**
  * @author Kiryl Karatsetski
@@ -96,75 +94,11 @@ public class SpringEntityMappingRegistryImpl implements IEntityMappingRegistry {
         return delegate.isRegisteredEntityName(entityName);
     }
 
-    public String getTableName(Class entityClass) {
-        return delegate.getTableName(entityClass);
+    public IEntityType getEntityType(String name) {
+        return delegate.getEntityType(name);
     }
 
-    public String getTableName(String entityName) {
-        return delegate.getTableName(entityName);
-    }
-
-    public String getEntityName(Class entityClass) {
-        return delegate.getEntityName(entityClass);
-    }
-
-    public Class getEntityClass(String entityName) {
-        return delegate.getEntityClass(entityName);
-    }
-
-    public Collection<String> getColumnNames(Class entityClass) {
-        return delegate.getColumnNames(entityClass);
-    }
-
-    public Collection<String> getColumnNames(String entityName) {
-        return delegate.getColumnNames(entityName);
-    }
-
-    public Collection<IFieldMapping> getFieldMappings(Class entityClass) {
-        return delegate.getFieldMappings(entityClass);
-    }
-
-    public Collection<IFieldMapping> getFieldMappings(String entityName) {
-        return delegate.getFieldMappings(entityName);
-    }
-
-    public Collection<IFieldMapping> getIdFields(Class entityClass) {
-        return delegate.getIdFields(entityClass);
-    }
-
-    public Collection<IFieldMapping> getIdFields(String entityName) {
-        return delegate.getIdFields(entityName);
-    }
-
-    public IFieldMapping getVersionField(Class entityClass) {
-        return delegate.getVersionField(entityClass);
-    }
-
-    public IFieldMapping getVersionField(String entityName) {
-        return delegate.getVersionField(entityName);
-    }
-
-    public Collection<IRelationMapping> getRelationMappings(Class entityClass) {
-        return delegate.getRelationMappings(entityClass);
-    }
-
-    public Collection<IRelationMapping> getRelationMappings(String entityName) {
-        return delegate.getRelationMappings(entityName);
-    }
-
-    public IFieldMapping getFieldMapping(Class entityClass, String propertyName) {
-        return delegate.getFieldMapping(entityClass, propertyName);
-    }
-
-    public IFieldMapping getFieldMapping(String entityName, String propertyName) {
-        return delegate.getFieldMapping(entityName, propertyName);
-    }
-
-    public IRelationMapping getRelationMapping(Class entityClass, String propertyName) {
-        return delegate.getRelationMapping(entityClass, propertyName);
-    }
-
-    public IRelationMapping getRelationMapping(String entityName, String propertyName) {
-        return delegate.getRelationMapping(entityName, propertyName);
+    public IEntityType getEntityType(Class name) {
+        return delegate.getEntityType(name);
     }
 }

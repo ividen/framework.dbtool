@@ -1,6 +1,6 @@
 package ru.kwanza.dbtool.orm.impl.mapping;
 
-import ru.kwanza.dbtool.orm.api.internal.IEntity;
+import ru.kwanza.dbtool.orm.api.internal.IEntityType;
 import ru.kwanza.dbtool.orm.api.internal.IFieldMapping;
 import ru.kwanza.dbtool.orm.api.internal.IRelationMapping;
 
@@ -12,15 +12,25 @@ import java.util.Map;
 /**
  * @author Alexander Guzanov
  */
-public abstract class AbstractEntity implements IEntity {
+public abstract class AbstractEntityType implements IEntityType {
     private String tableName;
     private String sql;
     private Class entityClass;
+    private String name;
     private IFieldMapping versionField;
     private IFieldMapping idField;
 
     private Map<String, IFieldMapping> fields = new LinkedHashMap<String, IFieldMapping>();
+    private Map<String, IFieldMapping> fieldsByColumnName = new LinkedHashMap<String, IFieldMapping>();
     private Map<String, IRelationMapping> relations = new LinkedHashMap<String, IRelationMapping>();
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 
     public String getTableName() {
         return tableName;
@@ -79,7 +89,16 @@ public abstract class AbstractEntity implements IEntity {
     }
 
     public void addField(IFieldMapping field) {
+        if (fields.get(field.getName()) != null) {
+            throw new RuntimeException("Duplicate property name '" + field.getName() + "' in class " + entityClass);
+        }
+
         fields.put(field.getName(), field);
+        if (fieldsByColumnName.containsKey(field.getColumn())) {
+            throw new RuntimeException("Duplication column " + field.getColumn() + " mapping in " + entityClass.getName());
+        }
+
+        fieldsByColumnName.put(field.getColumn(), field);
     }
 
     public void addRelation(IRelationMapping relation) {

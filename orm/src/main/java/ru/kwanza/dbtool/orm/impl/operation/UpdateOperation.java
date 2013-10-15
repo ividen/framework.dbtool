@@ -7,6 +7,7 @@ import ru.kwanza.dbtool.core.*;
 import ru.kwanza.dbtool.core.util.FieldValueExtractor;
 import ru.kwanza.dbtool.core.util.UpdateUtil;
 import ru.kwanza.dbtool.orm.api.internal.IEntityMappingRegistry;
+import ru.kwanza.dbtool.orm.api.internal.IEntityType;
 import ru.kwanza.dbtool.orm.api.internal.IFieldMapping;
 import ru.kwanza.toolbox.fieldhelper.FieldHelper;
 import ru.kwanza.toolbox.fieldhelper.Property;
@@ -53,28 +54,27 @@ public class UpdateOperation extends Operation implements IUpdateOperation {
     }
 
     protected void initOperation() {
-        this.fieldMappings = entityMappingRegistry.getFieldMappings(entityClass);
+        final IEntityType entityType = entityMappingRegistry.getEntityType(entityClass);
+        this.fieldMappings = entityType.getFields();
 
-        final Collection<IFieldMapping> idFieldMappings = entityMappingRegistry.getIdFields(entityClass);
+        this.idFieldMapping = entityType.getIdField();
 
-        if (idFieldMappings == null || idFieldMappings.isEmpty()) {
+        if (idFieldMapping == null) {
             throw new RuntimeException("IdFieldMapping for entity class" + entityClass + " not found");
         }
 
-        this.idFieldMapping = idFieldMappings.iterator().next();
-        this.idEntityField = idFieldMapping != null ? idFieldMapping.getProperty() : null;
+        this.idEntityField = idFieldMapping.getProperty();
 
-        this.versionFieldMapping = entityMappingRegistry.getVersionField(entityClass);
+        this.versionFieldMapping = entityType.getVersionField();
         this.versionEntityField = versionFieldMapping != null ? versionFieldMapping.getProperty() : null;
 
         this.versionSupport = versionEntityField != null;
 
-        final String tableName = entityMappingRegistry.getTableName(entityClass);
-        final Collection<String> columnNames = entityMappingRegistry.getColumnNames(entityClass);
+        final String tableName = entityType.getTableName();
         final String idColumnName = idFieldMapping != null ? idFieldMapping.getColumn() : null;
         final String versionColumnName = versionFieldMapping != null ? versionFieldMapping.getColumn() : null;
 
-        this.updateQuery = buildUpdateQuery(tableName, columnNames, idColumnName, versionColumnName);
+        this.updateQuery = buildUpdateQuery(tableName, fieldMappings, idColumnName, versionColumnName);
         this.checkQuery = buildCheckQuery(tableName, idColumnName, versionColumnName);
 
         if (log.isTraceEnabled()) {
@@ -83,13 +83,13 @@ public class UpdateOperation extends Operation implements IUpdateOperation {
         }
     }
 
-    private String buildUpdateQuery(String tableName, Collection<String> columnNames, String idColumnName, String versionColumnName) {
+    private String buildUpdateQuery(String tableName, Collection<IFieldMapping> fields, String idColumnName, String versionColumnName) {
         final StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("update ");
         stringBuilder.append(tableName);
         stringBuilder.append(" set ");
-        for (String columnName : columnNames) {
-            stringBuilder.append(columnName).append("=?, ");
+        for (IFieldMapping field : fields) {
+            stringBuilder.append(field.getColumn()).append("=?, ");
         }
         stringBuilder.deleteCharAt(stringBuilder.length() - 2);
         stringBuilder.append("where ");

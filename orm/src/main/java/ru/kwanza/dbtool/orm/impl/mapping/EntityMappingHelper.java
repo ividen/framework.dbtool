@@ -1,9 +1,6 @@
 package ru.kwanza.dbtool.orm.impl.mapping;
 
-import ru.kwanza.dbtool.orm.annotations.Entity;
-import ru.kwanza.dbtool.orm.annotations.Field;
-import ru.kwanza.dbtool.orm.annotations.IdField;
-import ru.kwanza.dbtool.orm.annotations.VersionField;
+import ru.kwanza.dbtool.orm.annotations.*;
 import ru.kwanza.toolbox.fieldhelper.FieldHelper;
 import ru.kwanza.toolbox.fieldhelper.Property;
 
@@ -56,7 +53,24 @@ public class EntityMappingHelper {
         return tableName;
     }
 
+
+    public static String getEntitySql(Entity entity, Class entityClass) {
+        final String sql = entity.sql();
+        if (sql.trim().isEmpty()) {
+            return null;
+        }
+        return sql;
+    }
+
     public static String getEntityNameFromAnnotation(Entity entity, Class entityClass) {
+        final String entityName = entity.name();
+        if (entityName.trim().isEmpty()) {
+            return entityClass.getSimpleName();
+        }
+        return entityName;
+    }
+
+    public static String getEntityNameFromAnnotation(AbstractEntity entity, Class entityClass) {
         final String entityName = entity.name();
         if (entityName.trim().isEmpty()) {
             return entityClass.getSimpleName();

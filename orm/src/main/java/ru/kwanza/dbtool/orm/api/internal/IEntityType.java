@@ -5,7 +5,9 @@ import java.util.Collection;
 /**
  * @author Alexander Guzanov
  */
-public interface IEntity<T> {
+public interface IEntityType<T> {
+
+    String getName();
 
     String getTableName();
 

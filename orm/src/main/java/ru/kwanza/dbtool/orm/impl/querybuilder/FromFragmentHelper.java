@@ -37,16 +37,16 @@ class FromFragmentHelper {
                 }
                 fromPart.append(joinRelation.getType() == Join.Type.LEFT ? " LEFT JOIN " : " INNER JOIN ");
                 if (joinRelation.hasChilds()) {
-                    fromPart.append('(').append(builder.getRegistry().getTableName(relationClass)).append(' ')
+                    fromPart.append('(').append(builder.getRegistry().getEntityType(relationClass).getTableName()).append(' ')
                             .append(joinRelation.getAlias());
                     processJoinRelation(fromPart, joinRelation, holder);
                     fromPart.append(')');
                 } else {
-                    fromPart.append(builder.getRegistry().getTableName(relationClass)).append(' ').append(joinRelation.getAlias());
+                    fromPart.append(builder.getRegistry().getEntityType(relationClass).getTableName()).append(' ').append(joinRelation.getAlias());
                 }
 
                 fromPart.append(" ON ").append(rootRelations.getAlias() == null
-                        ? builder.getRegistry().getTableName(builder.getEntityClass())
+                        ? builder.getRegistry().getEntityType(builder.getEntityClass()).getTableName()
                         : rootRelations.getAlias()).append('.').append(joinRelation.getRelationMapping().getKeyMapping().getColumn())
                         .append('=').append(joinRelation.getAlias()).append('.')
                         .append(joinRelation.getRelationMapping().getRelationKeyMapping().getColumn()).append(' ');

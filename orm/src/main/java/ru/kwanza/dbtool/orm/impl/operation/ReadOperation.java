@@ -25,12 +25,11 @@ public class ReadOperation extends Operation implements IReadOperation {
 
     @Override
     protected void initOperation() {
-        final Collection<IFieldMapping> idFieldMappings = entityMappingRegistry.getIdFields(entityClass);
-        if (idFieldMappings == null || idFieldMappings.isEmpty()) {
+        final IFieldMapping idFieldMapping = entityMappingRegistry.getEntityType(entityClass).getIdField();
+        if (idFieldMapping==null) {
             throw new RuntimeException("IdFieldMapping for entity class" + entityClass + " not found");
         }
 
-        final IFieldMapping idFieldMapping = idFieldMappings.iterator().next();
         final String propertyName = idFieldMapping.getName();
 
         this.queryForObject =

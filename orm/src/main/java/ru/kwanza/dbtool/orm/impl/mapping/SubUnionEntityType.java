@@ -1,6 +1,6 @@
 package ru.kwanza.dbtool.orm.impl.mapping;
 
-import ru.kwanza.dbtool.orm.api.internal.IEntity;
+import ru.kwanza.dbtool.orm.api.internal.IEntityType;
 import ru.kwanza.dbtool.orm.api.internal.IFieldMapping;
 import ru.kwanza.dbtool.orm.api.internal.IRelationMapping;
 import ru.kwanza.toolbox.fieldhelper.Property;
@@ -13,12 +13,12 @@ import java.util.Map;
 /**
  * @author Alexander Guzanov
  */
-public class SubUnionEntity implements IEntity {
-    private IEntity entity;
+public class SubUnionEntityType implements IEntityType {
+    private IEntityType entity;
 
     private Map<String, IFieldMapping> fields = new HashMap<String, IFieldMapping>();
 
-    public SubUnionEntity(IEntity entity, UnionEntity unionEntity) {
+    public SubUnionEntityType(IEntityType entity, UnionEntityType unionEntity) {
         this.entity = entity;
         final Collection<IFieldMapping> fields1 = entity.getFields();
         for (IFieldMapping fieldMapping : fields1) {
@@ -32,8 +32,12 @@ public class SubUnionEntity implements IEntity {
 
     }
 
-    public IEntity getEntity() {
+    public IEntityType getEntity() {
         return entity;
+    }
+
+    public String getName() {
+        return entity.getName();
     }
 
     public String getTableName() {

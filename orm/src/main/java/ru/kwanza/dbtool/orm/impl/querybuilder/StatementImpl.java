@@ -105,7 +105,7 @@ public abstract class StatementImpl<T> implements IStatement<T> {
     }
 
     public <F> void selectMapList(String propertyName, final Map<F, List<T>> result, final ListProducer<T> listProducer) {
-        IFieldMapping fieldMapping = config.getRegistry().getFieldMapping(config.getEntityClass(), propertyName);
+        IFieldMapping fieldMapping = config.getRegistry().getEntityType(config.getEntityClass()).getField(propertyName);
         if (fieldMapping == null) {
             throw new IllegalArgumentException("Unknown field name!");
         }
@@ -126,7 +126,7 @@ public abstract class StatementImpl<T> implements IStatement<T> {
     }
 
     public <F> void selectMap(String propertyName, final Map<F, T> result) {
-        IFieldMapping fieldMapping = config.getRegistry().getFieldMapping(config.getEntityClass(), propertyName);
+        IFieldMapping fieldMapping = config.getRegistry().getEntityType(config.getEntityClass()).getField(propertyName);
         if (fieldMapping == null) {
             throw new IllegalArgumentException("Unknown field name!");
         }
@@ -259,7 +259,7 @@ public abstract class StatementImpl<T> implements IStatement<T> {
                     return;
                 }
 
-                //todo aguzanov get and check IEntity how to determine entityClass which to Allocate
+                //todo aguzanov get and check IEntityType how to determine entityClass which to Allocate
                 try {
                     obj = ObjectAllocator.newInstance(relationClass);
                 } catch (Exception e) {
@@ -283,7 +283,7 @@ public abstract class StatementImpl<T> implements IStatement<T> {
         }
 
         private boolean hasIdValue(JoinRelation relation, ResultSet rs, Class relationClass) throws SQLException {
-            IFieldMapping idField = config.getRegistry().getIdFields(relationClass).iterator().next();
+            IFieldMapping idField = config.getRegistry().getEntityType(relationClass).getIdField();
             if (FieldValueExtractor.getValue(rs, Column.getFullColumnName(relation, idField), idField.getProperty().getType()) == null) {
                 return false;
             }
@@ -291,7 +291,8 @@ public abstract class StatementImpl<T> implements IStatement<T> {
         }
 
         private void readAndFill(ResultSet rs, Class entityClass, JoinRelation relation, Object obj) throws SQLException {
-            for (IFieldMapping idf : config.getRegistry().getFieldMappings(entityClass)) {
+            final Collection<IFieldMapping> fields = config.getRegistry().getEntityType(entityClass).getFields();
+            for (IFieldMapping idf : fields) {
                 Object value = FieldValueExtractor.getValue(rs, Column.getFullColumnName(relation, idf), idf.getProperty().getType());
                 idf.getProperty().set(obj, value);
             }

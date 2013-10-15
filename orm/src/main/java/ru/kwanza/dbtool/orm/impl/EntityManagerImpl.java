@@ -98,14 +98,12 @@ public class EntityManagerImpl extends SpringSerializable implements IEntityMana
 
     @SuppressWarnings("unchecked")
     public <F, T> Map<F, T> readMapByKeys(Class<T> entityClass, Collection keys) {
-        Collection<IFieldMapping> idFieldMappings = mappingRegistry.getIdFields(entityClass);
-        if (idFieldMappings == null || idFieldMappings.isEmpty()) {
+        final IFieldMapping idFieldMapping = mappingRegistry.getEntityType(entityClass).getIdField();
+        if (idFieldMapping == null) {
             throw new RuntimeException("IdFieldMapping for entity class" + entityClass + " not found");
         }
 
-        String idField = idFieldMappings.iterator().next().getName();
-
-        return (Map<F, T>) operationFactory.getReadOperation(entityClass).selectMapByKeys(keys, idField);
+        return (Map<F, T>) operationFactory.getReadOperation(entityClass).selectMapByKeys(keys, idFieldMapping.getName());
     }
 
     @SuppressWarnings("unchecked")
