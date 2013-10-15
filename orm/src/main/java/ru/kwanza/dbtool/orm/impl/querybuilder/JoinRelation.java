@@ -1,6 +1,7 @@
 package ru.kwanza.dbtool.orm.impl.querybuilder;
 
 import ru.kwanza.dbtool.orm.api.Join;
+import ru.kwanza.dbtool.orm.api.internal.IEntityType;
 import ru.kwanza.dbtool.orm.api.internal.IRelationMapping;
 
 import java.util.HashMap;
@@ -12,18 +13,24 @@ import java.util.Map;
 class JoinRelation {
     private String alias;
     private Join.Type type;
+    private IEntityType entityType;
     private IRelationMapping relationMapping;
     private Map<String, JoinRelation> childs;
 
-    JoinRelation(Join.Type type, String alias, IRelationMapping relationMapping) {
+    JoinRelation(Join.Type type, IEntityType entityType,String alias, IRelationMapping relationMapping) {
         this.type = type;
         this.alias = alias;
+        this.entityType = entityType;
         this.relationMapping = relationMapping;
-
     }
 
-    JoinRelation(String alias) {
-        this.alias = alias;
+    JoinRelation(IEntityType entityType) {
+        this.entityType = entityType;
+        this.alias = entityType.getTableName();
+    }
+
+    IEntityType getEntityType() {
+        return entityType;
     }
 
     boolean isRoot() {

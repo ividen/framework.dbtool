@@ -323,7 +323,7 @@ public class EntityMappingRegistry implements IEntityMappingRegistry {
     }
 
     private void tryUpdateUnionEntityType(Class entityClass, AbstractEntityType entityType) {
-        final Class abstractEntityClass = findAbstractEntityClass(entityClass);
+        final Class abstractEntityClass = findAbstractEntityClass(entityClass.getSuperclass());
         if (abstractEntityClass != null) {
             if (!isRegisteredEntityClass(abstractEntityClass)) {
                 registerEntityClass(abstractEntityClass);

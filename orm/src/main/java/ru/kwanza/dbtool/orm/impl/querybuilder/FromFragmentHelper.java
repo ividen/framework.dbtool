@@ -14,7 +14,12 @@ class FromFragmentHelper {
 
     String createFromFragment(Parameters holder) {
         final JoinRelation rootRelations = builder.getRelationFactory().getRoot();
-        final StringBuilder fromPart = new StringBuilder(rootRelations.getAlias());
+        final StringBuilder fromPart = new StringBuilder();
+        if (rootRelations.getEntityType().getSql() != null) {
+            fromPart.append('(').append(rootRelations.getEntityType().getSql()).append(") ");
+        }
+
+        fromPart.append(rootRelations.getAlias());
 
         if (rootRelations != null) {
             processJoinRelation(fromPart, rootRelations, holder);
@@ -42,14 +47,15 @@ class FromFragmentHelper {
                     processJoinRelation(fromPart, joinRelation, holder);
                     fromPart.append(')');
                 } else {
-                    fromPart.append(builder.getRegistry().getEntityType(relationClass).getTableName()).append(' ').append(joinRelation.getAlias());
+                    fromPart.append(builder.getRegistry().getEntityType(relationClass).getTableName()).append(' ')
+                            .append(joinRelation.getAlias());
                 }
 
-                fromPart.append(" ON ").append(rootRelations.getAlias() == null
-                        ? builder.getRegistry().getEntityType(builder.getEntityClass()).getTableName()
-                        : rootRelations.getAlias()).append('.').append(joinRelation.getRelationMapping().getKeyMapping().getColumn())
-                        .append('=').append(joinRelation.getAlias()).append('.')
-                        .append(joinRelation.getRelationMapping().getRelationKeyMapping().getColumn()).append(' ');
+                fromPart.append(" ON ")
+                        .append(rootRelations.getAlias() == null ? builder.getRegistry().getEntityType(builder.getEntityClass())
+                                .getTableName() : rootRelations.getAlias()).append('.')
+                        .append(joinRelation.getRelationMapping().getKeyMapping().getColumn()).append('=').append(joinRelation.getAlias())
+                        .append('.').append(joinRelation.getRelationMapping().getRelationKeyMapping().getColumn()).append(' ');
                 if (extConditionPart != null) {
                     fromPart.append(" AND (").append(extConditionPart).append(')');
                     holder.join(joinHolder);

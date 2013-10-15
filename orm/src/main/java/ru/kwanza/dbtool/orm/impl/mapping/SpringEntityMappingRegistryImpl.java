@@ -11,6 +11,7 @@ import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.SystemPropertyUtils;
+import ru.kwanza.dbtool.orm.annotations.AbstractEntity;
 import ru.kwanza.dbtool.orm.annotations.Entity;
 import ru.kwanza.dbtool.orm.api.internal.IEntityMappingRegistry;
 import ru.kwanza.dbtool.orm.api.internal.IEntityType;
@@ -56,7 +57,7 @@ public class SpringEntityMappingRegistryImpl implements IEntityMappingRegistry {
                             log.trace(className);
                             final ClassLoader classLoader = resourcePatternResolver.getClassLoader();
                             Class<?> entityClass = classLoader.loadClass(className);
-                            if (entityClass.isAnnotationPresent(Entity.class)) {
+                            if (entityClass.isAnnotationPresent(Entity.class) || entityClass.isAnnotationPresent(AbstractEntity.class)) {
                                 delegate.registerEntityClass(entityClass);
                             }
                         }

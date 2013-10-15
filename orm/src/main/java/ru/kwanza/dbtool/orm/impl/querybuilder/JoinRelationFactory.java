@@ -1,6 +1,7 @@
 package ru.kwanza.dbtool.orm.impl.querybuilder;
 
 import ru.kwanza.dbtool.orm.api.Join;
+import ru.kwanza.dbtool.orm.api.internal.IEntityType;
 import ru.kwanza.dbtool.orm.api.internal.IRelationMapping;
 
 /**
@@ -15,7 +16,7 @@ class JoinRelationFactory {
         this.builder = builder;
         this.aliasCounter = 1;
 
-        this.root = new JoinRelation(builder.getRegistry().getEntityType(builder.getEntityClass()).getTableName());
+        this.root = new JoinRelation(builder.getRegistry().getEntityType(builder.getEntityClass()));
     }
 
     JoinRelation getRoot() {
@@ -23,7 +24,6 @@ class JoinRelationFactory {
     }
 
     JoinRelation registerRelation(JoinRelation root, Join.Type type, String propertyName) {
-
         JoinRelation joinRelation = root.getChild(propertyName);
 
         if (joinRelation != null) {
@@ -32,12 +32,14 @@ class JoinRelationFactory {
 
         Class entityClass = root.isRoot() ? builder.getEntityClass() : root.getRelationMapping().getRelationClass();
 
-        final IRelationMapping relationMapping = builder.getRegistry().getEntityType(entityClass).getRelation(propertyName);
+        final IEntityType entityType = builder.getRegistry().getEntityType(entityClass);
+        final IRelationMapping relationMapping = entityType.getRelation(propertyName);
+
         if (relationMapping == null) {
             throw new IllegalArgumentException("Wrong relation name for " + entityClass.getName() + " : " + propertyName + " !");
         }
 
-        joinRelation = new JoinRelation(type, "t" + aliasCounter++, relationMapping);
+        joinRelation = new JoinRelation(type,entityType, "t" + aliasCounter++, relationMapping);
         root.addChild(propertyName, joinRelation);
         return joinRelation;
     }

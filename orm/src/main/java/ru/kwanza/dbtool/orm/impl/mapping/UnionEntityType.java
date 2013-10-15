@@ -21,21 +21,23 @@ public class UnionEntityType extends AbstractEntityType {
     public UnionEntityType(String name, Class entityClass) {
         setName(name);
         setEntityClass(entityClass);
+        setTableName(name + "_");
     }
 
     public String getNextAlias() {
         return "f_" + (aliasCounter++);
     }
 
-    public void validate() {
-        if (getSql() != null) {
-            return;
+    @Override
+    public String getSql() {
+        if (entities.isEmpty()) {
+            return null;
         }
         for (SubUnionEntityType entity : entities) {
             entity.validate();
         }
 
-        StringBuilder sql = new StringBuilder("(SELECT ");
+        StringBuilder sql = new StringBuilder();
         StringBuilder commonFields = new StringBuilder("");
 
         for (IFieldMapping fieldMapping : getFields()) {
@@ -45,6 +47,7 @@ public class UnionEntityType extends AbstractEntityType {
         Set<String> fields = new LinkedHashSet<String>();
 
         for (int i = 0; i < entities.size(); i++) {
+            sql.append("SELECT ");
             SubUnionEntityType entity = entities.get(i);
             IEntityType baseEntity = entity.getEntity();
             sql.append(commonFields);
@@ -67,12 +70,61 @@ public class UnionEntityType extends AbstractEntityType {
             sql.append(" FROM ");
             final String entitySql = entity.getSql();
             if (entitySql != null) {
-                sql.append(entitySql).append(' ');
+                sql.append('(').append(entitySql).append(") ");
             }
 
             sql.append(entity.getTableName()).append(UNION_ALL);
         }
-        setSql(sql.delete(sql.length() - UNION_ALL.length(), sql.length()).toString());
+        return  sql.delete(sql.length() - UNION_ALL.length(), sql.length()).toString();
+    }
+
+    public void validate() {
+//        if (entities.isEmpty()) {
+//            return;
+//        }
+//        for (SubUnionEntityType entity : entities) {
+//            entity.validate();
+//        }
+//
+//        StringBuilder sql = new StringBuilder();
+//        StringBuilder commonFields = new StringBuilder("");
+//
+//        for (IFieldMapping fieldMapping : getFields()) {
+//            commonFields.append(fieldMapping.getColumn()).append(',');
+//        }
+//
+//        Set<String> fields = new LinkedHashSet<String>();
+//
+//        for (int i = 0; i < entities.size(); i++) {
+//            sql.append("SELECT ");
+//            SubUnionEntityType entity = entities.get(i);
+//            IEntityType baseEntity = entity.getEntity();
+//            sql.append(commonFields);
+//            sql.append(i).append(" ").append(CLAZZ_).append(',');
+//
+//            for (String field : fields) {
+//                sql.append("null ").append(field).append(',');
+//            }
+//
+//            for (IFieldMapping fieldMapping : entity.getFields()) {
+//                final IFieldMapping parentField = getField(fieldMapping.getName());
+//                if (parentField == null) {
+//                    sql.append(baseEntity.getField(fieldMapping.getColumn())).append(' ');
+//                    sql.append(fieldMapping.getColumn());
+//                    fields.add(fieldMapping.getColumn());
+//                }
+//            }
+//
+//            sql.deleteCharAt(sql.length() - 1);
+//            sql.append(" FROM ");
+//            final String entitySql = entity.getSql();
+//            if (entitySql != null) {
+//                sql.append(entitySql).append(' ');
+//            }
+//
+//            sql.append(entity.getTableName()).append(UNION_ALL);
+//        }
+//        setSql(sql.delete(sql.length() - UNION_ALL.length(), sql.length()).toString());
     }
 
     public boolean isAbstract() {
@@ -81,6 +133,7 @@ public class UnionEntityType extends AbstractEntityType {
 
     public void addEntity(IEntityType entity) {
         entities.add(new SubUnionEntityType(entity, this));
+        validate();
     }
 
     public static final String getClassColumnName() {
