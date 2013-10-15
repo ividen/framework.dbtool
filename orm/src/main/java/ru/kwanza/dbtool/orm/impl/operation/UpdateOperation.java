@@ -6,8 +6,8 @@ import org.springframework.jdbc.core.RowMapper;
 import ru.kwanza.dbtool.core.*;
 import ru.kwanza.dbtool.core.util.FieldValueExtractor;
 import ru.kwanza.dbtool.core.util.UpdateUtil;
-import ru.kwanza.dbtool.orm.impl.mapping.FieldMapping;
-import ru.kwanza.dbtool.orm.impl.mapping.IEntityMappingRegistry;
+import ru.kwanza.dbtool.orm.api.internal.IEntityMappingRegistry;
+import ru.kwanza.dbtool.orm.api.internal.IFieldMapping;
 import ru.kwanza.toolbox.fieldhelper.FieldHelper;
 import ru.kwanza.toolbox.fieldhelper.Property;
 
@@ -24,12 +24,12 @@ public class UpdateOperation extends Operation implements IUpdateOperation {
 
     private static final Logger log = LoggerFactory.getLogger(UpdateOperation.class);
 
-    private Collection<FieldMapping> fieldMappings;
+    private Collection<IFieldMapping> fieldMappings;
 
-    private FieldMapping idFieldMapping;
+    private IFieldMapping idFieldMapping;
     private Property idEntityField;
 
-    private FieldMapping versionFieldMapping;
+    private IFieldMapping versionFieldMapping;
     private Property versionEntityField;
 
     private boolean versionSupport;
@@ -55,7 +55,7 @@ public class UpdateOperation extends Operation implements IUpdateOperation {
     protected void initOperation() {
         this.fieldMappings = entityMappingRegistry.getFieldMappings(entityClass);
 
-        final Collection<FieldMapping> idFieldMappings = entityMappingRegistry.getIdFields(entityClass);
+        final Collection<IFieldMapping> idFieldMappings = entityMappingRegistry.getIdFields(entityClass);
 
         if (idFieldMappings == null || idFieldMappings.isEmpty()) {
             throw new RuntimeException("IdFieldMapping for entity class" + entityClass + " not found");
@@ -132,7 +132,7 @@ public class UpdateOperation extends Operation implements IUpdateOperation {
         public boolean setValues(PreparedStatement pst, Object object) throws SQLException {
             try {
                 int index = 0;
-                for (FieldMapping fieldMapping : fieldMappings) {
+                for (IFieldMapping fieldMapping : fieldMappings) {
                     final Property entityFiled = fieldMapping.getProperty();
                     FieldSetter.setValue(pst, ++index, entityFiled.getType(), entityFiled.value(object));
                 }
@@ -148,7 +148,7 @@ public class UpdateOperation extends Operation implements IUpdateOperation {
         public boolean setValues(PreparedStatement pst, Object object, Long newVersion, Long oldVersion) throws SQLException {
             try {
                 int index = 0;
-                for (FieldMapping fieldMapping : fieldMappings) {
+                for (IFieldMapping fieldMapping : fieldMappings) {
                     final Property entityFiled = fieldMapping.getProperty();
                     if (fieldMapping.getColumn().equals(versionFieldMapping.getColumn())) {
                         FieldSetter.setLong(pst, ++index, newVersion);

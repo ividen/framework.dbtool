@@ -12,8 +12,8 @@ import ru.kwanza.dbtool.core.util.FieldValueExtractor;
 import ru.kwanza.dbtool.core.util.SelectUtil;
 import ru.kwanza.dbtool.orm.api.IStatement;
 import ru.kwanza.dbtool.orm.api.ListProducer;
+import ru.kwanza.dbtool.orm.api.internal.IFieldMapping;
 import ru.kwanza.dbtool.orm.impl.ObjectAllocator;
-import ru.kwanza.dbtool.orm.impl.mapping.FieldMapping;
 import ru.kwanza.toolbox.fieldhelper.Property;
 
 import java.sql.ResultSet;
@@ -105,7 +105,7 @@ public abstract class StatementImpl<T> implements IStatement<T> {
     }
 
     public <F> void selectMapList(String propertyName, final Map<F, List<T>> result, final ListProducer<T> listProducer) {
-        FieldMapping fieldMapping = config.getRegistry().getFieldMapping(config.getEntityClass(), propertyName);
+        IFieldMapping fieldMapping = config.getRegistry().getFieldMapping(config.getEntityClass(), propertyName);
         if (fieldMapping == null) {
             throw new IllegalArgumentException("Unknown field name!");
         }
@@ -126,7 +126,7 @@ public abstract class StatementImpl<T> implements IStatement<T> {
     }
 
     public <F> void selectMap(String propertyName, final Map<F, T> result) {
-        FieldMapping fieldMapping = config.getRegistry().getFieldMapping(config.getEntityClass(), propertyName);
+        IFieldMapping fieldMapping = config.getRegistry().getFieldMapping(config.getEntityClass(), propertyName);
         if (fieldMapping == null) {
             throw new IllegalArgumentException("Unknown field name!");
         }
@@ -203,7 +203,7 @@ public abstract class StatementImpl<T> implements IStatement<T> {
     private class MapExtractor extends BaseExtractor<KeyValue<Object, T>> {
         private Property field;
 
-        private MapExtractor(FieldMapping mapping) {
+        private MapExtractor(IFieldMapping mapping) {
             this.field = mapping.getProperty();
         }
 
@@ -258,6 +258,8 @@ public abstract class StatementImpl<T> implements IStatement<T> {
                 if (!hasIdValue(relation, rs, relationClass)) {
                     return;
                 }
+
+                //todo aguzanov get and check IEntity how to determine entityClass which to Allocate
                 try {
                     obj = ObjectAllocator.newInstance(relationClass);
                 } catch (Exception e) {
@@ -281,7 +283,7 @@ public abstract class StatementImpl<T> implements IStatement<T> {
         }
 
         private boolean hasIdValue(JoinRelation relation, ResultSet rs, Class relationClass) throws SQLException {
-            FieldMapping idField = config.getRegistry().getIdFields(relationClass).iterator().next();
+            IFieldMapping idField = config.getRegistry().getIdFields(relationClass).iterator().next();
             if (FieldValueExtractor.getValue(rs, Column.getFullColumnName(relation, idField), idField.getProperty().getType()) == null) {
                 return false;
             }
@@ -289,7 +291,7 @@ public abstract class StatementImpl<T> implements IStatement<T> {
         }
 
         private void readAndFill(ResultSet rs, Class entityClass, JoinRelation relation, Object obj) throws SQLException {
-            for (FieldMapping idf : config.getRegistry().getFieldMappings(entityClass)) {
+            for (IFieldMapping idf : config.getRegistry().getFieldMappings(entityClass)) {
                 Object value = FieldValueExtractor.getValue(rs, Column.getFullColumnName(relation, idf), idf.getProperty().getType());
                 idf.getProperty().set(obj, value);
             }

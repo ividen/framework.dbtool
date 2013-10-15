@@ -1,9 +1,9 @@
 package ru.kwanza.dbtool.orm.impl.fetcher;
 
 import ru.kwanza.dbtool.orm.api.IQuery;
+import ru.kwanza.dbtool.orm.api.internal.IFieldMapping;
+import ru.kwanza.dbtool.orm.api.internal.IRelationMapping;
 import ru.kwanza.dbtool.orm.impl.fetcher.proxy.IProxy;
-import ru.kwanza.dbtool.orm.impl.mapping.FieldMapping;
-import ru.kwanza.dbtool.orm.impl.mapping.RelationMapping;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -13,17 +13,17 @@ import java.util.Set;
  * @author Alexander Guzanov
  */
 class RelationValue {
-    private FieldMapping idField;
-    private RelationMapping relationMapping;
+    private IFieldMapping idField;
+    private IRelationMapping relationMapping;
     private IQuery fetchQuery;
 
-    RelationValue(FieldMapping idField, RelationMapping relationMapping, IQuery fetchQuery) {
+    RelationValue(IFieldMapping idField, IRelationMapping relationMapping, IQuery fetchQuery) {
         this.idField = idField;
         this.relationMapping = relationMapping;
         this.fetchQuery = fetchQuery;
     }
 
-    public RelationMapping getRelationMapping() {
+    public IRelationMapping getRelationMapping() {
         return relationMapping;
     }
 

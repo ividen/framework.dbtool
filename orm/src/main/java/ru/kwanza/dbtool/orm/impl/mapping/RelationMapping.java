@@ -3,6 +3,8 @@ package ru.kwanza.dbtool.orm.impl.mapping;
 import ru.kwanza.dbtool.orm.annotations.GroupByType;
 import ru.kwanza.dbtool.orm.api.If;
 import ru.kwanza.dbtool.orm.api.Join;
+import ru.kwanza.dbtool.orm.api.internal.IFieldMapping;
+import ru.kwanza.dbtool.orm.api.internal.IRelationMapping;
 import ru.kwanza.toolbox.fieldhelper.Property;
 import ru.kwanza.toolbox.splitter.Splitter;
 
@@ -12,22 +14,23 @@ import java.util.Map;
 /**
  * @author Kiryl Karatsetski
  */
-public class RelationMapping {
+class RelationMapping implements IRelationMapping {
     private final String name;
     private final Class relationClass;
-    private final FieldMapping keyMapping;
-    private final FieldMapping relationKeyMapping;
+    private final IFieldMapping keyMapping;
+    private final IFieldMapping relationKeyMapping;
     private final Property property;
     private final If condition;
     private final Splitter groupBy;
     private final GroupByType groupByType;
     private Join[] joins = null;
 
-    public RelationMapping(String name, Class relationClass, FieldMapping keyMapping, FieldMapping relationKeyMapping, Property property) {
+    public RelationMapping(String name, Class relationClass, IFieldMapping keyMapping, IFieldMapping relationKeyMapping,
+                           Property property) {
         this(name, relationClass, keyMapping, relationKeyMapping, property, null, null, null, null);
     }
 
-    public RelationMapping(String name, Class relationClass, FieldMapping keyMapping, FieldMapping relationKeyMapping, Property property,
+    public RelationMapping(String name, Class relationClass, IFieldMapping keyMapping, IFieldMapping relationKeyMapping, Property property,
                            If condition, Property[] groupBy, GroupByType groupByType, Join[] joins) {
         this.name = name;
         this.relationClass = relationClass;
@@ -44,7 +47,7 @@ public class RelationMapping {
         return joins;
     }
 
-    public FieldMapping getKeyMapping() {
+    public IFieldMapping getKeyMapping() {
         return keyMapping;
     }
 
@@ -52,7 +55,7 @@ public class RelationMapping {
         return relationClass;
     }
 
-    public FieldMapping getRelationKeyMapping() {
+    public IFieldMapping getRelationKeyMapping() {
         return relationKeyMapping;
     }
 

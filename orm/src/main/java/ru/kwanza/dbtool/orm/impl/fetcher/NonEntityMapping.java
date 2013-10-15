@@ -3,9 +3,9 @@ package ru.kwanza.dbtool.orm.impl.fetcher;
 import ru.kwanza.dbtool.orm.annotations.Association;
 import ru.kwanza.dbtool.orm.annotations.ManyToOne;
 import ru.kwanza.dbtool.orm.annotations.OneToMany;
+import ru.kwanza.dbtool.orm.api.internal.IRelationMapping;
 import ru.kwanza.dbtool.orm.impl.mapping.EntityMappingHelper;
 import ru.kwanza.dbtool.orm.impl.mapping.EntityMappingRegistry;
-import ru.kwanza.dbtool.orm.impl.mapping.RelationMapping;
 
 import javax.annotation.Resource;
 import java.lang.reflect.AnnotatedElement;
@@ -21,12 +21,12 @@ class NonEntityMapping {
     @Resource(name = "dbtool.IEntityMappingRegistry")
     private EntityMappingRegistry registry;
 
-    private ConcurrentMap<Class, Map<String, RelationMapping>> cache = new ConcurrentHashMap<Class, Map<String, RelationMapping>>();
+    private ConcurrentMap<Class, Map<String, IRelationMapping>> cache = new ConcurrentHashMap<Class, Map<String, IRelationMapping>>();
 
-    public Map<String, RelationMapping> get(Class entityClass) {
-        Map<String, RelationMapping> mappings = cache.get(entityClass);
+    public Map<String, IRelationMapping> get(Class entityClass) {
+        Map<String, IRelationMapping> mappings = cache.get(entityClass);
         if (mappings == null) {
-            mappings = new HashMap<String, RelationMapping>();
+            mappings = new HashMap<String, IRelationMapping>();
             parseClass(entityClass, mappings);
             if (null != cache.putIfAbsent(entityClass, mappings)) {
                 mappings = cache.get(entityClass);
@@ -36,7 +36,7 @@ class NonEntityMapping {
         return mappings;
     }
 
-    private void parseClass(Class aClass, Map<String, RelationMapping> mappings) {
+    private void parseClass(Class aClass, Map<String, IRelationMapping> mappings) {
         if (aClass == Object.class) {
             return;
         }
@@ -47,7 +47,7 @@ class NonEntityMapping {
         parseClass(aClass.getSuperclass(), mappings);
     }
 
-    private void processElements(Class aClass, Map<String, RelationMapping> mappings, AnnotatedElement[] elements) {
+    private void processElements(Class aClass, Map<String, IRelationMapping> mappings, AnnotatedElement[] elements) {
         for (AnnotatedElement field : elements) {
             if (field.isAnnotationPresent(ManyToOne.class)) {
                 processManyToOne(aClass, mappings, field);
@@ -60,13 +60,13 @@ class NonEntityMapping {
         }
     }
 
-    private void processAssociation(Class aClass, Map<String, RelationMapping> mappings, AnnotatedElement annotatedElement) {
-        final RelationMapping relationMapping = registry.parseAssociation(aClass, annotatedElement);
+    private void processAssociation(Class aClass, Map<String, IRelationMapping> mappings, AnnotatedElement annotatedElement) {
+        final IRelationMapping relationMapping = registry.parseAssociation(aClass, annotatedElement);
         mappings.put(relationMapping.getName(), relationMapping);
     }
 
-    private void processManyToOne(Class aClass, Map<String, RelationMapping> mappings, AnnotatedElement annotatedElement) {
-        final RelationMapping relationMapping = registry.parseManyToOne(aClass, annotatedElement);
+    private void processManyToOne(Class aClass, Map<String, IRelationMapping> mappings, AnnotatedElement annotatedElement) {
+        final IRelationMapping relationMapping = registry.parseManyToOne(aClass, annotatedElement);
         mappings.put(relationMapping.getName(), relationMapping);
     }
 }

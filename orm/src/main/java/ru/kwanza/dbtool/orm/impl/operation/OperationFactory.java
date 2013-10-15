@@ -2,7 +2,7 @@ package ru.kwanza.dbtool.orm.impl.operation;
 
 import ru.kwanza.dbtool.core.DBTool;
 import ru.kwanza.dbtool.core.VersionGenerator;
-import ru.kwanza.dbtool.orm.impl.mapping.IEntityMappingRegistry;
+import ru.kwanza.dbtool.orm.api.internal.IEntityMappingRegistry;
 
 import javax.annotation.Resource;
 import java.util.Map;

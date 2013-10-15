@@ -3,8 +3,8 @@ package ru.kwanza.dbtool.orm.impl.operation;
 import ru.kwanza.dbtool.core.DBTool;
 import ru.kwanza.dbtool.orm.api.IQuery;
 import ru.kwanza.dbtool.orm.api.If;
-import ru.kwanza.dbtool.orm.impl.mapping.FieldMapping;
-import ru.kwanza.dbtool.orm.impl.mapping.IEntityMappingRegistry;
+import ru.kwanza.dbtool.orm.api.internal.IEntityMappingRegistry;
+import ru.kwanza.dbtool.orm.api.internal.IFieldMapping;
 import ru.kwanza.dbtool.orm.impl.querybuilder.QueryBuilderFactory;
 
 import java.util.Collection;
@@ -25,12 +25,12 @@ public class ReadOperation extends Operation implements IReadOperation {
 
     @Override
     protected void initOperation() {
-        final Collection<FieldMapping> idFieldMappings = entityMappingRegistry.getIdFields(entityClass);
+        final Collection<IFieldMapping> idFieldMappings = entityMappingRegistry.getIdFields(entityClass);
         if (idFieldMappings == null || idFieldMappings.isEmpty()) {
             throw new RuntimeException("IdFieldMapping for entity class" + entityClass + " not found");
         }
 
-        final FieldMapping idFieldMapping = idFieldMappings.iterator().next();
+        final IFieldMapping idFieldMapping = idFieldMappings.iterator().next();
         final String propertyName = idFieldMapping.getName();
 
         this.queryForObject =

@@ -1,7 +1,7 @@
 package ru.kwanza.dbtool.orm.impl.querybuilder;
 
 import ru.kwanza.dbtool.orm.api.Join;
-import ru.kwanza.dbtool.orm.impl.mapping.RelationMapping;
+import ru.kwanza.dbtool.orm.api.internal.IRelationMapping;
 
 /**
  * @author Alexander Guzanov
@@ -32,7 +32,7 @@ class JoinRelationFactory {
 
         Class entityClass = root.isRoot() ? builder.getEntityClass() : root.getRelationMapping().getRelationClass();
 
-        final RelationMapping relationMapping = builder.getRegistry().getRelationMapping(entityClass, propertyName);
+        final IRelationMapping relationMapping = builder.getRegistry().getRelationMapping(entityClass, propertyName);
         if (relationMapping == null) {
             throw new IllegalArgumentException("Wrong relation name for " + entityClass.getName() + " : " + propertyName + " !");
         }

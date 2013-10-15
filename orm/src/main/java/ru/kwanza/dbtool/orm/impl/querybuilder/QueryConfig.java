@@ -1,7 +1,7 @@
 package ru.kwanza.dbtool.orm.impl.querybuilder;
 
 import ru.kwanza.dbtool.core.DBTool;
-import ru.kwanza.dbtool.orm.impl.mapping.IEntityMappingRegistry;
+import ru.kwanza.dbtool.orm.api.internal.IEntityMappingRegistry;
 
 /**
  * @author Alexander Guzanov

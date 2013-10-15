@@ -7,17 +7,11 @@ import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
- * Описывает взаимосвязь между java-классом и таблицой в базе данных
- *
  * @author Alexander Guzanov
  */
+
 @Retention(RUNTIME)
 @Target(TYPE)
-public @interface Entity {
-
+public @interface AbstractEntity {
     String name();
-
-    String sql() default "";
-
-    String table();
 }

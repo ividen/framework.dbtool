@@ -4,7 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.kwanza.dbtool.core.DBTool;
 import ru.kwanza.dbtool.orm.api.*;
-import ru.kwanza.dbtool.orm.impl.mapping.IEntityMappingRegistry;
+import ru.kwanza.dbtool.orm.api.internal.IEntityMappingRegistry;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -113,7 +113,7 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
     private void processJoin(JoinRelation root, Join joinClause) {
         JoinRelation joinRelation = relationFactory.registerRelation(root, joinClause.getType(), joinClause.getPropertyName());
 
-        if (joinClause != null && joinClause.getSubJoins()!=null) {
+        if (joinClause != null && joinClause.getSubJoins() != null) {
             for (Join join : joinClause.getSubJoins()) {
                 processJoin(joinRelation, join);
             }

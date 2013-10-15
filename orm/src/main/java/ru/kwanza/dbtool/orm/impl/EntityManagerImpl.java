@@ -7,10 +7,10 @@ import ru.kwanza.dbtool.orm.api.IEntityBatcher;
 import ru.kwanza.dbtool.orm.api.IEntityManager;
 import ru.kwanza.dbtool.orm.api.IFiltering;
 import ru.kwanza.dbtool.orm.api.IQueryBuilder;
+import ru.kwanza.dbtool.orm.api.internal.IFieldMapping;
 import ru.kwanza.dbtool.orm.impl.fetcher.Fetcher;
 import ru.kwanza.dbtool.orm.impl.filtering.FilteringImpl;
-import ru.kwanza.dbtool.orm.impl.mapping.FieldMapping;
-import ru.kwanza.dbtool.orm.impl.mapping.IEntityMappingRegistry;
+import ru.kwanza.dbtool.orm.api.internal.IEntityMappingRegistry;
 import ru.kwanza.dbtool.orm.impl.operation.OperationFactory;
 import ru.kwanza.dbtool.orm.impl.querybuilder.QueryBuilderFactory;
 import ru.kwanza.toolbox.SpringSerializable;
@@ -98,7 +98,7 @@ public class EntityManagerImpl extends SpringSerializable implements IEntityMana
 
     @SuppressWarnings("unchecked")
     public <F, T> Map<F, T> readMapByKeys(Class<T> entityClass, Collection keys) {
-        Collection<FieldMapping> idFieldMappings = mappingRegistry.getIdFields(entityClass);
+        Collection<IFieldMapping> idFieldMappings = mappingRegistry.getIdFields(entityClass);
         if (idFieldMappings == null || idFieldMappings.isEmpty()) {
             throw new RuntimeException("IdFieldMapping for entity class" + entityClass + " not found");
         }

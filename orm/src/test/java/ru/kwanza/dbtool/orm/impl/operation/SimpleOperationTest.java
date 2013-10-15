@@ -13,7 +13,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
 import ru.kwanza.dbtool.core.UpdateException;
 import ru.kwanza.dbtool.orm.api.IEntityManager;
-import ru.kwanza.dbtool.orm.impl.mapping.IEntityMappingRegistry;
+import ru.kwanza.dbtool.orm.api.internal.IEntityMappingRegistry;
 import ru.kwanza.dbtool.orm.impl.mapping.entities.Agent;
 
 import javax.annotation.Resource;

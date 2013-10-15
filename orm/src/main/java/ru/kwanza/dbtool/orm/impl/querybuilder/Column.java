@@ -1,20 +1,20 @@
 package ru.kwanza.dbtool.orm.impl.querybuilder;
 
-import ru.kwanza.dbtool.orm.impl.mapping.FieldMapping;
+import ru.kwanza.dbtool.orm.api.internal.IFieldMapping;
 
 /**
  * @author Alexander Guzanov
  */
 class Column {
     private JoinRelation relation;
-    private FieldMapping fieldMapping;
+    private IFieldMapping fieldMapping;
 
-    Column(JoinRelation relation, FieldMapping fieldMapping) {
+    Column(JoinRelation relation, IFieldMapping fieldMapping) {
         this.relation = relation;
         this.fieldMapping = fieldMapping;
     }
 
-    static String getFullColumnName(JoinRelation relation, FieldMapping fieldMapping) {
+    static String getFullColumnName(JoinRelation relation, IFieldMapping fieldMapping) {
         if (relation.isRoot() && relation.getAllChilds() == null) {
             return fieldMapping.getColumn();
         }

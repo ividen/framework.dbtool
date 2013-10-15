@@ -7,8 +7,8 @@ import ru.kwanza.dbtool.core.FieldSetter;
 import ru.kwanza.dbtool.core.UpdateException;
 import ru.kwanza.dbtool.core.UpdateSetter;
 import ru.kwanza.dbtool.core.util.UpdateUtil;
-import ru.kwanza.dbtool.orm.impl.mapping.FieldMapping;
-import ru.kwanza.dbtool.orm.impl.mapping.IEntityMappingRegistry;
+import ru.kwanza.dbtool.orm.api.internal.IEntityMappingRegistry;
+import ru.kwanza.dbtool.orm.api.internal.IFieldMapping;
 import ru.kwanza.toolbox.fieldhelper.Property;
 
 import java.sql.PreparedStatement;
@@ -36,13 +36,13 @@ public class DeleteOperation extends Operation implements IDeleteOperation {
 
     @Override
     protected void initOperation() {
-        final Collection<FieldMapping> idFieldMappings = entityMappingRegistry.getIdFields(entityClass);
+        final Collection<IFieldMapping> idFieldMappings = entityMappingRegistry.getIdFields(entityClass);
 
         if (idFieldMappings == null || idFieldMappings.isEmpty()) {
             throw new RuntimeException("IdFieldMapping for entity class" + entityClass + " not found");
         }
 
-        final FieldMapping idFieldMapping = idFieldMappings.iterator().next();
+        final IFieldMapping idFieldMapping = idFieldMappings.iterator().next();
         this.idEntityFiled = idFieldMapping.getProperty();
 
         final String tableName = entityMappingRegistry.getTableName(entityClass);

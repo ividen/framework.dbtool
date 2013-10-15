@@ -1,6 +1,6 @@
 package ru.kwanza.dbtool.orm.impl.querybuilder;
 
-import ru.kwanza.dbtool.orm.impl.mapping.FieldMapping;
+import ru.kwanza.dbtool.orm.api.internal.IFieldMapping;
 
 import java.util.Collection;
 
@@ -24,11 +24,11 @@ class FieldFragmentHelper {
     }
 
     private void processFields(String alias, JoinRelation root, StringBuilder result) {
-        Collection<FieldMapping> fields = root.getRelationMapping() == null
+        Collection<IFieldMapping> fields = root.getRelationMapping() == null
                 ? builder.getRegistry().getFieldMappings(builder.getEntityClass())
                 : builder.getRegistry().getFieldMappings(root.getRelationMapping().getRelationClass());
         if (fields != null) {
-            for (FieldMapping fm : fields) {
+            for (IFieldMapping fm : fields) {
                 if (alias != null) {
                     result.append(alias).append('.').append(fm.getColumn()).append(' ').append(alias).append('_').append(fm.getColumn())
                             .append(",");

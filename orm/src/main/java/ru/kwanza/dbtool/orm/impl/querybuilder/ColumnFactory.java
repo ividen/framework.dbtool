@@ -1,7 +1,7 @@
 package ru.kwanza.dbtool.orm.impl.querybuilder;
 
 import ru.kwanza.dbtool.orm.api.Join;
-import ru.kwanza.dbtool.orm.impl.mapping.FieldMapping;
+import ru.kwanza.dbtool.orm.api.internal.IFieldMapping;
 
 import java.util.StringTokenizer;
 
@@ -31,7 +31,7 @@ class ColumnFactory {
             }
         }
 
-        final FieldMapping fieldMapping = builder.getRegistry().getFieldMapping(entityClass, propertyName);
+        final IFieldMapping fieldMapping = builder.getRegistry().getFieldMapping(entityClass, propertyName);
         if (fieldMapping == null) {
             throw new IllegalArgumentException("Unknown field " + propertyName + " in " + entityClass.getName() + "!");
         }

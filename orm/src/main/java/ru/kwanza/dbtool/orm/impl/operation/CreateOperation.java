@@ -7,8 +7,8 @@ import ru.kwanza.dbtool.core.FieldSetter;
 import ru.kwanza.dbtool.core.UpdateException;
 import ru.kwanza.dbtool.core.UpdateSetter;
 import ru.kwanza.dbtool.core.util.UpdateUtil;
-import ru.kwanza.dbtool.orm.impl.mapping.FieldMapping;
-import ru.kwanza.dbtool.orm.impl.mapping.IEntityMappingRegistry;
+import ru.kwanza.dbtool.orm.api.internal.IEntityMappingRegistry;
+import ru.kwanza.dbtool.orm.api.internal.IFieldMapping;
 import ru.kwanza.toolbox.fieldhelper.Property;
 
 import java.sql.PreparedStatement;
@@ -23,9 +23,9 @@ public class CreateOperation extends Operation implements ICreateOperation {
 
     private static final Logger log = LoggerFactory.getLogger(CreateOperation.class);
 
-    private Collection<FieldMapping> fieldMappings;
+    private Collection<IFieldMapping> fieldMappings;
 
-    private FieldMapping versionFieldMapping;
+    private IFieldMapping versionFieldMapping;
 
     private String createQuery;
 
@@ -80,7 +80,7 @@ public class CreateOperation extends Operation implements ICreateOperation {
         public boolean setValues(PreparedStatement pst, Object object) throws SQLException {
             try {
                 int index = 0;
-                for (FieldMapping fieldMapping : fieldMappings) {
+                for (IFieldMapping fieldMapping : fieldMappings) {
                     final Property entityFiled = fieldMapping.getProperty();
                     if (versionFieldMapping != null && fieldMapping.getColumn().equals(versionFieldMapping.getColumn())) {
                         entityFiled.set(object, 1L);

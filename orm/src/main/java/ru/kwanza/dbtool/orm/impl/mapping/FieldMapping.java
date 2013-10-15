@@ -1,11 +1,12 @@
 package ru.kwanza.dbtool.orm.impl.mapping;
 
+import ru.kwanza.dbtool.orm.api.internal.IFieldMapping;
 import ru.kwanza.toolbox.fieldhelper.Property;
 
 /**
  * @author Kiryl Karatsetski
  */
-public class FieldMapping {
+class FieldMapping implements IFieldMapping {
     private String name;
     private String column;
     public int type;

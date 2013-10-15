@@ -2,7 +2,7 @@ package ru.kwanza.dbtool.orm.impl.querybuilder;
 
 import ru.kwanza.dbtool.core.DBTool;
 import ru.kwanza.dbtool.orm.api.IQueryBuilder;
-import ru.kwanza.dbtool.orm.impl.mapping.IEntityMappingRegistry;
+import ru.kwanza.dbtool.orm.api.internal.IEntityMappingRegistry;
 import ru.kwanza.dbtool.orm.impl.querybuilder.db.mssql.MSSQLQueryBuilder;
 import ru.kwanza.dbtool.orm.impl.querybuilder.db.mysql.MySQLQueryBuilder;
 import ru.kwanza.dbtool.orm.impl.querybuilder.db.oracle.OracleQueryBuilder;
