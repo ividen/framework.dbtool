@@ -31,9 +31,9 @@ public class SpringEntityMappingRegistryImpl implements IEntityMappingRegistry {
     private ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
     private MetadataReaderFactory metadataReaderFactory = new CachingMetadataReaderFactory(resourcePatternResolver);
 
-    private IEntityMappingRegistry delegate;
+    private EntityMappingRegistry delegate;
 
-    public SpringEntityMappingRegistryImpl(IEntityMappingRegistry delegate, String[] basePackages) {
+    public SpringEntityMappingRegistryImpl(EntityMappingRegistry delegate, String[] basePackages) {
         this.delegate = delegate;
         for (String basePackage : basePackages) {
             scanPackage(basePackage);

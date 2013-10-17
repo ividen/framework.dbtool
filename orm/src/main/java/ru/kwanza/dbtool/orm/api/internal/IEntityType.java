@@ -13,8 +13,6 @@ public interface IEntityType<T> {
 
     String getSql();
 
-    void validate();
-
     Class<T> getEntityClass();
 
     boolean isAbstract();
