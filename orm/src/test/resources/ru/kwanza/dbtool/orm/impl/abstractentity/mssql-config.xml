@@ -21,7 +21,7 @@
     <dbtool-orm:entityMapping scan-package="ru.kwanza.dbtool.orm.impl.abstractentity"/>
 
 
-    <!--<bean class="ru.kwanza.dbtool.orm.impl.querybuilder.QueryTest$InitDB"/>-->
+    <bean class="ru.kwanza.dbtool.orm.impl.querybuilder.QueryTest$InitDB"/>
     <bean id="dataSource" destroy-method="close" class="org.apache.commons.dbcp.BasicDataSource">
         <property name="driverClassName" value="${jdbc.driverClass}"/>
         <property name="url" value="${jdbc.connectionUrl}"/>

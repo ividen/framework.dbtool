@@ -1,7 +1,10 @@
 package ru.kwanza.dbtool.orm.impl.abstractentity;
 
+import org.springframework.test.context.ContextConfiguration;
+
 /**
  * @author Alexander Guzanov
  */
-public class PostgeSQLTestAbstractEntity {
+@ContextConfiguration(locations = "postgresql-config.xml")
+public class PostgeSQLTestAbstractEntity extends TestAbstractEntity {
 }
