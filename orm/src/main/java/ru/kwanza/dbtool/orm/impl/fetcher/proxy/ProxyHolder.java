@@ -21,7 +21,7 @@ public class ProxyHolder implements Serializable {
     public ProxyHolder(Class clazz, IProxy proxy, ProxyCallback callback) throws Exception {
         try {
             this.clazz = clazz;
-            this.data = ProxyEntry.getDelegate(proxy);
+            this.data = Proxy.getDelegate(proxy);
             this.fetcher = callback.getFetcher();
             this.holders = callback.getHolders();
             this.holderClass = callback.getHolderClass();
@@ -37,7 +37,7 @@ public class ProxyHolder implements Serializable {
             final ProxyFactory factory = fetcher.getProxyFactory();
             final Object proxy =
                     factory.newInstance(clazz, new ProxyCallback(fetcher, holderClass, holders, relationClass, relationProperty));
-            ProxyEntry.setDelegate(proxy, data);
+            Proxy.setDelegate(proxy, data);
             return proxy;
         } catch (Exception e) {
             throw new RuntimeException(e);

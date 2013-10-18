@@ -104,4 +104,6 @@ public abstract class AbstractEntityType implements IEntityType {
     public void addRelation(IRelationMapping relation) {
         relations.put(relation.getName(), relation);
     }
+
+
 }

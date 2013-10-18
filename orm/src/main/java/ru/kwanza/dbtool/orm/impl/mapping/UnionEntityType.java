@@ -3,10 +3,7 @@ package ru.kwanza.dbtool.orm.impl.mapping;
 import ru.kwanza.dbtool.orm.api.internal.IEntityType;
 import ru.kwanza.dbtool.orm.api.internal.IFieldMapping;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author Alexander Guzanov
@@ -18,6 +15,8 @@ public class UnionEntityType extends AbstractEntityType {
 
     private List<IEntityType> entityTypes = new ArrayList<IEntityType>();
     private List<SubUnionEntityType> subUnionEntityTypes;
+    private Map<String,IFieldMapping> allFields = new HashMap<String, IFieldMapping>();
+    private int alias;
 
     public UnionEntityType(String name, Class entityClass) {
         setName(name);
@@ -49,6 +48,10 @@ public class UnionEntityType extends AbstractEntityType {
             addField(CLAZZ_FIELD);
             prepareSql();
         }
+    }
+
+    public static FieldMapping getClazzField() {
+        return CLAZZ_FIELD;
     }
 
     private void prepareSql() {
@@ -105,10 +108,34 @@ public class UnionEntityType extends AbstractEntityType {
             SubUnionEntityType subUnionEntityType = new SubUnionEntityType(entityType, this);
             subUnionEntityTypes.add(subUnionEntityType);
             for (IFieldMapping field : subUnionEntityType.getSubFields()) {
-                addField(field);
+                allFields.put(field.getName(),field);
             }
 
         }
+    }
+
+    public Collection<IFieldMapping> getCommonFields(){
+        return super.getFields();
+    }
+
+    public IFieldMapping getCommonField(String name){
+        return  super.getField(name);
+    }
+
+    @Override
+    public IFieldMapping getField(String name) {
+        return allFields.get(name);
+    }
+
+    @Override
+    public Collection<IFieldMapping> getFields() {
+        return Collections.unmodifiableCollection(allFields.values());
+    }
+
+    @Override
+    public void addField(IFieldMapping field) {
+        super.addField(field);
+        allFields.put(field.getName(),field);
     }
 
     public boolean isAbstract() {
@@ -129,5 +156,9 @@ public class UnionEntityType extends AbstractEntityType {
 
     public List<IEntityType> getEntityTypes() {
         return Collections.unmodifiableList(entityTypes);
+    }
+
+    public int nextFieldAlias() {
+        return alias++;
     }
 }

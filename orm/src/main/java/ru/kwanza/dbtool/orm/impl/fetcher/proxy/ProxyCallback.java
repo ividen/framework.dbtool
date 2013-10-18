@@ -99,7 +99,7 @@ public class ProxyCallback implements MethodInterceptor, Serializable {
         if (!safeMode.get()) {
             load();
 
-            final Object delegate = ProxyEntry.getDelegate(obj);
+            final Object delegate = Proxy.getDelegate(obj);
             if (delegate != null) {
                 return proxy.invoke(delegate, args);
             } else {

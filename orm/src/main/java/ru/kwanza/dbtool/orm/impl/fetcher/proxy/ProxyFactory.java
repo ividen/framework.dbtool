@@ -20,18 +20,18 @@ import java.util.concurrent.ConcurrentMap;
  * @author Alexander Guzanov
  */
 public class ProxyFactory extends SpringSerializable {
-    private ConcurrentMap<Class, ProxyEntry> generatedClasses = new ConcurrentHashMap<Class, ProxyEntry>();
+    private ConcurrentMap<Class, Proxy> generatedClasses = new ConcurrentHashMap<Class, Proxy>();
 
     public <T> T newInstance(final Class<T> clazz, ProxyCallback callback)
             throws InvocationTargetException, IllegalAccessException, InstantiationException, NoSuchFieldException, NoSuchMethodException {
 
-        ProxyEntry<T> result = get(clazz);
+        Proxy<T> result = get(clazz);
 
         return result.newInstance(callback);
     }
 
-    public <T> ProxyEntry<T> get(final Class<T> clazz) {
-        ProxyEntry<T> result = generatedClasses.get(clazz);
+    public <T> Proxy<T> get(final Class<T> clazz) {
+        Proxy<T> result = generatedClasses.get(clazz);
 
         if (result == null) {
             Enhancer enhancer = new Enhancer();
@@ -39,7 +39,7 @@ public class ProxyFactory extends SpringSerializable {
                 @Override
                 protected ClassGenerator transform(ClassGenerator cg) throws Exception {
                     return new TransformingClassGenerator(cg, new ClassTransformerChain(new ClassTransformer[]{
-                            new AddPropertyTransformer(new String[]{ProxyEntry.DELEGATE}, new Type[]{Type.getType(clazz)}),
+                            new AddPropertyTransformer(new String[]{Proxy.DELEGATE}, new Type[]{Type.getType(clazz)}),
                             new FieldProviderTransformer()}));
                 }
             });
@@ -53,7 +53,7 @@ public class ProxyFactory extends SpringSerializable {
                 enhancer.setInterfaces(new Class[]{IProxy.class, Serializable.class, clazz});
             }
 
-            result = new ProxyEntry(enhancer.createClass());
+            result = new Proxy(enhancer.createClass());
             if (null != generatedClasses.putIfAbsent(clazz, result)) {
                 result = generatedClasses.get(result);
             }

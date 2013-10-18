@@ -1,6 +1,7 @@
 package ru.kwanza.dbtool.orm.impl.querybuilder;
 
 import ru.kwanza.dbtool.orm.api.Join;
+import ru.kwanza.dbtool.orm.api.internal.IEntityType;
 
 /**
  * @author Alexander Guzanov
@@ -41,13 +42,14 @@ class FromFragmentHelper {
                                     joinHolder);
                 }
                 fromPart.append(joinRelation.getType() == Join.Type.LEFT ? " LEFT JOIN " : " INNER JOIN ");
+                final IEntityType entityType = builder.getRegistry().getEntityType(relationClass);
                 if (joinRelation.hasChilds()) {
-                    fromPart.append('(').append(builder.getRegistry().getEntityType(relationClass).getTableName()).append(' ')
+                    fromPart.append('(').append(getTableName(entityType)).append(' ')
                             .append(joinRelation.getAlias());
                     processJoinRelation(fromPart, joinRelation, holder);
                     fromPart.append(')');
                 } else {
-                    fromPart.append(builder.getRegistry().getEntityType(relationClass).getTableName()).append(' ')
+                    fromPart.append(getTableName(entityType)).append(' ')
                             .append(joinRelation.getAlias());
                 }
 
@@ -62,5 +64,10 @@ class FromFragmentHelper {
                 }
             }
         }
+    }
+
+    private String getTableName(IEntityType entityType) {
+        final String sql = entityType.getSql();
+        return sql==null? entityType.getTableName(): "("+sql+") ";
     }
 }

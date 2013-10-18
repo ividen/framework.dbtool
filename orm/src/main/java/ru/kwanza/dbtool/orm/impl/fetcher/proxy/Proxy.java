@@ -10,18 +10,18 @@ import java.lang.reflect.InvocationTargetException;
 /**
  * @author Alexander Guzanov
  */
-public class ProxyEntry<T> {
+public class Proxy<T> {
     public static final String DELEGATE = "delegate";
     private static final String CGLIB_$_CONSTRUCTED = "CGLIB$CONSTRUCTED";
     private static final String DELEGATE_FIELD = "$cglib_prop_" + DELEGATE;
     private Class<T> theClass;
 
-    public ProxyEntry(Class<T> theClass) {
+    Proxy(Class<T> theClass) {
 
         this.theClass = theClass;
     }
 
-    public T newInstance(ProxyCallback loader) throws InvocationTargetException, IllegalAccessException {
+    T newInstance(ProxyCallback loader) throws InvocationTargetException, IllegalAccessException {
         T result = ObjectAllocator.newInstance(theClass);
         ((Factory) result).setCallbacks(new MethodInterceptor[]{loader});
         ((FieldProvider) result).setField(CGLIB_$_CONSTRUCTED, true);
@@ -29,7 +29,11 @@ public class ProxyEntry<T> {
         return result;
     }
 
-    public static <T> T getDelegate(T object) {
+    public static boolean isProxy(Object object) {
+        return (object instanceof IProxy) && (object instanceof FieldProvider);
+    }
+
+    public static <T> T getDelegate(Object object) {
         return (T) ((FieldProvider) object).getField(DELEGATE_FIELD);
     }
 

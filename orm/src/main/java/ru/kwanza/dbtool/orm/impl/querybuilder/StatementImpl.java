@@ -12,8 +12,10 @@ import ru.kwanza.dbtool.core.util.FieldValueExtractor;
 import ru.kwanza.dbtool.core.util.SelectUtil;
 import ru.kwanza.dbtool.orm.api.IStatement;
 import ru.kwanza.dbtool.orm.api.ListProducer;
+import ru.kwanza.dbtool.orm.api.internal.IEntityType;
 import ru.kwanza.dbtool.orm.api.internal.IFieldMapping;
 import ru.kwanza.dbtool.orm.impl.ObjectAllocator;
+import ru.kwanza.dbtool.orm.impl.mapping.UnionEntityType;
 import ru.kwanza.toolbox.fieldhelper.Property;
 
 import java.sql.ResultSet;
@@ -230,13 +232,9 @@ public abstract class StatementImpl<T> implements IStatement<T> {
 
             while (rs.next()) {
                 T result;
-                try {
-                    result = ObjectAllocator.newInstance(config.getEntityClass());
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-
-                readAndFill(rs, config.getEntityClass(), config.getRootRelation(), result);
+                final IEntityType entityType = getEntityType(config.getRootRelation(), rs, config.getEntityClass());
+                result = (T) createObject(entityType);
+                readAndFill(rs, entityType.getFields(), config.getRootRelation(), result);
                 readRelation(result, config.getRootRelation(), rs);
 
                 objects.add(getValue(result));
@@ -259,14 +257,11 @@ public abstract class StatementImpl<T> implements IStatement<T> {
                     return;
                 }
 
-                //todo aguzanov get and check IEntityType how to determine entityClass which to Allocate
-                try {
-                    obj = ObjectAllocator.newInstance(relationClass);
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
+                IEntityType entityType = getEntityType(relation, rs, relationClass);
 
-                readAndFill(rs, relationClass, relation, obj);
+                obj = createObject(entityType);
+
+                readAndFill(rs, entityType.getFields(), relation, obj);
             } else {
                 obj = parentObj;
             }
@@ -282,6 +277,26 @@ public abstract class StatementImpl<T> implements IStatement<T> {
             }
         }
 
+        private Object createObject(IEntityType entityType) {
+            Object obj;
+            try {
+                obj = ObjectAllocator.newInstance(entityType.getEntityClass());
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            return obj;
+        }
+
+        private IEntityType getEntityType(JoinRelation relation, ResultSet rs, Class relationClass) throws SQLException {
+            IEntityType entityType = config.getRegistry().getEntityType(relationClass);
+            if (entityType instanceof UnionEntityType) {
+
+                final UnionEntityType unionEntityType = (UnionEntityType) entityType;
+                entityType = unionEntityType.getEntity(rs.getInt(Column.getFullColumnName(relation, UnionEntityType.getClazzField())));
+            }
+            return entityType;
+        }
+
         private boolean hasIdValue(JoinRelation relation, ResultSet rs, Class relationClass) throws SQLException {
             IFieldMapping idField = config.getRegistry().getEntityType(relationClass).getIdField();
             if (FieldValueExtractor.getValue(rs, Column.getFullColumnName(relation, idField), idField.getProperty().getType()) == null) {
@@ -290,8 +305,7 @@ public abstract class StatementImpl<T> implements IStatement<T> {
             return true;
         }
 
-        private void readAndFill(ResultSet rs, Class entityClass, JoinRelation relation, Object obj) throws SQLException {
-            final Collection<IFieldMapping> fields = config.getRegistry().getEntityType(entityClass).getFields();
+        private void readAndFill(ResultSet rs, Collection<IFieldMapping> fields, JoinRelation relation, Object obj) throws SQLException {
             for (IFieldMapping idf : fields) {
                 Object value = FieldValueExtractor.getValue(rs, Column.getFullColumnName(relation, idf), idf.getProperty().getType());
                 idf.getProperty().set(obj, value);
