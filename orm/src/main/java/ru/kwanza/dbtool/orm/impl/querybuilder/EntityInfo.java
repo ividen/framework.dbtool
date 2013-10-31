@@ -10,21 +10,21 @@ import java.util.Map;
 /**
  * @author Alexander Guzanov
  */
-class JoinRelation {
+class EntityInfo {
     private String alias;
-    private Join.Type type;
+    private Join.Type joinType;
     private IEntityType entityType;
     private IRelationMapping relationMapping;
-    private Map<String, JoinRelation> childs;
+    private Map<String, EntityInfo> childs;
 
-    JoinRelation(Join.Type type, IEntityType entityType,String alias, IRelationMapping relationMapping) {
-        this.type = type;
+    EntityInfo(Join.Type joinType, IEntityType entityType, String alias, IRelationMapping relationMapping) {
+        this.joinType = joinType;
         this.alias = alias;
         this.entityType = entityType;
         this.relationMapping = relationMapping;
     }
 
-    JoinRelation(IEntityType entityType) {
+    EntityInfo(IEntityType entityType) {
         this.entityType = entityType;
         this.alias = entityType.getTableName();
     }
@@ -34,11 +34,11 @@ class JoinRelation {
     }
 
     boolean isRoot() {
-        return type == null;
+        return joinType == null;
     }
 
-    Join.Type getType() {
-        return type;
+    Join.Type getJoinType() {
+        return joinType;
     }
 
     String getAlias() {
@@ -49,19 +49,19 @@ class JoinRelation {
         return relationMapping;
     }
 
-    void addChild(String name, JoinRelation relation) {
+    void addChild(String name, EntityInfo relation) {
         if (childs == null) {
-            childs = new HashMap<String, JoinRelation>();
+            childs = new HashMap<String, EntityInfo>();
         }
 
         childs.put(name, relation);
     }
 
-    JoinRelation getChild(String propertyName) {
+    EntityInfo getChild(String propertyName) {
         return childs == null ? null : childs.get(propertyName);
     }
 
-    Map<String, JoinRelation> getAllChilds() {
+    Map<String, EntityInfo> getAllChilds() {
         return childs;
     }
 
@@ -69,4 +69,7 @@ class JoinRelation {
         return childs != null && !childs.isEmpty();
     }
 
+    public void setJoinType(Join.Type joinType) {
+        this.joinType = joinType;
+    }
 }

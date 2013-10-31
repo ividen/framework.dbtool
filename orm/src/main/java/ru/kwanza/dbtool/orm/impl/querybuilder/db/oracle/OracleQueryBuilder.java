@@ -3,6 +3,7 @@ package ru.kwanza.dbtool.orm.impl.querybuilder.db.oracle;
 import ru.kwanza.dbtool.core.DBTool;
 import ru.kwanza.dbtool.orm.api.IQuery;
 import ru.kwanza.dbtool.orm.api.internal.IEntityMappingRegistry;
+import ru.kwanza.dbtool.orm.impl.EntityManagerImpl;
 import ru.kwanza.dbtool.orm.impl.querybuilder.AbstractQueryBuilder;
 import ru.kwanza.dbtool.orm.impl.querybuilder.QueryConfig;
 
@@ -11,8 +12,8 @@ import ru.kwanza.dbtool.orm.impl.querybuilder.QueryConfig;
  */
 public class OracleQueryBuilder<T> extends AbstractQueryBuilder<T> {
 
-    public OracleQueryBuilder(DBTool dbTool, IEntityMappingRegistry registry, Class entityClass) {
-        super(dbTool, registry, entityClass);
+    public OracleQueryBuilder(EntityManagerImpl em, Class entityClass) {
+        super(em, entityClass);
     }
 
     protected IQuery<T> createQuery(QueryConfig config) {

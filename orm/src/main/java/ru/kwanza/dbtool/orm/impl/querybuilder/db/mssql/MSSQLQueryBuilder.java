@@ -3,6 +3,7 @@ package ru.kwanza.dbtool.orm.impl.querybuilder.db.mssql;
 import ru.kwanza.dbtool.core.DBTool;
 import ru.kwanza.dbtool.orm.api.IQuery;
 import ru.kwanza.dbtool.orm.api.internal.IEntityMappingRegistry;
+import ru.kwanza.dbtool.orm.impl.EntityManagerImpl;
 import ru.kwanza.dbtool.orm.impl.querybuilder.AbstractQueryBuilder;
 import ru.kwanza.dbtool.orm.impl.querybuilder.QueryConfig;
 
@@ -11,8 +12,8 @@ import ru.kwanza.dbtool.orm.impl.querybuilder.QueryConfig;
  */
 public class MSSQLQueryBuilder<T> extends AbstractQueryBuilder<T> {
 
-    public MSSQLQueryBuilder(DBTool dbTool, IEntityMappingRegistry registry, Class entityClass) {
-        super(dbTool, registry, entityClass);
+    public MSSQLQueryBuilder(EntityManagerImpl em, Class entityClass) {
+        super(em, entityClass);
     }
 
     protected IQuery<T> createQuery(QueryConfig config) {

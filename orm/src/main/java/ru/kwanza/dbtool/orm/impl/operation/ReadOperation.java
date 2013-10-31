@@ -5,6 +5,7 @@ import ru.kwanza.dbtool.orm.api.IQuery;
 import ru.kwanza.dbtool.orm.api.If;
 import ru.kwanza.dbtool.orm.api.internal.IEntityMappingRegistry;
 import ru.kwanza.dbtool.orm.api.internal.IFieldMapping;
+import ru.kwanza.dbtool.orm.impl.EntityManagerImpl;
 import ru.kwanza.dbtool.orm.impl.querybuilder.QueryBuilderFactory;
 
 import java.util.Collection;
@@ -19,13 +20,13 @@ public class ReadOperation extends Operation implements IReadOperation {
 
     private IQuery queryForCollection;
 
-    public ReadOperation(IEntityMappingRegistry entityMappingRegistry, DBTool dbTool, Class entityClass) {
-        super(entityMappingRegistry, dbTool, entityClass);
+    public ReadOperation(EntityManagerImpl em, Class entityClass) {
+        super(em,  entityClass);
     }
 
     @Override
     protected void initOperation() {
-        final IFieldMapping idFieldMapping = entityMappingRegistry.getEntityType(entityClass).getIdField();
+        final IFieldMapping idFieldMapping = em.getRegistry().getEntityType(entityClass).getIdField();
         if (idFieldMapping==null) {
             throw new RuntimeException("IdFieldMapping for entity class" + entityClass + " not found");
         }
@@ -33,9 +34,9 @@ public class ReadOperation extends Operation implements IReadOperation {
         final String propertyName = idFieldMapping.getName();
 
         this.queryForObject =
-                QueryBuilderFactory.createBuilder(dbTool, entityMappingRegistry, entityClass).where(If.isEqual(propertyName)).create();
+                QueryBuilderFactory.createBuilder(em, entityClass).where(If.isEqual(propertyName)).create();
         this.queryForCollection =
-                QueryBuilderFactory.createBuilder(dbTool, entityMappingRegistry, entityClass).where(If.in(propertyName)).create();
+                QueryBuilderFactory.createBuilder(em, entityClass).where(If.in(propertyName)).create();
     }
 
     public Object selectByKey(Object key) {

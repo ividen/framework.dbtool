@@ -24,22 +24,19 @@ public class JoinClauseHelper {
 
     private static void processScanRelations(Map<String, Object> scan, List<Join> result) {
         for (Map.Entry<String, Object> entry : scan.entrySet()) {
+            Join[] subJoins = null;
             if (entry.getValue() instanceof Map) {
-                if (entry.getKey().startsWith("#")) {
-                    ArrayList<Join> subJoins = new ArrayList<Join>();
-                    processScanRelations((Map<String, Object>) entry.getValue(), subJoins);
-                    result.add(Join.left(entry.getKey().substring(1).trim(), subJoins.toArray(new Join[]{})));
-                } else {
-                    ArrayList<Join> subJoins = new ArrayList<Join>();
-                    processScanRelations((Map<String, Object>) entry.getValue(), subJoins);
-                    result.add(Join.inner(entry.getKey(), subJoins.toArray(new Join[]{})));
-                }
+                ArrayList<Join> list = new ArrayList<Join>();
+                processScanRelations((Map<String, Object>) entry.getValue(), list);
+                subJoins = list.toArray(new Join[list.size()]);
+            }
+
+            if (entry.getKey().startsWith("&")) {
+                result.add(Join.left(entry.getKey().substring(1).trim(), subJoins));
+            } else if (entry.getKey().startsWith("!")) {
+                result.add(Join.inner(entry.getKey().substring(1).trim(), subJoins));
             } else {
-                if (entry.getKey().startsWith("#")) {
-                    result.add(Join.left(entry.getKey().substring(1).trim()));
-                } else {
-                    result.add(Join.inner(entry.getKey()));
-                }
+                result.add(Join.fetch(entry.getKey(), subJoins));
             }
         }
     }

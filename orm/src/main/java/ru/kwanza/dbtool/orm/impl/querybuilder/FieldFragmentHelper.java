@@ -17,13 +17,13 @@ class FieldFragmentHelper {
     String createFieldsFragment() {
         StringBuilder result = new StringBuilder();
         String alias =
-                builder.getRelationFactory().getRoot().getAllChilds() == null ? null : builder.getRelationFactory().getRoot().getAlias();
-        processFields(alias, builder.getRelationFactory().getRoot(), result);
+                builder.getEntityInfoFactory().getRoot().getAllChilds() == null ? null : builder.getEntityInfoFactory().getRoot().getAlias();
+        processFields(alias, builder.getEntityInfoFactory().getRoot(), result);
         result.deleteCharAt(result.length() - 1);
         return result.toString();
     }
 
-    private void processFields(String alias, JoinRelation root, StringBuilder result) {
+    private void processFields(String alias, EntityInfo root, StringBuilder result) {
         Collection<IFieldMapping> fields = root.getRelationMapping() == null
                 ? builder.getRegistry().getEntityType(builder.getEntityClass()).getFields()
                 : builder.getRegistry().getEntityType(root.getRelationMapping().getRelationClass()).getFields();
@@ -39,8 +39,8 @@ class FieldFragmentHelper {
 
         }
         if (root != null && root.getAllChilds() != null) {
-            for (JoinRelation joinRelation : root.getAllChilds().values()) {
-                processFields(joinRelation.getAlias(), joinRelation, result);
+            for (EntityInfo entityInfo : root.getAllChilds().values()) {
+                processFields(entityInfo.getAlias(), entityInfo, result);
             }
         }
     }

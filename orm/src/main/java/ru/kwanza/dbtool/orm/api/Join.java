@@ -14,7 +14,6 @@ public final class Join {
         FETCH
     }
 
-    //todo aguzanov конструктор с ArrayList
     Join(Type type, String propertyName, Join[] subJoins) {
         this.propertyName = propertyName;
         this.type = type;

@@ -21,10 +21,10 @@ class WhereFragmentHelper {
     }
 
     public void createConditionString(If condition, StringBuilder where, Parameters holder) {
-        createConditionString(builder.getRelationFactory().getRoot(), condition, where, holder);
+        createConditionString(builder.getEntityInfoFactory().getRoot(), condition, where, holder);
     }
 
-    public void createConditionString(JoinRelation root, If condition, StringBuilder where, Parameters holder) {
+    public void createConditionString(EntityInfo root, If condition, StringBuilder where, Parameters holder) {
         if (condition == null) {
             return;
         }

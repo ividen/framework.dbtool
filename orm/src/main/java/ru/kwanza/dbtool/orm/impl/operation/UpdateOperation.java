@@ -9,6 +9,7 @@ import ru.kwanza.dbtool.core.util.UpdateUtil;
 import ru.kwanza.dbtool.orm.api.internal.IEntityMappingRegistry;
 import ru.kwanza.dbtool.orm.api.internal.IEntityType;
 import ru.kwanza.dbtool.orm.api.internal.IFieldMapping;
+import ru.kwanza.dbtool.orm.impl.EntityManagerImpl;
 import ru.kwanza.toolbox.fieldhelper.FieldHelper;
 import ru.kwanza.toolbox.fieldhelper.Property;
 
@@ -47,14 +48,14 @@ public class UpdateOperation extends Operation implements IUpdateOperation {
 
     private VersionGenerator versionGenerator;
 
-    public UpdateOperation(IEntityMappingRegistry entityMappingRegistry, DBTool dbTool, Class entityClass,
+    public UpdateOperation(EntityManagerImpl em, Class entityClass,
                            VersionGenerator versionGenerator) {
-        super(entityMappingRegistry, dbTool, entityClass);
+        super(em, entityClass);
         this.versionGenerator = versionGenerator;
     }
 
     protected void initOperation() {
-        final IEntityType entityType = entityMappingRegistry.getEntityType(entityClass);
+        final IEntityType entityType = em.getRegistry().getEntityType(entityClass);
         this.fieldMappings = entityType.getFields();
 
         this.idFieldMapping = entityType.getIdField();
@@ -121,9 +122,9 @@ public class UpdateOperation extends Operation implements IUpdateOperation {
         if (versionSupport) {
             UpdateUtil
                     .batchUpdate(getJdbcTemplate(), updateQuery, objects, updateOperationSetter, checkQuery, keyVersionRowMapper, keyField,
-                            versionField, dbTool.getDbType());
+                            versionField, em.getDbTool().getDbType());
         } else {
-            UpdateUtil.batchUpdate(getJdbcTemplate(), updateQuery, objects, updateSetter, dbTool.getDbType());
+            UpdateUtil.batchUpdate(getJdbcTemplate(), updateQuery, objects, updateSetter, em.getDbTool().getDbType());
         }
     }
 

@@ -2,9 +2,10 @@ package ru.kwanza.dbtool.orm.impl.querybuilder;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.kwanza.dbtool.core.DBTool;
 import ru.kwanza.dbtool.orm.api.*;
 import ru.kwanza.dbtool.orm.api.internal.IEntityMappingRegistry;
+import ru.kwanza.dbtool.orm.impl.EntityManagerImpl;
+import ru.kwanza.dbtool.orm.impl.fetcher.FetchInfo;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,13 +15,12 @@ import java.util.List;
  */
 public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
     private static final Logger logger = LoggerFactory.getLogger(AbstractQuery.class);
-    private IEntityMappingRegistry registry;
-    private DBTool dbTool;
+    private EntityManagerImpl em;
     private Class entityClass;
     private If condition;
     private List<OrderBy> orderBy = null;
 
-    private JoinRelationFactory relationFactory;
+    private EntityInfoFactory entityInfoFactory;
     private ColumnFactory columnFactory;
 
     private WhereFragmentHelper whereFragmentHelper;
@@ -28,14 +28,13 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
     private FromFragmentHelper fromFragmentHelper;
     private OrderByFragmentHelper orderByFragmentHelper;
 
-    public AbstractQueryBuilder(DBTool dbTool, IEntityMappingRegistry registry, Class entityClass) {
-        if (!registry.isRegisteredEntityClass(entityClass)) {
+    public AbstractQueryBuilder(EntityManagerImpl em, Class entityClass) {
+        if (!em.getRegistry().isRegisteredEntityClass(entityClass)) {
             throw new RuntimeException("Not registered entity class: " + entityClass);
         }
-        this.registry = registry;
+        this.em = em;
         this.entityClass = entityClass;
-        this.dbTool = dbTool;
-        this.relationFactory = new JoinRelationFactory(this);
+        this.entityInfoFactory = new EntityInfoFactory(this);
         this.columnFactory = new ColumnFactory(this);
         this.whereFragmentHelper = new WhereFragmentHelper(this);
         this.fieldFragmentHelper = new FieldFragmentHelper(this);
@@ -43,8 +42,8 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
         this.orderByFragmentHelper = new OrderByFragmentHelper(this);
     }
 
-    JoinRelationFactory getRelationFactory() {
-        return relationFactory;
+    EntityInfoFactory getEntityInfoFactory() {
+        return entityInfoFactory;
     }
 
     ColumnFactory getColumnFactory() {
@@ -56,7 +55,7 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
     }
 
     IEntityMappingRegistry getRegistry() {
-        return registry;
+        return em.getRegistry();
     }
 
     WhereFragmentHelper getWhereFragmentHelper() {
@@ -93,29 +92,30 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
         String sqlString = sql.toString();
         logger.debug("Creating query {}", sqlString);
 
-        return createQuery(createConfig(relationFactory.getRoot(), sqlString, joinParams.join(whereParams)));
+        return createQuery(createConfig(entityInfoFactory.getRoot(), sqlString, joinParams.join(whereParams)));
     }
 
     public IQueryBuilder<T> join(String string) {
         for (Join join : JoinClauseHelper.parse(string)) {
-            processJoin(relationFactory.getRoot(), join);
+            processJoin(entityInfoFactory.getRoot(), join);
         }
 
         return this;
     }
 
     public IQueryBuilder<T> join(Join joinClause) {
-        processJoin(relationFactory.getRoot(), joinClause);
+        processJoin(entityInfoFactory.getRoot(), joinClause);
 
         return this;
     }
 
-    private void processJoin(JoinRelation root, Join joinClause) {
-        JoinRelation joinRelation = relationFactory.registerRelation(root, joinClause.getType(), joinClause.getPropertyName());
-
-        if (joinClause != null && joinClause.getSubJoins() != null) {
-            for (Join join : joinClause.getSubJoins()) {
-                processJoin(joinRelation, join);
+    private void processJoin(EntityInfo root, Join joinClause) {
+        EntityInfo entityInfo = entityInfoFactory.registerInfo(root, joinClause.getType(), joinClause.getPropertyName());
+        if (entityInfo.getJoinType() != Join.Type.FETCH) {
+            if (joinClause != null && joinClause.getSubJoins() != null) {
+                for (Join join : joinClause.getSubJoins()) {
+                    processJoin(entityInfo, join);
+                }
             }
         }
     }
@@ -125,11 +125,11 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
     public IQuery<T> createNative(String sql) {
         Parameters holder = new Parameters();
         String preparedSql = SQLParser.prepareSQL(sql, holder);
-        return createQuery(createConfig(relationFactory.getRoot(), preparedSql, holder));
+        return createQuery(createConfig(entityInfoFactory.getRoot(), preparedSql, holder));
     }
 
-    private QueryConfig<T> createConfig(JoinRelation rootRelations, String sqlString, Parameters holder) {
-        return new QueryConfig<T>(dbTool, registry, entityClass, sqlString, rootRelations, holder);
+    private QueryConfig<T> createConfig(EntityInfo rootRelations, String sqlString, Parameters holder) {
+        return new QueryConfig<T>(em, entityClass, sqlString, rootRelations, holder, null);
     }
 
     protected StringBuilder createSQLString(String fieldsString, String from, String where, String orderBy) {

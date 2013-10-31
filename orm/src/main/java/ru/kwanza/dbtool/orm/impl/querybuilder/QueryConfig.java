@@ -1,43 +1,42 @@
 package ru.kwanza.dbtool.orm.impl.querybuilder;
 
-import ru.kwanza.dbtool.core.DBTool;
-import ru.kwanza.dbtool.orm.api.internal.IEntityMappingRegistry;
+import ru.kwanza.dbtool.orm.impl.EntityManagerImpl;
+import ru.kwanza.dbtool.orm.impl.fetcher.FetchInfo;
+
+import java.util.List;
 
 /**
  * @author Alexander Guzanov
  */
 public class QueryConfig<T> {
-    private final DBTool dbTool;
     private final String sql;
-    private final IEntityMappingRegistry registry;
+    private final EntityManagerImpl em;
     private final Class<T> entityClass;
-    private final JoinRelation rootRelation;
+    private final EntityInfo rootRelation;
     private final ParamsHolder holder;
 
-    QueryConfig(DBTool dbTool, IEntityMappingRegistry registry, Class<T> entityClass, String sql, JoinRelation rootRelations,
-                Parameters parameters) {
-        this.dbTool = dbTool;
+    private List<FetchInfo> fetchInfo;
+
+    QueryConfig(EntityManagerImpl em, Class<T> entityClass, String sql, EntityInfo rootRelations, Parameters parameters,
+                List<FetchInfo> fetchInfo) {
         this.sql = sql;
-        this.registry = registry;
+        this.em = em;
         this.entityClass = entityClass;
         this.rootRelation = rootRelations;
         this.holder = parameters.createHolder();
+        this.fetchInfo = fetchInfo;
     }
 
-    public JoinRelation getRootRelation() {
+    public EntityInfo getRootRelation() {
         return rootRelation;
-    }
-
-    public DBTool getDbTool() {
-        return dbTool;
     }
 
     public String getSql() {
         return sql;
     }
 
-    public IEntityMappingRegistry getRegistry() {
-        return registry;
+    public EntityManagerImpl getEntityManager() {
+        return em;
     }
 
     public Class<T> getEntityClass() {
@@ -46,5 +45,9 @@ public class QueryConfig<T> {
 
     public ParamsHolder getParamsHolder() {
         return holder;
+    }
+
+    public List<FetchInfo> getFetchInfo() {
+        return fetchInfo;
     }
 }

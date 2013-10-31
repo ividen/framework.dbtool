@@ -15,6 +15,7 @@ import ru.kwanza.dbtool.orm.api.ListProducer;
 import ru.kwanza.dbtool.orm.api.internal.IEntityType;
 import ru.kwanza.dbtool.orm.api.internal.IFieldMapping;
 import ru.kwanza.dbtool.orm.impl.ObjectAllocator;
+import ru.kwanza.dbtool.orm.impl.fetcher.FetchInfo;
 import ru.kwanza.dbtool.orm.impl.mapping.UnionEntityType;
 import ru.kwanza.toolbox.fieldhelper.Property;
 
@@ -42,14 +43,14 @@ public abstract class StatementImpl<T> implements IStatement<T> {
     public T select() {
         final Object[] result = new Object[1];
 
-        SelectUtil.batchSelect(config.getDbTool().getJdbcTemplate(), prepareSql(config.getSql()), new SingleObjectObjectExtractor<T>(),
-                new SelectUtil.Container<Collection<T>>() {
-                    public void add(Collection<T> objects) {
-                        if (objects != null && !objects.isEmpty()) {
-                            result[0] = objects.iterator().next();
-                        }
-                    }
-                }, getParamValues(), getResultSetType());
+        SelectUtil.batchSelect(config.getEntityManager().getDbTool().getJdbcTemplate(), prepareSql(config.getSql()),
+                new SingleObjectObjectExtractor<T>(), new SelectUtil.Container<Collection<T>>() {
+            public void add(Collection<T> objects) {
+                if (objects != null && !objects.isEmpty()) {
+                    result[0] = objects.iterator().next();
+                }
+            }
+        }, getParamValues(), getResultSetType());
 
         return (T) result[0];
     }
@@ -92,56 +93,69 @@ public abstract class StatementImpl<T> implements IStatement<T> {
     public List<T> selectList() {
         final LinkedList<T> result = new LinkedList<T>();
         selectList(result);
+        fetchRelationsIfNeed(result);
         return result;
     }
 
     public void selectList(final List<T> result) {
-        SelectUtil.batchSelect(config.getDbTool().getJdbcTemplate(), prepareSql(config.getSql()), new ObjectExtractor<T>(),
-                new SelectUtil.Container<Collection<T>>() {
-                    public void add(Collection<T> objects) {
-                        if (objects != null) {
-                            result.addAll(objects);
-                        }
-                    }
-                }, getParamValues(), getResultSetType());
+        SelectUtil
+                .batchSelect(config.getEntityManager().getDbTool().getJdbcTemplate(), prepareSql(config.getSql()), new ObjectExtractor<T>(),
+                        new SelectUtil.Container<Collection<T>>() {
+                            public void add(Collection<T> objects) {
+                                if (objects != null) {
+                                    result.addAll(objects);
+                                }
+                            }
+                        }, getParamValues(), getResultSetType());
+
+        fetchRelationsIfNeed(result);
     }
 
     public <F> void selectMapList(String propertyName, final Map<F, List<T>> result, final ListProducer<T> listProducer) {
-        IFieldMapping fieldMapping = config.getRegistry().getEntityType(config.getEntityClass()).getField(propertyName);
+        IFieldMapping fieldMapping = config.getEntityManager().getRegistry().getEntityType(config.getEntityClass()).getField(propertyName);
         if (fieldMapping == null) {
             throw new IllegalArgumentException("Unknown field name!");
         }
 
-        SelectUtil.batchSelect(config.getDbTool().getJdbcTemplate(), prepareSql(config.getSql()), new MapExtractor(fieldMapping),
-                new SelectUtil.Container<Collection<KeyValue<F, T>>>() {
-                    public void add(Collection<KeyValue<F, T>> objects) {
-                        for (KeyValue<F, T> kv : objects) {
-                            List<T> vs = result.get(kv.getKey());
-                            if (vs == null) {
-                                vs = listProducer.create();
-                                result.put(kv.getKey(), vs);
-                            }
-                            vs.add(kv.getValue());
-                        }
+        SelectUtil.batchSelect(config.getEntityManager().getDbTool().getJdbcTemplate(), prepareSql(config.getSql()),
+                new MapExtractor(fieldMapping), new SelectUtil.Container<Collection<KeyValue<F, T>>>() {
+            public void add(Collection<KeyValue<F, T>> objects) {
+                for (KeyValue<F, T> kv : objects) {
+                    List<T> vs = result.get(kv.getKey());
+                    if (vs == null) {
+                        vs = listProducer.create();
+                        result.put(kv.getKey(), vs);
                     }
-                }, getParamValues(), getResultSetType());
+                    vs.add(kv.getValue());
+                }
+            }
+        }, getParamValues(), getResultSetType());
+
+        if (getConfig().getFetchInfo() != null) {
+            ArrayList<T> values = new ArrayList<T>();
+            for (List<T> r : result.values()) {
+                values.addAll(r);
+            }
+            fetchRelationsIfNeed(values);
+        }
     }
 
     public <F> void selectMap(String propertyName, final Map<F, T> result) {
-        IFieldMapping fieldMapping = config.getRegistry().getEntityType(config.getEntityClass()).getField(propertyName);
+        IFieldMapping fieldMapping = config.getEntityManager().getRegistry().getEntityType(config.getEntityClass()).getField(propertyName);
         if (fieldMapping == null) {
             throw new IllegalArgumentException("Unknown field name!");
         }
 
-        SelectUtil.batchSelect(config.getDbTool().getJdbcTemplate(), prepareSql(config.getSql()), new MapExtractor(fieldMapping),
-                new SelectUtil.Container<Collection<KeyValue<F, T>>>() {
-                    public void add(Collection<KeyValue<F, T>> objects) {
-                        for (KeyValue<F, T> kv : objects) {
-                            result.put(kv.getKey(), kv.getValue());
-                        }
-                    }
-                }, getParamValues(), getResultSetType());
+        SelectUtil.batchSelect(config.getEntityManager().getDbTool().getJdbcTemplate(), prepareSql(config.getSql()),
+                new MapExtractor(fieldMapping), new SelectUtil.Container<Collection<KeyValue<F, T>>>() {
+            public void add(Collection<KeyValue<F, T>> objects) {
+                for (KeyValue<F, T> kv : objects) {
+                    result.put(kv.getKey(), kv.getValue());
+                }
+            }
+        }, getParamValues(), getResultSetType());
 
+        fetchRelationsIfNeed(result.values());
     }
 
     public Map<Object, T> selectMap(String propertyName) {
@@ -154,6 +168,13 @@ public abstract class StatementImpl<T> implements IStatement<T> {
         final Map<Object, List<T>> result = new LinkedHashMap<Object, List<T>>();
         selectMapList(propertyName, result, ListProducer.LINKED_LIST);
         return result;
+    }
+
+    private void fetchRelationsIfNeed(Collection<T> items) {
+        final List<FetchInfo> fetchConfig = getConfig().getFetchInfo();
+        if (fetchConfig != null) {
+            config.getEntityManager().getFetcher().fetch(items, fetchConfig);
+        }
     }
 
     public IStatement<T> setParameter(int index, Object value) {
@@ -219,7 +240,7 @@ public abstract class StatementImpl<T> implements IStatement<T> {
         public Collection<TYPE> extractData(ResultSet rs) throws SQLException, DataAccessException {
 
             Integer offset = StatementImpl.this.offset;
-            DBTool.DBType dbType = config.getDbTool().getDbType();
+            DBTool.DBType dbType = config.getEntityManager().getDbTool().getDbType();
             if ((MYSQL != dbType && POSTGRESQL != dbType && offset != null && offset > 0) || (MYSQL == dbType && offset != null
                     && offset > 0 && StatementImpl.this.maxSize == null)) {
                 if (rs.next()) {
@@ -245,7 +266,7 @@ public abstract class StatementImpl<T> implements IStatement<T> {
 
         public abstract TYPE getValue(Object e);
 
-        private void readRelation(Object parentObj, JoinRelation relation, ResultSet rs) throws SQLException {
+        private void readRelation(Object parentObj, EntityInfo relation, ResultSet rs) throws SQLException {
             if (relation == null) {
                 return;
             }
@@ -267,8 +288,8 @@ public abstract class StatementImpl<T> implements IStatement<T> {
             }
 
             if (relation.getAllChilds() != null) {
-                for (JoinRelation joinRelation : relation.getAllChilds().values()) {
-                    readRelation(obj, joinRelation, rs);
+                for (EntityInfo entityInfo : relation.getAllChilds().values()) {
+                    readRelation(obj, entityInfo, rs);
                 }
             }
 
@@ -287,8 +308,8 @@ public abstract class StatementImpl<T> implements IStatement<T> {
             return obj;
         }
 
-        private IEntityType getEntityType(JoinRelation relation, ResultSet rs, Class relationClass) throws SQLException {
-            IEntityType entityType = config.getRegistry().getEntityType(relationClass);
+        private IEntityType getEntityType(EntityInfo relation, ResultSet rs, Class relationClass) throws SQLException {
+            IEntityType entityType = config.getEntityManager().getRegistry().getEntityType(relationClass);
             if (entityType instanceof UnionEntityType) {
 
                 final UnionEntityType unionEntityType = (UnionEntityType) entityType;
@@ -297,22 +318,21 @@ public abstract class StatementImpl<T> implements IStatement<T> {
             return entityType;
         }
 
-        private boolean hasIdValue(JoinRelation relation, ResultSet rs, Class relationClass) throws SQLException {
-            IFieldMapping idField = config.getRegistry().getEntityType(relationClass).getIdField();
+        private boolean hasIdValue(EntityInfo relation, ResultSet rs, Class relationClass) throws SQLException {
+            IFieldMapping idField = config.getEntityManager().getRegistry().getEntityType(relationClass).getIdField();
             if (FieldValueExtractor.getValue(rs, Column.getFullColumnName(relation, idField), idField.getProperty().getType()) == null) {
                 return false;
             }
             return true;
         }
 
-        private void readAndFill(ResultSet rs, Collection<IFieldMapping> fields, JoinRelation relation, Object obj) throws SQLException {
+        private void readAndFill(ResultSet rs, Collection<IFieldMapping> fields, EntityInfo relation, Object obj) throws SQLException {
             for (IFieldMapping idf : fields) {
                 Object value = FieldValueExtractor.getValue(rs, Column.getFullColumnName(relation, idf), idf.getProperty().getType());
                 idf.getProperty().set(obj, value);
             }
 
         }
-
     }
 
     private class SingleObjectObjectExtractor<T> extends ObjectExtractor<T> {

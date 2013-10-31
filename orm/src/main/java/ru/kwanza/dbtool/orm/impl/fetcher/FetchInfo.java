@@ -12,12 +12,12 @@ import java.util.Set;
 /**
  * @author Alexander Guzanov
  */
-class RelationValue {
+public class FetchInfo {
     private IFieldMapping idField;
     private IRelationMapping relationMapping;
     private IQuery fetchQuery;
 
-    RelationValue(IFieldMapping idField, IRelationMapping relationMapping, IQuery fetchQuery) {
+    public FetchInfo(IFieldMapping idField, IRelationMapping relationMapping, IQuery fetchQuery) {
         this.idField = idField;
         this.relationMapping = relationMapping;
         this.fetchQuery = fetchQuery;

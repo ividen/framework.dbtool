@@ -32,7 +32,7 @@ public class EntityManagerImpl extends SpringSerializable implements IEntityMana
     private VersionGenerator versionGenerator;
 
     @Resource(name = "dbtool.IEntityMappingRegistry")
-    private IEntityMappingRegistry mappingRegistry;
+    private IEntityMappingRegistry registry;
 
     @Resource(name = "dbtool.OperationFactory")
     private OperationFactory operationFactory;
@@ -98,7 +98,7 @@ public class EntityManagerImpl extends SpringSerializable implements IEntityMana
 
     @SuppressWarnings("unchecked")
     public <F, T> Map<F, T> readMapByKeys(Class<T> entityClass, Collection keys) {
-        final IFieldMapping idFieldMapping = mappingRegistry.getEntityType(entityClass).getIdField();
+        final IFieldMapping idFieldMapping = registry.getEntityType(entityClass).getIdField();
         if (idFieldMapping == null) {
             throw new RuntimeException("IdFieldMapping for entity class" + entityClass + " not found");
         }
@@ -112,7 +112,7 @@ public class EntityManagerImpl extends SpringSerializable implements IEntityMana
     }
 
     public <T> IQueryBuilder<T> queryBuilder(Class<T> entityClass) {
-        return QueryBuilderFactory.createBuilder(dbTool, mappingRegistry, entityClass);
+        return QueryBuilderFactory.createBuilder(this, entityClass);
     }
 
     public <T> IFiltering<T> filtering(Class<T> entityClass) {
@@ -139,4 +139,15 @@ public class EntityManagerImpl extends SpringSerializable implements IEntityMana
         fetcher.fetchLazy(object);
     }
 
+    public Fetcher getFetcher() {
+        return fetcher;
+    }
+
+    public IEntityMappingRegistry getRegistry() {
+        return registry;
+    }
+
+    public DBTool getDbTool() {
+        return dbTool;
+    }
 }

@@ -48,7 +48,7 @@ public abstract class TestAbstractEntity extends AbstractJUnit4SpringContextTest
 
     @Test
     public void testQuieryBuilder_4() {
-        final AbstractQuery<TestEntity> query = (AbstractQuery<TestEntity>) em.queryBuilder(TestEntity.class).join("#entity").create();
+        final AbstractQuery<TestEntity> query = (AbstractQuery<TestEntity>) em.queryBuilder(TestEntity.class).join("&entity").create();
         Assert.assertEquals(query.getConfig().getSql(),
                 "SELECT test_entity.id test_entity_id,test_entity.int_field test_entity_int_field,test_entity.string_field test_entity_string_field,test_entity.date_field test_entity_date_field,test_entity.short_field test_entity_short_field,test_entity.version test_entity_version,test_entity.entity_aid test_entity_entity_aid,test_entity.entity_bid test_entity_entity_bid,t1.clazz_ t1_clazz_,t1.id t1_id,t1.f_0 t1_f_0,t1.f_5 t1_f_5,t1.f_2 t1_f_2,t1.f_1 t1_f_1,t1.f_4 t1_f_4,t1.f_3 t1_f_3,t1.version t1_version FROM test_entity LEFT JOIN (SELECT id,version,0 clazz_,title f_0,null f_1,null f_2,null f_3,null f_4,null f_5 FROM test_entity_a UNION ALL SELECT id,version,1 clazz_,null f_0,title f_1,entity_gid f_2,null f_3,null f_4,null f_5 FROM test_entity_e UNION ALL SELECT id,version,2 clazz_,null f_0,null f_1,null f_2,title f_3,null f_4,null f_5 FROM test_entity_f UNION ALL SELECT id,version,3 clazz_,null f_0,null f_1,null f_2,null f_3,title f_4,null f_5 FROM test_entity_b UNION ALL SELECT id,version,4 clazz_,null f_0,null f_1,null f_2,null f_3,null f_4,title f_5 FROM test_entity_c)  t1 ON test_entity.entity_aid=t1.id ");
 
@@ -57,7 +57,7 @@ public abstract class TestAbstractEntity extends AbstractJUnit4SpringContextTest
     @Test
     public void testQuieryBuilder_5() {
         final AbstractQuery<TestEntity> query =
-                (AbstractQuery<TestEntity>) em.queryBuilder(TestEntity.class).join("#entity,#otherEntity").create();
+                (AbstractQuery<TestEntity>) em.queryBuilder(TestEntity.class).join("&entity,&otherEntity").create();
         Assert.assertEquals(query.getConfig().getSql(),
                 "SELECT test_entity.id test_entity_id,test_entity.int_field test_entity_int_field,test_entity.string_field test_entity_string_field,test_entity.date_field test_entity_date_field,test_entity.short_field test_entity_short_field,test_entity.version test_entity_version,test_entity.entity_aid test_entity_entity_aid,test_entity.entity_bid test_entity_entity_bid,t1.clazz_ t1_clazz_,t1.id t1_id,t1.f_0 t1_f_0,t1.f_5 t1_f_5,t1.f_2 t1_f_2,t1.f_1 t1_f_1,t1.f_4 t1_f_4,t1.f_3 t1_f_3,t1.version t1_version,t2.clazz_ t2_clazz_,t2.id t2_id,t2.f_0 t2_f_0,t2.f_5 t2_f_5,t2.f_2 t2_f_2,t2.f_1 t2_f_1,t2.f_4 t2_f_4,t2.f_3 t2_f_3,t2.version t2_version FROM test_entity LEFT JOIN (SELECT id,version,0 clazz_,title f_0,null f_1,null f_2,null f_3,null f_4,null f_5 FROM test_entity_a UNION ALL SELECT id,version,1 clazz_,null f_0,title f_1,entity_gid f_2,null f_3,null f_4,null f_5 FROM test_entity_e UNION ALL SELECT id,version,2 clazz_,null f_0,null f_1,null f_2,title f_3,null f_4,null f_5 FROM test_entity_f UNION ALL SELECT id,version,3 clazz_,null f_0,null f_1,null f_2,null f_3,title f_4,null f_5 FROM test_entity_b UNION ALL SELECT id,version,4 clazz_,null f_0,null f_1,null f_2,null f_3,null f_4,title f_5 FROM test_entity_c)  t1 ON test_entity.entity_aid=t1.id  LEFT JOIN (SELECT id,version,0 clazz_,title f_0,null f_1,null f_2,null f_3,null f_4,null f_5 FROM test_entity_a UNION ALL SELECT id,version,1 clazz_,null f_0,title f_1,entity_gid f_2,null f_3,null f_4,null f_5 FROM test_entity_e UNION ALL SELECT id,version,2 clazz_,null f_0,null f_1,null f_2,title f_3,null f_4,null f_5 FROM test_entity_f UNION ALL SELECT id,version,3 clazz_,null f_0,null f_1,null f_2,null f_3,title f_4,null f_5 FROM test_entity_b UNION ALL SELECT id,version,4 clazz_,null f_0,null f_1,null f_2,null f_3,null f_4,title f_5 FROM test_entity_c)  t2 ON test_entity.entity_bid=t2.id ");
 
@@ -66,7 +66,7 @@ public abstract class TestAbstractEntity extends AbstractJUnit4SpringContextTest
     @Test
     public void testQuieryBuilder_6() {
         final AbstractQuery<TestEntity> query =
-                (AbstractQuery<TestEntity>) em.queryBuilder(TestEntity.class).join("#entityWithCondition").create();
+                (AbstractQuery<TestEntity>) em.queryBuilder(TestEntity.class).join("&entityWithCondition").create();
         Assert.assertEquals(query.getConfig().getSql(),
                 "SELECT test_entity.id test_entity_id,test_entity.int_field test_entity_int_field,test_entity.string_field test_entity_string_field,test_entity.date_field test_entity_date_field,test_entity.short_field test_entity_short_field,test_entity.version test_entity_version,test_entity.entity_aid test_entity_entity_aid,test_entity.entity_bid test_entity_entity_bid,t1.clazz_ t1_clazz_,t1.id t1_id,t1.f_0 t1_f_0,t1.f_5 t1_f_5,t1.f_2 t1_f_2,t1.f_1 t1_f_1,t1.f_4 t1_f_4,t1.f_3 t1_f_3,t1.version t1_version FROM test_entity LEFT JOIN (SELECT id,version,0 clazz_,title f_0,null f_1,null f_2,null f_3,null f_4,null f_5 FROM test_entity_a UNION ALL SELECT id,version,1 clazz_,null f_0,title f_1,entity_gid f_2,null f_3,null f_4,null f_5 FROM test_entity_e UNION ALL SELECT id,version,2 clazz_,null f_0,null f_1,null f_2,title f_3,null f_4,null f_5 FROM test_entity_f UNION ALL SELECT id,version,3 clazz_,null f_0,null f_1,null f_2,null f_3,title f_4,null f_5 FROM test_entity_b UNION ALL SELECT id,version,4 clazz_,null f_0,null f_1,null f_2,null f_3,null f_4,title f_5 FROM test_entity_c)  t1 ON test_entity.entity_aid=t1.id  AND (t1.version >= ?)");
     }
@@ -183,7 +183,7 @@ public abstract class TestAbstractEntity extends AbstractJUnit4SpringContextTest
 
     @Test
     public void tesJoin_1() {
-        final IQuery<TestEntity> query = em.queryBuilder(TestEntity.class).join("#entity,#otherEntity").create();
+        final IQuery<TestEntity> query = em.queryBuilder(TestEntity.class).join("&entity,&otherEntity").create();
 
         final List<TestEntity> entities = query.prepare().selectList();
 
@@ -198,7 +198,7 @@ public abstract class TestAbstractEntity extends AbstractJUnit4SpringContextTest
 
     @Test
     public void tesJoin_2() {
-        final IQuery<TestEntity> query = em.queryBuilder(TestEntity.class).join("#entity").create();
+        final IQuery<TestEntity> query = em.queryBuilder(TestEntity.class).join("&entity").create();
 
         final List<TestEntity> entities = query.prepare().selectList();
 
@@ -225,7 +225,7 @@ public abstract class TestAbstractEntity extends AbstractJUnit4SpringContextTest
 
     @Test
     public void testJoin_4() {
-        final IQuery<TestEntity> query = em.queryBuilder(TestEntity.class).join("entityWithCondition").create();
+        final IQuery<TestEntity> query = em.queryBuilder(TestEntity.class).join("!entityWithCondition").create();
 
         final List<TestEntity> entities = query.prepare().selectList();
         Assert.assertEquals(entities.size(), 3000);

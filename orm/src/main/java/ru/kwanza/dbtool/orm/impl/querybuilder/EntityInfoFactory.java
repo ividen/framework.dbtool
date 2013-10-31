@@ -7,27 +7,31 @@ import ru.kwanza.dbtool.orm.api.internal.IRelationMapping;
 /**
  * @author Alexander Guzanov
  */
-class JoinRelationFactory {
+class EntityInfoFactory {
     private final AbstractQueryBuilder builder;
-    private final JoinRelation root;
+    private final EntityInfo root;
     private int aliasCounter;
 
-    JoinRelationFactory(AbstractQueryBuilder builder) {
+    EntityInfoFactory(AbstractQueryBuilder builder) {
         this.builder = builder;
         this.aliasCounter = 1;
 
-        this.root = new JoinRelation(builder.getRegistry().getEntityType(builder.getEntityClass()));
+        this.root = new EntityInfo(builder.getRegistry().getEntityType(builder.getEntityClass()));
     }
 
-    JoinRelation getRoot() {
+    EntityInfo getRoot() {
         return root;
     }
 
-    JoinRelation registerRelation(JoinRelation root, Join.Type type, String propertyName) {
-        JoinRelation joinRelation = root.getChild(propertyName);
+    EntityInfo registerInfo(EntityInfo root, Join.Type type, String propertyName) {
+        EntityInfo entityInfo = root.getChild(propertyName);
 
-        if (joinRelation != null) {
-            return joinRelation;
+        if (entityInfo != null) {
+            if(type!=entityInfo.getJoinType() && entityInfo.getJoinType()== Join.Type.FETCH){
+                entityInfo.setJoinType(type);
+            }
+
+            return entityInfo;
         }
 
         Class entityClass = root.isRoot() ? builder.getEntityClass() : root.getRelationMapping().getRelationClass();
@@ -39,8 +43,8 @@ class JoinRelationFactory {
             throw new IllegalArgumentException("Wrong relation name for " + entityClass.getName() + " : " + propertyName + " !");
         }
 
-        joinRelation = new JoinRelation(type,entityType, "t" + aliasCounter++, relationMapping);
-        root.addChild(propertyName, joinRelation);
-        return joinRelation;
+        entityInfo = new EntityInfo(type,entityType, "t" + aliasCounter++, relationMapping);
+        root.addChild(propertyName, entityInfo);
+        return entityInfo;
     }
 }

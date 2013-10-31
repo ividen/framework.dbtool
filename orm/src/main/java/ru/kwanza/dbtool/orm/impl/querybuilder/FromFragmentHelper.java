@@ -3,6 +3,8 @@ package ru.kwanza.dbtool.orm.impl.querybuilder;
 import ru.kwanza.dbtool.orm.api.Join;
 import ru.kwanza.dbtool.orm.api.internal.IEntityType;
 
+import java.util.ArrayList;
+
 /**
  * @author Alexander Guzanov
  */
@@ -13,8 +15,18 @@ class FromFragmentHelper {
         this.builder = builder;
     }
 
-    String createFromFragment(Parameters holder) {
-        final JoinRelation rootRelations = builder.getRelationFactory().getRoot();
+    static class Result {
+        String sqlPart;
+        ArrayList<EntityInfo> fetchEntities;
+
+        Result(String sqlPart, ArrayList<EntityInfo> fetchEntities) {
+            this.sqlPart = sqlPart;
+            this.fetchEntities = fetchEntities;
+        }
+    }
+
+    Result createFromFragment(Parameters holder) {
+        final EntityInfo rootRelations = builder.getEntityInfoFactory().getRoot();
         final StringBuilder fromPart = new StringBuilder();
         if (rootRelations.getEntityType().getSql() != null) {
             fromPart.append('(').append(rootRelations.getEntityType().getSql()).append(") ");
@@ -22,42 +34,44 @@ class FromFragmentHelper {
 
         fromPart.append(rootRelations.getAlias());
 
+        ArrayList<EntityInfo> fetchEntities = new ArrayList<EntityInfo>();
+
         if (rootRelations != null) {
-            processJoinRelation(fromPart, rootRelations, holder);
+            processJoinRelation(fromPart, rootRelations, holder, fetchEntities);
         }
-        return fromPart.toString();
+        return new Result(fromPart.toString(), fetchEntities);
     }
 
-    private void processJoinRelation(StringBuilder fromPart, JoinRelation rootRelations, Parameters holder) {
-        if (rootRelations.hasChilds()) {
-            for (JoinRelation joinRelation : rootRelations.getAllChilds().values()) {
-                final Class relationClass = joinRelation.getRelationMapping().getRelationClass();
+    private void processJoinRelation(StringBuilder fromPart, EntityInfo root, Parameters holder, ArrayList<EntityInfo> fetchEntities) {
+        if (root.hasChilds()) {
+            for (EntityInfo entityInfo : root.getAllChilds().values()) {
+                if (entityInfo.getJoinType() == Join.Type.FETCH) {
+                    fetchEntities.add(entityInfo) continue;
+                } final Class relationClass = entityInfo.getRelationMapping().getRelationClass();
                 StringBuilder extConditionPart = null;
                 Parameters joinHolder = null;
-                if (joinRelation.getRelationMapping().getCondition() != null) {
+                if (entityInfo.getRelationMapping().getCondition() != null) {
                     joinHolder = new Parameters();
                     extConditionPart = new StringBuilder();
                     builder.getWhereFragmentHelper()
-                            .createConditionString(joinRelation, joinRelation.getRelationMapping().getCondition(), extConditionPart,
+                            .createConditionString(entityInfo, entityInfo.getRelationMapping().getCondition(), extConditionPart,
                                     joinHolder);
                 }
-                fromPart.append(joinRelation.getType() == Join.Type.LEFT ? " LEFT JOIN " : " INNER JOIN ");
+                fromPart.append(entityInfo.getJoinType() == Join.Type.LEFT ? " LEFT JOIN " : " INNER JOIN ");
                 final IEntityType entityType = builder.getRegistry().getEntityType(relationClass);
-                if (joinRelation.hasChilds()) {
-                    fromPart.append('(').append(getTableName(entityType)).append(' ')
-                            .append(joinRelation.getAlias());
-                    processJoinRelation(fromPart, joinRelation, holder);
+                if (entityInfo.hasChilds()) {
+                    fromPart.append('(').append(getTableName(entityType)).append(' ').append(entityInfo.getAlias());
+                    processJoinRelation(fromPart, entityInfo, holder, fetchEntities);
                     fromPart.append(')');
                 } else {
-                    fromPart.append(getTableName(entityType)).append(' ')
-                            .append(joinRelation.getAlias());
+                    fromPart.append(getTableName(entityType)).append(' ').append(entityInfo.getAlias());
                 }
 
-                fromPart.append(" ON ")
-                        .append(rootRelations.getAlias() == null ? builder.getRegistry().getEntityType(builder.getEntityClass())
-                                .getTableName() : rootRelations.getAlias()).append('.')
-                        .append(joinRelation.getRelationMapping().getKeyMapping().getColumn()).append('=').append(joinRelation.getAlias())
-                        .append('.').append(joinRelation.getRelationMapping().getRelationKeyMapping().getColumn()).append(' ');
+                fromPart.append(" ON ").append(root.getAlias() == null
+                        ? builder.getRegistry().getEntityType(builder.getEntityClass()).getTableName()
+                        : root.getAlias()).append('.').append(entityInfo.getRelationMapping().getKeyMapping().getColumn()).append('=')
+                        .append(entityInfo.getAlias()).append('.')
+                        .append(entityInfo.getRelationMapping().getRelationKeyMapping().getColumn()).append(' ');
                 if (extConditionPart != null) {
                     fromPart.append(" AND (").append(extConditionPart).append(')');
                     holder.join(joinHolder);
@@ -68,6 +82,6 @@ class FromFragmentHelper {
 
     private String getTableName(IEntityType entityType) {
         final String sql = entityType.getSql();
-        return sql==null? entityType.getTableName(): "("+sql+") ";
+        return sql == null ? entityType.getTableName() : "(" + sql + ") ";
     }
 }

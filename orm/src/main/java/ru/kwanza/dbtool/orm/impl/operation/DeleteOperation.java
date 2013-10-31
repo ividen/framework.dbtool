@@ -9,6 +9,7 @@ import ru.kwanza.dbtool.core.UpdateSetter;
 import ru.kwanza.dbtool.core.util.UpdateUtil;
 import ru.kwanza.dbtool.orm.api.internal.IEntityMappingRegistry;
 import ru.kwanza.dbtool.orm.api.internal.IFieldMapping;
+import ru.kwanza.dbtool.orm.impl.EntityManagerImpl;
 import ru.kwanza.toolbox.fieldhelper.Property;
 
 import java.sql.PreparedStatement;
@@ -30,13 +31,13 @@ public class DeleteOperation extends Operation implements IDeleteOperation {
     private UpdateSetter updateSetterByObject = new UpdateSetterByObject();
     private UpdateSetter updateSetterByKey = new UpdateSetterByKey();
 
-    public DeleteOperation(IEntityMappingRegistry registry, DBTool dbTool, Class entityClass) {
-        super(registry, dbTool, entityClass);
+    public DeleteOperation(EntityManagerImpl em, Class entityClass) {
+        super(em, entityClass);
     }
 
     @Override
     protected void initOperation() {
-        final IFieldMapping idField = entityMappingRegistry.getEntityType(entityClass).getIdField();
+        final IFieldMapping idField = em.getRegistry().getEntityType(entityClass).getIdField();
 
         if (idField == null ) {
             throw new RuntimeException("IdFieldMapping for entity class" + entityClass + " not found");
@@ -44,7 +45,7 @@ public class DeleteOperation extends Operation implements IDeleteOperation {
 
         this.idEntityFiled = idField.getProperty();
 
-        final String tableName = entityMappingRegistry.getEntityType(entityClass).getTableName();
+        final String tableName = em.getRegistry().getEntityType(entityClass).getTableName();
         final String idColumnName = idField.getColumn();
 
         this.deleteQuery = buildQuery(tableName, idColumnName);
@@ -69,7 +70,7 @@ public class DeleteOperation extends Operation implements IDeleteOperation {
 
     @SuppressWarnings("unchecked")
     public void executeDelete(Collection objects) throws UpdateException {
-        UpdateUtil.batchUpdate(getJdbcTemplate(), deleteQuery, objects, updateSetterByObject, dbTool.getDbType());
+        UpdateUtil.batchUpdate(getJdbcTemplate(), deleteQuery, objects, updateSetterByObject, em.getDbTool().getDbType());
     }
 
     public void executeDeleteByKey(Object key) throws UpdateException {
@@ -78,7 +79,7 @@ public class DeleteOperation extends Operation implements IDeleteOperation {
 
     @SuppressWarnings("unchecked")
     public void executeDeleteByKeys(Collection keys) throws UpdateException {
-        UpdateUtil.batchUpdate(getJdbcTemplate(), deleteQuery, keys, updateSetterByKey, dbTool.getDbType());
+        UpdateUtil.batchUpdate(getJdbcTemplate(), deleteQuery, keys, updateSetterByKey, em.getDbTool().getDbType());
     }
 
     private class UpdateSetterByObject implements UpdateSetter {

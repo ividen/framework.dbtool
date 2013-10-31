@@ -10,6 +10,7 @@ import ru.kwanza.dbtool.core.util.UpdateUtil;
 import ru.kwanza.dbtool.orm.api.internal.IEntityMappingRegistry;
 import ru.kwanza.dbtool.orm.api.internal.IEntityType;
 import ru.kwanza.dbtool.orm.api.internal.IFieldMapping;
+import ru.kwanza.dbtool.orm.impl.EntityManagerImpl;
 import ru.kwanza.toolbox.fieldhelper.Property;
 
 import java.sql.PreparedStatement;
@@ -32,13 +33,13 @@ public class CreateOperation extends Operation implements ICreateOperation {
 
     private UpdateSetter updateSetter = new CreateOperationSetter();
 
-    public CreateOperation(IEntityMappingRegistry registry, DBTool dbTool, Class entityClass) {
-        super(registry, dbTool, entityClass);
+    public CreateOperation(EntityManagerImpl em, Class entityClass) {
+        super(em, entityClass);
     }
 
     @Override
     protected void initOperation() {
-        final IEntityType entityType = entityMappingRegistry.getEntityType(entityClass);
+        final IEntityType entityType = em.getRegistry().getEntityType(entityClass);
         this.fieldMappings = entityType.getFields();
         this.versionFieldMapping = entityType.getVersionField();
 
@@ -56,7 +57,7 @@ public class CreateOperation extends Operation implements ICreateOperation {
 
     @SuppressWarnings("unchecked")
     public void executeCreate(Collection objects) throws UpdateException {
-        UpdateUtil.batchUpdate(getJdbcTemplate(), createQuery, objects, updateSetter, dbTool.getDbType());
+        UpdateUtil.batchUpdate(getJdbcTemplate(), createQuery, objects, updateSetter, em.getDbTool().getDbType());
     }
 
     private String buildQuery(String tableName, Collection<IFieldMapping> fields) {

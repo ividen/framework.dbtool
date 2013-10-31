@@ -3,24 +3,21 @@ package ru.kwanza.dbtool.orm.impl.operation;
 import org.springframework.jdbc.core.JdbcTemplate;
 import ru.kwanza.dbtool.core.DBTool;
 import ru.kwanza.dbtool.orm.api.internal.IEntityMappingRegistry;
+import ru.kwanza.dbtool.orm.impl.EntityManagerImpl;
 
 /**
  * @author Kiryl Karatsetski
  */
 public abstract class Operation {
 
-    protected IEntityMappingRegistry entityMappingRegistry;
-
-    protected DBTool dbTool;
-
+    protected EntityManagerImpl em;
     protected Class entityClass;
 
-    protected Operation(IEntityMappingRegistry entityMappingRegistry, DBTool dbTool, Class entityClass) {
-        if (!entityMappingRegistry.isRegisteredEntityClass(entityClass)) {
+    protected Operation(EntityManagerImpl em, Class entityClass) {
+        if (!em.getRegistry().isRegisteredEntityClass(entityClass)) {
             throw new RuntimeException("Not registered entity class: " + entityClass);
         }
-        this.entityMappingRegistry = entityMappingRegistry;
-        this.dbTool = dbTool;
+        this.em = em;
         this.entityClass = entityClass;
         initOperation();
     }
@@ -28,6 +25,6 @@ public abstract class Operation {
     protected abstract void initOperation();
 
     protected JdbcTemplate getJdbcTemplate() {
-        return dbTool.getJdbcTemplate();
+        return em.getDbTool().getJdbcTemplate();
     }
 }
