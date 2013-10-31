@@ -15,7 +15,6 @@ import ru.kwanza.dbtool.orm.api.ListProducer;
 import ru.kwanza.dbtool.orm.api.internal.IEntityType;
 import ru.kwanza.dbtool.orm.api.internal.IFieldMapping;
 import ru.kwanza.dbtool.orm.impl.ObjectAllocator;
-import ru.kwanza.dbtool.orm.impl.fetcher.FetchInfo;
 import ru.kwanza.dbtool.orm.impl.mapping.UnionEntityType;
 import ru.kwanza.toolbox.fieldhelper.Property;
 
@@ -93,7 +92,6 @@ public abstract class StatementImpl<T> implements IStatement<T> {
     public List<T> selectList() {
         final LinkedList<T> result = new LinkedList<T>();
         selectList(result);
-        fetchRelationsIfNeed(result);
         return result;
     }
 
@@ -108,7 +106,6 @@ public abstract class StatementImpl<T> implements IStatement<T> {
                             }
                         }, getParamValues(), getResultSetType());
 
-        fetchRelationsIfNeed(result);
     }
 
     public <F> void selectMapList(String propertyName, final Map<F, List<T>> result, final ListProducer<T> listProducer) {
@@ -130,14 +127,6 @@ public abstract class StatementImpl<T> implements IStatement<T> {
                 }
             }
         }, getParamValues(), getResultSetType());
-
-        if (getConfig().getFetchInfo() != null) {
-            ArrayList<T> values = new ArrayList<T>();
-            for (List<T> r : result.values()) {
-                values.addAll(r);
-            }
-            fetchRelationsIfNeed(values);
-        }
     }
 
     public <F> void selectMap(String propertyName, final Map<F, T> result) {
@@ -155,7 +144,6 @@ public abstract class StatementImpl<T> implements IStatement<T> {
             }
         }, getParamValues(), getResultSetType());
 
-        fetchRelationsIfNeed(result.values());
     }
 
     public Map<Object, T> selectMap(String propertyName) {
@@ -168,13 +156,6 @@ public abstract class StatementImpl<T> implements IStatement<T> {
         final Map<Object, List<T>> result = new LinkedHashMap<Object, List<T>>();
         selectMapList(propertyName, result, ListProducer.LINKED_LIST);
         return result;
-    }
-
-    private void fetchRelationsIfNeed(Collection<T> items) {
-        final List<FetchInfo> fetchConfig = getConfig().getFetchInfo();
-        if (fetchConfig != null) {
-            config.getEntityManager().getFetcher().fetch(items, fetchConfig);
-        }
     }
 
     public IStatement<T> setParameter(int index, Object value) {
@@ -253,10 +234,10 @@ public abstract class StatementImpl<T> implements IStatement<T> {
 
             while (rs.next()) {
                 T result;
-                final IEntityType entityType = getEntityType(config.getRootRelation(), rs, config.getEntityClass());
+                final IEntityType entityType = getEntityType(config.getRoot(), rs, config.getEntityClass());
                 result = (T) createObject(entityType);
-                readAndFill(rs, entityType.getFields(), config.getRootRelation(), result);
-                readRelation(result, config.getRootRelation(), rs);
+                readAndFill(rs, entityType.getFields(), config.getRoot(), result);
+                readEntities(result, config.getRoot(), rs);
 
                 objects.add(getValue(result));
             }
@@ -266,7 +247,7 @@ public abstract class StatementImpl<T> implements IStatement<T> {
 
         public abstract TYPE getValue(Object e);
 
-        private void readRelation(Object parentObj, EntityInfo relation, ResultSet rs) throws SQLException {
+        private void readEntities(Object parentObj, EntityInfo relation, ResultSet rs) throws SQLException {
             if (relation == null) {
                 return;
             }
@@ -289,7 +270,7 @@ public abstract class StatementImpl<T> implements IStatement<T> {
 
             if (relation.getAllChilds() != null) {
                 for (EntityInfo entityInfo : relation.getAllChilds().values()) {
-                    readRelation(obj, entityInfo, rs);
+                    readEntities(obj, entityInfo, rs);
                 }
             }
 

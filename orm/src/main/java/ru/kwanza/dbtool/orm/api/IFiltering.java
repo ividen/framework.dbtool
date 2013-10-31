@@ -7,11 +7,11 @@ public interface IFiltering<T> extends ISelectOperationProvider<T> {
 
     IFiltering<T> paging(Integer offset, Integer maxSize);
 
-    IFiltering<T> join(String joinClause);
+    IFiltering<T> join(String join);
 
     IFiltering<T> join(Join join);
 
-    IFiltering<T> join(boolean use, String joinClause);
+    IFiltering<T> join(boolean use, String join);
 
     IFiltering<T> join(boolean use, Join join);
 

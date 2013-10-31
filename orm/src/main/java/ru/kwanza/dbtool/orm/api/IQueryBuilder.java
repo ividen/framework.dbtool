@@ -9,7 +9,7 @@ public interface IQueryBuilder<T> {
 
     IQuery<T> createNative(String sql);
 
-    IQueryBuilder<T> join(Join joinClause);
+    IQueryBuilder<T> join(Join join);
 
     IQueryBuilder<T> join(String string);
 

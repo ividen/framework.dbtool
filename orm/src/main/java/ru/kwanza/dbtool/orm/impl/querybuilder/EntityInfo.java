@@ -1,5 +1,6 @@
 package ru.kwanza.dbtool.orm.impl.querybuilder;
 
+import ru.kwanza.dbtool.orm.api.IQuery;
 import ru.kwanza.dbtool.orm.api.Join;
 import ru.kwanza.dbtool.orm.api.internal.IEntityType;
 import ru.kwanza.dbtool.orm.api.internal.IRelationMapping;
@@ -12,13 +13,14 @@ import java.util.Map;
  */
 class EntityInfo {
     private String alias;
-    private Join.Type joinType;
+    private Join join;
     private IEntityType entityType;
     private IRelationMapping relationMapping;
     private Map<String, EntityInfo> childs;
+    private IQuery fetchQuery;
 
-    EntityInfo(Join.Type joinType, IEntityType entityType, String alias, IRelationMapping relationMapping) {
-        this.joinType = joinType;
+    EntityInfo(Join join, IEntityType entityType, String alias, IRelationMapping relationMapping) {
+        this.join = join;
         this.alias = alias;
         this.entityType = entityType;
         this.relationMapping = relationMapping;
@@ -34,11 +36,19 @@ class EntityInfo {
     }
 
     boolean isRoot() {
-        return joinType == null;
+        return join == null;
     }
 
     Join.Type getJoinType() {
-        return joinType;
+        return join.getType();
+    }
+
+    Join getJoin() {
+        return join;
+    }
+
+    void setJoin(Join join) {
+        this.join = join;
     }
 
     String getAlias() {
@@ -69,7 +79,15 @@ class EntityInfo {
         return childs != null && !childs.isEmpty();
     }
 
-    public void setJoinType(Join.Type joinType) {
-        this.joinType = joinType;
+    public void setJoinType(Join join) {
+        this.join = join;
+    }
+
+    public void setFetchQuery(IQuery fetchQuery) {
+        this.fetchQuery = fetchQuery;
+    }
+
+    public IQuery getFetchQuery() {
+        return fetchQuery;
     }
 }

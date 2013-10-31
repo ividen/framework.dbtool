@@ -1,7 +1,7 @@
 package ru.kwanza.dbtool.orm.impl.filtering;
 
 import ru.kwanza.dbtool.orm.api.*;
-import ru.kwanza.dbtool.orm.impl.querybuilder.JoinClauseHelper;
+import ru.kwanza.dbtool.orm.impl.querybuilder.JoinHelper;
 import ru.kwanza.dbtool.orm.impl.querybuilder.OrderByFragmentHelper;
 
 import java.util.ArrayList;
@@ -34,8 +34,8 @@ public class FilteringImpl<T> implements IFiltering<T> {
         return this;
     }
 
-    public IFiltering<T> join(String joinClause) {
-        getJoins().addAll(JoinClauseHelper.parse(joinClause));
+    public IFiltering<T> join(String join) {
+        getJoins().addAll(JoinHelper.parse(join));
         return this;
     }
 
@@ -44,12 +44,12 @@ public class FilteringImpl<T> implements IFiltering<T> {
         return this;
     }
 
-    public IFiltering<T> join(boolean use, String joinClause) {
+    public IFiltering<T> join(boolean use, String join) {
         if (!use) {
             return this;
         }
 
-        return join(joinClause);
+        return join(join);
     }
 
     public IFiltering<T> join(boolean use, Join join) {

@@ -9,6 +9,8 @@ import ru.kwanza.toolbox.fieldhelper.Property;
 import ru.kwanza.toolbox.splitter.Splitter;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -23,7 +25,7 @@ class RelationMapping implements IRelationMapping {
     private final If condition;
     private final Splitter groupBy;
     private final GroupByType groupByType;
-    private Join[] joins = null;
+    private List<Join> joins = null;
 
     public RelationMapping(String name, Class relationClass, IFieldMapping keyMapping, IFieldMapping relationKeyMapping,
                            Property property) {
@@ -31,7 +33,7 @@ class RelationMapping implements IRelationMapping {
     }
 
     public RelationMapping(String name, Class relationClass, IFieldMapping keyMapping, IFieldMapping relationKeyMapping, Property property,
-                           If condition, Property[] groupBy, GroupByType groupByType, Join[] joins) {
+                           If condition, Property[] groupBy, GroupByType groupByType,  List<Join> joins) {
         this.name = name;
         this.relationClass = relationClass;
         this.keyMapping = keyMapping;
@@ -40,10 +42,10 @@ class RelationMapping implements IRelationMapping {
         this.condition = condition;
         this.groupBy = groupBy == null ? null : new Splitter(groupBy);
         this.groupByType = groupByType;
-        this.joins = joins;
+        this.joins = joins==null? Collections.<Join>emptyList():joins;
     }
 
-    public Join[] getJoins() {
+    public List<Join> getJoins() {
         return joins;
     }
 

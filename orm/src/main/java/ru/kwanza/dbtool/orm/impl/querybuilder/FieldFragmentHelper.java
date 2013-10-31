@@ -1,5 +1,6 @@
 package ru.kwanza.dbtool.orm.impl.querybuilder;
 
+import ru.kwanza.dbtool.orm.api.Join;
 import ru.kwanza.dbtool.orm.api.internal.IFieldMapping;
 
 import java.util.Collection;
@@ -16,8 +17,9 @@ class FieldFragmentHelper {
 
     String createFieldsFragment() {
         StringBuilder result = new StringBuilder();
-        String alias =
-                builder.getEntityInfoFactory().getRoot().getAllChilds() == null ? null : builder.getEntityInfoFactory().getRoot().getAlias();
+        String alias = builder.getEntityInfoFactory().getRoot().getAllChilds() == null
+                ? null
+                : builder.getEntityInfoFactory().getRoot().getAlias();
         processFields(alias, builder.getEntityInfoFactory().getRoot(), result);
         result.deleteCharAt(result.length() - 1);
         return result.toString();
@@ -40,7 +42,9 @@ class FieldFragmentHelper {
         }
         if (root != null && root.getAllChilds() != null) {
             for (EntityInfo entityInfo : root.getAllChilds().values()) {
-                processFields(entityInfo.getAlias(), entityInfo, result);
+                if (entityInfo.getJoinType() != Join.Type.FETCH) {
+                    processFields(entityInfo.getAlias(), entityInfo, result);
+                }
             }
         }
     }

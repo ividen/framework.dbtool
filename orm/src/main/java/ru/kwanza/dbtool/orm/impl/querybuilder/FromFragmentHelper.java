@@ -46,8 +46,10 @@ class FromFragmentHelper {
         if (root.hasChilds()) {
             for (EntityInfo entityInfo : root.getAllChilds().values()) {
                 if (entityInfo.getJoinType() == Join.Type.FETCH) {
-                    fetchEntities.add(entityInfo) continue;
-                } final Class relationClass = entityInfo.getRelationMapping().getRelationClass();
+                    fetchEntities.add(entityInfo);
+                    continue;
+                }
+                final Class relationClass = entityInfo.getRelationMapping().getRelationClass();
                 StringBuilder extConditionPart = null;
                 Parameters joinHolder = null;
                 if (entityInfo.getRelationMapping().getCondition() != null) {

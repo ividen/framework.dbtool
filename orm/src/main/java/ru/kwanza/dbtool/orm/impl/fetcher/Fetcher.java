@@ -353,10 +353,9 @@ public class Fetcher extends SpringSerializable {
             condition = If.and(condition, relationMapping.getCondition());
         }
         IQueryBuilder queryBuilder = em.queryBuilder(relationMapping.getRelationClass()).where(condition);
-        if (relationMapping.getJoins() != null) {
-            for (Join join : relationMapping.getJoins()) {
-                queryBuilder.join(join);
-            }
+
+        for (Join join : relationMapping.getJoins()) {
+            queryBuilder.join(join);
         }
 
         fetchInfo = new FetchInfo(relation, relationMapping, queryBuilder.create());

@@ -230,28 +230,24 @@ public class EntityMappingRegistry implements IEntityMappingRegistry {
         return new RelationMapping(name, relationClass, propertyMapping, relationPropertyMapping, fetchField);
     }
 
-    private Join[] getJoinsForGroupBy(Class relationClass, Property[] groupBy) {
+    private List<Join> getJoinsForGroupBy(Class relationClass, Property[] groupBy) {
         if (groupBy == null || groupBy.length == 0) {
             return null;
         }
-        final Collection<Join> joins = new ArrayList<Join>();
+        final List<Join> joins = new ArrayList<Join>();
         if (groupBy != null) {
             for (Property p : groupBy) {
-                final Join[] j = parseGroupBy(relationClass, p.getName());
+                final Join j = parseGroupBy(relationClass, p.getName());
                 if (j != null) {
-                    joins.add(j[0]);
+                    joins.add(j);
                 }
             }
         }
 
-        if (!joins.isEmpty()) {
-            return joins.toArray(new Join[]{});
-        }
-
-        return null;
+        return joins;
     }
 
-    private Join[] parseGroupBy(Class relationClass, String name) {
+    private Join parseGroupBy(Class relationClass, String name) {
         if (!entityTypeByEntityClass.containsKey(relationClass)) {
             registerEntityClass(relationClass);
         }
@@ -263,11 +259,11 @@ public class EntityMappingRegistry implements IEntityMappingRegistry {
                 throw new IllegalArgumentException("Can't process groupBy for relation " + propertyName + " in " + relationClass.getName());
             }
 
-            return new Join[]{Join.inner(propertyName, parseGroupBy(relationMapping.getRelationClass(), name.substring(index + 1)))};
+            return Join.inner(propertyName, parseGroupBy(relationMapping.getRelationClass(), name.substring(index + 1)));
         } else {
             final IRelationMapping relationMapping = getEntityType(relationClass).getRelation(name);
             if (relationMapping != null) {
-                return new Join[]{Join.inner(name, parseGroupBy(relationMapping.getRelationClass(), name.substring(index + 1)))};
+                return Join.inner(name, parseGroupBy(relationMapping.getRelationClass(), name.substring(index + 1)));
             }
             return null;
         }

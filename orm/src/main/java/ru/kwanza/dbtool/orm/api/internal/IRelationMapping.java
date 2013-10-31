@@ -6,11 +6,13 @@ import ru.kwanza.dbtool.orm.api.Join;
 import ru.kwanza.toolbox.fieldhelper.Property;
 import ru.kwanza.toolbox.splitter.Splitter;
 
+import java.util.List;
+
 /**
  * @author Alexander Guzanov
  */
 public interface IRelationMapping {
-    public Join[] getJoins();
+    public List<Join> getJoins();
 
     public IFieldMapping getKeyMapping();
 

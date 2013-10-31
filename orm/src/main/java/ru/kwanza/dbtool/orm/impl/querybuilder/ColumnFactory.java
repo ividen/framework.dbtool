@@ -26,7 +26,7 @@ class ColumnFactory {
             StringTokenizer st = new StringTokenizer(path, ".");
             while (st.hasMoreElements()) {
                 final String token = st.nextToken();
-                root = builder.getEntityInfoFactory().registerInfo(root, Join.Type.INNER, token);
+                root = builder.getEntityInfoFactory().registerInfo(root, Join.inner(token));
                 entityClass = root.getRelationMapping().getRelationClass();
             }
         }

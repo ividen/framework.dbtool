@@ -10,11 +10,11 @@ import java.util.Map;
 /**
  * @author Alexander Guzanov
  */
-public class JoinClauseHelper {
+public class JoinHelper {
 
-    public static List<Join> parse(String joinClause) {
+    public static List<Join> parse(String join) {
         final ArrayList<Join> result = new ArrayList<Join>();
-        parse(joinClause, result);
+        parse(join, result);
         return result;
     }
 

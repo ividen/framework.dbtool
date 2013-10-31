@@ -197,7 +197,7 @@ public abstract class QueryBuilderWithJoinTest extends AbstractJUnit4SpringConte
     @Test
     public void test8() {
         AbstractQuery<TestEntity> query1 = (AbstractQuery<TestEntity>) em.queryBuilder(TestEntity.class)
-                .join("!entityA, !entityB, !entityC {!entityE{entityG},!entityF} ,!entityD")
+                .join("!entityA, !entityB, !entityC {!entityE{!entityG},!entityF} ,!entityD")
                 .where(If.and(If.isEqual("entityA.title"), If.isEqual("entityB.title"), If.isEqual("entityC.title")))
                 .orderBy("dateField ASC").create();
 
@@ -334,5 +334,90 @@ public abstract class QueryBuilderWithJoinTest extends AbstractJUnit4SpringConte
                         + " ON test_entity.entity_cid=t1.id  AND ((t2.version IS NOT NULL) AND (t3.version > ?)) "
                         + "WHERE t1.title = ?");
     }
+
+    @Test
+    public void test14() {
+        AbstractQuery<TestEntity> query1 = (AbstractQuery<TestEntity>) em.queryBuilder(TestEntity.class)
+                .join("entityA, entityB, entityC {!entityE{!entityG},!entityF} ,!entityD")
+                .where(If.and(If.isEqual("entityA.title"), If.isEqual("entityB.title"), If.isEqual("entityC.title")))
+                .orderBy("dateField ASC").create();
+
+        assertEquals(query1.getConfig().getSql(),
+                "SELECT test_entity.id test_entity_id,test_entity.int_field test_entity_int_field,test_entity.string_field test_entity_string_field,"
+                        + "test_entity.date_field test_entity_date_field,test_entity.short_field test_entity_short_field,"
+                        + "test_entity.version test_entity_version,test_entity.entity_aid test_entity_entity_aid,"
+                        + "test_entity.entity_bid test_entity_entity_bid,test_entity.entity_cid test_entity_entity_cid,"
+                        + "test_entity.entity_did test_entity_entity_did,t5.id t5_id,t5.title t5_title,"
+                        + "t5.version t5_version,t6.id t6_id,t6.title t6_title,t6.version t6_version,t4.id t4_id,t4.title t4_title,"
+                        + "t4.version t4_version,t7.id t7_id,t7.title t7_title,t7.version t7_version,t7.entity_eid t7_entity_eid,"
+                        + "t7.entity_fid t7_entity_fid,t10.id t10_id,t10.title t10_title,t10.version t10_version,"
+                        + "t8.id t8_id,t8.title t8_title,t8.version t8_version,t8.entity_gid t8_entity_gid,"
+                        + "t9.id t9_id,t9.title t9_title,t9.version t9_version FROM test_entity "
+                        + "INNER JOIN test_entity_a t5 ON test_entity.entity_aid=t5.id  INNER JOIN test_entity_b t6 "
+                        + "ON test_entity.entity_bid=t6.id  INNER JOIN test_entity_D t4 ON test_entity.entity_did=t4.id  "
+                        + "INNER JOIN (test_entity_c t7 INNER JOIN test_entity_f t10 ON t7.entity_fid=t10.id  "
+                        + "INNER JOIN (test_entity_e t8 INNER JOIN test_entity_g t9 ON t8.entity_gid=t9.id ) "
+                        + "ON t7.entity_eid=t8.id ) ON test_entity.entity_cid=t7.id  WHERE (t5.title = ?) "
+                        + "AND (t6.title = ?) AND (t7.title = ?) ORDER BY test_entity.date_field ASC");
+    }
+
+
+    @Test
+    public void test15() {
+        AbstractQuery<TestEntity> query1 = (AbstractQuery<TestEntity>) em.queryBuilder(TestEntity.class)
+                .join("entityA, entityB, entityC {entityE{!entityG},entityF} ,entityD")
+                .orderBy("dateField ASC").create();
+
+        assertEquals(query1.getConfig().getSql(),
+                "SELECT test_entity.id test_entity_id,test_entity.int_field test_entity_int_field,"
+                        + "test_entity.string_field test_entity_string_field,test_entity.date_field test_entity_date_field,"
+                        + "test_entity.short_field test_entity_short_field,test_entity.version test_entity_version,"
+                        + "test_entity.entity_aid test_entity_entity_aid,test_entity.entity_bid test_entity_entity_bid,"
+                        + "test_entity.entity_cid test_entity_entity_cid,test_entity.entity_did test_entity_entity_did "
+                        + "FROM test_entity ORDER BY test_entity.date_field ASC");
+    }
+
+
+    @Test
+    public void test16() {
+        AbstractQuery<TestEntity> query1 = (AbstractQuery<TestEntity>) em.queryBuilder(TestEntity.class)
+                .join("entityA, entityB, entityC {entityE{!entityG},entityF} ,entityD")
+                .where(If.isEqual("entityC.entityE.entityG.title"))
+                .orderBy("dateField ASC").create();
+
+        assertEquals(query1.getConfig().getSql(),
+                "SELECT test_entity.id test_entity_id,test_entity.int_field test_entity_int_field,"
+                        + "test_entity.string_field test_entity_string_field,test_entity.date_field test_entity_date_field,"
+                        + "test_entity.short_field test_entity_short_field,test_entity.version test_entity_version,"
+                        + "test_entity.entity_aid test_entity_entity_aid,test_entity.entity_bid test_entity_entity_bid,"
+                        + "test_entity.entity_cid test_entity_entity_cid,test_entity.entity_did test_entity_entity_did,"
+                        + "t5.id t5_id,t5.title t5_title,t5.version t5_version,t5.entity_eid t5_entity_eid,t5.entity_fid t5_entity_fid,"
+                        + "t8.id t8_id,t8.title t8_title,t8.version t8_version,t8.entity_gid t8_entity_gid,t9.id t9_id,t9.title t9_title,"
+                        + "t9.version t9_version FROM test_entity INNER JOIN (test_entity_c t5 INNER JOIN (test_entity_e t8 "
+                        + "INNER JOIN test_entity_g t9 ON t8.entity_gid=t9.id ) ON t5.entity_eid=t8.id ) ON test_entity.entity_cid=t5.id  "
+                        + "WHERE t8.title = ? ORDER BY test_entity.date_field ASC");
+    }
+
+
+    @Test
+    public void test17() {
+        AbstractQuery<TestEntity> query1 = (AbstractQuery<TestEntity>) em.queryBuilder(TestEntity.class)
+                .join("entityA, entityB, entityC {entityE{!entityG},entityF} ,entityD")
+                .where(If.isEqual("entityC.entityE.title"))
+                .orderBy("dateField ASC").create();
+
+        assertEquals(query1.getConfig().getSql(),
+                "SELECT test_entity.id test_entity_id,test_entity.int_field test_entity_int_field,"
+                        + "test_entity.string_field test_entity_string_field,test_entity.date_field test_entity_date_field,"
+                        + "test_entity.short_field test_entity_short_field,test_entity.version test_entity_version,"
+                        + "test_entity.entity_aid test_entity_entity_aid,test_entity.entity_bid test_entity_entity_bid,"
+                        + "test_entity.entity_cid test_entity_entity_cid,test_entity.entity_did test_entity_entity_did,t5.id t5_id,"
+                        + "t5.title t5_title,t5.version t5_version,t5.entity_eid t5_entity_eid,t5.entity_fid t5_entity_fid,t8.id t8_id,"
+                        + "t8.title t8_title,t8.version t8_version,t8.entity_gid t8_entity_gid,t9.id t9_id,t9.title t9_title,"
+                        + "t9.version t9_version FROM test_entity INNER JOIN (test_entity_c t5 INNER JOIN (test_entity_e t8 "
+                        + "INNER JOIN test_entity_g t9 ON t8.entity_gid=t9.id ) ON t5.entity_eid=t8.id ) ON test_entity.entity_cid=t5.id "
+                        + " WHERE t8.title = ? ORDER BY test_entity.date_field ASC");
+    }
+
 
 }

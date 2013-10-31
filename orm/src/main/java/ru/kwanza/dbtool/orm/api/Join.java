@@ -1,12 +1,16 @@
 package ru.kwanza.dbtool.orm.api;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 /**
  * @author Alexander Guzanov
  */
 public final class Join {
     private final Type type;
     private final String propertyName;
-    private final Join[] subJoins;
+    private final List<Join> subJoins;
 
     public enum Type {
         INNER,
@@ -15,6 +19,13 @@ public final class Join {
     }
 
     Join(Type type, String propertyName, Join[] subJoins) {
+        this.propertyName = propertyName;
+        this.type = type;
+        this.subJoins = subJoins==null? Collections.<Join>emptyList(): Arrays.asList(subJoins);
+    }
+
+
+    Join(Type type, String propertyName, List<Join> subJoins) {
         this.propertyName = propertyName;
         this.type = type;
         this.subJoins = subJoins;
@@ -28,7 +39,7 @@ public final class Join {
         return propertyName;
     }
 
-    public Join[] getSubJoins() {
+    public List<Join> getSubJoins() {
         return subJoins;
     }
 
@@ -41,6 +52,18 @@ public final class Join {
     }
 
     public static Join fetch(String property, Join... subJoins) {
+        return new Join(Type.FETCH, property, subJoins);
+    }
+
+    public static Join left(String property, List<Join> subJoins) {
+        return new Join(Type.LEFT, property, subJoins);
+    }
+
+    public static Join inner(String property, List<Join> subJoins) {
+        return new Join(Type.INNER, property, subJoins);
+    }
+
+    public static Join fetch(String property, List<Join> subJoins) {
         return new Join(Type.FETCH, property, subJoins);
     }
 }

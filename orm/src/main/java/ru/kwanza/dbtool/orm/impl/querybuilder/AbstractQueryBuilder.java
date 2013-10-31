@@ -4,10 +4,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.kwanza.dbtool.orm.api.*;
 import ru.kwanza.dbtool.orm.api.internal.IEntityMappingRegistry;
+import ru.kwanza.dbtool.orm.api.internal.IFieldMapping;
+import ru.kwanza.dbtool.orm.api.internal.IRelationMapping;
 import ru.kwanza.dbtool.orm.impl.EntityManagerImpl;
-import ru.kwanza.dbtool.orm.impl.fetcher.FetchInfo;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -82,42 +84,53 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
         Parameters whereParams = new Parameters();
         Parameters joinParams = new Parameters();
 
-        String where = whereFragmentHelper.createWhereFragment(this.condition, whereParams);
-        String orderBy = orderByFragmentHelper.createOrderByFragment();
-        String from = fromFragmentHelper.createFromFragment(joinParams);
-        String fieldsString = fieldFragmentHelper.createFieldsFragment();
+        final String where = whereFragmentHelper.createWhereFragment(this.condition, whereParams);
+        final String orderBy = orderByFragmentHelper.createOrderByFragment();
+        final FromFragmentHelper.Result result = fromFragmentHelper.createFromFragment(joinParams);
+        final String from = result.sqlPart;
+        final String fieldsString = fieldFragmentHelper.createFieldsFragment();
+        final StringBuilder sql = createSQLString(fieldsString, from, where, orderBy);
 
-        StringBuilder sql = createSQLString(fieldsString, from, where, orderBy);
-
-        String sqlString = sql.toString();
+        final String sqlString = sql.toString();
         logger.debug("Creating query {}", sqlString);
 
-        return createQuery(createConfig(entityInfoFactory.getRoot(), sqlString, joinParams.join(whereParams)));
+        for (EntityInfo fetchEntity : result.fetchEntities) {
+            final IRelationMapping relationMapping = fetchEntity.getRelationMapping();
+            IFieldMapping relation = relationMapping.getRelationKeyMapping();
+            If condition = If.in(relation.getName());
+            if (relationMapping.getCondition() != null) {
+                condition = If.and(condition, relationMapping.getCondition());
+            }
+            IQueryBuilder queryBuilder = em.queryBuilder(relationMapping.getRelationClass()).where(condition);
+            for (Join join : relationMapping.getJoins()) {
+                queryBuilder.join(join);
+            }
+
+            for (Join join : fetchEntity.getJoin().getSubJoins()) {
+                queryBuilder.join(join);
+            }
+            fetchEntity.setFetchQuery(queryBuilder.create());
+        }
+
+        return createQuery(createConfig(entityInfoFactory.getRoot(), sqlString, joinParams.join(whereParams),result.fetchEntities));
     }
 
     public IQueryBuilder<T> join(String string) {
-        for (Join join : JoinClauseHelper.parse(string)) {
+        for (Join join : JoinHelper.parse(string)) {
             processJoin(entityInfoFactory.getRoot(), join);
         }
 
         return this;
     }
 
-    public IQueryBuilder<T> join(Join joinClause) {
-        processJoin(entityInfoFactory.getRoot(), joinClause);
+    public IQueryBuilder<T> join(Join join) {
+        processJoin(entityInfoFactory.getRoot(), join);
 
         return this;
     }
 
-    private void processJoin(EntityInfo root, Join joinClause) {
-        EntityInfo entityInfo = entityInfoFactory.registerInfo(root, joinClause.getType(), joinClause.getPropertyName());
-        if (entityInfo.getJoinType() != Join.Type.FETCH) {
-            if (joinClause != null && joinClause.getSubJoins() != null) {
-                for (Join join : joinClause.getSubJoins()) {
-                    processJoin(entityInfo, join);
-                }
-            }
-        }
+    private void processJoin(EntityInfo root, Join join) {
+        entityInfoFactory.registerInfo(root, join);
     }
 
     protected abstract IQuery<T> createQuery(QueryConfig config);
@@ -125,11 +138,11 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
     public IQuery<T> createNative(String sql) {
         Parameters holder = new Parameters();
         String preparedSql = SQLParser.prepareSQL(sql, holder);
-        return createQuery(createConfig(entityInfoFactory.getRoot(), preparedSql, holder));
+        return createQuery(createConfig(entityInfoFactory.getRoot(), preparedSql, holder, Collections.<EntityInfo>emptyList()));
     }
 
-    private QueryConfig<T> createConfig(EntityInfo rootRelations, String sqlString, Parameters holder) {
-        return new QueryConfig<T>(em, entityClass, sqlString, rootRelations, holder, null);
+    private QueryConfig<T> createConfig(EntityInfo rootRelations, String sqlString, Parameters holder, List<EntityInfo> fetchEntities) {
+        return new QueryConfig<T>(em, entityClass, sqlString, rootRelations, holder, fetchEntities);
     }
 
     protected StringBuilder createSQLString(String fieldsString, String from, String where, String orderBy) {
