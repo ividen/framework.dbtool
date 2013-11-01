@@ -520,4 +520,71 @@ public abstract class QueryTest extends AbstractJUnit4SpringContextTests {
 
     }
 
+    @Test
+    public void testWithJoin_6() {
+
+        final IQuery<TestEntity> query = em.queryBuilder(TestEntity.class).join("!associatedEntityC,entityC{entityE,entityF}")
+                .where(If.and(If.isEqual("intField", If.valueOf(10)), If.isEqual("entityAID"), If.isEqual("shortField", If.valueOf(1))))
+                .create();
+
+        final List<TestEntity> testEntities = query.prepare().setParameter(1, 0).selectList();
+
+        Assert.assertEquals(testEntities.size(), 2);
+
+        for (TestEntity testEntity : testEntities) {
+            Assert.assertEquals(testEntity.getAssociatedEntityC().getId(), testEntity.getEntityC().getId());
+            Assert.assertEquals(testEntity.getAssociatedEntityC().getId(), testEntity.getEntityCID());
+            Assert.assertEquals(testEntity.getAssociatedEntityC().getEntityE().getId(), testEntity.getAssociatedEntityC().getEntityEID());
+            Assert.assertEquals(testEntity.getAssociatedEntityC().getEntityF().getId(), testEntity.getAssociatedEntityC().getEntityFID());
+            assertNull(testEntity.getAssociatedEntityA());
+            assertNull(testEntity.getAssociatedEntityC().getEntityE().getEntityG());
+        }
+
+    }
+
+    @Test
+    public void testWithJoin_7() {
+
+        final IQuery<TestEntity> query = em.queryBuilder(TestEntity.class).join("!associatedEntityC,entityC{!entityE,entityF}")
+                .where(If.and(If.isEqual("intField", If.valueOf(10)), If.isEqual("entityAID"), If.isEqual("shortField", If.valueOf(1))))
+                .create();
+
+        final List<TestEntity> testEntities = query.prepare().setParameter(1, 0).selectList();
+
+        Assert.assertEquals(testEntities.size(), 2);
+
+        for (TestEntity testEntity : testEntities) {
+            Assert.assertEquals(testEntity.getAssociatedEntityC().getId(), testEntity.getEntityC().getId());
+            Assert.assertEquals(testEntity.getAssociatedEntityC().getId(), testEntity.getEntityCID());
+            Assert.assertEquals(testEntity.getAssociatedEntityC().getEntityE().getId(), testEntity.getAssociatedEntityC().getEntityEID());
+            Assert.assertEquals(testEntity.getAssociatedEntityC().getEntityF().getId(), testEntity.getAssociatedEntityC().getEntityFID());
+            assertNull(testEntity.getAssociatedEntityA());
+            assertNull(testEntity.getAssociatedEntityC().getEntityE().getEntityG());
+        }
+
+    }
+
+
+    @Test
+    public void testWithJoin_8() {
+
+        final IQuery<TestEntity> query = em.queryBuilder(TestEntity.class).join("!associatedEntityC,entityC{!entityE,!entityF}")
+                .where(If.and(If.isEqual("intField", If.valueOf(10)), If.isEqual("entityAID"), If.isEqual("shortField", If.valueOf(1))))
+                .create();
+
+        final List<TestEntity> testEntities = query.prepare().setParameter(1, 0).selectList();
+
+        Assert.assertEquals(testEntities.size(), 2);
+
+        for (TestEntity testEntity : testEntities) {
+            Assert.assertEquals(testEntity.getAssociatedEntityC().getId(), testEntity.getEntityC().getId());
+            Assert.assertEquals(testEntity.getAssociatedEntityC().getId(), testEntity.getEntityCID());
+            Assert.assertEquals(testEntity.getAssociatedEntityC().getEntityE().getId(), testEntity.getAssociatedEntityC().getEntityEID());
+            Assert.assertEquals(testEntity.getAssociatedEntityC().getEntityF().getId(), testEntity.getAssociatedEntityC().getEntityFID());
+            assertNull(testEntity.getAssociatedEntityA());
+            assertNull(testEntity.getAssociatedEntityC().getEntityE().getEntityG());
+        }
+
+    }
+
 }
