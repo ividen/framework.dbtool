@@ -4,8 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.kwanza.dbtool.orm.api.*;
 import ru.kwanza.dbtool.orm.api.internal.IEntityMappingRegistry;
-import ru.kwanza.dbtool.orm.api.internal.IFieldMapping;
-import ru.kwanza.dbtool.orm.api.internal.IRelationMapping;
 import ru.kwanza.dbtool.orm.impl.EntityManagerImpl;
 
 import java.util.ArrayList;
@@ -60,6 +58,10 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
         return em.getRegistry();
     }
 
+    EntityManagerImpl getEm() {
+        return em;
+    }
+
     WhereFragmentHelper getWhereFragmentHelper() {
         return whereFragmentHelper;
     }
@@ -94,25 +96,7 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
         final String sqlString = sql.toString();
         logger.debug("Creating query {}", sqlString);
 
-        for (EntityInfo fetchEntity : result.fetchEntities) {
-            final IRelationMapping relationMapping = fetchEntity.getRelationMapping();
-            IFieldMapping relation = relationMapping.getRelationKeyMapping();
-            If condition = If.in(relation.getName());
-            if (relationMapping.getCondition() != null) {
-                condition = If.and(condition, relationMapping.getCondition());
-            }
-            IQueryBuilder queryBuilder = em.queryBuilder(relationMapping.getRelationClass()).where(condition);
-            for (Join join : relationMapping.getJoins()) {
-                queryBuilder.join(join);
-            }
-
-            for (Join join : fetchEntity.getJoin().getSubJoins()) {
-                queryBuilder.join(join);
-            }
-            fetchEntity.setFetchQuery(queryBuilder.create());
-        }
-
-        return createQuery(createConfig(entityInfoFactory.getRoot(), sqlString, joinParams.join(whereParams),result.fetchEntities));
+        return createQuery(createConfig(entityInfoFactory.getRoot(), sqlString, joinParams.join(whereParams), result.fetchEntities));
     }
 
     public IQueryBuilder<T> join(String string) {

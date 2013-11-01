@@ -68,7 +68,7 @@ class EntityInfoFactory {
             throw new IllegalArgumentException("Wrong relation name for " + entityClass.getName() + " : " + join.getPropertyName() + " !");
         }
 
-        entityInfo = new EntityInfo(join, entityType, "t" + aliasCounter++, relationMapping);
+        entityInfo = new EntityInfo(builder.getEm(), join, entityType, "t" + aliasCounter++, relationMapping);
         root.addChild(join.getPropertyName(), entityInfo);
         return entityInfo;
     }

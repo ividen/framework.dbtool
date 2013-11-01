@@ -3,13 +3,21 @@ package ru.kwanza.dbtool.orm.impl.fetcher;
 /**
  * @author Alexander Guzanov
  */
-class RelationKey {
+public class FetchEntry {
     private Class entityClass;
-    private String relationPropertyName;
+    private String fetchQuery;
 
-    RelationKey(Class entityClass, String relationPropertyName) {
+    public FetchEntry(Class entityClass, String fetchQuery) {
         this.entityClass = entityClass;
-        this.relationPropertyName = relationPropertyName;
+        this.fetchQuery = fetchQuery;
+    }
+
+    public Class getEntityClass() {
+        return entityClass;
+    }
+
+    public String getFetchQuery() {
+        return fetchQuery;
     }
 
     @Override
@@ -21,12 +29,12 @@ class RelationKey {
             return false;
         }
 
-        RelationKey that = (RelationKey) o;
+        FetchEntry that = (FetchEntry) o;
 
         if (!entityClass.equals(that.entityClass)) {
             return false;
         }
-        if (!relationPropertyName.equals(that.relationPropertyName)) {
+        if (!fetchQuery.equals(that.fetchQuery)) {
             return false;
         }
 
@@ -36,7 +44,7 @@ class RelationKey {
     @Override
     public int hashCode() {
         int result = entityClass.hashCode();
-        result = 31 * result + relationPropertyName.hashCode();
+        result = 31 * result + fetchQuery.hashCode();
         return result;
     }
 }

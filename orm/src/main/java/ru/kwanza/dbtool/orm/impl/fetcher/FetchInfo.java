@@ -1,26 +1,41 @@
 package ru.kwanza.dbtool.orm.impl.fetcher;
 
-import ru.kwanza.dbtool.orm.api.IQuery;
+import ru.kwanza.dbtool.orm.api.*;
 import ru.kwanza.dbtool.orm.api.internal.IFieldMapping;
 import ru.kwanza.dbtool.orm.api.internal.IRelationMapping;
 import ru.kwanza.dbtool.orm.impl.fetcher.proxy.IProxy;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
  * @author Alexander Guzanov
  */
 public class FetchInfo {
-    private IFieldMapping idField;
     private IRelationMapping relationMapping;
     private IQuery fetchQuery;
 
-    public FetchInfo(IFieldMapping idField, IRelationMapping relationMapping, IQuery fetchQuery) {
-        this.idField = idField;
+    public FetchInfo(IEntityManager em, IRelationMapping relationMapping, List<Join> subJoins) {
         this.relationMapping = relationMapping;
-        this.fetchQuery = fetchQuery;
+
+        IFieldMapping relation = relationMapping.getRelationKeyMapping();
+        If condition = If.in(relation.getName());
+        if (relationMapping.getCondition() != null) {
+            condition = If.and(condition, relationMapping.getCondition());
+        }
+        IQueryBuilder queryBuilder = em.queryBuilder(relationMapping.getRelationClass()).where(condition);
+
+        for (Join join : relationMapping.getJoins()) {
+            queryBuilder.join(join);
+        }
+
+        for (Join join : subJoins) {
+            queryBuilder.join(join);
+        }
+
+        this.fetchQuery = queryBuilder.create();
     }
 
     public IRelationMapping getRelationMapping() {
@@ -29,6 +44,10 @@ public class FetchInfo {
 
     public IQuery getFetchQuery() {
         return fetchQuery;
+    }
+
+    public void setFetchQuery(IQuery fetchQuery) {
+        this.fetchQuery = fetchQuery;
     }
 
     public Set getRelationIds(Collection objs) {
@@ -55,6 +74,6 @@ public class FetchInfo {
     }
 
     public String getIDGroupingField() {
-        return idField.getName();
+        return relationMapping.getRelationKeyMapping().getName();
     }
 }

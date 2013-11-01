@@ -26,23 +26,23 @@ class FromFragmentHelper {
     }
 
     Result createFromFragment(Parameters holder) {
-        final EntityInfo rootRelations = builder.getEntityInfoFactory().getRoot();
+        final EntityInfo root = builder.getEntityInfoFactory().getRoot();
         final StringBuilder fromPart = new StringBuilder();
-        if (rootRelations.getEntityType().getSql() != null) {
-            fromPart.append('(').append(rootRelations.getEntityType().getSql()).append(") ");
+        if (root.getEntityType().getSql() != null) {
+            fromPart.append('(').append(root.getEntityType().getSql()).append(") ");
         }
 
-        fromPart.append(rootRelations.getAlias());
+        fromPart.append(root.getAlias());
 
         ArrayList<EntityInfo> fetchEntities = new ArrayList<EntityInfo>();
 
-        if (rootRelations != null) {
-            processJoinRelation(fromPart, rootRelations, holder, fetchEntities);
+        if (root != null) {
+            processJoin(fromPart, root, holder, fetchEntities);
         }
         return new Result(fromPart.toString(), fetchEntities);
     }
 
-    private void processJoinRelation(StringBuilder fromPart, EntityInfo root, Parameters holder, ArrayList<EntityInfo> fetchEntities) {
+    private void processJoin(StringBuilder fromPart, EntityInfo root, Parameters holder, ArrayList<EntityInfo> fetchEntities) {
         if (root.hasChilds()) {
             for (EntityInfo entityInfo : root.getAllChilds().values()) {
                 if (entityInfo.getJoinType() == Join.Type.FETCH) {
@@ -63,7 +63,7 @@ class FromFragmentHelper {
                 final IEntityType entityType = builder.getRegistry().getEntityType(relationClass);
                 if (entityInfo.hasChilds()) {
                     fromPart.append('(').append(getTableName(entityType)).append(' ').append(entityInfo.getAlias());
-                    processJoinRelation(fromPart, entityInfo, holder, fetchEntities);
+                    processJoin(fromPart, entityInfo, holder, fetchEntities);
                     fromPart.append(')');
                 } else {
                     fromPart.append(getTableName(entityType)).append(' ').append(entityInfo.getAlias());

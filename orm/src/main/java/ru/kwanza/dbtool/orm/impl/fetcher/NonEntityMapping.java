@@ -3,6 +3,8 @@ package ru.kwanza.dbtool.orm.impl.fetcher;
 import ru.kwanza.dbtool.orm.annotations.Association;
 import ru.kwanza.dbtool.orm.annotations.ManyToOne;
 import ru.kwanza.dbtool.orm.annotations.OneToMany;
+import ru.kwanza.dbtool.orm.api.internal.IEntityMappingRegistry;
+import ru.kwanza.dbtool.orm.api.internal.IEntityType;
 import ru.kwanza.dbtool.orm.api.internal.IRelationMapping;
 import ru.kwanza.dbtool.orm.impl.mapping.EntityMappingHelper;
 import ru.kwanza.dbtool.orm.impl.mapping.EntityMappingRegistry;
@@ -17,24 +19,11 @@ import java.util.concurrent.ConcurrentMap;
 /**
  * @author Alexander Guzanov
  */
-class NonEntityMapping {
+class NonEntityMapping implements IEntityMappingRegistry {
     @Resource(name = "dbtool.IEntityMappingRegistry")
     private EntityMappingRegistry registry;
 
-    private ConcurrentMap<Class, Map<String, IRelationMapping>> cache = new ConcurrentHashMap<Class, Map<String, IRelationMapping>>();
-
-    public Map<String, IRelationMapping> get(Class entityClass) {
-        Map<String, IRelationMapping> mappings = cache.get(entityClass);
-        if (mappings == null) {
-            mappings = new HashMap<String, IRelationMapping>();
-            parseClass(entityClass, mappings);
-            if (null != cache.putIfAbsent(entityClass, mappings)) {
-                mappings = cache.get(entityClass);
-            }
-        }
-
-        return mappings;
-    }
+    private ConcurrentMap<Class, IEntityType> cache = new ConcurrentHashMap<Class, IEntityType>();
 
     private void parseClass(Class aClass, Map<String, IRelationMapping> mappings) {
         if (aClass == Object.class) {
@@ -68,5 +57,34 @@ class NonEntityMapping {
     private void processManyToOne(Class aClass, Map<String, IRelationMapping> mappings, AnnotatedElement annotatedElement) {
         final IRelationMapping relationMapping = registry.parseManyToOne(aClass, annotatedElement);
         mappings.put(relationMapping.getName(), relationMapping);
+    }
+
+    public void registerEntityClass(Class entityClass) {
+        IEntityType type = cache.get(entityClass);
+        if (type == null) {
+            Map<String, IRelationMapping> relations = new HashMap<String, IRelationMapping>();
+            parseClass(entityClass, relations);
+            type = new NonORMEntity(entityClass, relations);
+            if (null != cache.putIfAbsent(entityClass, type)) {
+                type = cache.get(entityClass);
+            }
+        }
+
+    }
+
+    public boolean isRegisteredEntityClass(Class entityClass) {
+        return cache.containsKey(entityClass);
+    }
+
+    public boolean isRegisteredEntityName(String entityName) {
+        throw new UnsupportedOperationException();
+    }
+
+    public IEntityType getEntityType(String name) {
+        throw new UnsupportedOperationException();
+    }
+
+    public IEntityType getEntityType(Class name) {
+        return cache.get(name);
     }
 }
