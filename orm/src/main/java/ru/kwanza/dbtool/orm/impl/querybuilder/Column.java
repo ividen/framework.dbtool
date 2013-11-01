@@ -15,7 +15,7 @@ class Column {
     }
 
     static String getFullColumnName(EntityInfo relation, IFieldMapping fieldMapping) {
-        if (relation.isRoot() && relation.getAllChilds() == null) {
+        if (relation.isRoot() && relation.getJoins() == null) {
             return fieldMapping.getColumn();
         }
         return relation.getAlias() + "_" + fieldMapping.getColumn();

@@ -15,17 +15,8 @@ class FromFragmentHelper {
         this.builder = builder;
     }
 
-    static class Result {
-        String sqlPart;
-        ArrayList<EntityInfo> fetchEntities;
 
-        Result(String sqlPart, ArrayList<EntityInfo> fetchEntities) {
-            this.sqlPart = sqlPart;
-            this.fetchEntities = fetchEntities;
-        }
-    }
-
-    Result createFromFragment(Parameters holder) {
+    String createFromFragment(Parameters holder) {
         final EntityInfo root = builder.getEntityInfoFactory().getRoot();
         final StringBuilder fromPart = new StringBuilder();
         if (root.getEntityType().getSql() != null) {
@@ -34,21 +25,15 @@ class FromFragmentHelper {
 
         fromPart.append(root.getAlias());
 
-        ArrayList<EntityInfo> fetchEntities = new ArrayList<EntityInfo>();
-
         if (root != null) {
-            processJoin(fromPart, root, holder, fetchEntities);
+            processJoin(fromPart, root, holder);
         }
-        return new Result(fromPart.toString(), fetchEntities);
+        return fromPart.toString();
     }
 
-    private void processJoin(StringBuilder fromPart, EntityInfo root, Parameters holder, ArrayList<EntityInfo> fetchEntities) {
-        if (root.hasChilds()) {
-            for (EntityInfo entityInfo : root.getAllChilds().values()) {
-                if (entityInfo.getJoinType() == Join.Type.FETCH) {
-                    fetchEntities.add(entityInfo);
-                    continue;
-                }
+    private void processJoin(StringBuilder fromPart, EntityInfo root, Parameters holder) {
+        if (root.hasJoins()) {
+            for (EntityInfo entityInfo : root.getJoins().values()) {
                 final Class relationClass = entityInfo.getRelationMapping().getRelationClass();
                 StringBuilder extConditionPart = null;
                 Parameters joinHolder = null;
@@ -61,9 +46,9 @@ class FromFragmentHelper {
                 }
                 fromPart.append(entityInfo.getJoinType() == Join.Type.LEFT ? " LEFT JOIN " : " INNER JOIN ");
                 final IEntityType entityType = builder.getRegistry().getEntityType(relationClass);
-                if (entityInfo.hasChilds()) {
+                if (entityInfo.hasJoins()) {
                     fromPart.append('(').append(getTableName(entityType)).append(' ').append(entityInfo.getAlias());
-                    processJoin(fromPart, entityInfo, holder, fetchEntities);
+                    processJoin(fromPart, entityInfo, holder);
                     fromPart.append(')');
                 } else {
                     fromPart.append(getTableName(entityType)).append(' ').append(entityInfo.getAlias());

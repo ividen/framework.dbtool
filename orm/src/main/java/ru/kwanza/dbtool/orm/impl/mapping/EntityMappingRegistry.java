@@ -232,22 +232,19 @@ public class EntityMappingRegistry implements IEntityMappingRegistry {
 
     private List<Join> getJoinsForGroupBy(Class relationClass, Property[] groupBy) {
         if (groupBy == null || groupBy.length == 0) {
-            return null;
+            return Collections.emptyList();
         }
         final List<Join> joins = new ArrayList<Join>();
         if (groupBy != null) {
             for (Property p : groupBy) {
-                final Join j = parseGroupBy(relationClass, p.getName());
-                if (j != null) {
-                    joins.add(j);
-                }
+                joins.addAll(parseGroupBy(relationClass, p.getName()));
             }
         }
 
         return joins;
     }
 
-    private Join parseGroupBy(Class relationClass, String name) {
+    private List<Join> parseGroupBy(Class relationClass, String name) {
         if (!entityTypeByEntityClass.containsKey(relationClass)) {
             registerEntityClass(relationClass);
         }
@@ -259,13 +256,15 @@ public class EntityMappingRegistry implements IEntityMappingRegistry {
                 throw new IllegalArgumentException("Can't process groupBy for relation " + propertyName + " in " + relationClass.getName());
             }
 
-            return Join.inner(propertyName, parseGroupBy(relationMapping.getRelationClass(), name.substring(index + 1)));
+            return Collections
+                    .singletonList(Join.inner(propertyName, parseGroupBy(relationMapping.getRelationClass(), name.substring(index + 1))));
         } else {
             final IRelationMapping relationMapping = getEntityType(relationClass).getRelation(name);
             if (relationMapping != null) {
-                return Join.inner(name, parseGroupBy(relationMapping.getRelationClass(), name.substring(index + 1)));
+                return Collections
+                        .singletonList(Join.inner(name, parseGroupBy(relationMapping.getRelationClass(), name.substring(index + 1))));
             }
-            return null;
+            return Collections.emptyList();
         }
     }
 

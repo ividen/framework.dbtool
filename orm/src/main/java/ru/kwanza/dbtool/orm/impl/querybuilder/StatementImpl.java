@@ -17,6 +17,7 @@ import ru.kwanza.dbtool.orm.api.internal.IEntityType;
 import ru.kwanza.dbtool.orm.api.internal.IFieldMapping;
 import ru.kwanza.dbtool.orm.impl.ObjectAllocator;
 import ru.kwanza.dbtool.orm.impl.mapping.UnionEntityType;
+import ru.kwanza.toolbox.fieldhelper.FieldHelper;
 import ru.kwanza.toolbox.fieldhelper.Property;
 
 import java.sql.ResultSet;
@@ -200,6 +201,11 @@ public abstract class StatementImpl<T> implements IStatement<T> {
 
     private class ObjectExtractor<T> extends BaseExtractor<T> {
         @Override
+        protected Collection getFetchableObjects(ArrayList<T> objects) {
+            return objects;
+        }
+
+        @Override
         public T getValue(Object e) {
             return (T) e;
         }
@@ -213,13 +219,21 @@ public abstract class StatementImpl<T> implements IStatement<T> {
         }
 
         @Override
+        protected Collection getFetchableObjects(ArrayList<KeyValue<Object, T>> objects) {
+            return FieldHelper.getFieldCollection(objects,new FieldHelper.Field<KeyValue<Object, T>,T>() {
+                public Object value(KeyValue o) {
+                    return o.getValue();
+                }
+            });
+        }
+
+        @Override
         public KeyValue<Object, T> getValue(Object e) {
             return new KeyValue<Object, T>(field.value(e), (T) e);
         }
     }
 
     private abstract class BaseExtractor<TYPE> implements ResultSetExtractor {
-        private Map<EntityInfo, Set> relationsIds = new HashMap<EntityInfo, Set>();
 
         public Collection<TYPE> extractData(ResultSet rs) throws SQLException, DataAccessException {
 
@@ -245,28 +259,18 @@ public abstract class StatementImpl<T> implements IStatement<T> {
                 objects.add(getValue(result));
             }
 
-
-            config.getEntityManager().getFetcher().fetch(objects, EntityInfo.getFetchInfo(config.getFetchEntities()));
+            if (!config.getFetchInfo().isEmpty()) {
+                config.getEntityManager().getFetcher().fetch(getFetchableObjects(objects), config.getFetchInfo());
+            }
 
             return objects;
         }
 
+        protected abstract Collection getFetchableObjects(ArrayList<TYPE> objects);
+
         public abstract TYPE getValue(Object e);
 
         private void readEntities(Object parentObj, EntityInfo entityInfo, ResultSet rs) throws SQLException {
-            if (!entityInfo.isRoot() && entityInfo.getJoinType()== Join.Type.FETCH) {
-                 Set set = relationsIds.get(entityInfo);
-                if(set==null){
-                    set = new HashSet();
-                    relationsIds.put(entityInfo,set);
-                }
-
-                final IFieldMapping idf = entityInfo.getRelationMapping().getKeyMapping();
-                set.add(FieldValueExtractor.getValue(rs, Column.getFullColumnName(entityInfo, idf), idf.getProperty().getType()));
-
-                return;
-            }
-
             Object obj;
             if (!entityInfo.isRoot()) {
                 final Class relationClass = entityInfo.getRelationMapping().getRelationClass();
@@ -283,8 +287,8 @@ public abstract class StatementImpl<T> implements IStatement<T> {
                 obj = parentObj;
             }
 
-            if (entityInfo.getAllChilds() != null) {
-                for (EntityInfo subEntityInfo : entityInfo.getAllChilds().values()) {
+            if (entityInfo.getJoins() != null) {
+                for (EntityInfo subEntityInfo : entityInfo.getJoins().values()) {
                     readEntities(obj, subEntityInfo, rs);
                 }
             }
@@ -333,6 +337,11 @@ public abstract class StatementImpl<T> implements IStatement<T> {
 
     private class SingleObjectObjectExtractor<T> extends ObjectExtractor<T> {
         private boolean getted = false;
+
+        @Override
+        protected Collection getFetchableObjects(ArrayList<T> objects) {
+            return objects;
+        }
 
         @Override
         public T getValue(Object e) {

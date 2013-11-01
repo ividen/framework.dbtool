@@ -5,10 +5,12 @@ import org.slf4j.LoggerFactory;
 import ru.kwanza.dbtool.orm.api.*;
 import ru.kwanza.dbtool.orm.api.internal.IEntityMappingRegistry;
 import ru.kwanza.dbtool.orm.impl.EntityManagerImpl;
+import ru.kwanza.dbtool.orm.impl.fetcher.FetchInfo;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Alexander Guzanov
@@ -88,15 +90,39 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
 
         final String where = whereFragmentHelper.createWhereFragment(this.condition, whereParams);
         final String orderBy = orderByFragmentHelper.createOrderByFragment();
-        final FromFragmentHelper.Result result = fromFragmentHelper.createFromFragment(joinParams);
-        final String from = result.sqlPart;
+        final String from = fromFragmentHelper.createFromFragment(joinParams);
         final String fieldsString = fieldFragmentHelper.createFieldsFragment();
         final StringBuilder sql = createSQLString(fieldsString, from, where, orderBy);
 
         final String sqlString = sql.toString();
         logger.debug("Creating query {}", sqlString);
 
-        return createQuery(createConfig(entityInfoFactory.getRoot(), sqlString, joinParams.join(whereParams), result.fetchEntities));
+        return createQuery(createConfig(entityInfoFactory.getRoot(), sqlString, joinParams.join(whereParams), createFetchInfo()));
+    }
+
+    private List<FetchInfo> createFetchInfo() {
+        List<FetchInfo> result = new ArrayList<FetchInfo>();
+
+        createFetchList(entityInfoFactory.getRoot(), result);
+
+
+        return result;
+    }
+
+    private void createFetchList(EntityInfo entityInfo, List<FetchInfo> result) {
+        if (entityInfo.hasFetches()) {
+            for (Map.Entry<String, Join> entry : entityInfo.getFetches().entrySet()) {
+                result.addAll(em.getFetcher()
+                        .getFetchInfo(entityInfo.getEntityType().getEntityClass(), Collections.singletonList(entry.getValue())));
+            }
+        }
+
+        if (entityInfo.hasJoins()) {
+            for (EntityInfo info : entityInfo.getJoins().values()) {
+                createFetchList(info, result);
+            }
+
+        }
     }
 
     public IQueryBuilder<T> join(String string) {
@@ -122,11 +148,11 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
     public IQuery<T> createNative(String sql) {
         Parameters holder = new Parameters();
         String preparedSql = SQLParser.prepareSQL(sql, holder);
-        return createQuery(createConfig(entityInfoFactory.getRoot(), preparedSql, holder, Collections.<EntityInfo>emptyList()));
+        return createQuery(createConfig(entityInfoFactory.getRoot(), preparedSql, holder, Collections.<FetchInfo>emptyList()));
     }
 
-    private QueryConfig<T> createConfig(EntityInfo rootRelations, String sqlString, Parameters holder, List<EntityInfo> fetchEntities) {
-        return new QueryConfig<T>(em, entityClass, sqlString, rootRelations, holder, fetchEntities);
+    private QueryConfig<T> createConfig(EntityInfo rootRelations, String sqlString, Parameters holder, List<FetchInfo> fetchInfo) {
+        return new QueryConfig<T>(em, entityClass, sqlString, rootRelations, holder, fetchInfo);
     }
 
     protected StringBuilder createSQLString(String fieldsString, String from, String where, String orderBy) {

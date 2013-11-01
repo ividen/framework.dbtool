@@ -17,7 +17,7 @@ class FieldFragmentHelper {
 
     String createFieldsFragment() {
         StringBuilder result = new StringBuilder();
-        String alias = builder.getEntityInfoFactory().getRoot().getAllChilds() == null
+        String alias = builder.getEntityInfoFactory().getRoot().getJoins() == null
                 ? null
                 : builder.getEntityInfoFactory().getRoot().getAlias();
         processFields(alias, builder.getEntityInfoFactory().getRoot(), result);
@@ -40,8 +40,8 @@ class FieldFragmentHelper {
             }
 
         }
-        if (root != null && root.getAllChilds() != null) {
-            for (EntityInfo entityInfo : root.getAllChilds().values()) {
+        if (root != null && root.getJoins() != null) {
+            for (EntityInfo entityInfo : root.getJoins().values()) {
                 if (entityInfo.getJoinType() != Join.Type.FETCH) {
                     processFields(entityInfo.getAlias(), entityInfo, result);
                 }

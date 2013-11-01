@@ -15,10 +15,10 @@ public class QueryConfig<T> {
     private final EntityInfo rootRelation;
     private final ParamsHolder holder;
 
-    private List<EntityInfo> fetchEntities;
+    private List<FetchInfo> fetchEntities;
 
     QueryConfig(EntityManagerImpl em, Class<T> entityClass, String sql, EntityInfo rootRelations, Parameters parameters,
-                List<EntityInfo> fetchEntities) {
+                List<FetchInfo> fetchEntities) {
         this.sql = sql;
         this.em = em;
         this.entityClass = entityClass;
@@ -47,7 +47,7 @@ public class QueryConfig<T> {
         return holder;
     }
 
-    public List<EntityInfo> getFetchEntities() {
+    public List<FetchInfo> getFetchInfo() {
         return fetchEntities;
     }
 }

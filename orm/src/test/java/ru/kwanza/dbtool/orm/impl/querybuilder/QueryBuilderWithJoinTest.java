@@ -324,23 +324,18 @@ public abstract class QueryBuilderWithJoinTest extends AbstractJUnit4SpringConte
                 .where(If.and(If.isEqual("entityA.title"), If.isEqual("entityB.title"), If.isEqual("entityC.title")))
                 .orderBy("dateField ASC").create();
 
-        assertEquals(query1.getConfig().getSql(),
-                "SELECT test_entity.id test_entity_id,test_entity.int_field test_entity_int_field,test_entity.string_field test_entity_string_field,"
-                        + "test_entity.date_field test_entity_date_field,test_entity.short_field test_entity_short_field,"
-                        + "test_entity.version test_entity_version,test_entity.entity_aid test_entity_entity_aid,"
-                        + "test_entity.entity_bid test_entity_entity_bid,test_entity.entity_cid test_entity_entity_cid,"
-                        + "test_entity.entity_did test_entity_entity_did,t5.id t5_id,t5.title t5_title,"
-                        + "t5.version t5_version,t6.id t6_id,t6.title t6_title,t6.version t6_version,t4.id t4_id,t4.title t4_title,"
-                        + "t4.version t4_version,t7.id t7_id,t7.title t7_title,t7.version t7_version,t7.entity_eid t7_entity_eid,"
-                        + "t7.entity_fid t7_entity_fid,t10.id t10_id,t10.title t10_title,t10.version t10_version,"
-                        + "t8.id t8_id,t8.title t8_title,t8.version t8_version,t8.entity_gid t8_entity_gid,"
-                        + "t9.id t9_id,t9.title t9_title,t9.version t9_version FROM test_entity "
-                        + "INNER JOIN test_entity_a t5 ON test_entity.entity_aid=t5.id  INNER JOIN test_entity_b t6 "
-                        + "ON test_entity.entity_bid=t6.id  INNER JOIN test_entity_D t4 ON test_entity.entity_did=t4.id  "
-                        + "INNER JOIN (test_entity_c t7 INNER JOIN test_entity_f t10 ON t7.entity_fid=t10.id  "
-                        + "INNER JOIN (test_entity_e t8 INNER JOIN test_entity_g t9 ON t8.entity_gid=t9.id ) "
-                        + "ON t7.entity_eid=t8.id ) ON test_entity.entity_cid=t7.id  WHERE (t5.title = ?) "
-                        + "AND (t6.title = ?) AND (t7.title = ?) ORDER BY test_entity.date_field ASC");
+        assertEquals(query1.getConfig().getSql(), "SELECT test_entity.id test_entity_id,test_entity.int_field test_entity_int_field,"
+                + "test_entity.string_field test_entity_string_field,test_entity.date_field test_entity_date_field,"
+                + "test_entity.short_field test_entity_short_field,test_entity.version test_entity_version,"
+                + "test_entity.entity_aid test_entity_entity_aid,test_entity.entity_bid test_entity_entity_bid,"
+                + "test_entity.entity_cid test_entity_entity_cid,test_entity.entity_did test_entity_entity_did,t2.id t2_id,"
+                + "t2.title t2_title,t2.version t2_version,t3.id t3_id,t3.title t3_title,t3.version t3_version,t1.id t1_id,"
+                + "t1.title t1_title,t1.version t1_version,t4.id t4_id,t4.title t4_title,t4.version t4_version,"
+                + "t4.entity_eid t4_entity_eid,t4.entity_fid t4_entity_fid FROM test_entity "
+                + "INNER JOIN test_entity_a t2 ON test_entity.entity_aid=t2.id  "
+                + "INNER JOIN test_entity_b t3 ON test_entity.entity_bid=t3.id  INNER JOIN test_entity_D t1 "
+                + "ON test_entity.entity_did=t1.id  INNER JOIN test_entity_c t4 ON test_entity.entity_cid=t4.id  "
+                + "WHERE (t2.title = ?) AND (t3.title = ?) AND (t4.title = ?) ORDER BY test_entity.date_field ASC");
     }
 
     @Test
@@ -348,12 +343,8 @@ public abstract class QueryBuilderWithJoinTest extends AbstractJUnit4SpringConte
         AbstractQuery<TestEntity> query1 = (AbstractQuery<TestEntity>) em.queryBuilder(TestEntity.class)
                 .join("entityA, entityB, entityC {entityE{!entityG},entityF} ,entityD").orderBy("dateField ASC").create();
 
-        assertEquals(query1.getConfig().getSql(), "SELECT test_entity.id test_entity_id,test_entity.int_field test_entity_int_field,"
-                + "test_entity.string_field test_entity_string_field,test_entity.date_field test_entity_date_field,"
-                + "test_entity.short_field test_entity_short_field,test_entity.version test_entity_version,"
-                + "test_entity.entity_aid test_entity_entity_aid,test_entity.entity_bid test_entity_entity_bid,"
-                + "test_entity.entity_cid test_entity_entity_cid,test_entity.entity_did test_entity_entity_did "
-                + "FROM test_entity ORDER BY test_entity.date_field ASC");
+        assertEquals(query1.getConfig().getSql(), "SELECT id,int_field,string_field,date_field,short_field,version,entity_aid,entity_bid,"
+                + "entity_cid,entity_did FROM test_entity ORDER BY test_entity.date_field ASC");
     }
 
     @Test
@@ -363,15 +354,14 @@ public abstract class QueryBuilderWithJoinTest extends AbstractJUnit4SpringConte
                 .orderBy("dateField ASC").create();
 
         assertEquals(query1.getConfig().getSql(), "SELECT test_entity.id test_entity_id,test_entity.int_field test_entity_int_field,"
-                + "test_entity.string_field test_entity_string_field,test_entity.date_field test_entity_date_field,"
-                + "test_entity.short_field test_entity_short_field,test_entity.version test_entity_version,"
-                + "test_entity.entity_aid test_entity_entity_aid,test_entity.entity_bid test_entity_entity_bid,"
-                + "test_entity.entity_cid test_entity_entity_cid,test_entity.entity_did test_entity_entity_did,t5.id t5_id,"
-                + "t5.title t5_title,t5.version t5_version,t5.entity_eid t5_entity_eid,t5.entity_fid t5_entity_fid,t8.id t8_id,"
-                + "t8.title t8_title,t8.version t8_version,t8.entity_gid t8_entity_gid,t9.id t9_id,t9.title t9_title,"
-                + "t9.version t9_version FROM test_entity INNER JOIN (test_entity_c t5 INNER JOIN (test_entity_e t8 "
-                + "INNER JOIN test_entity_g t9 ON t8.entity_gid=t9.id ) ON t5.entity_eid=t8.id ) ON test_entity.entity_cid=t5.id  "
-                + "WHERE t9.title = ? ORDER BY test_entity.date_field ASC");
+                + "test_entity.string_field test_entity_string_field,test_entity.date_field test_entity_date_field,test_entity.short_fi"
+                + "eld test_entity_short_field,test_entity.version test_entity_version,test_entity.entity_aid test_entity_entity_aid,test_en"
+                + "tity.entity_bid test_entity_entity_bid,test_entity.entity_cid test_entity_entity_cid,test_entity.entity_did test_entity_"
+                + "entity_did,t1.id t1_id,t1.title t1_title,t1.version t1_version,t1.entity_eid t1_entity_eid,t1.entity_fid t1_entity_fid,"
+                + "t2.id t2_id,t2.title t2_title,t2.version t2_version,t2.entity_gid t2_entity_gid,t3.id t3_id,t3.title t3_title,t3.versi"
+                + "on t3_version FROM test_entity INNER JOIN (test_entity_c t1 INNER JOIN (test_entity_e t2 INNER JOIN test_entity_g t3 O"
+                + "N t2.entity_gid=t3.id ) ON t1.entity_eid=t2.id ) ON test_entity.entity_cid=t1.id  WHERE t3.title = ? ORDER BY test_e"
+                + "ntity.date_field ASC");
     }
 
     @Test
@@ -380,16 +370,14 @@ public abstract class QueryBuilderWithJoinTest extends AbstractJUnit4SpringConte
                 .join("entityA, entityB, entityC {entityE{!entityG},entityF} ,entityD").where(If.isEqual("entityC.entityE.title"))
                 .orderBy("dateField ASC").create();
 
-        assertEquals(query1.getConfig().getSql(), "SELECT test_entity.id test_entity_id,test_entity.int_field test_entity_int_field,"
-                + "test_entity.string_field test_entity_string_field,test_entity.date_field test_entity_date_field,"
-                + "test_entity.short_field test_entity_short_field,test_entity.version test_entity_version,"
-                + "test_entity.entity_aid test_entity_entity_aid,test_entity.entity_bid test_entity_entity_bid,"
-                + "test_entity.entity_cid test_entity_entity_cid,test_entity.entity_did test_entity_entity_did,t5.id t5_id,"
-                + "t5.title t5_title,t5.version t5_version,t5.entity_eid t5_entity_eid,t5.entity_fid t5_entity_fid,t8.id t8_id,"
-                + "t8.title t8_title,t8.version t8_version,t8.entity_gid t8_entity_gid,t9.id t9_id,t9.title t9_title,"
-                + "t9.version t9_version FROM test_entity INNER JOIN (test_entity_c t5 INNER JOIN (test_entity_e t8 "
-                + "INNER JOIN test_entity_g t9 ON t8.entity_gid=t9.id ) ON t5.entity_eid=t8.id ) ON test_entity.entity_cid=t5.id "
-                + " WHERE t8.title = ? ORDER BY test_entity.date_field ASC");
+        assertEquals(query1.getConfig().getSql(), "SELECT test_entity.id test_entity_id,test_entity.int_field test_entity_int_field,test"
+                + "_entity.string_field test_entity_string_field,test_entity.date_field test_entity_date_field,test_entity.short_field te"
+                + "st_entity_short_field,test_entity.version test_entity_version,test_entity.entity_aid test_entity_entity_aid,test_entit"
+                + "y.entity_bid test_entity_entity_bid,test_entity.entity_cid test_entity_entity_cid,test_entity.entity_did test_entity_"
+                + "entity_did,t1.id t1_id,t1.title t1_title,t1.version t1_version,t1.entity_eid t1_entity_eid,t1.entity_fid t1_entity_fid"
+                + ",t2.id t2_id,t2.title t2_title,t2.version t2_version,t2.entity_gid t2_entity_gid FROM test_entity INNER JOIN (test_ent"
+                + "ity_c t1 INNER JOIN test_entity_e t2 ON t1.entity_eid=t2.id ) ON test_entity.entity_cid=t1.id  WHERE t2.title = ? O"
+                + "RDER BY test_entity.date_field ASC");
     }
 
     @Test
@@ -398,12 +386,8 @@ public abstract class QueryBuilderWithJoinTest extends AbstractJUnit4SpringConte
                 .join("entityA, entityB, entityC {entityE{entityG},entityF} ,entityD").orderBy("dateField ASC").create();
 
         assertEquals(query1.getConfig().getSql(),
-                "SELECT test_entity.id test_entity_id,test_entity.int_field test_entity_int_field,"
-                        + "test_entity.string_field test_entity_string_field,test_entity.date_field test_entity_date_field,"
-                        + "test_entity.short_field test_entity_short_field,test_entity.version test_entity_version,"
-                        + "test_entity.entity_aid test_entity_entity_aid,test_entity.entity_bid test_entity_entity_bid,"
-                        + "test_entity.entity_cid test_entity_entity_cid,test_entity.entity_did test_entity_entity_did "
-                        + "FROM test_entity ORDER BY test_entity.date_field ASC");
+                "SELECT id,int_field,string_field,date_field,short_field,version,entity_aid,entity_bid,entity_cid,"
+                        + "entity_did FROM test_entity ORDER BY test_entity.date_field ASC");
     }
 
 }

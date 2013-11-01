@@ -1,7 +1,6 @@
 package ru.kwanza.dbtool.orm.impl.fetcher;
 
 import ru.kwanza.dbtool.orm.annotations.GroupByType;
-import ru.kwanza.dbtool.orm.api.IEntityManager;
 import ru.kwanza.dbtool.orm.api.Join;
 import ru.kwanza.dbtool.orm.api.ListProducer;
 import ru.kwanza.dbtool.orm.api.internal.IEntityType;
@@ -30,7 +29,8 @@ public class Fetcher extends SpringSerializable {
     @Resource(name = "dbtool.NonEntityMapping")
     private NonEntityMapping nonEntityMapping;
 
-    private ConcurrentMap<FetchEntry, List<FetchInfo>> cache = new ConcurrentHashMap<FetchEntry, List<FetchInfo>>();
+    private ConcurrentMap<FetchEntry,FetchKey> entries = new ConcurrentHashMap<FetchEntry, FetchKey>();
+    private ConcurrentMap<FetchKey, List<FetchInfo>> fetchInfo = new ConcurrentHashMap<FetchKey, List<FetchInfo>>();
 
 
     public ProxyFactory getProxyFactory() {
@@ -45,30 +45,52 @@ public class Fetcher extends SpringSerializable {
         fetch(items, getFetchInfo(entityClass, relationPath));
     }
 
-    private List<FetchInfo> getFetchInfo(Class entityClass, String relationPath) {
-        final FetchEntry key = new FetchEntry(entityClass, relationPath);
-        List<FetchInfo> result = cache.get(key);
+    public List<FetchInfo> getFetchInfo(Class entityClass, String relationPath) {
+        return getFetchInfo(getKey(entityClass,relationPath));
+    }
+
+    public List<FetchInfo> getFetchInfo(Class entityClass, List<Join> joins) {
+        return getFetchInfo(new FetchKey(entityClass,joins));
+    }
+
+    private List<FetchInfo> getFetchInfo(FetchKey key) {
+        List<FetchInfo> result = fetchInfo.get(key);
 
         if (result == null) {
             result = new ArrayList<FetchInfo>();
-            if (null != cache.putIfAbsent(key, result)) {
-                result = cache.get(key);
-            }
-            final List<Join> joins = JoinHelper.parse(relationPath);
-            final IEntityType entityType = getEntityType(entityClass);
 
-            for (Join join : joins) {
+            final IEntityType entityType = getEntityType(key.getEntityClass());
+
+            for (Join join : key.getJoins()) {
                 final IRelationMapping relation = entityType.getRelation(join.getPropertyName());
                 if (relation == null) {
-                    throw new RuntimeException("Relation " + join.getPropertyName() + " in " + entityClass);
+                    throw new IllegalArgumentException("Relation " + join.getPropertyName() + " not found  in " + key.getEntityClass());
                 }
 
-                result.add(createFetchInfo(relation, join.getSubJoins()));
+                result.add(new FetchInfo(em, relation, join.getSubJoins()));
+            }
+            if (null != fetchInfo.putIfAbsent(key, result)) {
+                result = fetchInfo.get(key);
             }
         }
 
         return result;
     }
+
+
+    private FetchKey getKey(Class entityClass, String relationPath){
+        final FetchEntry entry = new FetchEntry(entityClass, relationPath);
+        FetchKey result = entries.get(entry);
+        if(result==null){
+            result= new FetchKey(entityClass,JoinHelper.parse(relationPath));
+            if(null!=entries.putIfAbsent(entry,result)){
+                result = entries.get(entry);
+            }
+        }
+
+        return result;
+    }
+
 
     private IEntityType getEntityType(Class entityClass) {
         IEntityType entityType;
@@ -117,9 +139,7 @@ public class Fetcher extends SpringSerializable {
     public <T> void doLazyFetch(Class<T> entityClass, Collection<T> items, String propertyName) {
         ProxyCallback.enterSafe();
         try {
-            //todo aguzanov кэшировать?
-            final FetchInfo fetchInfo =
-                    createFetchInfo(getEntityType(entityClass).getRelation(propertyName), Collections.<Join>emptyList());
+            final FetchInfo fetchInfo = getFetchInfo(entityClass,propertyName).get(0);
             final Map<Object, Object> map = queryRelation(items, fetchInfo);
             ArrayList relationItems = new ArrayList();
             for (T item : items) {
@@ -200,14 +220,14 @@ public class Fetcher extends SpringSerializable {
     }
 
     public <T> Map queryRelation(Collection<T> items, FetchInfo fetchInfo) {
-        final IRelationMapping fm = fetchInfo.getRelationMapping();
-        final Class type = fm.getProperty().getType();
+        final IRelationMapping relation = fetchInfo.getRelationMapping();
+        final Class type = relation.getProperty().getType();
         final Set relationIds = fetchInfo.getRelationIds(items);
         if (relationIds.isEmpty()) {
             return Collections.emptyMap();
         }
 
-        if (fm.isCollection()) {
+        if (relation.isCollection()) {
             Map<Object, List<T>> result = new HashMap<Object, List<T>>();
             ListProducer<T> producer;
             producer = getListProducer(type);
@@ -234,7 +254,4 @@ public class Fetcher extends SpringSerializable {
         return producer;
     }
 
-    private FetchInfo createFetchInfo(IRelationMapping relationMapping, List<Join> subJoins) {
-        return new FetchInfo(em, relationMapping, subJoins);
-    }
 }

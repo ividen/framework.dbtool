@@ -17,7 +17,6 @@ class EntityInfoFactory {
     EntityInfoFactory(AbstractQueryBuilder builder) {
         this.builder = builder;
         this.aliasCounter = 1;
-
         this.root = new EntityInfo(builder.getRegistry().getEntityType(builder.getEntityClass()));
     }
 
@@ -26,29 +25,13 @@ class EntityInfoFactory {
     }
 
     EntityInfo registerInfo(EntityInfo root, Join join) {
-        EntityInfo entityInfo = root.getChild(join.getPropertyName());
+        EntityInfo entityInfo = root.getJoin(join.getPropertyName());
 
-        if (entityInfo != null) {
-            if (join.getType() != entityInfo.getJoinType() && entityInfo.getJoinType() == Join.Type.FETCH) {
-                ArrayList<Join> subJoins = new ArrayList<Join>();
-                subJoins.addAll(join.getSubJoins());
-                subJoins.addAll(entityInfo.getJoin().getSubJoins());
-                Join newJoin = join.getType() == Join.Type.LEFT
-                        ? Join.left(join.getPropertyName(), subJoins)
-                        : Join.inner(join.getPropertyName(), subJoins);
-
-                entityInfo = doRegister(root, newJoin);
-                for (Join subJoin : subJoins) {
-                    registerInfo(entityInfo, subJoin);
-                }
-            }
-
-            return entityInfo;
-        } else {
+        if (entityInfo == null) {
             entityInfo = doRegister(root, join);
         }
 
-        if (entityInfo.getJoinType() != Join.Type.FETCH) {
+        if (entityInfo != null) {
             for (Join subJoin : entityInfo.getJoin().getSubJoins()) {
                 registerInfo(entityInfo, subJoin);
             }
@@ -58,18 +41,22 @@ class EntityInfoFactory {
     }
 
     private EntityInfo doRegister(EntityInfo root, Join join) {
-        EntityInfo entityInfo;
-        Class entityClass = root.isRoot() ? builder.getEntityClass() : root.getRelationMapping().getRelationClass();
+        if (join.getType() == Join.Type.FETCH) {
+            root.addFetch(join);
+            return null;
+        } else {
+            Class entityClass = root.isRoot() ? builder.getEntityClass() : root.getRelationMapping().getRelationClass();
+            final IEntityType entityType = builder.getRegistry().getEntityType(entityClass);
+            final IRelationMapping relationMapping = entityType.getRelation(join.getPropertyName());
 
-        final IEntityType entityType = builder.getRegistry().getEntityType(entityClass);
-        final IRelationMapping relationMapping = entityType.getRelation(join.getPropertyName());
+            if (relationMapping == null) {
+                throw new IllegalArgumentException(
+                        "Wrong relation name for " + entityClass.getName() + " : " + join.getPropertyName() + " !");
+            }
 
-        if (relationMapping == null) {
-            throw new IllegalArgumentException("Wrong relation name for " + entityClass.getName() + " : " + join.getPropertyName() + " !");
+            EntityInfo entityInfo = new EntityInfo(join, entityType, "t" + aliasCounter++, relationMapping);
+            root.addJoin(join.getPropertyName(), entityInfo);
+            return entityInfo;
         }
-
-        entityInfo = new EntityInfo(builder.getEm(), join, entityType, "t" + aliasCounter++, relationMapping);
-        root.addChild(join.getPropertyName(), entityInfo);
-        return entityInfo;
     }
 }
