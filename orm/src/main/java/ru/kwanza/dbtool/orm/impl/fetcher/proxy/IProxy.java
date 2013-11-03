@@ -6,6 +6,4 @@ import java.io.ObjectStreamException;
  * @author Alexander Guzanov
  */
 public interface IProxy {
-
-    public Object writeReplace() throws ObjectStreamException;
 }

@@ -4,6 +4,7 @@ import ru.kwanza.dbtool.orm.annotations.*;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Alexander Guzanov
@@ -24,7 +25,7 @@ public class TestEntityE   implements Serializable {
     private TestEntityG entityG;
 
     @OneToMany(relationProperty = "entityEID", relationClass = TestEntityC.class)
-    private ArrayList<TestEntityC> entitiesC;
+    private List<TestEntityC> entitiesC;
 
     public Long getId() {
         return id;
@@ -46,7 +47,7 @@ public class TestEntityE   implements Serializable {
         return entityG;
     }
 
-    public ArrayList<TestEntityC> getEntitiesC() {
+    public List<TestEntityC> getEntitiesC() {
         return entitiesC;
     }
 }

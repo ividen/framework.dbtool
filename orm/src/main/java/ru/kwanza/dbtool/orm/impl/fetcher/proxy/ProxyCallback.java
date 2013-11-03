@@ -12,7 +12,7 @@ import java.util.concurrent.locks.ReentrantLock;
 /**
  * @author Alexander Guzanov
  */
-public class ProxyCallback implements MethodInterceptor, Serializable {
+public class ProxyCallback implements MethodInterceptor,Serializable {
 
     private static final ThreadLocal<Boolean> safeMode = new ThreadLocal<Boolean>() {
         @Override
@@ -60,14 +60,15 @@ public class ProxyCallback implements MethodInterceptor, Serializable {
 
     public void load() {
         if (!loaded) {
-            lock.lock();
+            final ReentrantLock mainLock = lock;
+            mainLock.lock();
             try {
                 if (!loaded) {
                     doLoad();
                 }
             } finally {
                 freeAll();
-                lock.unlock();
+                mainLock.unlock();
 
             }
         }
@@ -82,10 +83,13 @@ public class ProxyCallback implements MethodInterceptor, Serializable {
     }
 
     private void freeAll() {
+        this.loaded = true;
+        this.lock = null;
         this.holderClass = null;
         this.holders = null;
         this.relationProperty = null;
-        this.loaded = true;
+        this.fetcher = null;
+
     }
 
     private void doLoad() {
@@ -93,9 +97,6 @@ public class ProxyCallback implements MethodInterceptor, Serializable {
     }
 
     public Object intercept(Object obj, Method method, Object[] args, MethodProxy proxy) throws Throwable {
-        if (isWriteReplace(method)) {
-            return new ProxyHolder(relationClass, (IProxy) obj, this);
-        }
         if (!safeMode.get()) {
             load();
 
@@ -108,10 +109,5 @@ public class ProxyCallback implements MethodInterceptor, Serializable {
         } else {
             return proxy.invokeSuper(obj, args);
         }
-    }
-
-    private boolean isWriteReplace(Method method) {
-        return method.getName().equals("writeReplace") && method.getReturnType().equals(Object.class)
-                && method.getParameterTypes().length == 0;
     }
 }

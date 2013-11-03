@@ -11,6 +11,8 @@ import ru.kwanza.dbtool.orm.impl.mapping.EntityMappingRegistry;
 import ru.kwanza.toolbox.SerializationHelper;
 
 import javax.annotation.Resource;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -265,11 +267,21 @@ public abstract class TestFetcherIml extends AbstractJUnit4SpringContextTests {
         }
 
     }
+    // Fetch all
+    //Non fetched  386324
+    //Lazy fetcher 1 904 112    946 584
 
+    //fetch A  1 139 649            457696
     @Test
-    public void testLazyFetch_1() {
+    public void testLazyFetch_1() throws Exception {
         List<TestEntity> testEntities = query().prepare().selectList();
+
+
         em.fetchLazy(TestEntity.class, testEntities);
+
+        final byte[] bytes = SerializationHelper.objectToBytes(applicationContext, testEntities);
+        System.out.println(bytes.length);
+        testEntities = (List<TestEntity>) SerializationHelper.bytesToObject(applicationContext, bytes);
 
         for (TestEntity testEntity : testEntities) {
             Assert.assertEquals(testEntity.getEntityAID(), testEntity.getEntityA().getId());
@@ -277,12 +289,14 @@ public abstract class TestFetcherIml extends AbstractJUnit4SpringContextTests {
             Assert.assertEquals(testEntity.getEntityCID(), testEntity.getEntityC().getId());
             Assert.assertEquals(testEntity.getEntityDID(), testEntity.getEntityD().getId());
 
-            Assert.assertEquals(testEntity.getEntityC().getEntityEID(), testEntity.getEntityC().getEntityE().getId());
+//            Assert.assertEquals(testEntity.getEntityC().getEntityEID(), testEntity.getEntityC().getEntityE().getId());
             Assert.assertEquals(testEntity.getEntityC().getEntityFID(), testEntity.getEntityC().getEntityF().getId());
-
+//
             Assert.assertEquals(testEntity.getEntityC().getEntityE().getEntityGID(),
                     testEntity.getEntityC().getEntityE().getEntityG().getId());
         }
+
+        System.out.println(SerializationHelper.objectToBytes(applicationContext, testEntities).length);
 
     }
 
