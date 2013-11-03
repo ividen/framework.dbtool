@@ -21,5 +21,5 @@ public @interface VersionField {
     /**
      * название колонки в базе данных
      */
-    String column();
+    String value();
 }

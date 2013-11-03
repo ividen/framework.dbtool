@@ -10,29 +10,30 @@ import java.util.Date;
  */
 @Entity(name = "TestEntity", table = "test_entity")
 public class TestEntity implements Serializable {
-    @IdField(column = "id")
+    @IdField( "id")
     private Long id;
-    @Field(column = "int_field")
+    @Field( "int_field")
     private Integer intField;
-    @Field(column = "string_field")
+    @Field( "string_field")
     private String stringField;
-    @Field(column = "date_field")
+    @Field( "date_field")
     private Date dateField;
-    @Field(column = "short_field")
+    @Field( "short_field")
     private Short shortField;
-    @VersionField(column = "version")
+    @VersionField( "version")
     private Long version;
 
-    @Field(column = "entity_aid")
+    @Field( "entity_aid")
     private Long entityAID;
 
-    @Field(column = "entity_bid")
+    @Field( "entity_bid")
     private Long entityBID;
 
     @ManyToOne(property = "entityAID")
     private AbstractTestEntity entity;
 
-    @Association(property = "entityAID", relationProperty = "id", condition = "isGreaterOrEqual('version',valueOf(0))")
+    @ManyToOne(property = "entityAID")
+    @Condition("isGreaterOrEqual('version',valueOf(0))")
     private AbstractTestEntity entityWithCondition;
 
     @ManyToOne(property = "entityBID")

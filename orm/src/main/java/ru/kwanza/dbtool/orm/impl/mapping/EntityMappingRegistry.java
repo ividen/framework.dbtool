@@ -158,15 +158,20 @@ public class EntityMappingRegistry implements IEntityMappingRegistry {
 
         final IFieldMapping propertyMapping = entityType != null
                 ? entityType.getField(association.property())
-                : new FieldMapping(name, null, Types.BIGINT, false, FieldHelper.constructProperty(entityClass, association.property()));
+                : new FieldMapping(name, null, Types.BIGINT, FieldHelper.constructProperty(entityClass, association.property()));
         final Property fetchField = FieldHelper.constructProperty(entityClass, name);
         final Class relationClass = association.relationClass() != Object.class ? association.relationClass() : fetchField.getType();
         if (relationClass == Object.class) {
             throw new RuntimeException(
                     "Relation @OneToMany in  " + entityClass.getName() + "." + name + " must have relativeClass() specified!");
         }
-        final If condition = association.condition().isEmpty() ? null : parseCondition(association);
-        final Property[] groupBy = association.groupBy().isEmpty() ? null : parseGroupBy(relationClass, association);
+
+        final Condition ifConfig = element.getAnnotation(Condition.class);
+        final If condition = ifConfig == null ? null : parseCondition(ifConfig);
+
+        final GroupBy groupByConfig = element.getAnnotation(GroupBy.class);
+        final Property[] groupBy = groupByConfig == null ? null : parseGroupBy(relationClass, groupByConfig);
+        final GroupByType groupByType = groupByConfig == null ? null : groupByConfig.type();
 
         if (!entityTypeByEntityClass.containsKey(relationClass)) {
             this.registerEntityClass(relationClass);
@@ -180,12 +185,12 @@ public class EntityMappingRegistry implements IEntityMappingRegistry {
         }
 
         return new RelationMapping(name, relationClass, propertyMapping, relationPropertyMapping, fetchField, condition, groupBy,
-                association.groupByType(), getJoinsForGroupBy(relationClass, groupBy));
+                groupByType, getJoinsForGroupBy(relationClass, groupBy));
     }
 
-    public IRelationMapping parseOneToMany(final Class entityClass, final AnnotatedElement annotatedElement) {
-        final OneToMany oneToMany = annotatedElement.getAnnotation(OneToMany.class);
-        final String name = getPropertyName(annotatedElement);
+    public IRelationMapping parseOneToMany(final Class entityClass, final AnnotatedElement element) {
+        final OneToMany oneToMany = element.getAnnotation(OneToMany.class);
+        final String name = getPropertyName(element);
         final IFieldMapping propertyMapping = getEntityType(entityClass).getIdField();
         final Property fetchField = FieldHelper.constructProperty(entityClass, name);
         final Class relationClass = oneToMany.relationClass() != Object.class ? oneToMany.relationClass() : fetchField.getType();
@@ -197,6 +202,18 @@ public class EntityMappingRegistry implements IEntityMappingRegistry {
         if (!entityTypeByEntityClass.containsKey(relationClass)) {
             registerEntityClass(relationClass);
         }
+
+        final Condition ifConfig = element.getAnnotation(Condition.class);
+        final If condition = ifConfig == null ? null : parseCondition(ifConfig);
+
+        final GroupBy groupByConfig = element.getAnnotation(GroupBy.class);
+        final Property[] groupBy = groupByConfig == null ? null : parseGroupBy(relationClass, groupByConfig);
+        final GroupByType groupByType = groupByConfig == null ? null : groupByConfig.type();
+
+        if (!entityTypeByEntityClass.containsKey(relationClass)) {
+            this.registerEntityClass(relationClass);
+        }
+
         IFieldMapping relationPropertyMapping = getPropertyFieldMapping(relationClass, oneToMany.relationProperty());
         if (relationPropertyMapping == null) {
             throw new RuntimeException(
@@ -204,21 +221,23 @@ public class EntityMappingRegistry implements IEntityMappingRegistry {
                             + " for @OneToMany " + entityClass.getName() + "." + name + "!");
         }
 
-        return new RelationMapping(name, relationClass, propertyMapping, relationPropertyMapping, fetchField);
+        return new RelationMapping(name, relationClass, propertyMapping, relationPropertyMapping, fetchField, condition, groupBy,
+                groupByType, getJoinsForGroupBy(relationClass, groupBy));
+
     }
 
-    public IRelationMapping parseManyToOne(final Class entityClass, final AnnotatedElement annotatedElement) {
-        final ManyToOne manyToOne = annotatedElement.getAnnotation(ManyToOne.class);
-        final String name = getPropertyName(annotatedElement);
+    public IRelationMapping parseManyToOne(final Class entityClass, final AnnotatedElement element) {
+        final ManyToOne manyToOne = element.getAnnotation(ManyToOne.class);
+        final String name = getPropertyName(element);
 
         final AbstractEntityType entityType = entityTypeByEntityClass.get(entityClass);
         final IFieldMapping propertyMapping = entityType != null
                 ? entityType.getField(manyToOne.property())
-                : new FieldMapping(name, null, Types.BIGINT, false, FieldHelper.constructProperty(entityClass, manyToOne.property()));
+                : new FieldMapping(name, null, Types.BIGINT, FieldHelper.constructProperty(entityClass, manyToOne.property()));
         if (propertyMapping == null) {
             throw new RuntimeException(
                     "Not found property " + manyToOne.property() + "for @ManyToOne " + entityClass.getName() + "." + getPropertyName(
-                            annotatedElement) + "!");
+                            element) + "!");
         }
 
         final Property fetchField = FieldHelper.constructProperty(entityClass, name);
@@ -226,8 +245,17 @@ public class EntityMappingRegistry implements IEntityMappingRegistry {
         if (!entityTypeByEntityClass.containsKey(relationClass)) {
             registerEntityClass(relationClass);
         }
+
+        final Condition ifConfig = element.getAnnotation(Condition.class);
+        final If condition = ifConfig == null ? null : parseCondition(ifConfig);
+
+        final GroupBy groupByConfig = element.getAnnotation(GroupBy.class);
+        final Property[] groupBy = groupByConfig == null ? null : parseGroupBy(relationClass, groupByConfig);
+        final GroupByType groupByType = groupByConfig == null ? null : groupByConfig.type();
+
         final IFieldMapping relationPropertyMapping = getEntityType(relationClass).getIdField();
-        return new RelationMapping(name, relationClass, propertyMapping, relationPropertyMapping, fetchField);
+        return new RelationMapping(name, relationClass, propertyMapping, relationPropertyMapping, fetchField, condition, groupBy,
+                groupByType, getJoinsForGroupBy(relationClass, groupBy));
     }
 
     private List<Join> getJoinsForGroupBy(Class relationClass, Property[] groupBy) {
@@ -268,8 +296,8 @@ public class EntityMappingRegistry implements IEntityMappingRegistry {
         }
     }
 
-    private If parseCondition(Association association) {
-        final Expression expression = conditionParser.parseExpression(association.condition());
+    private If parseCondition(Condition ifConfig) {
+        final Expression expression = conditionParser.parseExpression(ifConfig.value());
         EvaluationContext ctx = new StandardEvaluationContext(If.class);
         return (If) expression.getValue(ctx, (Object) If.class);
     }
@@ -380,8 +408,8 @@ public class EntityMappingRegistry implements IEntityMappingRegistry {
         logRegisterFetchMapping(entityClass, relationMapping);
     }
 
-    private Property[] parseGroupBy(Class entityClass, Association association) {
-        StringTokenizer st = new StringTokenizer(association.groupBy(), ",");
+    private Property[] parseGroupBy(Class entityClass, GroupBy groupByConfig) {
+        StringTokenizer st = new StringTokenizer(groupByConfig.value(), ",");
         ArrayList<Property> fields = new ArrayList<Property>();
         while (st.hasMoreTokens()) {
             String field = st.nextToken().trim();

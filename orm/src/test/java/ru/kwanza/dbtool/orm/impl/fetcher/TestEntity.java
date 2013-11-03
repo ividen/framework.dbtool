@@ -10,26 +10,26 @@ import java.util.Date;
  */
 @Entity(name = "TestEntity", table = "test_entity")
 public class TestEntity  implements Serializable{
-    @IdField(column = "id")
+    @IdField( "id")
     private Long id;
-    @Field(column = "int_field")
+    @Field( "int_field")
     private Integer intField;
-    @Field(column = "string_field")
+    @Field( "string_field")
     private String stringField;
-    @Field(column = "date_field")
+    @Field( "date_field")
     private Date dateField;
-    @Field(column = "short_field")
+    @Field( "short_field")
     private Short shortField;
-    @VersionField(column = "version")
+    @VersionField( "version")
     private Long version;
 
-    @Field(column = "entity_aid")
+    @Field( "entity_aid")
     private Long entityAID;
-    @Field(column = "entity_bid")
+    @Field( "entity_bid")
     private Long entityBID;
-    @Field(column = "entity_cid")
+    @Field( "entity_cid")
     private Long entityCID;
-    @Field(column = "entity_did")
+    @Field( "entity_did")
     private Long entityDID;
 
 
@@ -42,10 +42,12 @@ public class TestEntity  implements Serializable{
     @ManyToOne(property = "entityDID")
     private TestEntityD entityD;
 
-    @Association(property = "entityAID", relationProperty = "id" ,condition="and(isNotNull('version'),isGreater('version',valueOf(-1)))")
+    @Association(property = "entityAID", relationProperty = "id" )
+    @Condition("and(isNotNull('version'),isGreater('version',valueOf(-1)))")
     private TestEntityA associatedEntityA;
 
-    @Association(property = "entityCID", relationProperty = "id" ,condition="and(isNotNull('entityE.version'),isGreater('entityF.version',valueOf(-1)))")
+    @Association(property = "entityCID", relationProperty = "id")
+    @Condition("and(isNotNull('entityE.version'),isGreater('entityF.version',valueOf(-1)))")
     private TestEntityC associatedEntityC;
 
 

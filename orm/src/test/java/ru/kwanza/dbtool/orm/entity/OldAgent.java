@@ -10,13 +10,13 @@ import ru.kwanza.dbtool.orm.annotations.IdField;
 @Entity(name = "OldAgent", table = "agent")
 public class OldAgent {
 
-    @IdField(column = "id1")
+    @IdField("id1")
     private Long id1;
 
-    @Field(column = "name1")
+    @Field("name1")
     private String name1;
 
-    @Field(column = "address")
+    @Field("address")
     private String address;
 
 //    public Long getId() {

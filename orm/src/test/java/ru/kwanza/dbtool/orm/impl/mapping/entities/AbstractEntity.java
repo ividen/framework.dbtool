@@ -9,13 +9,13 @@ import ru.kwanza.dbtool.orm.annotations.VersionField;
  */
 public abstract class AbstractEntity {
 
-    @IdField(column = "id")
+    @IdField( "id")
     private Long id;
 
-    @Field(column = "pcid")
+    @Field( "pcid")
     private String pcid;
 
-    @VersionField(column = "version")
+    @VersionField( "version")
     private Long version;
 
     protected AbstractEntity() {

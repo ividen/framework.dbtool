@@ -1,6 +1,7 @@
 package ru.kwanza.dbtool.orm.impl.fetcher;
 
 import ru.kwanza.dbtool.orm.annotations.Association;
+import ru.kwanza.dbtool.orm.annotations.GroupBy;
 import ru.kwanza.dbtool.orm.annotations.GroupByType;
 
 import java.io.Serializable;
@@ -17,16 +18,16 @@ public class TestEventWithAssociation implements Serializable {
     @Association(property = "entityAID", relationProperty = "entityAID", relationClass = TestEntity.class)
     private Collection<TestEntity> entities;
 
-    @Association(property = "entityAID", relationProperty = "entityAID", relationClass = TestEntity.class, groupBy = "entityA",
-            groupByType = GroupByType.ONE_TO_MANY)
+    @Association(property = "entityAID", relationProperty = "entityAID", relationClass = TestEntity.class)
+    @GroupBy(value = "entityA", type = GroupByType.ONE_TO_MANY)
     private Map<TestEntityA, List<TestEntity>> entitiesByEntityA;
 
-    @Association(property = "entityAID", relationProperty = "entityAID", relationClass = TestEntity.class,
-            groupBy = "entityA, entityC.entityE.id",
-            groupByType = GroupByType.ONE_TO_MANY)
+    @Association(property = "entityAID", relationProperty = "entityAID", relationClass = TestEntity.class)
+    @GroupBy(value = "entityA, entityC.entityE.id", type = GroupByType.ONE_TO_MANY)
     private Map<TestEntityA, Map<Long, List<TestEntity>>> entitiesByACEId;
 
-    @Association(property = "entityAID", relationProperty = "entityAID", relationClass = TestEntity.class, groupBy = "id")
+    @Association(property = "entityAID", relationProperty = "entityAID", relationClass = TestEntity.class)
+    @GroupBy("id")
     private Map<Long, TestEntity> entitiesById;
 
     public TestEventWithAssociation(Long entityAID) {

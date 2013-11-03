@@ -9,6 +9,6 @@ import ru.kwanza.dbtool.orm.annotations.IdField;
 @Entity(name = "EntityWithDuplicateFieldProperty", table = "entity_with_duplicate_field_property")
 public class EntityWithDuplicateFieldProperty extends AbstractEntity {
 
-    @IdField(column = "id2")
+    @IdField( "id2")
     private Long id;
 }

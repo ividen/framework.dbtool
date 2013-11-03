@@ -11,11 +11,11 @@ import java.util.Collection;
 
 @Entity(name = "TestEntityG", table = "test_entity_g")
 public class TestEntityG   implements Serializable {
-    @IdField(column = "id")
+    @IdField( "id")
     private Long id;
-    @Field(column = "title")
+    @Field( "title")
     private String title;
-    @VersionField(column = "version")
+    @VersionField("version")
     private Long version;
 
     @OneToMany(relationClass = TestEntityE.class,relationProperty = "entityGID")
