@@ -92,7 +92,7 @@ public abstract class StatementImpl<T> implements IStatement<T> {
     }
 
     public List<T> selectList() {
-        final LinkedList<T> result = new LinkedList<T>();
+        final ArrayList<T> result = new ArrayList<T>();
         selectList(result);
         return result;
     }
@@ -156,7 +156,7 @@ public abstract class StatementImpl<T> implements IStatement<T> {
 
     public Map<Object, List<T>> selectMapList(String propertyName) {
         final Map<Object, List<T>> result = new LinkedHashMap<Object, List<T>>();
-        selectMapList(propertyName, result, ListProducer.LINKED_LIST);
+        selectMapList(propertyName, result, ListProducer.ARRAY_LIST);
         return result;
     }
 
