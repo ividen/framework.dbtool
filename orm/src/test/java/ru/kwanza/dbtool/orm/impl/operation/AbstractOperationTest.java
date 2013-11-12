@@ -63,15 +63,15 @@ public abstract class AbstractOperationTest extends DBTestCase {
     }
 
     protected IEntityMappingRegistry getEntityMappingRegistry() {
-        return applicationContext.getBean(IEntityMappingRegistry.class);
+        return (IEntityMappingRegistry) applicationContext.getBean("dbtool.IEntityMappingRegistry");
     }
 
     protected IEntityManager getEntityManager() {
-        return applicationContext.getBean(IEntityManager.class);
+        return (IEntityManager) applicationContext.getBean("dbtool.IEntityManager");
     }
 
     protected DBTool getDBTool() {
-        return applicationContext.getBean(DBTool.class);
+        return (DBTool) applicationContext.getBean("dbtool.DBTool");
     }
 }
 

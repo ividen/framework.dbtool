@@ -1,5 +1,6 @@
 package ru.kwanza.dbtool.core;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -11,24 +12,29 @@ public class UpdateException extends Exception {
     private long updateCount;
 
     public UpdateException() {
+        this(null, null, null, 0,null);
     }
 
     public UpdateException(String message) {
-        super(message);
+        this(message, null, null, 0,null);
     }
 
     public UpdateException(String message, Throwable cause) {
-        super(message, cause);
+        this(message,  null,null,0,cause);
     }
 
     public UpdateException(Throwable cause) {
-        super(cause);
+        this(null,  null,null,0,cause);
     }
 
     public UpdateException(String msg, List constrainted, List optimistic, long updateCount) {
-        this(msg);
-        this.constrainted = constrainted;
-        this.optimistic = optimistic;
+        this(msg,constrainted,optimistic,updateCount,null);
+    }
+
+    public UpdateException(String msg, List constrainted, List optimistic, long updateCount, Throwable cause) {
+        super(msg,cause);
+        this.constrainted = constrainted != null ? constrainted : Collections.emptyList();
+        this.optimistic = optimistic != null ? optimistic : Collections.emptyList();
         this.updateCount = updateCount;
     }
 
@@ -40,19 +46,8 @@ public class UpdateException extends Exception {
         return updateCount;
     }
 
-    void setConstrainted(List constrainted) {
-        this.constrainted = constrainted;
-    }
-
     public <T> List<T> getOptimistic() {
         return optimistic;
     }
 
-    void setOptimistic(List optimistic) {
-        this.optimistic = optimistic;
-    }
-
-    public void setUpdateCount(long updateCount) {
-        this.updateCount = updateCount;
-    }
 }

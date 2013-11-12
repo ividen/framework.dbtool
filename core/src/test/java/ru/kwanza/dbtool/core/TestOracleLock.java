@@ -45,19 +45,4 @@ public class TestOracleLock extends AbstractTestLock {
             }
         }
     }
-
-    public void testDefineException() throws Exception {
-        String lockName = "";
-        for (int i = 0; i < 150; i++) {
-            lockName = lockName + 'A';
-        }
-        boolean throwCheck = false;
-        try {
-            dbTool.getLock(lockName);
-        } catch (RuntimeException e) {
-            throwCheck = true;
-            assertTrue(e.getMessage().contains("ORA-12899"));
-        }
-        assertTrue(throwCheck);
-    }
 }
