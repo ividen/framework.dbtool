@@ -8,7 +8,7 @@ import ru.kwanza.dbtool.orm.annotations.Field;
  */
 @Entity(name="TestEntityA", table = "test_entity_a")
 public class TestEntityA extends AbstractTestEntity {
-    @Field(column = "title")
+    @Field( "title")
     private String title;
 
     public String getTitle() {

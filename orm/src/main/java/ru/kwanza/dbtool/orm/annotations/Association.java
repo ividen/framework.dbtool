@@ -19,10 +19,4 @@ public @interface Association {
     String relationProperty();
 
     Class relationClass() default Object.class;
-
-    String condition() default "";
-
-    String groupBy() default "";
-
-    GroupByType groupByType() default GroupByType.ONE_TO_ONE;
 }

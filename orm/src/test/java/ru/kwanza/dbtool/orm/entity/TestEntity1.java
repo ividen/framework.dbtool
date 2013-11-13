@@ -10,16 +10,16 @@ import java.sql.Types;
 @Entity(name = "TestEntity1", table = "test_entity")
 public class TestEntity1 extends OldAgent {
 
-    @IdField(column = "id")
+    @IdField("id")
     private Long id;
 
-    @Field(column = "name")
+    @Field("name")
     private String name;
 
-    @Field(column = "desc", type = Types.NVARCHAR)
+    @Field(value="desc", type = Types.NVARCHAR)
     private String description;
 
-    @VersionField(column = "version")
+    @VersionField( "version")
     private Long version = 0l;
 
     private Long counter;
@@ -35,12 +35,12 @@ public class TestEntity1 extends OldAgent {
         this.oldAgent = oldAgent;
     }
 
-    @Field(column = "counter")
+    @Field("counter")
     public Long getCounter() {
         return counter;
     }
 
-    @Field(column = "agent_id")
+    @Field("agent_id")
     private Long agentId;
 
     public String getDescription() {

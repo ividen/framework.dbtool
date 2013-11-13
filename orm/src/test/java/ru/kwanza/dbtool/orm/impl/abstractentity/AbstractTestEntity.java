@@ -9,9 +9,9 @@ import ru.kwanza.dbtool.orm.annotations.VersionField;
  */
 @AbstractEntity(name = "AbstractTestEntity")
 public class AbstractTestEntity {
-    @IdField(column = "id")
+    @IdField( "id")
     private Long id;
-    @VersionField(column = "version")
+    @VersionField( "version")
     private Long version;
 
     public Long getId() {

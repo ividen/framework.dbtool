@@ -11,14 +11,14 @@ import java.util.List;
  */
 @Entity(name = "TestEntityE", table = "test_entity_e")
 public class TestEntityE   implements Serializable {
-    @IdField(column = "id")
+    @IdField( "id")
     private Long id;
-    @Field(column = "title")
+    @Field( "title")
     private String title;
-    @VersionField(column = "version")
+    @VersionField("version")
     private Long version;
 
-    @Field(column = "entity_gid")
+    @Field( "entity_gid")
     private Long entityGID;
 
     @ManyToOne(property = "entityGID")

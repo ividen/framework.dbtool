@@ -12,11 +12,11 @@ import java.io.Serializable;
  */
 @Entity(name = "TestEntityD", table = "test_entity_D")
 public class TestEntityD   implements Serializable {
-    @IdField(column = "id")
+    @IdField( "id")
     private Long id;
-    @Field(column = "title")
+    @Field( "title")
     private String title;
-    @VersionField(column = "version")
+    @VersionField( "version")
     private Long version;
 
 

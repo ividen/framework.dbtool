@@ -9,7 +9,7 @@ import ru.kwanza.dbtool.orm.annotations.Field;
 @Entity(name = "TestEntityWithBlob", table = "test_entity")
 public class TestEntityWithBlob extends TestEntity1 {
 
-    @Field(column = "entity_body")
+    @Field("entity_body")
     private byte[] body;
 
     public byte[] getBody() {

@@ -11,7 +11,7 @@ import java.util.*;
 public class UnionEntityType extends AbstractEntityType {
     private static final String UNION_ALL = " UNION ALL ";
     private static final String CLAZZ_ = "clazz_";
-    public static final FieldMapping CLAZZ_FIELD = new FieldMapping(null, CLAZZ_, 0, false, null);
+    public static final FieldMapping CLAZZ_FIELD = new FieldMapping(null, CLAZZ_, 0, null);
 
     private List<IEntityType> entityTypes = new ArrayList<IEntityType>();
     private List<SubUnionEntityType> subUnionEntityTypes;

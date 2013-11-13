@@ -9,19 +9,19 @@ import java.util.Date;
  */
 public abstract class Trx extends AbstractEntity {
 
-    @Field(column = "parent_trx_id")
+    @Field( "parent_trx_id")
     private Long parentTrxId;
 
-    @Field(column = "started_at")
+    @Field( "started_at")
     private Date startedAt;
 
-    @Field(column = "finished_at")
+    @Field( "finished_at")
     private Date finishedAt;
 
-    @Field(column = "result_code")
+    @Field( "result_code")
     private Integer resultCode;
 
-    @Field(column = "extended_code")
+    @Field( "extended_code")
     private Integer extendedCode;
 
     protected Trx() {
