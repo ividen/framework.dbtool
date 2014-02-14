@@ -7,10 +7,11 @@ import ru.kwanza.dbtool.orm.api.IEntityBatcher;
 import ru.kwanza.dbtool.orm.api.IEntityManager;
 import ru.kwanza.dbtool.orm.api.IFiltering;
 import ru.kwanza.dbtool.orm.api.IQueryBuilder;
+import ru.kwanza.dbtool.orm.api.internal.IEntityMappingRegistry;
 import ru.kwanza.dbtool.orm.api.internal.IFieldMapping;
 import ru.kwanza.dbtool.orm.impl.fetcher.Fetcher;
+import ru.kwanza.dbtool.orm.impl.fetcher.proxy.Proxy;
 import ru.kwanza.dbtool.orm.impl.filtering.FilteringImpl;
-import ru.kwanza.dbtool.orm.api.internal.IEntityMappingRegistry;
 import ru.kwanza.dbtool.orm.impl.operation.OperationFactory;
 import ru.kwanza.dbtool.orm.impl.querybuilder.QueryBuilderFactory;
 import ru.kwanza.toolbox.SpringSerializable;
@@ -137,6 +138,18 @@ public class EntityManagerImpl extends SpringSerializable implements IEntityMana
 
     public <T> void fetchLazy(T object) {
         fetcher.fetchLazy(object);
+    }
+
+    public boolean isProxy(Object object) {
+        return Proxy.isProxy(object);
+    }
+
+    public <T> T unwrapProxy(T object) {
+        return isProxy(object) ? Proxy.getDelegate(object) : object;
+    }
+
+    public boolean isNull(Object object) {
+        return false;
     }
 
     public Fetcher getFetcher() {

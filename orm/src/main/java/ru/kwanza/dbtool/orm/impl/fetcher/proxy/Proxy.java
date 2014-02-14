@@ -33,7 +33,7 @@ public class Proxy<T> {
         return (object instanceof IProxy) && (object instanceof FieldProvider);
     }
 
-    public static <T> T getDelegate(Object object) {
+    public static <T> T getDelegate(T object) {
         return (T) ((FieldProvider) object).getField(DELEGATE_FIELD);
     }
 

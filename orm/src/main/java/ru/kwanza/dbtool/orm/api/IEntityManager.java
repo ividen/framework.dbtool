@@ -1,6 +1,8 @@
 package ru.kwanza.dbtool.orm.api;
 
+import net.sf.cglib.transform.impl.FieldProvider;
 import ru.kwanza.dbtool.core.UpdateException;
+import ru.kwanza.dbtool.orm.impl.fetcher.proxy.IProxy;
 
 import java.util.Collection;
 import java.util.List;
@@ -50,4 +52,11 @@ public interface IEntityManager {
     <T> void fetchLazy(Class<T> entityClass, Collection<T> items);
 
     <T> void fetchLazy(T object);
+
+    boolean isProxy(Object object);
+
+    <T> T unwrapProxy(T object);
+
+    boolean isNull(Object object);
+
 }

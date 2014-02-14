@@ -19,11 +19,11 @@ public class TestEventWithAssociation implements Serializable {
     private Collection<TestEntity> entities;
 
     @Association(property = "entityAID", relationProperty = "entityAID", relationClass = TestEntity.class)
-    @GroupBy(value = "entityA", type = GroupByType.ONE_TO_MANY)
+    @GroupBy(value = "entityA", type = GroupByType.MAP_OF_LIST)
     private Map<TestEntityA, List<TestEntity>> entitiesByEntityA;
 
     @Association(property = "entityAID", relationProperty = "entityAID", relationClass = TestEntity.class)
-    @GroupBy(value = "entityA, entityC.entityE.id", type = GroupByType.ONE_TO_MANY)
+    @GroupBy(value = "entityA, entityC.entityE.id", type = GroupByType.MAP_OF_LIST)
     private Map<TestEntityA, Map<Long, List<TestEntity>>> entitiesByACEId;
 
     @Association(property = "entityAID", relationProperty = "entityAID", relationClass = TestEntity.class)

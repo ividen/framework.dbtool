@@ -214,7 +214,7 @@ public class Fetcher extends SpringSerializable {
     }
 
     private Object split(IRelationMapping relationMapping, Object relationObjValue) {
-        relationObjValue = relationMapping.getGroupByType() == GroupByType.ONE_TO_MANY ? relationMapping.getGroupBy()
+        relationObjValue = relationMapping.getGroupByType() == GroupByType.MAP_OF_LIST ? relationMapping.getGroupBy()
                 .oneToMany((Collection) relationObjValue) : relationMapping.getGroupBy().oneToOne((Collection) relationObjValue);
         return relationObjValue;
     }

@@ -266,17 +266,17 @@ public abstract class TestAbstractEntity extends AbstractJUnit4SpringContextTest
         for (TestEntity testEntity : testEntities) {
             Assert.assertEquals(testEntity.getEntityAID(), testEntity.getEntity().getId());
             Assert.assertTrue(Proxy.isProxy(testEntity.getEntity()));
-            Assert.assertEquals(Proxy.<TestEntityA>getDelegate(testEntity.getEntity()).getTitle(),
+            Assert.assertEquals(((TestEntityA)Proxy.getDelegate(testEntity.getEntity())).getTitle(),
                     "test_entity_a" + testEntity.getEntityAID());
 
             Assert.assertEquals(testEntity.getEntityAID(), testEntity.getEntityWithCondition().getId());
             Assert.assertTrue(Proxy.isProxy(testEntity.getEntityWithCondition()));
-            Assert.assertEquals(Proxy.<TestEntityA>getDelegate(testEntity.getEntityWithCondition()).getTitle(),
+            Assert.assertEquals(((TestEntityA)Proxy.getDelegate(testEntity.getEntityWithCondition())).getTitle(),
                     "test_entity_a" + testEntity.getEntityAID());
 
             Assert.assertEquals(testEntity.getEntityBID(), testEntity.getOtherEntity().getId());
             Assert.assertTrue(Proxy.isProxy(testEntity.getOtherEntity()));
-            Assert.assertEquals(Proxy.<TestEntityB>getDelegate(testEntity.getOtherEntity()).getTitle(),
+            Assert.assertEquals(((TestEntityB)Proxy.getDelegate(testEntity.getOtherEntity())).getTitle(),
                     "test_entity_b" + testEntity.getEntityBID());
         }
     }
