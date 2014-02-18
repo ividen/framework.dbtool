@@ -2,6 +2,7 @@ package ru.kwanza.dbtool.orm.api;
 
 import net.sf.cglib.transform.impl.FieldProvider;
 import ru.kwanza.dbtool.core.UpdateException;
+import ru.kwanza.dbtool.orm.LockResult;
 import ru.kwanza.dbtool.orm.impl.fetcher.proxy.IProxy;
 
 import java.util.Collection;
@@ -59,4 +60,7 @@ public interface IEntityManager {
 
     boolean isNull(Object object);
 
+    <T> LockResult<T> lockOptimistic(Collection<T> items);
+
+    <T> LockResult<T> lockPessimistic(Collection<T> items);
 }
