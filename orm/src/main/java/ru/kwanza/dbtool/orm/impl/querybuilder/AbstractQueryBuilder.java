@@ -29,6 +29,7 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
     private FieldFragmentHelper fieldFragmentHelper;
     private FromFragmentHelper fromFragmentHelper;
     private OrderByFragmentHelper orderByFragmentHelper;
+    private boolean lazy = false;
 
     public AbstractQueryBuilder(EntityManagerImpl em, Class entityClass) {
         if (!em.getRegistry().isRegisteredEntityClass(entityClass)) {
@@ -97,19 +98,19 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
         final String sqlString = sql.toString();
         logger.debug("Creating query {}", sqlString);
 
-        return createQuery(createConfig(entityInfoFactory.getRoot(), sqlString, joinParams.join(whereParams), createFetchInfo()));
+        return createQuery(createConfig(entityInfoFactory.getRoot(), sqlString, joinParams.join(whereParams), createFetchInfo(), lazy));
     }
 
     private List<FetchInfo> createFetchInfo() {
         List<FetchInfo> result = new ArrayList<FetchInfo>();
 
-        createFetchList(entityInfoFactory.getRoot(), result);
+        createFetchList(entityInfoFactory.getRoot(), result, lazy);
 
 
         return result;
     }
 
-    private void createFetchList(EntityInfo entityInfo, List<FetchInfo> result) {
+    private void createFetchList(EntityInfo entityInfo, List<FetchInfo> result, boolean lazy) {
         if (entityInfo.hasFetches()) {
             for (Map.Entry<String, Join> entry : entityInfo.getFetches().entrySet()) {
                 result.addAll(em.getFetcher()
@@ -119,7 +120,7 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
 
         if (entityInfo.hasJoins()) {
             for (EntityInfo info : entityInfo.getJoins().values()) {
-                createFetchList(info, result);
+                createFetchList(info, result, lazy);
             }
 
         }
@@ -139,6 +140,12 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
         return this;
     }
 
+    public IQueryBuilder<T> lazy() {
+        this.lazy = true;
+
+        return this;
+    }
+
     private void processJoin(EntityInfo root, Join join) {
         entityInfoFactory.registerInfo(root, join);
     }
@@ -148,11 +155,11 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
     public IQuery<T> createNative(String sql) {
         Parameters holder = new Parameters();
         String preparedSql = SQLParser.prepareSQL(sql, holder);
-        return createQuery(createConfig(entityInfoFactory.getRoot(), preparedSql, holder, Collections.<FetchInfo>emptyList()));
+        return createQuery(createConfig(entityInfoFactory.getRoot(), preparedSql, holder, Collections.<FetchInfo>emptyList(), lazy));
     }
 
-    private QueryConfig<T> createConfig(EntityInfo rootRelations, String sqlString, Parameters holder, List<FetchInfo> fetchInfo) {
-        return new QueryConfig<T>(em, entityClass, sqlString, rootRelations, holder, fetchInfo);
+    private QueryConfig<T> createConfig(EntityInfo rootRelations, String sqlString, Parameters holder, List<FetchInfo> fetchInfo, boolean lazy) {
+        return new QueryConfig<T>(em, entityClass, sqlString, rootRelations, holder, fetchInfo, lazy);
     }
 
     protected StringBuilder createSQLString(String fieldsString, String from, String where, String orderBy) {

@@ -17,7 +17,7 @@ public class FetchInfo {
     private IRelationMapping relationMapping;
     private IQuery fetchQuery;
 
-    public FetchInfo(IEntityManager em, IRelationMapping relationMapping, List<Join> subJoins) {
+    public FetchInfo(IEntityManager em, IRelationMapping relationMapping, List<Join> subJoins,boolean lazy) {
         this.relationMapping = relationMapping;
 
         IFieldMapping relation = relationMapping.getRelationKeyMapping();
@@ -26,6 +26,9 @@ public class FetchInfo {
             condition = If.and(condition, relationMapping.getCondition());
         }
         IQueryBuilder queryBuilder = em.queryBuilder(relationMapping.getRelationClass()).where(condition);
+        if(lazy){
+            queryBuilder = queryBuilder.lazy();
+        }
 
         for (Join join : relationMapping.getJoins()) {
             queryBuilder.join(join);

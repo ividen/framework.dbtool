@@ -11,7 +11,6 @@ import ru.kwanza.dbtool.core.SqlCollectionParameterValue;
 import ru.kwanza.dbtool.core.util.FieldValueExtractor;
 import ru.kwanza.dbtool.core.util.SelectUtil;
 import ru.kwanza.dbtool.orm.api.IStatement;
-import ru.kwanza.dbtool.orm.api.Join;
 import ru.kwanza.dbtool.orm.api.ListProducer;
 import ru.kwanza.dbtool.orm.api.internal.IEntityType;
 import ru.kwanza.dbtool.orm.api.internal.IFieldMapping;
@@ -107,7 +106,13 @@ public abstract class StatementImpl<T> implements IStatement<T> {
                                 }
                             }
                         }, getParamValues(), getResultSetType());
+        fetchLazyIfNeed(result);
+    }
 
+    private void fetchLazyIfNeed(Collection<T> result) {
+        if (config.isLazy()) {
+            config.getEntityManager().fetchLazy(config.getEntityClass(), result);
+        }
     }
 
     public <F> void selectMapList(String propertyName, final Map<F, List<T>> result, final ListProducer<T> listProducer) {
@@ -115,6 +120,7 @@ public abstract class StatementImpl<T> implements IStatement<T> {
         if (fieldMapping == null) {
             throw new IllegalArgumentException("Unknown field name!");
         }
+        final List<T> containerForLazy = config.isLazy() ? new ArrayList<T>() : null;
 
         SelectUtil.batchSelect(config.getEntityManager().getDbTool().getJdbcTemplate(), prepareSql(config.getSql()),
                 new MapExtractor(fieldMapping), new SelectUtil.Container<Collection<KeyValue<F, T>>>() {
@@ -126,9 +132,14 @@ public abstract class StatementImpl<T> implements IStatement<T> {
                         result.put(kv.getKey(), vs);
                     }
                     vs.add(kv.getValue());
+                    if (config.isLazy()) {
+                        containerForLazy.add(kv.getValue());
+                    }
                 }
             }
         }, getParamValues(), getResultSetType());
+
+        fetchLazyIfNeed(containerForLazy);
     }
 
     public <F> void selectMap(String propertyName, final Map<F, T> result) {
@@ -146,6 +157,7 @@ public abstract class StatementImpl<T> implements IStatement<T> {
             }
         }, getParamValues(), getResultSetType());
 
+        fetchLazyIfNeed(result.values());
     }
 
     public Map<Object, T> selectMap(String propertyName) {
@@ -169,8 +181,8 @@ public abstract class StatementImpl<T> implements IStatement<T> {
         this.params[index - 1] = type == SqlTypeValue.TYPE_UNKNOWN
                 ? value
                 : ((value instanceof Collection)
-                        ? new SqlCollectionParameterValue(type, (Collection) value)
-                        : new SqlParameterValue(type, value));
+                ? new SqlCollectionParameterValue(type, (Collection) value)
+                : new SqlParameterValue(type, value));
 
         return this;
     }
@@ -220,7 +232,7 @@ public abstract class StatementImpl<T> implements IStatement<T> {
 
         @Override
         protected Collection getFetchableObjects(ArrayList<KeyValue<Object, T>> objects) {
-            return FieldHelper.getFieldCollection(objects,new FieldHelper.Field<KeyValue<Object, T>,T>() {
+            return FieldHelper.getFieldCollection(objects, new FieldHelper.Field<KeyValue<Object, T>, T>() {
                 public Object value(KeyValue o) {
                     return o.getValue();
                 }

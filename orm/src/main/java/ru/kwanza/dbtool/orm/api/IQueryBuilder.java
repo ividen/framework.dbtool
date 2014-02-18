@@ -11,6 +11,8 @@ public interface IQueryBuilder<T> {
 
     IQueryBuilder<T> join(Join join);
 
+    IQueryBuilder<T> lazy();
+
     IQueryBuilder<T> join(String string);
 
     IQueryBuilder<T> where(If condition);
