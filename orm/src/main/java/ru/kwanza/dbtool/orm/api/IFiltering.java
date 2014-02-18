@@ -19,6 +19,8 @@ public interface IFiltering<T> extends ISelectOperationProvider<T> {
 
     IFiltering<T> filter(If condition, Object... params);
 
+    IFiltering<T> filter(Filter ... filters);
+
     IFiltering<T> orderBy(String orderByClause);
 
     IFiltering<T> orderBy(OrderBy orderBy);
