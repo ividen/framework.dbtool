@@ -6,6 +6,7 @@ import javax.sql.DataSource;
 import java.sql.*;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.Executor;
 
 /**
  * @author Alexander Guzanov
@@ -52,7 +53,7 @@ class ConnectionWrapper implements Connection {
     }
 
     public void close() throws SQLException {
-        if(delegate!=null){
+        if (delegate != null) {
             isClosed = true;
             DataSourceUtils.releaseConnection(delegate, ds);
             delegate = null;
@@ -213,6 +214,26 @@ class ConnectionWrapper implements Connection {
         return getDelegate().createStruct(typeName, attributes);
     }
 
+    public void setSchema(String schema) throws SQLException {
+        getDelegate().setSchema(schema);
+    }
+
+    public String getSchema() throws SQLException {
+        return getDelegate().getSchema();
+    }
+
+    public void abort(Executor executor) throws SQLException {
+        getDelegate().abort(executor);
+    }
+
+    public void setNetworkTimeout(Executor executor, int milliseconds) throws SQLException {
+        getDelegate().setNetworkTimeout(executor, milliseconds);
+    }
+
+    public int getNetworkTimeout() throws SQLException {
+        return getDelegate().getNetworkTimeout();
+    }
+
     public <T> T unwrap(Class<T> iface) throws SQLException {
         return getDelegate().unwrap(iface);
     }
@@ -222,7 +243,7 @@ class ConnectionWrapper implements Connection {
     }
 
     private Connection getDelegate() {
-        if(isClosed){
+        if (isClosed) {
             throw new IllegalStateException("Connection is closed!");
         }
         if (delegate == null) {

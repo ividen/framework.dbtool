@@ -62,7 +62,7 @@ public class FilteringImpl<T> implements IFiltering<T> {
 
     public IFiltering<T> filter(boolean use, If condition, Object... params) {
         if (use) {
-            getFilters().add(new Filter(condition, params));
+            getFilters().add(new Filter(true, condition, params));
         }
 
         return this;
@@ -91,6 +91,16 @@ public class FilteringImpl<T> implements IFiltering<T> {
 
     public IFiltering<T> filter(If condition, Object... params) {
         return filter(true, condition, params);
+    }
+
+    public IFiltering<T> filter(Filter... filters) {
+        for (Filter filter : filters) {
+            if (filter.isUse()) {
+                getFilters().add(filter);
+            }
+        }
+
+        return this;
     }
 
     public IFiltering<T> orderBy(String orderByClause) {
@@ -155,8 +165,8 @@ public class FilteringImpl<T> implements IFiltering<T> {
         LinkedList<If> conditions = new LinkedList<If>();
         if (filters != null) {
             for (Filter f : filters) {
-                if (f.isHasParams()) {
-                    for (Object p : f.getValue()) {
+                if (f.getParams() != null) {
+                    for (Object p : f.getParams()) {
                         params.add(p);
                     }
                 }

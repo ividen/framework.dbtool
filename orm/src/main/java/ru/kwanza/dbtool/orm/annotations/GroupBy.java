@@ -15,5 +15,5 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 public @interface GroupBy {
     String value();
 
-    GroupByType type() default GroupByType.ONE_TO_ONE;
+    GroupByType type() default GroupByType.MAP;
 }
