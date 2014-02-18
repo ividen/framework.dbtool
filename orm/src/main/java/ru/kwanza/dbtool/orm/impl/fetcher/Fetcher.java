@@ -29,7 +29,7 @@ public class Fetcher extends SpringSerializable {
     @Resource(name = "dbtool.NonEntityMapping")
     private NonEntityMapping nonEntityMapping;
 
-    private ConcurrentMap<FetchEntry,FetchKey> entries = new ConcurrentHashMap<FetchEntry, FetchKey>();
+    private ConcurrentMap<FetchEntry, FetchKey> entries = new ConcurrentHashMap<FetchEntry, FetchKey>();
     private ConcurrentMap<FetchKey, List<FetchInfo>> fetchInfo = new ConcurrentHashMap<FetchKey, List<FetchInfo>>();
 
 
@@ -46,11 +46,11 @@ public class Fetcher extends SpringSerializable {
     }
 
     public List<FetchInfo> getFetchInfo(Class entityClass, String relationPath) {
-        return getFetchInfo(getKey(entityClass,relationPath));
+        return getFetchInfo(getKey(entityClass, relationPath));
     }
 
     public List<FetchInfo> getFetchInfo(Class entityClass, List<Join> joins) {
-        return getFetchInfo(new FetchKey(entityClass,joins));
+        return getFetchInfo(new FetchKey(entityClass, joins));
     }
 
     private List<FetchInfo> getFetchInfo(FetchKey key) {
@@ -78,12 +78,12 @@ public class Fetcher extends SpringSerializable {
     }
 
 
-    private FetchKey getKey(Class entityClass, String relationPath){
+    private FetchKey getKey(Class entityClass, String relationPath) {
         final FetchEntry entry = new FetchEntry(entityClass, relationPath);
         FetchKey result = entries.get(entry);
-        if(result==null){
-            result= new FetchKey(entityClass,JoinHelper.parse(relationPath));
-            if(null!=entries.putIfAbsent(entry,result)){
+        if (result == null) {
+            result = new FetchKey(entityClass, JoinHelper.parse(relationPath));
+            if (null != entries.putIfAbsent(entry, result)) {
                 result = entries.get(entry);
             }
         }
@@ -119,7 +119,7 @@ public class Fetcher extends SpringSerializable {
                     ProxyCallback batch =
                             new ProxyCallback(this, entityClass, items, relationMapping.getProperty().getType(), relationMapping.getName());
                     for (T item : items) {
-                        if (relationMapping.getProperty().value(item) == null) {
+                        if (relationMapping.getProperty().value(item) == null && relationMapping.getKeyMapping().getProperty().value(item) != null) {
                             relationMapping.getProperty().set(item, factory.newInstance(relationMapping.getProperty().getType(), batch));
                         }
                     }
@@ -139,7 +139,7 @@ public class Fetcher extends SpringSerializable {
     public <T> void doLazyFetch(Class<T> entityClass, Collection<T> items, String propertyName) {
         ProxyCallback.enterSafe();
         try {
-            final FetchInfo fetchInfo = getFetchInfo(entityClass,propertyName).get(0);
+            final FetchInfo fetchInfo = getFetchInfo(entityClass, propertyName).get(0);
             final Map<Object, Object> map = queryRelation(items, fetchInfo);
             ArrayList relationItems = new ArrayList();
             for (T item : items) {
