@@ -96,4 +96,8 @@ public class EntityInfo {
         return fetches != null && !fetches.isEmpty();
     }
 
+    public static String getTableName(IEntityType entityType) {
+        return entityType.getSql() == null ? entityType.getTableName() : "(" + entityType.getSql() + ") ";
+    }
+
 }

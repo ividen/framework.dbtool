@@ -67,8 +67,5 @@ class FromFragmentHelper {
         }
     }
 
-    private String getTableName(IEntityType entityType) {
-        final String sql = entityType.getSql();
-        return sql == null ? entityType.getTableName() : "(" + sql + ") ";
-    }
+
 }

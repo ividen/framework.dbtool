@@ -3,10 +3,7 @@ package ru.kwanza.dbtool.orm.impl;
 import ru.kwanza.dbtool.core.DBTool;
 import ru.kwanza.dbtool.core.UpdateException;
 import ru.kwanza.dbtool.core.VersionGenerator;
-import ru.kwanza.dbtool.orm.api.IEntityBatcher;
-import ru.kwanza.dbtool.orm.api.IEntityManager;
-import ru.kwanza.dbtool.orm.api.IFiltering;
-import ru.kwanza.dbtool.orm.api.IQueryBuilder;
+import ru.kwanza.dbtool.orm.api.*;
 import ru.kwanza.dbtool.orm.api.internal.IEntityMappingRegistry;
 import ru.kwanza.dbtool.orm.api.internal.IFieldMapping;
 import ru.kwanza.dbtool.orm.impl.fetcher.Fetcher;
@@ -149,7 +146,15 @@ public class EntityManagerImpl extends SpringSerializable implements IEntityMana
     }
 
     public boolean isNull(Object object) {
-        return false;
+        return object==null || (isProxy(object) && unwrapProxy(object)==null);
+    }
+
+    public <T> LockResult<T> lock(LockType type, Collection<T> items) {
+        return null;
+    }
+
+    public <T> LockResult<T> lock(LockType type, T item) {
+        return null;
     }
 
     public Fetcher getFetcher() {
