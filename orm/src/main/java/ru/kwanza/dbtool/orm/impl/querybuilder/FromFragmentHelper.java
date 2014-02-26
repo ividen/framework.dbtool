@@ -47,11 +47,11 @@ class FromFragmentHelper {
                 fromPart.append(entityInfo.getJoinType() == Join.Type.LEFT ? " LEFT JOIN " : " INNER JOIN ");
                 final IEntityType entityType = builder.getRegistry().getEntityType(relationClass);
                 if (entityInfo.hasJoins()) {
-                    fromPart.append('(').append(getTableName(entityType)).append(' ').append(entityInfo.getAlias());
+                    fromPart.append('(').append(entityType.getTableName()).append(' ').append(entityInfo.getAlias());
                     processJoin(fromPart, entityInfo, holder);
                     fromPart.append(')');
                 } else {
-                    fromPart.append(getTableName(entityType)).append(' ').append(entityInfo.getAlias());
+                    fromPart.append(entityType.getTableName()).append(' ').append(entityInfo.getAlias());
                 }
 
                 fromPart.append(" ON ").append(root.getAlias() == null

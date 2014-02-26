@@ -3,9 +3,9 @@ package ru.kwanza.dbtool.orm.impl.lockoperation;
 import ru.kwanza.dbtool.core.DBTool;
 import ru.kwanza.dbtool.orm.api.LockType;
 import ru.kwanza.dbtool.orm.impl.EntityManagerImpl;
-import ru.kwanza.dbtool.orm.impl.lockoperation.db.oracle.OracleLockOperation;
+import ru.kwanza.dbtool.orm.impl.lockoperation.db.oracle.OracleSkipLockOperation;
+import ru.kwanza.dbtool.orm.impl.lockoperation.db.oracle.OracleWaiteLockOperation;
 import ru.kwanza.dbtool.orm.impl.lockoperation.db.oracle.OracleNoWaitLockOperation;
-import ru.kwanza.dbtool.orm.impl.lockoperation.db.oracle.OracleSkipLockedLockOperation;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -41,11 +41,11 @@ public class LockFactory {
         if (result == null) {
             if (em.getDbTool().getDbType() == DBTool.DBType.ORACLE) {
                 if (type == LockType.PESSIMISTIC_WAIT) {
-                    result = new OracleLockOperation<T>(em, entityClass);
+                    result = new OracleWaiteLockOperation<T>(em, entityClass);
                 } else if (type == LockType.PESSIMISTIC_NOWAIT) {
                     result = new OracleNoWaitLockOperation(em, entityClass);
                 } else if (type == LockType.PESSIMISTIC_SKIP_LOCKED) {
-                    result = new OracleSkipLockedLockOperation(em, entityClass);
+                    result = new OracleSkipLockOperation(em, entityClass);
                 }
             } else {
                 throw new UnsupportedOperationException("Lock operation is not supported for database " + em.getDbTool().getDbType());

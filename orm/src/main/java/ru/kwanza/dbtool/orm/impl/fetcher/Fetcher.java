@@ -67,7 +67,7 @@ public class Fetcher extends SpringSerializable {
                     throw new IllegalArgumentException("Relation " + join.getPropertyName() + " not found  in " + key.getEntityClass());
                 }
 
-                result.add(new FetchInfo(em, relation, join.getSubJoins()));
+                result.add(new FetchInfo(em, relation, join.getSubJoins(),false));
             }
             if (null != fetchInfo.putIfAbsent(key, result)) {
                 result = fetchInfo.get(key);

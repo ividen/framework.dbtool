@@ -7,9 +7,9 @@ import ru.kwanza.dbtool.orm.impl.querybuilder.EntityInfo;
 /**
  * @author Alexander Guzanov
  */
-public class OracleLockOperation<T> extends AbstractLockOperation<T> {
+public class OracleWaiteLockOperation<T> extends AbstractLockOperation<T> {
 
-    public OracleLockOperation(EntityManagerImpl em, Class<T> entityClass) {
+    public OracleWaiteLockOperation(EntityManagerImpl em, Class<T> entityClass) {
         super(entityClass, em);
     }
 
