@@ -13,7 +13,7 @@ import java.util.concurrent.ConcurrentMap;
 /**
  * @author Alexander Guzanov
  */
-public class LockFactory {
+public class LockOperationFactory {
 
     private ConcurrentMap<EntryKey, ILockOperation> cache = new ConcurrentHashMap<EntryKey, ILockOperation>();
 

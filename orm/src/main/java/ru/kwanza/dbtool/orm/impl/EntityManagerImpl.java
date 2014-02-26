@@ -9,12 +9,14 @@ import ru.kwanza.dbtool.orm.api.internal.IFieldMapping;
 import ru.kwanza.dbtool.orm.impl.fetcher.Fetcher;
 import ru.kwanza.dbtool.orm.impl.fetcher.proxy.Proxy;
 import ru.kwanza.dbtool.orm.impl.filtering.FilteringImpl;
+import ru.kwanza.dbtool.orm.impl.lockoperation.LockOperationFactory;
 import ru.kwanza.dbtool.orm.impl.operation.OperationFactory;
 import ru.kwanza.dbtool.orm.impl.querybuilder.QueryBuilderFactory;
 import ru.kwanza.toolbox.SpringSerializable;
 
 import javax.annotation.Resource;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -34,6 +36,9 @@ public class EntityManagerImpl extends SpringSerializable implements IEntityMana
 
     @Resource(name = "dbtool.OperationFactory")
     private OperationFactory operationFactory;
+
+    @Resource(name = "dbtool.LockOperationFactory")
+    private LockOperationFactory lockOperationFactory;
 
     @Resource(name = "dbtool.Fetcher")
     private Fetcher fetcher;
@@ -146,15 +151,15 @@ public class EntityManagerImpl extends SpringSerializable implements IEntityMana
     }
 
     public boolean isNull(Object object) {
-        return object==null || (isProxy(object) && unwrapProxy(object)==null);
+        return object == null || (isProxy(object) && unwrapProxy(object) == null);
     }
 
-    public <T> LockResult<T> lock(LockType type, Collection<T> items) {
-        return null;
+    public <T> LockResult<T> lock(LockType type, Class<T> entityClass, Collection<T> items) {
+        return lockOperationFactory.createOperation(this, type, entityClass).lock(items);
     }
 
     public <T> LockResult<T> lock(LockType type, T item) {
-        return null;
+        return lock(type, (Class<T>) item.getClass(), Collections.singleton(item));
     }
 
     public Fetcher getFetcher() {

@@ -16,6 +16,6 @@ public class OracleWaiteLockOperation<T> extends AbstractLockOperation<T> {
     @Override
     protected String createSQL() {
         return "SELECT " + entityType.getIdField().getColumn() + " FROM " +
-                EntityInfo.getTableName(entityType) + " WHERE " + entityType.getIdField().getColumn() + "IN (?) UPDATE";
+                EntityInfo.getTableName(entityType) + " WHERE " + entityType.getIdField().getColumn() + " IN (?) FOR UPDATE";
     }
 }

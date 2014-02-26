@@ -12,6 +12,6 @@ public class OracleNoWaitLockOperation<T> extends OracleWaiteLockOperation<T> {
 
     @Override
     protected String createSQL() {
-        return super.createSQL() + " WITH NOWAIT";
+        return super.createSQL() + " NOWAIT";
     }
 }

@@ -57,7 +57,7 @@ public interface IEntityManager {
 
     boolean isNull(Object object);
 
-    <T> LockResult<T> lock(LockType type, Collection<T> items);
+    <T> LockResult<T> lock(LockType type, Class<T> entityClass, Collection<T> items);
 
     <T> LockResult<T> lock(LockType type, T item);
 }

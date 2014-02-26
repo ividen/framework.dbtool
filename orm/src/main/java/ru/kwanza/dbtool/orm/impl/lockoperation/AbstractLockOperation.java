@@ -6,7 +6,7 @@ import ru.kwanza.dbtool.core.FieldGetter;
 import ru.kwanza.dbtool.orm.api.LockResult;
 import ru.kwanza.dbtool.orm.api.internal.IEntityType;
 import ru.kwanza.dbtool.orm.impl.EntityManagerImpl;
-
+import ru.kwanza.toolbox.fieldhelper.FieldHelper;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -37,8 +37,9 @@ public abstract class AbstractLockOperation<T> implements ILockOperation<T> {
                 public Object mapRow(ResultSet resultSet, int i) throws SQLException {
                     return FieldGetter.getValue(resultSet, entityType.getIdField().getColumn(), entityType.getIdField().getProperty().getType());
                 }
-            }, items);
+            }, FieldHelper.getFieldCollection(items, entityType.getIdField().getProperty()));
         } catch (DataAccessException e) {
+            //todo aguzanov log error;
             e.printStackTrace();
             return new LockResult<T>(Collections.<T>emptyList(), items);
         }

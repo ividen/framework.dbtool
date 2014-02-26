@@ -12,6 +12,6 @@ public class OracleSkipLockOperation<T> extends OracleWaiteLockOperation<T> {
 
     @Override
     protected String createSQL() {
-        return super.createSQL() + " WITH SKIPED LOCKED";
+        return super.createSQL() + " SKIP LOCKED";
     }
 }
