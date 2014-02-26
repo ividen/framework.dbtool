@@ -31,7 +31,7 @@ public class FieldGetter {
         return (T) getObject(rs, column);
     }
 
-    private Object getObject(ResultSet rs, String column) throws SQLException {
+    private static Object getObject(ResultSet rs, String column) throws SQLException {
         Object result = rs.getObject(column);
         if (rs.wasNull()) {
             result = null;

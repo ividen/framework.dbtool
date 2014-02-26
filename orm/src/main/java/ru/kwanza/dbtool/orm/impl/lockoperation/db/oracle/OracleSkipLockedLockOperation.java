@@ -1,6 +1,5 @@
-package ru.kwanza.dbtool.orm.impl.querybuilder.db.oracle;
+package ru.kwanza.dbtool.orm.impl.lockoperation.db.oracle;
 
-import com.sun.deploy.util.SyncAccess;
 import ru.kwanza.dbtool.orm.impl.EntityManagerImpl;
 
 /**

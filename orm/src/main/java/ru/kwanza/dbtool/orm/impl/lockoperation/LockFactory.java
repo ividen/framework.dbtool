@@ -1,10 +1,11 @@
-package ru.kwanza.dbtool.orm.impl;
+package ru.kwanza.dbtool.orm.impl.lockoperation;
 
 import ru.kwanza.dbtool.core.DBTool;
 import ru.kwanza.dbtool.orm.api.LockType;
-import ru.kwanza.dbtool.orm.impl.querybuilder.db.oracle.OracleLockOperation;
-import ru.kwanza.dbtool.orm.impl.querybuilder.db.oracle.OracleNoWaitLockOperation;
-import ru.kwanza.dbtool.orm.impl.querybuilder.db.oracle.OracleSkipLockedLockOperation;
+import ru.kwanza.dbtool.orm.impl.EntityManagerImpl;
+import ru.kwanza.dbtool.orm.impl.lockoperation.db.oracle.OracleLockOperation;
+import ru.kwanza.dbtool.orm.impl.lockoperation.db.oracle.OracleNoWaitLockOperation;
+import ru.kwanza.dbtool.orm.impl.lockoperation.db.oracle.OracleSkipLockedLockOperation;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -14,7 +15,7 @@ import java.util.concurrent.ConcurrentMap;
  */
 public class LockFactory {
 
-    private ConcurrentMap<EntryKey, LockOperation> cache = new ConcurrentHashMap<EntryKey, LockOperation>();
+    private ConcurrentMap<EntryKey, ILockOperation> cache = new ConcurrentHashMap<EntryKey, ILockOperation>();
 
     private static class EntryKey {
         private Class entityClass;
@@ -34,9 +35,9 @@ public class LockFactory {
         }
     }
 
-    public <T> LockOperation<T> createOperation(EntityManagerImpl em, LockType type, Class<T> entityClass) {
+    public <T> ILockOperation<T> createOperation(EntityManagerImpl em, LockType type, Class<T> entityClass) {
         EntryKey key = new EntryKey(entityClass, type);
-        LockOperation result = cache.get(key);
+        ILockOperation result = cache.get(key);
         if (result == null) {
             if (em.getDbTool().getDbType() == DBTool.DBType.ORACLE) {
                 if (type == LockType.PESSIMISTIC_WAIT) {
