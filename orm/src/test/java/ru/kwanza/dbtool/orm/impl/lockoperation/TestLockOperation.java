@@ -285,12 +285,38 @@ public class TestLockOperation extends AbstractJUnit4SpringContextTests {
     }
 
     /**
-     * LockType.PESSIMISTIC_WAIT
+     * LockType.PESSIMISTIC_NOWAIT
      * Отказ в блокировки, если набор блокировки полностью общий
      */
-    public void testNoWaiteLock_1() {
+    @Test
+    public void testNoWaiteLock_1() throws InterruptedException {
+        List<Long> ids = Arrays.asList(1l, 2l, 3l, 4l, 5l, 6l, 7l, 8l, 9l, 10l);
+        LockingThread first = new LockingThread(LockType.PESSIMISTIC_NOWAIT, ids);
+        LockingThread second = new LockingThread(LockType.PESSIMISTIC_NOWAIT, ids);
+
+        first.start();
+        second.start();
+
+        first.doWork(10000);
+        Assert.assertNotNull("Result must be no null in first thread", first.result);
+        Assert.assertEquals("Expected count of locked entities in first thread", 10, first.result.getLocked().size());
+        Assert.assertEquals("Expected count of unlocked entities in first thread", 0, first.result.getUnlocked().size());
+        second.doWork(10000);
+
+        Assert.assertNotNull("Result must be no null in second thread", second.result);
+        Assert.assertEquals("Expected count of locked entities in second thread", 0, second.result.getLocked().size());
+        Assert.assertEquals("Expected count of unlocked entities in second thread", 10, second.result.getUnlocked().size());
+        second.finish();
+        first.finish();
+    }
+
+    /**
+     * Отказ в блокировки, если в наборах есть одинаковый элемент
+     */
+    @Test
+    public void testNoWaiteLock_2() {
         List<Long> ids1 = Arrays.asList(1l, 2l, 3l, 4l, 5l);
-        List<Long> ids2 = Arrays.asList(6l, 7l, 8l, 9l, 10l);
+        List<Long> ids2 = Arrays.asList(5l, 6l, 7l, 8l, 9l);
         LockingThread first = new LockingThread(LockType.PESSIMISTIC_NOWAIT, ids1);
         LockingThread second = new LockingThread(LockType.PESSIMISTIC_NOWAIT, ids2);
 
@@ -302,18 +328,12 @@ public class TestLockOperation extends AbstractJUnit4SpringContextTests {
         Assert.assertEquals("Expected count of locked entities in first thread", 5, first.result.getLocked().size());
         Assert.assertEquals("Expected count of unlocked entities in first thread", 0, first.result.getUnlocked().size());
         second.doWork(10000);
+
         Assert.assertNotNull("Result must be no null in second thread", second.result);
-        Assert.assertEquals("Expected count of locked entities in second thread", 5, second.result.getLocked().size());
-        Assert.assertEquals("Expected count of unlocked entities in second thread", 0, second.result.getUnlocked().size());
+        Assert.assertEquals("Expected count of locked entities in second thread", 0, second.result.getLocked().size());
+        Assert.assertEquals("Expected count of unlocked entities in second thread", 5, second.result.getUnlocked().size());
         second.finish();
         first.finish();
-    }
-
-    /**
-     * Отказ в блокировки, если в наборах есть одинаковый элемент
-     */
-    public void testNoWaiteLock_2() {
-
     }
 
     /**
@@ -345,15 +365,51 @@ public class TestLockOperation extends AbstractJUnit4SpringContextTests {
     /**
      * Отказ в блокировки, если набор блокировки полностью общий
      */
+    @Test
     public void testSkipLock_1() {
+        List<Long> ids = Arrays.asList(1l, 2l, 3l, 4l, 5l, 6l, 7l, 8l, 9l, 10l);
+        LockingThread first = new LockingThread(LockType.PESSIMISTIC_SKIP_LOCKED, ids);
+        LockingThread second = new LockingThread(LockType.PESSIMISTIC_SKIP_LOCKED, ids);
 
+        first.start();
+        second.start();
+
+        first.doWork(10000);
+        Assert.assertNotNull("Result must be no null in first thread", first.result);
+        Assert.assertEquals("Expected count of locked entities in first thread", 10, first.result.getLocked().size());
+        Assert.assertEquals("Expected count of unlocked entities in first thread", 0, first.result.getUnlocked().size());
+        second.doWork(10000);
+
+        Assert.assertNotNull("Result must be no null in second thread", second.result);
+        Assert.assertEquals("Expected count of locked entities in second thread", 0, second.result.getLocked().size());
+        Assert.assertEquals("Expected count of unlocked entities in second thread", 10, second.result.getUnlocked().size());
+        second.finish();
+        first.finish();
     }
 
     /**
      * Отказ в блокировки одного элемента, если он общий для двух наборов
      */
+    @Test
     public void testSkipLock_2() {
+        List<Long> ids1 = Arrays.asList(1l, 2l, 3l, 4l, 5l);
+        List<Long> ids2 = Arrays.asList(5l, 6l, 7l, 8l, 9l);;
+        LockingThread first = new LockingThread(LockType.PESSIMISTIC_SKIP_LOCKED, ids1);
+        LockingThread second = new LockingThread(LockType.PESSIMISTIC_SKIP_LOCKED, ids2);
 
+        first.start();
+        second.start();
+
+        first.doWork(10000);
+        Assert.assertNotNull("Result must be no null in first thread", first.result);
+        Assert.assertEquals("Expected count of locked entities in first thread", 5, first.result.getLocked().size());
+        Assert.assertEquals("Expected count of unlocked entities in first thread", 0, first.result.getUnlocked().size());
+        second.doWork(10000);
+        Assert.assertNotNull("Result must be no null in second thread", second.result);
+        Assert.assertEquals("Expected count of locked entities in second thread", 4, second.result.getLocked().size());
+        Assert.assertEquals("Expected count of unlocked entities in second thread", 1, second.result.getUnlocked().size());
+        second.finish();
+        first.finish();
     }
 
     /**
