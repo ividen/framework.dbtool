@@ -21,6 +21,7 @@ import ru.kwanza.dbtool.orm.api.LockType;
 import ru.kwanza.dbtool.orm.impl.mapping.EntityMappingRegistry;
 import ru.kwanza.txn.api.spi.ITransactionManager;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.sql.DataSource;
 import java.io.IOException;
@@ -36,7 +37,6 @@ import java.util.concurrent.locks.ReentrantLock;
  * @author Alexander Guzanov
  */
 
-
 public class TestLockOperation extends AbstractJUnit4SpringContextTests {
     @Resource(name = "dbtool.IEntityManager")
     protected IEntityManager em;
@@ -46,39 +46,14 @@ public class TestLockOperation extends AbstractJUnit4SpringContextTests {
     protected DBTool dbTool;
     @Resource(name = "dbtool.IEntityMappingRegistry")
     protected EntityMappingRegistry registry;
-    @Resource(name = "dataSource")
-    protected DataSource dataSource;
-
-    @Value("${jdbc.schema}")
-    private String schema;
+    @Resource(name = "initBean")
+    protected InitBean initBean;
 
 
-    @Before
-    public void setUpDV() throws Exception {
-        IDatabaseConnection connection = getConnection();
-        DatabaseOperation.CLEAN_INSERT.execute(connection, getInitDataSet());
-        connection.getConnection().commit();
-    }
-
-    private IDataSet getInitDataSet() throws IOException,
-            DataSetException {
-
-        return new FlatXmlDataSetBuilder().build(getClass().getResourceAsStream("initdb.xml"));
-    }
-
-    public IDatabaseConnection getConnection() throws SQLException, DatabaseUnitException {
-        DatabaseConnection connection = new DatabaseConnection(dataSource.getConnection(), schema);
-        connection.getConfig().setProperty(DatabaseConfig.FEATURE_BATCHED_STATEMENTS, true);
-        return connection;
-    }
 
     @Before
     public void init() {
         registry.registerEntityClass(LockedEntity.class);
-    }
-
-    public IDataSet getActualDataSet() throws Exception {
-        return new SortedDataSet(getConnection().createDataSet(new String[]{"locked_entity"}));
     }
 
 
@@ -119,7 +94,7 @@ public class TestLockOperation extends AbstractJUnit4SpringContextTests {
             workedLock.lock();
             try {
                 worked = true;
-                workedCondition.signal();
+                workedCondition.signalAll();
 
             } finally {
                 workedLock.unlock();
@@ -160,7 +135,7 @@ public class TestLockOperation extends AbstractJUnit4SpringContextTests {
             lock.lock();
             try {
                 notified = true;
-                notifyCondition.signal();
+                notifyCondition.signalAll();
             } finally {
                 lock.unlock();
             }
@@ -169,7 +144,7 @@ public class TestLockOperation extends AbstractJUnit4SpringContextTests {
             try {
 
                 if (!worked) {
-                    workedCondition.await(10000, TimeUnit.MILLISECONDS);
+                    workedCondition.await(millis, TimeUnit.MILLISECONDS);
                 }
             } catch (InterruptedException e) {
                 return worked;
@@ -185,7 +160,7 @@ public class TestLockOperation extends AbstractJUnit4SpringContextTests {
             lock.lock();
             try {
                 finished = true;
-                finishedCondition.signal();
+                finishedCondition.signalAll();
             } finally {
                 lock.unlock();
             }
@@ -194,6 +169,7 @@ public class TestLockOperation extends AbstractJUnit4SpringContextTests {
                 try {
                     join(1000);
                 } catch (InterruptedException e) {
+                    e.printStackTrace();
                     break;
                 }
             }
@@ -394,7 +370,8 @@ public class TestLockOperation extends AbstractJUnit4SpringContextTests {
     @Test
     public void testSkipLock_2() {
         List<Long> ids1 = Arrays.asList(1l, 2l, 3l, 4l, 5l);
-        List<Long> ids2 = Arrays.asList(5l, 6l, 7l, 8l, 9l);;
+        List<Long> ids2 = Arrays.asList(5l, 6l, 7l, 8l, 9l);
+        ;
         LockingThread first = new LockingThread(LockType.PESSIMISTIC_SKIP_LOCKED, ids1);
         LockingThread second = new LockingThread(LockType.PESSIMISTIC_SKIP_LOCKED, ids2);
 
