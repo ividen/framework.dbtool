@@ -9,6 +9,7 @@ import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.IDataSet;
 import org.dbunit.dataset.SortedDataSet;
 import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
+import org.dbunit.operation.DatabaseOperation;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Value;
@@ -54,9 +55,9 @@ public class TestLockOperation extends AbstractJUnit4SpringContextTests {
 
     @Before
     public void setUpDV() throws Exception {
-//        IDatabaseConnection connection = getConnection();
-//        DatabaseOperation.CLEAN_INSERT.execute(connection, getInitDataSet());
-//        connection.getConnection().commit();
+        IDatabaseConnection connection = getConnection();
+        DatabaseOperation.CLEAN_INSERT.execute(connection, getInitDataSet());
+        connection.getConnection().commit();
     }
 
     private IDataSet getInitDataSet() throws IOException,
