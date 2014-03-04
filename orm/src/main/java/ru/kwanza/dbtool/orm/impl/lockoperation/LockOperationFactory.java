@@ -3,9 +3,12 @@ package ru.kwanza.dbtool.orm.impl.lockoperation;
 import ru.kwanza.dbtool.core.DBTool;
 import ru.kwanza.dbtool.orm.api.LockType;
 import ru.kwanza.dbtool.orm.impl.EntityManagerImpl;
+import ru.kwanza.dbtool.orm.impl.lockoperation.db.mssql.MSSQLNoWaitLockOperation;
+import ru.kwanza.dbtool.orm.impl.lockoperation.db.mssql.MSSQLSkipLockOperation;
+import ru.kwanza.dbtool.orm.impl.lockoperation.db.mssql.MSSQLWaitLockOperation;
+import ru.kwanza.dbtool.orm.impl.lockoperation.db.oracle.OracleNoWaitLockOperation;
 import ru.kwanza.dbtool.orm.impl.lockoperation.db.oracle.OracleSkipLockOperation;
 import ru.kwanza.dbtool.orm.impl.lockoperation.db.oracle.OracleWaiteLockOperation;
-import ru.kwanza.dbtool.orm.impl.lockoperation.db.oracle.OracleNoWaitLockOperation;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -40,12 +43,20 @@ public class LockOperationFactory {
         ILockOperation result = cache.get(key);
         if (result == null) {
             if (em.getDbTool().getDbType() == DBTool.DBType.ORACLE) {
-                if (type == LockType.PESSIMISTIC_WAIT) {
+                if (type == LockType.WAIT) {
                     result = new OracleWaiteLockOperation<T>(em, entityClass);
-                } else if (type == LockType.PESSIMISTIC_NOWAIT) {
+                } else if (type == LockType.NOWAIT) {
                     result = new OracleNoWaitLockOperation(em, entityClass);
-                } else if (type == LockType.PESSIMISTIC_SKIP_LOCKED) {
+                } else if (type == LockType.SKIP_LOCKED) {
                     result = new OracleSkipLockOperation(em, entityClass);
+                }
+            } else if (em.getDbTool().getDbType() == DBTool.DBType.MSSQL) {
+                if (type == LockType.WAIT) {
+                    result = new MSSQLWaitLockOperation(em,entityClass);
+                } else if (type == LockType.NOWAIT) {
+                    result = new MSSQLNoWaitLockOperation(em,entityClass);
+                } else if (type == LockType.SKIP_LOCKED) {
+                    result = new MSSQLSkipLockOperation(em,entityClass);
                 }
             } else {
                 throw new UnsupportedOperationException("Lock operation is not supported for database " + em.getDbTool().getDbType());

@@ -23,7 +23,7 @@ public abstract class AbstractLockOperation<T> implements ILockOperation<T> {
     protected final IEntityType<T> entityType;
     protected final String sql;
 
-    public AbstractLockOperation(Class<T> entityClass, EntityManagerImpl em) {
+    public AbstractLockOperation(EntityManagerImpl em, Class<T> entityClass) {
         this.entityType = em.getRegistry().getEntityType(entityClass);
         this.em = em;
         this.sql = createSQL();

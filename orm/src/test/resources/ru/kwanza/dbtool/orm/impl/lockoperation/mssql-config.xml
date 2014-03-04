@@ -3,9 +3,10 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-    <import resource="classpath:txn-ds.xml"/>
+    <import resource="classpath:txn-ds-config.xml"/>
     <import resource="classpath:dbtool-config.xml"/>
     <import resource="classpath:dbtool-orm-config.xml"/>
+
 
     <bean id="propertyPlaceholderConfigurer"
           class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
@@ -22,6 +23,9 @@
         <property name="url" value="${jdbc.connectionUrl}"/>
         <property name="username" value="${jdbc.username}"/>
         <property name="password" value="${jdbc.password}"/>
+        <!--<property name="defaultAutoCommit" value="false"/>-->
     </bean>
+
+    <bean class="ru.kwanza.dbtool.orm.impl.lockoperation.InitBean" name="initBean"/>
 
 </beans>

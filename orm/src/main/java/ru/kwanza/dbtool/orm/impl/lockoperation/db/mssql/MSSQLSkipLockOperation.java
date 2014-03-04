@@ -8,13 +8,13 @@ import ru.kwanza.dbtool.orm.impl.querybuilder.EntityInfo;
  * @author Alexander Guzanov
  */
 public class MSSQLSkipLockOperation<T> extends AbstractLockOperation<T> {
-    public MSSQLSkipLockOperation(Class<T> entityClass, EntityManagerImpl em) {
-        super(entityClass, em);
+    public MSSQLSkipLockOperation(EntityManagerImpl em, Class<T> entityClass) {
+        super(em, entityClass);
     }
 
     @Override
     protected String createSQL() {
         return "SELECT " + entityType.getIdField().getColumn() + " FROM " +
-                EntityInfo.getTableName(entityType) + " WITH(UPDLOCK,READPAST) WHERE " + entityType.getIdField().getColumn() + "IN (?)";
+                EntityInfo.getTableName(entityType) + " WITH(UPDLOCK,READPAST) WHERE " + entityType.getIdField().getColumn() + " IN (?)";
     }
 }
