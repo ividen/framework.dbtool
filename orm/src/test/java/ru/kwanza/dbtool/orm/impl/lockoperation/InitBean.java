@@ -10,7 +10,7 @@ import org.dbunit.dataset.SortedDataSet;
 import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
 import org.dbunit.operation.DatabaseOperation;
 import org.springframework.beans.factory.annotation.Value;
-import ru.kwanza.dbtool.orm.impl.fetcher.*;
+import ru.kwanza.dbtool.orm.impl.fetcher.TestFetcherIml;
 import ru.kwanza.dbtool.orm.impl.mapping.EntityMappingRegistry;
 import ru.kwanza.txn.api.spi.ITransactionManager;
 
@@ -66,5 +66,6 @@ public class InitBean {
         connection.getConfig().setProperty(DatabaseConfig.FEATURE_BATCHED_STATEMENTS, true);
         return connection;
     }
+
 
 }
