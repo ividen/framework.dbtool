@@ -16,7 +16,7 @@ public class MySQLNoWaitLockOperation<T> extends MySQLWaitLockOperation<T> {
     @Override
     public LockResult<T> lock(Collection<T> items) {
         int lockTimeout = getLockTimeout();
-        setLockTimeout(100);
+        setLockTimeout(1);
         try {
             return super.lock(items);
         } finally {

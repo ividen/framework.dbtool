@@ -5,6 +5,7 @@ import ru.kwanza.dbtool.orm.impl.EntityManagerImpl;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 
 /**
  * @author Alexander Guzanov
@@ -21,9 +22,9 @@ public class MySQLSkipLockOperation<T> extends MySQLLockOperation<T> {
         final Collection<T> unlocked = new ArrayList<T>();
 
         try {
-            setLockTimeout(10);
+            setLockTimeout(1);
             for (T i : items) {
-                LockResult<T> result = super.lock(items);
+                LockResult<T> result = super.lock(Collections.singletonList(i));
                 locked.addAll(result.getLocked());
                 unlocked.addAll(result.getUnlocked());
             }

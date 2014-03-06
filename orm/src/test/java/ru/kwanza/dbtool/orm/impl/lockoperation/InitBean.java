@@ -37,11 +37,11 @@ public class InitBean {
 
     @PostConstruct
     public void setUpDV() throws Exception {
-        tm.begin();
-        IDatabaseConnection connection = getConnection();
-        DatabaseOperation.CLEAN_INSERT.execute(connection, getInitDataSet());
-        connection.getConnection().close();
-        tm.commit();
+//        tm.begin();
+//        IDatabaseConnection connection = getConnection();
+//        DatabaseOperation.CLEAN_INSERT.execute(connection, getInitDataSet());
+//        connection.getConnection().close();
+//        tm.commit();
     }
 
     private static IDataSet getDataSet() throws IOException,

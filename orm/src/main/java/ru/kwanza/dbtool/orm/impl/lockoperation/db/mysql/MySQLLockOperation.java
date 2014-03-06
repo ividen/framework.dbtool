@@ -23,7 +23,7 @@ public class MySQLLockOperation<T> extends AbstractLockOperation<T> {
     }
 
     protected int getLockTimeout() {
-        return em.getDbTool().getJdbcTemplate().queryForInt("get innodb_lock_wait_timeout");
+        return em.getDbTool().getJdbcTemplate().queryForInt("select @@innodb_lock_wait_timeout");
     }
 
 }

@@ -6,6 +6,8 @@ import ru.kwanza.dbtool.orm.impl.EntityManagerImpl;
 import ru.kwanza.dbtool.orm.impl.lockoperation.db.mssql.MSSQLNoWaitLockOperation;
 import ru.kwanza.dbtool.orm.impl.lockoperation.db.mssql.MSSQLSkipLockOperation;
 import ru.kwanza.dbtool.orm.impl.lockoperation.db.mssql.MSSQLWaitLockOperation;
+import ru.kwanza.dbtool.orm.impl.lockoperation.db.mysql.MySQLNoWaitLockOperation;
+import ru.kwanza.dbtool.orm.impl.lockoperation.db.mysql.MySQLSkipLockOperation;
 import ru.kwanza.dbtool.orm.impl.lockoperation.db.mysql.MySQLWaitLockOperation;
 import ru.kwanza.dbtool.orm.impl.lockoperation.db.oracle.OracleNoWaitLockOperation;
 import ru.kwanza.dbtool.orm.impl.lockoperation.db.oracle.OracleSkipLockOperation;
@@ -63,9 +65,9 @@ public class LockOperationFactory {
                 if (type == LockType.WAIT) {
                     result = new MySQLWaitLockOperation<T>(em, entityClass);
                 } else if (type == LockType.NOWAIT) {
-                    result = new MSSQLNoWaitLockOperation<T>(em, entityClass);
+                    result = new MySQLNoWaitLockOperation<T>(em, entityClass);
                 } else if (type == LockType.SKIP_LOCKED) {
-                    result = new MSSQLSkipLockOperation<T>(em, entityClass);
+                    result = new MySQLSkipLockOperation<T>(em, entityClass);
                 }
             } else {
                 throw new UnsupportedOperationException("Lock operation is not supported for database " + em.getDbTool().getDbType());
