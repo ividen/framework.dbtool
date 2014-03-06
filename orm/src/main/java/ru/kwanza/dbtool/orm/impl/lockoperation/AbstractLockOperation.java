@@ -1,5 +1,7 @@
 package ru.kwanza.dbtool.orm.impl.lockoperation;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 import ru.kwanza.dbtool.core.FieldGetter;
@@ -22,6 +24,7 @@ public abstract class AbstractLockOperation<T> implements ILockOperation<T> {
     protected final EntityManagerImpl em;
     protected final IEntityType<T> entityType;
     protected final String sql;
+    private static Logger logger = LoggerFactory.getLogger(AbstractLockOperation.class);
 
     public AbstractLockOperation(EntityManagerImpl em, Class<T> entityClass) {
         this.entityType = em.getRegistry().getEntityType(entityClass);
@@ -39,8 +42,7 @@ public abstract class AbstractLockOperation<T> implements ILockOperation<T> {
                 }
             }, FieldHelper.getFieldCollection(items, entityType.getIdField().getProperty()));
         } catch (DataAccessException e) {
-            //todo aguzanov log error;
-            e.printStackTrace();
+            logger.warn("Can't set lock: sql=" + sql, e);
             return new LockResult<T>(Collections.<T>emptyList(), items);
         }
 
