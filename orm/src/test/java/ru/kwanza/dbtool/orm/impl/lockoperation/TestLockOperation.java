@@ -202,12 +202,12 @@ public class TestLockOperation extends AbstractJUnit4SpringContextTests {
         first.start();
         second.start();
 
-        first.doWork(50000);
+        first.doWork(10000);
         Assert.assertNotNull("Result must be no null in first thread", first.result);
         Assert.assertEquals("Expected count of locked entities in first thread", 10, first.result.getLocked().size());
         Assert.assertEquals("Expected count of unlocked entities in first thread", 0, first.result.getUnlocked().size());
         assertObjects(first.result.getLocked(), ids);
-        second.doWork(50000);
+        second.doWork(10000);
         Assert.assertNull("Result must be null in second thread", second.result);
         first.finish();
         Thread.currentThread().sleep(1000);
@@ -233,12 +233,12 @@ public class TestLockOperation extends AbstractJUnit4SpringContextTests {
         first.start();
         second.start();
 
-        first.doWork(50000);
+        first.doWork(10000);
         Assert.assertNotNull("Result must be no null in first thread", first.result);
         Assert.assertEquals("Expected count of locked entities in first thread", 5, first.result.getLocked().size());
         assertObjects(first.result.getLocked(), ids1);
         Assert.assertEquals("Expected count of unlocked entities in first thread", 0, first.result.getUnlocked().size());
-        second.doWork(50000);
+        second.doWork(10000);
         Assert.assertNull("Result must be null in second thread", second.result);
         first.finish();
         Thread.currentThread().sleep(1000);
@@ -264,12 +264,12 @@ public class TestLockOperation extends AbstractJUnit4SpringContextTests {
         first.start();
         second.start();
 
-        first.doWork(50000);
+        first.doWork(10000);
         Assert.assertNotNull("Result must be no null in first thread", first.result);
         Assert.assertEquals("Expected count of locked entities in first thread", 5, first.result.getLocked().size());
         Assert.assertEquals("Expected count of unlocked entities in first thread", 0, first.result.getUnlocked().size());
         assertObjects(first.result.getLocked(), ids1);
-        second.doWork(50000);
+        second.doWork(10000);
         Assert.assertNotNull("Result must be no null in second thread", second.result);
         Assert.assertEquals("Expected count of locked entities in second thread", 5, second.result.getLocked().size());
         Assert.assertEquals("Expected count of unlocked entities in second thread", 0, second.result.getUnlocked().size());
@@ -291,12 +291,12 @@ public class TestLockOperation extends AbstractJUnit4SpringContextTests {
         first.start();
         second.start();
 
-        first.doWork(50000);
+        first.doWork(10000);
         Assert.assertNotNull("Result must be no null in first thread", first.result);
         Assert.assertEquals("Expected count of locked entities in first thread", 10, first.result.getLocked().size());
         assertObjects(first.result.getLocked(), ids);
         Assert.assertEquals("Expected count of unlocked entities in first thread", 0, first.result.getUnlocked().size());
-        second.doWork(50000);
+        second.doWork(10000);
 
         Assert.assertNotNull("Result must be no null in second thread", second.result);
         Assert.assertEquals("Expected count of locked entities in second thread", 0, second.result.getLocked().size());
@@ -319,12 +319,12 @@ public class TestLockOperation extends AbstractJUnit4SpringContextTests {
         first.start();
         second.start();
 
-        first.doWork(50000);
+        first.doWork(10000);
         Assert.assertNotNull("Result must be no null in first thread", first.result);
         Assert.assertEquals("Expected count of locked entities in first thread", 5, first.result.getLocked().size());
         Assert.assertEquals("Expected count of unlocked entities in first thread", 0, first.result.getUnlocked().size());
         assertObjects(first.result.getLocked(), ids1);
-        second.doWork(50000);
+        second.doWork(10000);
 
         Assert.assertNotNull("Result must be no null in second thread", second.result);
         Assert.assertEquals("Expected count of locked entities in second thread", 0, second.result.getLocked().size());
@@ -347,12 +347,12 @@ public class TestLockOperation extends AbstractJUnit4SpringContextTests {
         first.start();
         second.start();
 
-        first.doWork(500000);
+        first.doWork(100000);
         Assert.assertNotNull("Result must be no null in first thread", first.result);
         Assert.assertEquals("Expected count of locked entities in first thread", 5, first.result.getLocked().size());
         assertObjects(first.result.getLocked(), ids1);
         Assert.assertEquals("Expected count of unlocked entities in first thread", 0, first.result.getUnlocked().size());
-        second.doWork(50000);
+        second.doWork(10000);
         Assert.assertNotNull("Result must be no null in second thread", second.result);
         Assert.assertEquals("Expected count of locked entities in second thread", 5, second.result.getLocked().size());
         assertObjects(second.result.getLocked(), ids2);
@@ -374,12 +374,12 @@ public class TestLockOperation extends AbstractJUnit4SpringContextTests {
         first.start();
         second.start();
 
-        first.doWork(50000);
+        first.doWork(10000);
         Assert.assertNotNull("Result must be no null in first thread", first.result);
         Assert.assertEquals("Expected count of locked entities in first thread", 10, first.result.getLocked().size());
         assertObjects(first.result.getLocked(), ids);
         Assert.assertEquals("Expected count of unlocked entities in first thread", 0, first.result.getUnlocked().size());
-        second.doWork(50000);
+        second.doWork(150000);
 
         Assert.assertNotNull("Result must be no null in second thread", second.result);
         Assert.assertEquals("Expected count of locked entities in second thread", 0, second.result.getLocked().size());
@@ -403,12 +403,12 @@ public class TestLockOperation extends AbstractJUnit4SpringContextTests {
         first.start();
         second.start();
 
-        first.doWork(50000);
+        first.doWork(10000);
         Assert.assertNotNull("Result must be no null in first thread", first.result);
         Assert.assertEquals("Expected count of locked entities in first thread", 5, first.result.getLocked().size());
         assertObjects(first.result.getLocked(), ids1);
         Assert.assertEquals("Expected count of unlocked entities in first thread", 0, first.result.getUnlocked().size());
-        second.doWork(50000);
+        second.doWork(150000);
         Assert.assertNotNull("Result must be no null in second thread", second.result);
         Assert.assertEquals("Expected count of locked entities in second thread", 4, second.result.getLocked().size());
         assertObjects(second.result.getLocked(), Arrays.asList(9996l, 9997l, 9998l, 9999l));
@@ -431,12 +431,12 @@ public class TestLockOperation extends AbstractJUnit4SpringContextTests {
         first.start();
         second.start();
 
-        first.doWork(50000);
+        first.doWork(10000);
         Assert.assertNotNull("Result must be no null in first thread", first.result);
         Assert.assertEquals("Expected count of locked entities in first thread", 5, first.result.getLocked().size());
         assertObjects(first.result.getLocked(), ids1);
         Assert.assertEquals("Expected count of unlocked entities in first thread", 0, first.result.getUnlocked().size());
-        second.doWork(50000);
+        second.doWork(150000);
         Assert.assertNotNull("Result must be no null in second thread", second.result);
         Assert.assertEquals("Expected count of locked entities in second thread", 5, second.result.getLocked().size());
         assertObjects(second.result.getLocked(), ids2);
