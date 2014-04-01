@@ -40,7 +40,7 @@ public abstract class AbstractLockOperation<T> implements ILockOperation<T> {
                 public Object mapRow(ResultSet resultSet, int i) throws SQLException {
                     return FieldGetter.getValue(resultSet, entityType.getIdField().getColumn(), entityType.getIdField().getProperty().getType());
                 }
-            }, FieldHelper.getFieldCollection(items, entityType.getIdField().getProperty()));
+            }, getParams(items));
         } catch (DataAccessException e) {
             logger.warn("Can't set lock: sql=" + sql, e);
             return new LockResult<T>(Collections.<T>emptyList(), items);
@@ -58,6 +58,10 @@ public abstract class AbstractLockOperation<T> implements ILockOperation<T> {
         }
 
         return new LockResult<T>(locked, unlocked);
+    }
+
+    protected Object[] getParams(Collection<T> items) {
+        return new Object[]{FieldHelper.getFieldCollection(items, entityType.getIdField().getProperty())};
     }
 
     protected abstract String createSQL();

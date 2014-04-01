@@ -37,21 +37,16 @@ public class InitBean {
 
     @PostConstruct
     public void setUpDV() throws Exception {
-//        tm.begin();
-//        IDatabaseConnection connection = getConnection();
-//        DatabaseOperation.CLEAN_INSERT.execute(connection, getInitDataSet());
-//        connection.getConnection().close();
-//        tm.commit();
+        tm.begin();
+        IDatabaseConnection connection = getConnection();
+        DatabaseOperation.CLEAN_INSERT.execute(connection, getInitDataSet());
+        connection.getConnection().close();
+        tm.commit();
     }
 
     private static IDataSet getDataSet() throws IOException,
             DataSetException {
         return new FlatXmlDataSetBuilder().build(TestFetcherIml.class.getResourceAsStream("initdb.xml"));
-    }
-
-
-    public IDataSet getActualDataSet() throws Exception {
-        return new SortedDataSet(getConnection().createDataSet(new String[]{"test_entity"}));
     }
 
 
