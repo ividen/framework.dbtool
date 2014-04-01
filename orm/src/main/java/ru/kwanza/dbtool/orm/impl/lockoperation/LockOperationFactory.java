@@ -11,7 +11,10 @@ import ru.kwanza.dbtool.orm.impl.lockoperation.db.mysql.MySQLSkipLockOperation;
 import ru.kwanza.dbtool.orm.impl.lockoperation.db.mysql.MySQLWaitLockOperation;
 import ru.kwanza.dbtool.orm.impl.lockoperation.db.oracle.OracleNoWaitLockOperation;
 import ru.kwanza.dbtool.orm.impl.lockoperation.db.oracle.OracleSkipLockOperation;
-import ru.kwanza.dbtool.orm.impl.lockoperation.db.oracle.OracleWaiteLockOperation;
+import ru.kwanza.dbtool.orm.impl.lockoperation.db.oracle.OracleWaitLockOperation;
+import ru.kwanza.dbtool.orm.impl.lockoperation.db.posgresql.PostgreSQLNoWaitLockOperation;
+import ru.kwanza.dbtool.orm.impl.lockoperation.db.posgresql.PostgreSQLSkipLockOperation;
+import ru.kwanza.dbtool.orm.impl.lockoperation.db.posgresql.PostgreSQLWaitLockOperation;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -47,7 +50,7 @@ public class LockOperationFactory {
         if (result == null) {
             if (em.getDbTool().getDbType() == DBTool.DBType.ORACLE) {
                 if (type == LockType.WAIT) {
-                    result = new OracleWaiteLockOperation<T>(em, entityClass);
+                    result = new OracleWaitLockOperation<T>(em, entityClass);
                 } else if (type == LockType.NOWAIT) {
                     result = new OracleNoWaitLockOperation(em, entityClass);
                 } else if (type == LockType.SKIP_LOCKED) {
@@ -68,6 +71,14 @@ public class LockOperationFactory {
                     result = new MySQLNoWaitLockOperation<T>(em, entityClass);
                 } else if (type == LockType.SKIP_LOCKED) {
                     result = new MySQLSkipLockOperation<T>(em, entityClass);
+                }
+            } else if (em.getDbTool().getDbType() == DBTool.DBType.POSTGRESQL) {
+                if (type == LockType.WAIT) {
+                    result = new PostgreSQLWaitLockOperation<T>(em, entityClass);
+                } else if (type == LockType.NOWAIT) {
+                    result = new PostgreSQLNoWaitLockOperation<T>(em, entityClass);
+                } else if (type == LockType.SKIP_LOCKED) {
+                    result = new PostgreSQLSkipLockOperation<T>(em, entityClass);
                 }
             } else {
                 throw new UnsupportedOperationException("Lock operation is not supported for database " + em.getDbTool().getDbType());

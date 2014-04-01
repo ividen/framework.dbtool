@@ -5,7 +5,7 @@ import ru.kwanza.dbtool.orm.impl.EntityManagerImpl;
 /**
  * @author Alexander Guzanov
  */
-public class OracleSkipLockOperation<T> extends OracleWaiteLockOperation<T> {
+public class OracleSkipLockOperation<T> extends OracleWaitLockOperation<T> {
     public OracleSkipLockOperation(EntityManagerImpl em, Class<T> entityClass) {
         super(em, entityClass);
     }

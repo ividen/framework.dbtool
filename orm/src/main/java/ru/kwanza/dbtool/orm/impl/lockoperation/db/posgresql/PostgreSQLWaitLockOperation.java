@@ -1,4 +1,4 @@
-package ru.kwanza.dbtool.orm.impl.lockoperation.db.oracle;
+package ru.kwanza.dbtool.orm.impl.lockoperation.db.posgresql;
 
 import ru.kwanza.dbtool.orm.impl.EntityManagerImpl;
 import ru.kwanza.dbtool.orm.impl.lockoperation.AbstractLockOperation;
@@ -7,9 +7,9 @@ import ru.kwanza.dbtool.orm.impl.querybuilder.EntityInfo;
 /**
  * @author Alexander Guzanov
  */
-public class OracleWaiteLockOperation<T> extends AbstractLockOperation<T> {
+public class PostgreSQLWaitLockOperation<T> extends AbstractLockOperation<T> {
 
-    public OracleWaiteLockOperation(EntityManagerImpl em, Class<T> entityClass) {
+    public PostgreSQLWaitLockOperation(EntityManagerImpl em, Class<T> entityClass) {
         super(em, entityClass);
     }
 
