@@ -7,6 +7,7 @@ import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
 import ru.kwanza.dbtool.orm.api.IEntityManager;
 import ru.kwanza.dbtool.orm.api.IQuery;
 import ru.kwanza.dbtool.orm.api.If;
+import ru.kwanza.dbtool.orm.api.LockType;
 import ru.kwanza.dbtool.orm.impl.fetcher.proxy.Proxy;
 import ru.kwanza.dbtool.orm.impl.querybuilder.AbstractQuery;
 
@@ -183,7 +184,8 @@ public abstract class TestAbstractEntity extends AbstractJUnit4SpringContextTest
 
     @Test
     public void tesJoin_1() {
-        final IQuery<TestEntity> query = em.queryBuilder(TestEntity.class).join("&entity,&otherEntity").create();
+        final IQuery<TestEntity> query = em.queryBuilder(TestEntity.class)
+                .join("&entity,&otherEntity").create();
 
         final List<TestEntity> entities = query.prepare().selectList();
 

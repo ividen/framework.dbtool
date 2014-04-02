@@ -1,6 +1,8 @@
 package ru.kwanza.dbtool.orm.api;
 
 /**
+ * Построитель запросов
+ *
  * @author Alexander Guzanov
  */
 public interface IQueryBuilder<T> {
