@@ -4,7 +4,7 @@ import java.util.Collection;
 
 /**
  * Описание sql-предиката.<br/>
- *
+ * <p/>
  * Конструируется с помощью статических методов, описывающих тип условия
  * <ul>
  * <li><b>isLess</b> : &lt; </li>
@@ -15,61 +15,61 @@ import java.util.Collection;
  * <li><b>isNotNull</b> : IS NOT NULL </li>
  * <li><b>isGreater</b> : &gt </li>
  * <li><b>isGreaterOrEqual</b> : &gt= </li>
- *</ul>
- *
+ * </ul>
+ * <p/>
  * При конструировании условия указывается имя свойства по которому оно ставится.
- *
- *<pre>
+ * <p/>
+ * <pre>
  *  {@code
  *    IQuery<TestEntity> q = em.queryBuilder(TestEntity.class).where(If.isLess("fieldName")).create()
  *   }
- *</pre>
- *
+ * </pre>
+ * <p/>
  * что эквивалентно запросу
  * <pre>
  *  {@code
  *    SELECT * FROM test_entity WHERE field_name=?
  *   }
  * </pre>
- *
+ * <p/>
  * Условия может ставиться по вложенным сущностям(уровень вложенности произвольный).
  * В этом случае эти сущности  будут добавляны в пересечение и при выполнении запроса, соотвествующее поля связи будет заполнены
- *
+ * <p/>
  * <pre>
  *  {@code
  *     IQuery<TestEntity> q = em.queryBuilder(TestEntity.class).where(If.isEqual("type.code")).create()
  *   }
  * </pre>
- *
+ * <p/>
  * что эквивалентно запросу
  * <pre>
  *  {@code
  *      SELECT * FROM  test_entity INNER JOIN type on test_entity.type_id=type.id WHERE type.code=?
  *   }
  * </pre>
-
- *
+ * <p/>
+ * <p/>
  * При конструировании запроса может возникнуть необходимость установить сразу значение параметра, с которым он выполнятеся.
- <pre>
+ * <pre>
  *  {@code
  *     IQuery<TestEntity> q = em.queryBuilder(TestEntity.class).where(If.isLess("fieldName"),If.valueOf(10))).create()
  *   }
  * </pre>
- *
+ * <p/>
  * В этом случае тоже конструируется pre-compiled запрос, но при выполнении всегда автоматически устанавливается значенияе парамтера 10
  * <pre>
  *  {@code
  *      SELECT * FROM  test_entity  WHERE field_name=?
  *   }
  * </pre>
- *
+ * <p/>
  * Для простроения запросов состоящих из нескольких предикатов используются статические методы
  * <ul>
  * <li><b>and</b></li>
  * <li><b>or</b></li>
  * <li><b>not</b></li>
- *</ul>
- *
+ * </ul>
+ * <p/>
  * Пример:
  * <pre>
  *  {@code
@@ -89,18 +89,18 @@ import java.util.Collection;
  *                                 )).create()
  *   }
  * </pre>
- *
+ * <p/>
  * что эквивалентно запросу
  * <pre>
  *  {@code
  *   SELECT * FROM  test_entity WHERE (int_field=? AND long_field=? AND (date_field between ? and ?)) OR (int_field&lt;? AND long_field&gt;? AND NOT (date_field between ? and ?))
  *   }
  * </pre>
- *
+ * <p/>
  * Если при построении запросов с sql-предикатами предполагается что парамтер может учавствовать в нескольких позициях,
  * или если параметров много, то удобно пользоаться методами, которые при конструировании sql-предиката указывают имя параметра,
  * который будет использоваться
- *
+ * <p/>
  * Пример:
  * <pre>
  *  {@code
@@ -111,14 +111,14 @@ import java.util.Collection;
  *     q.prepare().setParameter("param1",1).selectList();
  *   }
  * </pre>
- *
+ * <p/>
  * что эквивалентно запросу
  * <pre>
  *  {@code
  *   SELECT * FROM  test_entity WHERE (int_field=:param1 AND long_field=:param1)
  *   }
  * </pre>
- *
+ * <p/>
  * В некоторых случаях сложные запросы можно построить используя статический метод <b>createNative</b>
  * Пример:
  * <pre>
@@ -130,16 +130,16 @@ import java.util.Collection;
  *   }
  * </pre>
  *
- *
+ * @author Alexander Guzanov
  * @see ru.kwanza.dbtool.orm.api.IQueryBuilder
  * @see ru.kwanza.dbtool.orm.api.IQuery
  * @see ru.kwanza.dbtool.orm.api.IStatement
  * @see ru.kwanza.dbtool.orm.api.IStatement#setParameter(String, Object)
- * @author Alexander Guzanov
  */
 public class If {
     /**
      * Тип sql-предиката
+     *
      * @see ru.kwanza.dbtool.orm.api.If
      */
     public enum Type {
@@ -171,10 +171,9 @@ public class If {
      * Класс используется для передачи в sql-предикате значения параметра по умолчанию
      * Для конструирования нужно использовать статический метод
      *
+     * @param <T> - значение параметра
      * @see ru.kwanza.dbtool.orm.api.If#valueOf
      * @see ru.kwanza.dbtool.orm.api.If
-     *
-     * @param <T> - значение параметра
      */
     public static class Value<T> {
         private T obj;
@@ -196,8 +195,8 @@ public class If {
     /**
      * Конструирования значения по-умолчанию для sql-предиката
      *
-     * @param value  значение
-     * @param <T>  тип значения
+     * @param value значение
+     * @param <T>   тип значения
      * @see ru.kwanza.dbtool.orm.api.If
      */
     public static <T> Value<T> valueOf(T value) {
@@ -222,7 +221,6 @@ public class If {
 
     /**
      * @return sql-строка для "нативного" предиката
-     *
      * @see ru.kwanza.dbtool.orm.api.If#createNative(String)
      * @see ru.kwanza.dbtool.orm.api.If
      */
@@ -268,7 +266,7 @@ public class If {
     /**
      * Конструирования sql-предиката c именнованым параметром: =
      *
-     * @param property имя свойства сущности
+     * @param property  имя свойства сущности
      * @param paramName имя параметра
      * @see ru.kwanza.dbtool.orm.api.If
      * @see ru.kwanza.dbtool.orm.api.IStatement#setParameter(String, Object)
@@ -281,7 +279,7 @@ public class If {
      * Конструирования sql-предиката со значением по-умолчанию: =
      *
      * @param property имя свойства сущности
-     * @param value значение по умолчанию
+     * @param value    значение по умолчанию
      * @see ru.kwanza.dbtool.orm.api.If
      * @see ru.kwanza.dbtool.orm.api.If#valueOf
      */
@@ -303,7 +301,7 @@ public class If {
     /**
      * Конструирования sql-предиката c именнованым параметром : &lt;&gt;
      *
-     * @param property имя свойства сущности
+     * @param property  имя свойства сущности
      * @param paramName имя параметра
      * @see ru.kwanza.dbtool.orm.api.If
      * @see ru.kwanza.dbtool.orm.api.IStatement#setParameter(String, Object)
@@ -316,7 +314,7 @@ public class If {
      * Конструирования sql-предиката со значением по-умолчанию: &lt;&gt;
      *
      * @param property имя свойства сущности
-     * @param value значение по умолчанию
+     * @param value    значение по умолчанию
      * @see ru.kwanza.dbtool.orm.api.If
      * @see ru.kwanza.dbtool.orm.api.If#valueOf
      */
@@ -337,7 +335,7 @@ public class If {
     /**
      * Конструирования sql-предиката c именнованым параметром : &gt;
      *
-     * @param property имя свойства сущности
+     * @param property  имя свойства сущности
      * @param paramName имя параметра
      * @see ru.kwanza.dbtool.orm.api.If
      * @see ru.kwanza.dbtool.orm.api.IStatement#setParameter(String, Object)
@@ -350,7 +348,7 @@ public class If {
      * Конструирования sql-предиката со значением по-умолчанию: &gt;
      *
      * @param property имя свойства сущности
-     * @param value значение по умолчанию
+     * @param value    значение по умолчанию
      * @see ru.kwanza.dbtool.orm.api.If
      * @see ru.kwanza.dbtool.orm.api.If#valueOf
      */
@@ -371,7 +369,7 @@ public class If {
     /**
      * Конструирования sql-предиката c именнованым параметром : &lt;
      *
-     * @param property имя свойства сущности
+     * @param property  имя свойства сущности
      * @param paramName имя параметра
      * @see ru.kwanza.dbtool.orm.api.If
      * @see ru.kwanza.dbtool.orm.api.IStatement#setParameter(String, Object)
@@ -384,7 +382,7 @@ public class If {
      * Конструирования sql-предиката со значением по-умолчанию: &lt;
      *
      * @param property имя свойства сущности
-     * @param value значение по умолчанию
+     * @param value    значение по умолчанию
      * @see ru.kwanza.dbtool.orm.api.If
      * @see ru.kwanza.dbtool.orm.api.If#valueOf
      */
@@ -405,7 +403,7 @@ public class If {
     /**
      * Конструирования sql-предиката c именнованым параметром : &gt;=
      *
-     * @param property имя свойства сущности
+     * @param property  имя свойства сущности
      * @param paramName имя параметра
      * @see ru.kwanza.dbtool.orm.api.If
      * @see ru.kwanza.dbtool.orm.api.IStatement#setParameter(String, Object)
@@ -418,7 +416,7 @@ public class If {
      * Конструирования sql-предиката со значением по-умолчанию: &gt;=
      *
      * @param property имя свойства сущности
-     * @param value значение по умолчанию
+     * @param value    значение по умолчанию
      * @see ru.kwanza.dbtool.orm.api.If
      * @see ru.kwanza.dbtool.orm.api.If#valueOf
      */
@@ -439,7 +437,7 @@ public class If {
     /**
      * Конструирования sql-предиката c именнованым параметром : &lt;=
      *
-     * @param property имя свойства сущности
+     * @param property  имя свойства сущности
      * @param paramName имя параметра
      * @see ru.kwanza.dbtool.orm.api.If
      * @see ru.kwanza.dbtool.orm.api.IStatement#setParameter(String, Object)
@@ -452,7 +450,7 @@ public class If {
      * Конструирования sql-предиката со значением по-умолчанию: &lt;=
      *
      * @param property имя свойства сущности
-     * @param value значение по умолчанию
+     * @param value    значение по умолчанию
      * @see ru.kwanza.dbtool.orm.api.If
      * @see ru.kwanza.dbtool.orm.api.If#valueOf
      */
@@ -493,7 +491,7 @@ public class If {
     /**
      * Конструирования sql-предиката c именнованым параметром : IN(?)
      *
-     * @param property имя свойства сущности
+     * @param property  имя свойства сущности
      * @param paramName имя параметра
      * @see ru.kwanza.dbtool.orm.api.If
      * @see ru.kwanza.dbtool.orm.api.IStatement#setParameter(String, Object)
@@ -507,7 +505,7 @@ public class If {
      * Конструирования sql-предиката со значением по-умолчанию: IN(?)
      *
      * @param property имя свойства сущности
-     * @param value значение по умолчанию
+     * @param value    значение по умолчанию
      * @see ru.kwanza.dbtool.orm.api.If
      * @see ru.kwanza.dbtool.orm.api.If#valueOf
      */
@@ -529,7 +527,7 @@ public class If {
     /**
      * Конструирования sql-предиката c именнованым параметром : LIKE ?
      *
-     * @param property имя свойства сущности
+     * @param property  имя свойства сущности
      * @param paramName имя параметра
      * @see ru.kwanza.dbtool.orm.api.If
      * @see ru.kwanza.dbtool.orm.api.IStatement#setParameter(String, Object)
@@ -543,7 +541,7 @@ public class If {
      * Конструирования sql-предиката со значением по-умолчанию: LIKE ?
      *
      * @param property имя свойства сущности
-     * @param value значение по умолчанию
+     * @param value    значение по умолчанию
      * @see ru.kwanza.dbtool.orm.api.If
      * @see ru.kwanza.dbtool.orm.api.If#valueOf
      */
@@ -563,6 +561,7 @@ public class If {
 
     /**
      * Конструирование коньюнкции условий: c1 AND c1 AND c3 ...
+     *
      * @param conditions список условий
      * @see ru.kwanza.dbtool.orm.api.If
      */
@@ -572,6 +571,7 @@ public class If {
 
     /**
      * Конструирование дезюнкций условий: c1 OR c1 OR c3 ...
+     *
      * @param conditions список условий
      * @see ru.kwanza.dbtool.orm.api.If
      */
@@ -581,6 +581,7 @@ public class If {
 
     /**
      * Конструирование отрицания: NOT(c)
+     *
      * @param conditions список условий
      * @see ru.kwanza.dbtool.orm.api.If
      */
@@ -590,10 +591,8 @@ public class If {
 
     /**
      * Создание "нативного" sql-предиката.
-     *
+     * <p/>
      * При создании для обозначения параметров можно использовать безымынне и именнованные парамтеры: <b>?</b> и <b>:param</b>
-     *
-     *
      *
      * @param sql - старока которая будет добавлена в запрос
      * @see ru.kwanza.dbtool.orm.api.If
