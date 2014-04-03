@@ -3,6 +3,10 @@ package ru.kwanza.dbtool.orm.api;
 import java.util.Collection;
 
 /**
+ *
+ *
+ *
+ *
  * @author Alexander Guzanov
  */
 public interface IEntityBatcher {

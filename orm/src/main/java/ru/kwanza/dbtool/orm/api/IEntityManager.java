@@ -1,10 +1,9 @@
 package ru.kwanza.dbtool.orm.api;
 
-import ru.kwanza.dbtool.core.UpdateException;
-
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import ru.kwanza.dbtool.core.UpdateException;
 
 /**
  * Основной интерфейс для работы с сущностями через механизм ORM.
@@ -115,7 +114,7 @@ public interface IEntityManager {
      * @see ru.kwanza.dbtool.core.UpdateException
      */
     void deleteByKeys(Class entityClass, Collection keys) throws UpdateException;
-                            l
+                            
     <T> T readByKey(Class<T> entityClass, Object key);
 
     <T> Collection<T> readByKeys(Class<T> entityClass, Collection keys);
