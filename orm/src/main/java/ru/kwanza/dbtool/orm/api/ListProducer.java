@@ -5,9 +5,16 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
+ * Фабрика списков
+ *
  * @author Alexander Guzanov
+ * @see ru.kwanza.dbtool.orm.api.ISelectOperationProvider#selectMapList(String, java.util.Map, ListProducer)
+ * @see <a href="http://en.wikipedia.org/wiki/Abstract_factory_pattern">Шаблон "Абстрактная фабрика"</a>
  */
 public abstract class ListProducer<T> {
+    /**
+     * Фабрика списка {@link java.util.ArrayList}
+     */
     public static final ListProducer ARRAY_LIST = new ListProducer() {
         @Override
         public List create() {
@@ -15,6 +22,9 @@ public abstract class ListProducer<T> {
         }
     };
 
+    /**
+     * Фабрика списка {@link java.util.ArrayList}
+     */
     public static final ListProducer LINKED_LIST = new ListProducer() {
         @Override
         public List create() {
@@ -24,7 +34,12 @@ public abstract class ListProducer<T> {
 
     public abstract List<T> create();
 
-    public static <T> ListProducer<T> create(final Class type){
+    /**
+     * Фабрика списка определенного класса
+     *
+     * @param type тип списка
+     */
+    public static <T> ListProducer<T> create(final Class<? extends List> type) {
         return new ListProducer<T>() {
             @Override
             public List<T> create() {
