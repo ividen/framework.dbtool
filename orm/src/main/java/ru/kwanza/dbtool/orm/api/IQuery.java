@@ -28,6 +28,7 @@ package ru.kwanza.dbtool.orm.api;
  *
  * @author Alexander Guzanov
  * @see IStatement
+ * @see ru.kwanza.dbtool.orm.api.IQueryBuilder
  */
 public interface IQuery<T> {
 
