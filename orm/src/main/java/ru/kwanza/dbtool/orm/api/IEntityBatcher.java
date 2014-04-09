@@ -4,9 +4,6 @@ import java.util.Collection;
 
 /**
  *
- *
- *
- *
  * @author Alexander Guzanov
  */
 public interface IEntityBatcher {
