@@ -67,8 +67,10 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  *
  * }
  * </pre>
- *
- *
+ * @see ru.kwanza.dbtool.orm.annotations.Association
+ * @see ru.kwanza.dbtool.orm.annotations.OneToMany
+ * @see ru.kwanza.dbtool.orm.annotations.Condition
+ * @see ru.kwanza.dbtool.orm.annotations.GroupBy
  */
 @Retention(RUNTIME)
 @Target({FIELD, METHOD})
@@ -77,6 +79,7 @@ public @interface ManyToOne {
     /**
      * Имя свойства класса, которое используется для выборки  связанной сущности. <br>
      * Сущность с которой устанавливается связь определяются по типу свойства, к которому указана эта аннотация.
+     * @see ru.kwanza.dbtool.orm.annotations.ManyToOne
      */
     String property();
 }

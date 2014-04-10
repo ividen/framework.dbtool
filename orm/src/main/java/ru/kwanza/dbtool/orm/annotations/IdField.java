@@ -19,11 +19,13 @@ public @interface IdField {
 
     /**
      * название колонки в базе данных
+     * @see ru.kwanza.dbtool.orm.annotations.IdField
      */
     String value();
 
     /**
      * Тип колонки. Это должна быть константа из  of java.sql.Types
+     * @see ru.kwanza.dbtool.orm.annotations.IdField
      */
     int type() default Types.BIGINT;
 }

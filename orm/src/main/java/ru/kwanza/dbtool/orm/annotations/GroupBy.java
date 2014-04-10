@@ -57,13 +57,23 @@ public @interface GroupBy {
     /**
      * Поле по которому осуществялется группировка.
      * <p/>
-     * Может  описывать поля связанных суностей
+     * Может  описывать поля связанных суностей.
+     * Формат строки условия:
+     * <pre>
+     *   Группировка =   GROUP_FIELD,GROUP_FIELD | GROUP_FIELD
+     *   GROUP_FIELD =  (RELATED_ENTITY.FIELD) | FIELD
+     *   RELATED_ENTITY = RELATION_FIELD| (RELATION_FIELD.RELATED_ENTITY)
+     *   FIELD - поле сущности
+     *   RELATION_FIELD - поле сущности описывающее связь
+     * </pre>
+
+     * @see ru.kwanza.dbtool.orm.annotations.GroupBy
      */
     String value();
 
     /**
      * Тип группировки
-     *
+     * @see ru.kwanza.dbtool.orm.annotations.GroupBy
      * @see ru.kwanza.dbtool.orm.annotations.GroupByType
      */
     GroupByType type() default GroupByType.MAP;

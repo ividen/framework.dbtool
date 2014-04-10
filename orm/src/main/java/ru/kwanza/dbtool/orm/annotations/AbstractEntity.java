@@ -7,10 +7,10 @@ import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
- * Аннотация абстрактной сущности, которая позволяет строить компонентную иерархию.
- * Каждый наследник этой сущности будет располагать своей отдельной таблицой и общим набором полей
- * <p/>
- * При построении запросов к сущностям, помеченным данной аннотации строится UNION запрос.
+ * Аннотация для абстрактной сущности, которая позволяет строить компонентную иерархию.
+ * </p>
+ * Каждый наследник этой сущности будет располагать своей отдельной таблицой и общим набором полей.
+ * При построении запросов к сущностям, помеченным данной аннотации строится UNION запрос, объединяющий таблицы сущностей наследников.
  * <p/>
  * Пример:
  * <pre>{@code @AbstractEntity(name="PaymentTrx")
@@ -50,7 +50,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * }
  * </pre>
  * <p/>
- * Использование абстрактных сущностей возможно так же в виде связанных сущностей, фетчить и джоинить эти сущности.
+ * Абстрактные сущности могут использоваться для указания отношений, можно  фетчить и джоинить эти сущности.
  * @see ru.kwanza.dbtool.orm.api.IQueryBuilder
  * @see ru.kwanza.dbtool.orm.api.IQuery
  * @see ru.kwanza.dbtool.orm.api.IStatement
@@ -61,6 +61,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 public @interface AbstractEntity {
     /**
      * Имя сущности
+     * @see ru.kwanza.dbtool.orm.annotations.AbstractEntity
      */
     String name();
 }

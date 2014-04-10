@@ -9,7 +9,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
  * Описывает поле версию. <br>
- * Поле должно быть типа <b>java.lang.Long</b>
+ * Поле должно быть типа {@link java.lang.Long}
  *
  * @author Alexander Guzanov
  */
@@ -20,6 +20,7 @@ public @interface VersionField {
 
     /**
      * название колонки в базе данных
+     * @see ru.kwanza.dbtool.orm.annotations.IdField
      */
     String value();
 }

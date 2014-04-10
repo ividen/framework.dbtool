@@ -10,15 +10,13 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 /**
  * Описание общей связи между двумя сущностями.
  * <p/>
- * Основное отличие от {@link ru.kwanza.dbtool.orm.annotations.OneToMany} и {@link ru.kwanza.dbtool.orm.annotations.ManyToOne} - сущности можно связать не только с писпользованием первчиных ключей
- * <p/>
- * Соотвествнно ассоциация может использоваться для описание двух видов отношения:
+ * Основное отличие от {@link ru.kwanza.dbtool.orm.annotations.OneToMany} и {@link ru.kwanza.dbtool.orm.annotations.ManyToOne} - сущности можно связать не только с использованием первчиных ключей
+ * Соотвествнно ассоциация может применяться для описание двух видов отношения:
  * <ul>
  * <li>один-ко-многим - в этом случае связанное поле представляет собой коллекцию</li>
  * <li>многие-к-одному - в этом случае связанное поле представляет собой одиночный объект</li>
  * </ul>
  * <p/>
- * Пример:
  * Например:
  * <pre>{@code @Entity(name="EntityA", table="entity_A")
  *  public class EntityA{
@@ -26,11 +24,10 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  *    @literal @Field("code"
  *     private String code;
  *   @literal @Association(property="code", relationProperty="entityACode", relationClass=EntityB.class)
- *     private Collection<EntityB> entittiesB
+ *     private Collection<EntityB> entitiesB
  *     .....
  *  }
  *
- * @author Guzanov Alexander
  * @literal @Entity(name="EntityB", table="entity_B")
  * public class EntityB{
  * .....
@@ -48,7 +45,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * EntityB entityB = ...;
  * EntityA entityA = ...;
  * entityB.setEntityACode(entityA.getCode());// work
- * entityB.setEntityA(entityA); // do't work
+ * entityB.setEntityA(entityA); // don't work
  * }</pre>
  *
  * Данная аннотация может использоваться не только внутри классов, помеченных {@link ru.kwanza.dbtool.orm.annotations.Entity} и {@link ru.kwanza.dbtool.orm.annotations.AbstractEntity},
@@ -80,7 +77,10 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * }
  * </pre>
  *
- *
+ * @see ru.kwanza.dbtool.orm.annotations.OneToMany
+ * @see ru.kwanza.dbtool.orm.annotations.ManyToOne
+ * @see ru.kwanza.dbtool.orm.annotations.Condition
+ * @see ru.kwanza.dbtool.orm.annotations.GroupBy
  */
 @Retention(RUNTIME)
 @Target({FIELD, METHOD})
@@ -88,11 +88,13 @@ public @interface Association {
 
     /**
      * Имя поля связи в сущности *
+     * @see ru.kwanza.dbtool.orm.annotations.Association
      */
     String property();
 
     /**
      * Имя поля связи в связанной сущности *
+     * @see ru.kwanza.dbtool.orm.annotations.Association
      */
     String relationProperty();
 
@@ -123,6 +125,7 @@ public @interface Association {
      * .....
      * }
      * }</pre>
+      * @see ru.kwanza.dbtool.orm.annotations.Association
      */
     Class relationClass() default Object.class;
 }

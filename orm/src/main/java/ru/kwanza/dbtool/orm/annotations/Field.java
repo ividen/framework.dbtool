@@ -10,7 +10,7 @@ import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
- * Мэппинг "обычного" поля на колонку таблицы
+ * Мэппинг поля на колонку таблицы
  *
  * @author Alexander Guzanov
  */
@@ -20,12 +20,13 @@ public @interface Field {
 
     /**
      * имя колонки в таблице
+     * @see Field
      */
     String value();
 
     /**
      * Тип колонки в таблице. Это должна быть одна из констант в  of java.sql.Types
-     *
+     * @see Field
      */
     int type() default SqlTypeValue.TYPE_UNKNOWN;
 }

@@ -40,6 +40,13 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  *
  * entityA.getEntitiesB().add(entityB);// don't work
  * entityB.setEntityAId(entityA.getId()); // work
+ * }
+ * </pre>
+ *
+ * @see ru.kwanza.dbtool.orm.annotations.Association
+ * @see ru.kwanza.dbtool.orm.annotations.ManyToOne
+ * @see ru.kwanza.dbtool.orm.annotations.Condition
+ * @see ru.kwanza.dbtool.orm.annotations.GroupBy
  * @author Guzanov Alexander
  */
 @Retention(RUNTIME)
@@ -50,6 +57,7 @@ public @interface OneToMany {
      * Имя свойства класса, которое используется для выборки  связанной сущности. </br>
      * Сущность с которой устанавливается связь определяются по типу свойства, к которому указана эта аннотация,</br>
      * или свойство {@link #relationClass()}, если результатом выборки является коллекция
+     * @see ru.kwanza.dbtool.orm.annotations.OneToMany
      */
     String relationProperty();
 
@@ -57,7 +65,7 @@ public @interface OneToMany {
      * Тип связанной сущности.
      *
      * Значения атрибута указывается, если поле связи представляет собой коллекцию
-     *
+     * @see ru.kwanza.dbtool.orm.annotations.OneToMany
      */
     Class relationClass() default Object.class;
 }
