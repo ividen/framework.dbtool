@@ -50,6 +50,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * entityB.setEntityACode(entityA.getCode());// work
  * entityB.setEntityA(entityA); // do't work
  * }</pre>
+ *
  */
 @Retention(RUNTIME)
 @Target({FIELD, METHOD})
