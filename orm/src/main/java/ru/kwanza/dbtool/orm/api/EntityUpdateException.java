@@ -6,6 +6,10 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * Ошибка возникающая в {@link IEntityBatcher#flush()}
+ * <p/>
+ * Содержит ссылки на объекты, над которыми не удалось выполнить операции.
+ *
  * @author Alexander Guzanov
  */
 public class EntityUpdateException extends Exception {
@@ -24,45 +28,66 @@ public class EntityUpdateException extends Exception {
         this.deleteByKeyExceptionMap = deleteByKeyExceptionMap;
     }
 
+    /**
+     * Список объекто определенного типа, котрые не удалось создать в базе данных
+     *
+     * @param entityClass тип сущности
+     */
     public <T> List<T> getCreateConstrained(Class entityClass) {
         return createExceptionMap.get(entityClass).getConstrainted();
     }
 
-    public <T> List<T> getCreateOptimistic(Class entityClass) {
-        return createExceptionMap.get(entityClass).getOptimistic();
-    }
-
+    /**
+     * Количество созданных объектов определенного типа
+     *
+     * @param entityClass
+     */
     public long getCreateUpdateCount(Class entityClass) {
         return createExceptionMap.get(entityClass).getUpdateCount();
     }
 
+    /**
+     * Список объектов определенного типа, которые не удалось обновить в базе данных по причине constraints violation
+     * @param entityClass тип сущности
+     */
     public <T> List<T> getUpdateConstrained(Class entityClass) {
         return updateExceptionMap.get(entityClass).getConstrainted();
     }
 
+    /**
+     * Список объектов определенного типа, которые не удалось обновить в базе данных по причине optimistic violation
+     * @param entityClass тип сущности
+     */
     public <T> List<T> getUpdateOptimistic(Class entityClass) {
         return updateExceptionMap.get(entityClass).getOptimistic();
     }
 
+    /**
+     * Количество измененных объектов опреденного типа
+     * @param entityClass тип сущности
+     */
     public long getUpdateUpdateCount(Class entityClass) {
         return updateExceptionMap.get(entityClass).getUpdateCount();
     }
 
-    public <T> List<T> getDeleteByObjectConstrained(Class entityClass) {
-        return deleteByObjectExceptionMap.get(entityClass).getConstrainted();
-    }
-
+    /**
+     * Список объектов, которые не удалось удалить по причине optimistic violation
+     *
+     * @param entityClass тип сущности
+     */
     public <T> List<T> getDeleteByObjectOptimistic(Class entityClass) {
         return deleteByObjectExceptionMap.get(entityClass).getOptimistic();
     }
 
+    /**
+     * Количество объектов опреденного типа, которые были удалены
+     * @param entityClass
+     * @return
+     */
     public long getDeleteByObjectUpdateCount(Class entityClass) {
         return deleteByObjectExceptionMap.get(entityClass).getUpdateCount();
     }
 
-    public <T> List<T> getDeleteByKeyConstrained(Class entityClass) {
-        return deleteByKeyExceptionMap.get(entityClass).getConstrainted();
-    }
 
     public <T> List<T> getDeleteByKeyOptimistic(Class entityClass) {
         return deleteByKeyExceptionMap.get(entityClass).getOptimistic();
