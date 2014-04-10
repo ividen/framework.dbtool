@@ -99,7 +99,7 @@ public class SpringEntityMappingRegistryImpl implements IEntityMappingRegistry {
         return delegate.getEntityType(name);
     }
 
-    public IEntityType getEntityType(Class name) {
-        return delegate.getEntityType(name);
+    public IEntityType getEntityType(Class entityClass) {
+        return delegate.getEntityType(entityClass);
     }
 }

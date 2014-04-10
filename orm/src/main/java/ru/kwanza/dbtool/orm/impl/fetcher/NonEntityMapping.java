@@ -84,7 +84,7 @@ class NonEntityMapping implements IEntityMappingRegistry {
         throw new UnsupportedOperationException();
     }
 
-    public IEntityType getEntityType(Class name) {
-        return cache.get(name);
+    public IEntityType getEntityType(Class entityClass) {
+        return cache.get(entityClass);
     }
 }

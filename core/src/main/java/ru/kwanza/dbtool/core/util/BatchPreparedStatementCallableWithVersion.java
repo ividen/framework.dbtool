@@ -75,10 +75,6 @@ public class BatchPreparedStatementCallableWithVersion<T, K, V> extends Abstract
             }
 
         } catch (BatchUpdateException e) {
-            DataAccessException translate = exeptionTranslator.translate("BatchPreparedStatementCallable", sql, e);
-            if (translate instanceof DuplicateKeyException) {
-                throw translate;
-            }
             UpdateUtil.logger.error("Error batching! May have constraines!", e);
             return ResultCodeUtil.processResult(e.getUpdateCounts(), skip, totalCount);
         }
