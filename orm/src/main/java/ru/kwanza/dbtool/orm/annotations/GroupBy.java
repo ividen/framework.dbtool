@@ -43,7 +43,13 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * }</pre>
  *
  * При этом при фетчинге таких связей связанные сущности будут объединятся с помощью INNER JOIN в "фетч" запросе.
+ *
+ *
  * @author Alexander Guzanov
+ * @see ru.kwanza.dbtool.orm.annotations.Entity
+ * @see ru.kwanza.dbtool.orm.annotations.OneToMany
+ * @see ru.kwanza.dbtool.orm.annotations.ManyToOne
+ * @see ru.kwanza.dbtool.orm.annotations.Association
  */
 @Retention(RUNTIME)
 @Target({FIELD, METHOD})

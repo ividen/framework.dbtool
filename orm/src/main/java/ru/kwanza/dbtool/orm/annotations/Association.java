@@ -51,6 +51,36 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * entityB.setEntityA(entityA); // do't work
  * }</pre>
  *
+ * Данная аннотация может использоваться не только внутри классов, помеченных {@link ru.kwanza.dbtool.orm.annotations.Entity} и {@link ru.kwanza.dbtool.orm.annotations.AbstractEntity},
+ * но и для обычных plain java object. В этом случае для таких классов можно фетчить эти зависимости с помощью {@link ru.kwanza.dbtool.orm.api.IEntityManager#fetch}
+ * или {@link ru.kwanza.dbtool.orm.api.IEntityManager#fetchLazy(Class, java.util.Collection) }
+ *
+ * Пример:
+ * <pre>{@code public class PaymentEvent{
+ *   private String agentPCID;
+ *
+ *  @literal @Association(property="agentId", relationProperty="id", relationClass=Agent.class)
+ *
+ *   private Agent> agent
+ *
+ *     public Long getAgentId(){
+ *         return new PCID(agentPCID).getInternalId();
+ *     }
+ *
+ * }
+ *  ...
+ *
+ *  Collection<PaymentEvent> events = ...;
+ *  em.fetchLazy(PaymentEvent.clas, events);
+ *
+ *  for(PaymentEvent e: events){
+ *      e.getAgent();// PROFIT!!!
+ *  }
+ *
+ * }
+ * </pre>
+ *
+ *
  */
 @Retention(RUNTIME)
 @Target({FIELD, METHOD})
