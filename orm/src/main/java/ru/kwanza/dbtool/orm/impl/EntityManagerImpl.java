@@ -147,7 +147,12 @@ public class EntityManagerImpl extends SpringSerializable implements IEntityMana
     }
 
     public <T> T unwrapProxy(T object) {
-        return isProxy(object) ? Proxy.getDelegate(object) : object;
+        if (isProxy(object)){
+            //emulate load on-demand
+            object.toString();
+            return Proxy.getDelegate(object);
+        }
+        else return object;
     }
 
     public boolean isNull(Object object) {
