@@ -14,7 +14,10 @@ import java.util.Collection;
 import static ru.kwanza.dbtool.core.blob.Const.BLOCK_SIZE;
 
 /**
+ * Утилита для чтения данных из blob-полей
+ *
  * @author Ivan Baluk
+ * @see ru.kwanza.dbtool.core.DBTool#getBlobInputStream(String, String, java.util.Collection)
  */
 public abstract class BlobInputStream extends InputStream implements Closeable {
     private DBTool dbTool;
@@ -67,6 +70,9 @@ public abstract class BlobInputStream extends InputStream implements Closeable {
         return condition;
     }
 
+    /**
+     * Размер поля в байтах
+     */
     public long getSize() {
         return size;
     }
@@ -75,6 +81,10 @@ public abstract class BlobInputStream extends InputStream implements Closeable {
         this.size = size;
     }
 
+    /**
+     * Текущая позиция.
+     *
+     */
     public long getPosition() {
         return position;
     }

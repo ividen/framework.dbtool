@@ -10,6 +10,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.ReentrantLock;
 
+/**
+ * Класс поторый позволяет устанавливать блокировку
+ */
 public abstract class AppLock extends ReentrantLock {
     public static final Logger logger = LoggerFactory.getLogger(AppLock.class);
 
@@ -26,10 +29,16 @@ public abstract class AppLock extends ReentrantLock {
         this.reentrant = reentrant;
     }
 
+    /**
+     * Имя блокировки
+     */
     public String getLockName() {
         return lockName;
     }
 
+    /**
+     * Установить блокировку
+     */
     public final void lock() {
         if (reEnterLock()) {
             return;
@@ -50,6 +59,13 @@ public abstract class AppLock extends ReentrantLock {
 
     protected abstract void doUnLock(Connection connection);
 
+    /**
+     * Закрыть работу с блокировкой.
+     *
+     * Этот метод обязательно нужно вызывать в секции <b>finally</b>,
+     * хотя он не снимает блокировки, а только освобождает ресурсы.
+     *
+     */
     public final void close() {
         if (exitReEnterLock()) {
             return;

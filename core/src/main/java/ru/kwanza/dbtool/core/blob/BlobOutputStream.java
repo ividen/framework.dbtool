@@ -12,6 +12,8 @@ import java.sql.SQLException;
 import java.util.Collection;
 
 /**
+ * Утилита записи blob полей
+ *
  * @author Ivan Baluk
  */
 public abstract class BlobOutputStream extends OutputStream implements Closeable {
@@ -50,6 +52,10 @@ public abstract class BlobOutputStream extends OutputStream implements Closeable
         return dbTool;
     }
 
+    /**
+     * Размер поля в байтах
+     *
+     */
     public long getSize() {
         return size;
     }
@@ -62,6 +68,9 @@ public abstract class BlobOutputStream extends OutputStream implements Closeable
         }
     }
 
+    /**
+     * Текущая позиция
+     */
     public long getPosition() {
         return position;
     }
