@@ -359,7 +359,7 @@
         <snapshotRepository>
             <id>snapshots</id>
             <name>snapshots</name>
-	     <url>https://artifactory.tprs.ru/artifactory/libs-snapshot-local</url>
+	     <url>https://artifactory.kwanza-systems.ru.ru/artifactory/libs-snapshot-local</url>
         </snapshotRepository>
     </distributionManagement>
 
