@@ -24,12 +24,18 @@ public abstract class AbstractEntityType implements IEntityType {
     private Map<String, IFieldMapping> fieldsByColumnName = new LinkedHashMap<String, IFieldMapping>();
     private Map<String, IRelationMapping> relations = new LinkedHashMap<String, IRelationMapping>();
 
-    public String getName() {
-        return name;
+    protected AbstractEntityType() {
     }
 
-    public void setName(String name) {
-        this.name = name;
+    protected AbstractEntityType(Class entityClass, String entityName, String tableName, String sql) {
+        this.entityClass = entityClass;
+        this.name = "".equals(entityName) ? entityClass.getSimpleName() : entityName;
+        this.tableName = tableName;
+        setSql(sql);
+    }
+
+    public String getName() {
+        return name;
     }
 
     public String getFromClause() {
@@ -73,16 +79,8 @@ public abstract class AbstractEntityType implements IEntityType {
         return Collections.unmodifiableCollection(relations.values());
     }
 
-    public void setTableName(String tableName) {
-        this.tableName = tableName;
-    }
-
     public void setSql(String sql) {
         this.sql = sql;
-    }
-
-    public void setEntityClass(Class entityClass) {
-        this.entityClass = entityClass;
     }
 
     public void setVersionField(IFieldMapping versionField) {

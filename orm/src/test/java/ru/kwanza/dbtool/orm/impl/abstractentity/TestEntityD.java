@@ -7,7 +7,7 @@ import ru.kwanza.dbtool.orm.annotations.Field;
  * @author Alexander Guzanov
  */
 
-@AbstractEntity(name="TestEntityD")
+@AbstractEntity()
 public class TestEntityD extends AbstractTestEntity {
     @Field( "title")
     private String title;

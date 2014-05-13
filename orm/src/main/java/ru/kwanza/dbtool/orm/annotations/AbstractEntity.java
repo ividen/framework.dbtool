@@ -63,5 +63,5 @@ public @interface AbstractEntity {
      * Имя сущности
      * @see ru.kwanza.dbtool.orm.annotations.AbstractEntity
      */
-    String name();
+    String name() default "";
 }

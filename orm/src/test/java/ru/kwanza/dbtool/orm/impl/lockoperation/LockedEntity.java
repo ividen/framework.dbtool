@@ -8,7 +8,7 @@ import ru.kwanza.dbtool.orm.annotations.VersionField;
 /**
  * @author Alexander Guzanov
  */
-@Entity(name="LockedEntity", table="locked_entity")
+@Entity(table="locked_entity")
 public class LockedEntity {
     @IdField("id")
     private Long id;

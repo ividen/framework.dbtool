@@ -68,10 +68,12 @@ public @interface Entity {
 
     /**
      * Имя сущности
+     * <p/>
+     * По умочанию в качестве имени сущности будет выбран {@link Class#getSimpleName()}
      *
      * @see ru.kwanza.dbtool.orm.annotations.Entity
      */
-    String name();
+    String name() default "";
 
     /**
      * Маппинг на сущности на native sql

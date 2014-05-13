@@ -19,9 +19,7 @@ public class UnionEntityType extends AbstractEntityType {
     private int alias;
 
     public UnionEntityType(String name, Class entityClass) {
-        setName(name);
-        setEntityClass(entityClass);
-        setTableName(name + "_");
+        super(entityClass,name,name + "_",null);
     }
 
     @Override

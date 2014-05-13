@@ -5,11 +5,9 @@ package ru.kwanza.dbtool.orm.impl.mapping;
  */
 public class SimpleEntityType extends AbstractEntityType {
 
-    public SimpleEntityType(Class entityClass,String entityName, String tableName, String sql) {
-        setName(entityName);
-        setEntityClass(entityClass);
-        setTableName(tableName);
-        setSql(sql);
+
+    public SimpleEntityType(Class entityClass, String entityName, String tableName, String sql) {
+        super(entityClass, entityName, tableName, sql);
     }
 
     public void validate() {
