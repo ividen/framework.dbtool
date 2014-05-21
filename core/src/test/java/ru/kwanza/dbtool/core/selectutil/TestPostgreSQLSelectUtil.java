@@ -5,6 +5,6 @@ package ru.kwanza.dbtool.core.selectutil;
  */
 public class TestPostgreSQLSelectUtil extends TestSelectUtil {
     protected String getSpringCfgFile() {
-        return "postgresql_config_select_util.xml";
+        return "postgresql-config.xml";
     }
 }

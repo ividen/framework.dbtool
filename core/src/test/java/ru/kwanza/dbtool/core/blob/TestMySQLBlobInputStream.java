@@ -14,6 +14,6 @@ public class TestMySQLBlobInputStream extends TestBlobInputStream {
     }
 
     protected String getSpringCfgFile() {
-        return "mysql_config_blob.xml";
+        return "mysql-config.xml";
     }
 }

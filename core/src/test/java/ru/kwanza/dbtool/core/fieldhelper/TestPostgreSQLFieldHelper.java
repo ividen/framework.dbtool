@@ -6,6 +6,6 @@ package ru.kwanza.dbtool.core.fieldhelper;
 public class TestPostgreSQLFieldHelper extends AbstractTestFieldHelper {
     @Override
     protected String getContextFileName() {
-        return "postgresql_config_select_util.xml";
+        return "postgresql-config.xml";
     }
 }

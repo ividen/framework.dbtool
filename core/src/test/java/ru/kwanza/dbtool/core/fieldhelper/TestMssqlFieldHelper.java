@@ -1,11 +1,13 @@
 package ru.kwanza.dbtool.core.fieldhelper;
 
+import org.springframework.test.context.ContextConfiguration;
+
 /**
  * @author Ivan Baluk
  */
+@ContextConfiguration(locations = "classpath:mssql-config.xml")
 public class TestMssqlFieldHelper extends AbstractTestFieldHelper {
-    @Override
     protected String getContextFileName() {
-        return "mssql_config_select_util.xml";
+        return "mssql-config.xml";
     }
 }

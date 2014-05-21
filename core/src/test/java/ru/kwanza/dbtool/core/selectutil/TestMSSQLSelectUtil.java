@@ -5,6 +5,6 @@ package ru.kwanza.dbtool.core.selectutil;
  */
 public class TestMSSQLSelectUtil extends TestSelectUtil {
     protected String getSpringCfgFile() {
-        return "mssql_config_select_util.xml";
+        return "mssql-config.xml";
     }
 }

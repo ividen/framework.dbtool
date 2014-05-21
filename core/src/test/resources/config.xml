@@ -3,16 +3,8 @@
        xmlns:util="http://www.springframework.org/schema/util"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
 
-<import resource="classpath:dbtool-config.xml"/>
 
-    <bean id="propertyPlaceholderConfigurer"
-          class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-        <property name="locations">
-            <list>
-                <value>classpath:db_oracle.properties</value>
-            </list>
-        </property>
-    </bean>
+    <import resource="classpath:dbtool-config.xml"/>
 
     <bean id="systemPrereqs"
           class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
@@ -25,7 +17,7 @@
                 <prop key="dbunit.driverClass">${jdbc.driverClass}</prop>
                 <prop key="dbunit.username">${jdbc.username}</prop>
                 <prop key="dbunit.password">${jdbc.password}</prop>
-                <prop key="dbunit.schema">${jdbc.schema}</prop>
+                <!--<prop key="dbunit.schema">${jdbc.schema}</prop>-->
             </util:properties>
         </property>
     </bean>
@@ -35,5 +27,11 @@
         <property name="url" value="${jdbc.connectionUrl}"/>
         <property name="username" value="${jdbc.username}"/>
         <property name="password" value="${jdbc.password}"/>
+        <property name="defaultAutoCommit" value="false"/>
+    </bean>
+
+
+    <bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
     </bean>
 </beans>

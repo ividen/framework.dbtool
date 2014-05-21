@@ -12,7 +12,7 @@ import java.sql.SQLException;
 public class TestMSSQLLock extends AbstractTestLock {
     @Override
     protected String getContextFileName() {
-        return "mssql_config_select_util.xml";
+        return "mssql-config.xml";
     }
 
     @Override

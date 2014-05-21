@@ -1,16 +1,20 @@
 package ru.kwanza.dbtool.core.fieldhelper;
 
 import junit.framework.Assert;
-import junit.framework.TestCase;
-import org.postgresql.Driver;
+import org.junit.Before;
+import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
 import ru.kwanza.dbtool.core.DBTool;
 import ru.kwanza.dbtool.core.FieldGetter;
 import ru.kwanza.dbtool.core.FieldSetter;
 import ru.kwanza.dbtool.core.UpdateSetter;
 
+import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -20,11 +24,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNull;
+
 /**
  * @author Ivan Baluk
  */
-public abstract class AbstractTestFieldHelper extends TestCase {
 
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+public abstract class AbstractTestFieldHelper extends AbstractJUnit4SpringContextTests {
     private static String DELETE_SQL = "delete from test_table1";
     private static String INSERT_SQL =
             "insert into test_table1 (xbool, xint, xbigint, xstring, xts1, xts2, xblob, xbigdecimal) " + "values (?, ?, ?, ?, ?, ?, ?, ?)";
@@ -38,15 +46,16 @@ public abstract class AbstractTestFieldHelper extends TestCase {
 
     private static String POSTGRESQL_SELECT_SQL = "select xbool, xint, xbigint, xstring, xts1, xts2, xblob, xbigdecimal from test_table1 where not(xint = ?) LIMIT 10";
 
-    private static DBTool dbTool = null;
+    @Resource(name="dbtool.DBTool")
+    private  DBTool dbTool;
 
-    @Override
+
+    @Before
     public void setUp() throws Exception {
-        ApplicationContext ctx = new ClassPathXmlApplicationContext(getContextFileName(), this.getClass());
-        dbTool = ctx.getBean(DBTool.class);
         dbTool.getDataSource().getConnection().prepareStatement(DELETE_SQL).execute();
     }
 
+    @Test
     public void testSetters() throws Exception {
         dbTool.update(INSERT_SQL, new ArrayList<Object>(Arrays.asList(1, 2, 3, 4, 5, 6)), new UpdateSetter<Object>() {
             public boolean setValues(PreparedStatement pst, Object object) throws SQLException {
@@ -64,21 +73,21 @@ public abstract class AbstractTestFieldHelper extends TestCase {
 
         String sql;
 
-        if(dbTool.getDbType() == DBTool.DBType.ORACLE){
-                    sql = ORACLE_SELECT_SQL;
-        }else if(dbTool.getDbType() == DBTool.DBType.MSSQL){
+        if (dbTool.getDbType() == DBTool.DBType.ORACLE) {
+            sql = ORACLE_SELECT_SQL;
+        } else if (dbTool.getDbType() == DBTool.DBType.MSSQL) {
             sql = MSSQL_SELECT_SQL;
-        }else if(dbTool.getDbType() == DBTool.DBType.MYSQL){
+        } else if (dbTool.getDbType() == DBTool.DBType.MYSQL) {
             sql = MYSQL_SELECT_SQL;
-        }else if(dbTool.getDbType() == DBTool.DBType.POSTGRESQL){
+        } else if (dbTool.getDbType() == DBTool.DBType.POSTGRESQL) {
             sql = POSTGRESQL_SELECT_SQL;
-        }else{
-           throw new RuntimeException("Unsupported database type!");
+        } else {
+            throw new RuntimeException("Unsupported database type!");
         }
 
         dbTool.selectList(sql, new RowMapper<Object>() {
             public Object mapRow(ResultSet rs, int rowNum) throws SQLException {
-                Assert.assertEquals((Boolean) true, FieldGetter.getBoolean(rs, "xbool"));
+                assertEquals((Boolean) true, FieldGetter.getBoolean(rs, "xbool"));
                 assertEquals((Integer) 2, FieldGetter.getInteger(rs, "xint"));
                 assertEquals((Long) 3l, FieldGetter.getLong(rs, "xbigint"));
                 assertEquals("4", FieldGetter.getString(rs, "xstring"));
@@ -91,6 +100,7 @@ public abstract class AbstractTestFieldHelper extends TestCase {
         }, 0);
     }
 
+    @Test
     public void testSettersNull() throws Exception {
         dbTool.update(INSERT_SQL, new ArrayList<Object>(Arrays.asList(1, 2, 3, 4, 5, 6)), new UpdateSetter<Object>() {
             public boolean setValues(PreparedStatement pst, Object object) throws SQLException {
@@ -108,15 +118,15 @@ public abstract class AbstractTestFieldHelper extends TestCase {
 
         String sql;
 
-        if(dbTool.getDbType() == DBTool.DBType.ORACLE){
+        if (dbTool.getDbType() == DBTool.DBType.ORACLE) {
             sql = ORACLE_SELECT_SQL;
-        }else if(dbTool.getDbType() == DBTool.DBType.MSSQL){
+        } else if (dbTool.getDbType() == DBTool.DBType.MSSQL) {
             sql = MSSQL_SELECT_SQL;
-        }else if(dbTool.getDbType() == DBTool.DBType.MYSQL){
+        } else if (dbTool.getDbType() == DBTool.DBType.MYSQL) {
             sql = MYSQL_SELECT_SQL;
-        } else if (dbTool.getDbType() == DBTool.DBType.POSTGRESQL){
+        } else if (dbTool.getDbType() == DBTool.DBType.POSTGRESQL) {
             sql = POSTGRESQL_SELECT_SQL;
-        } else{
+        } else {
             throw new RuntimeException("Unsupported database type!");
         }
         dbTool.selectList(sql, new RowMapper<Object>() {
@@ -133,6 +143,4 @@ public abstract class AbstractTestFieldHelper extends TestCase {
             }
         }, 0);
     }
-
-    protected abstract String getContextFileName();
 }
