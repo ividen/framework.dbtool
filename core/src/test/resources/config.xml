@@ -34,4 +34,10 @@
     <bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
         <property name="dataSource" ref="dataSource"/>
     </bean>
+
+    <bean id="dbTester" class="org.dbunit.DataSourceDatabaseTester">
+        <constructor-arg index="0" ref="dataSource"/>
+        <constructor-arg index="1" value="${jdbc.schema}"/>
+    </bean>
+
 </beans>

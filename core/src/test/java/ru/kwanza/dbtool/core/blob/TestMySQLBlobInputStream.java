@@ -2,18 +2,11 @@ package ru.kwanza.dbtool.core.blob;
 
 import org.dbunit.database.DatabaseConfig;
 import org.dbunit.ext.mssql.MsSqlDataTypeFactory;
+import org.springframework.test.context.ContextConfiguration;
 
 /**
  * @author: Ivan Baluk
  */
+@ContextConfiguration(locations = "classpath:mysql-config.xml")
 public class TestMySQLBlobInputStream extends TestBlobInputStream {
-
-    @Override
-    protected void setUpDatabaseConfig(DatabaseConfig config) {
-        config.setProperty(DatabaseConfig.PROPERTY_DATATYPE_FACTORY, new MsSqlDataTypeFactory());
-    }
-
-    protected String getSpringCfgFile() {
-        return "mysql-config.xml";
-    }
 }

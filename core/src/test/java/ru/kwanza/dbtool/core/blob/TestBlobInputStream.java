@@ -1,30 +1,41 @@
 package ru.kwanza.dbtool.core.blob;
 
-import org.dbunit.DBTestCase;
+import org.dbunit.IDatabaseTester;
 import org.dbunit.database.DatabaseConfig;
 import org.dbunit.dataset.IDataSet;
 import org.dbunit.dataset.ReplacementDataSet;
 import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
 import org.dbunit.operation.DatabaseOperation;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.junit.Before;
+import org.junit.Test;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
 import ru.kwanza.dbtool.core.DBTool;
 import ru.kwanza.dbtool.core.KeyValue;
-import ru.kwanza.dbtool.core.selectutil.TestSelectUtil;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.Arrays;
 
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.fail;
+
 /**
  * @author: Ivan Baluk
  */
-public abstract class TestBlobInputStream extends DBTestCase {
-    private ApplicationContext ctx;
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+public abstract class TestBlobInputStream extends AbstractJUnit4SpringContextTests {
 
-    @Override
-    protected IDataSet getDataSet() throws Exception {
+    @Resource(name = "dbtool.DBTool")
+    private DBTool dbTool;
+
+    @Resource(name = "dbTester")
+    private IDatabaseTester dbTester;
+
+    private IDataSet getDataSet() throws Exception {
         IDataSet tmpExpDataSet =
                 new FlatXmlDataSetBuilder().build(this.getClass().getResourceAsStream("./data/blob_input_stream_test.xml"));
         ReplacementDataSet rds = new ReplacementDataSet(tmpExpDataSet);
@@ -34,43 +45,29 @@ public abstract class TestBlobInputStream extends DBTestCase {
         return rds;
     }
 
-    @Override
-    protected void setUp() throws Exception {
-        ctx = new ClassPathXmlApplicationContext(getSpringCfgFile(), TestSelectUtil.class);
-        DatabaseOperation.CLEAN_INSERT.execute(getConnection(), getDataSet());
-//        ITransactionManager tm = ctx.getBean("txn.ITransactionManager", ITransactionManager.class);
-//        tm.begin();
+    @PostConstruct
+    protected void init() throws Exception {
+        dbTester.setDataSet(getDataSet());
+        dbTester.getConnection().getConfig().setProperty(DatabaseConfig.FEATURE_BATCHED_STATEMENTS, true);
+        dbTester.getConnection().getConfig().setProperty(DatabaseConfig.PROPERTY_FETCH_SIZE, 1000);
+        dbTester.setSetUpOperation(DatabaseOperation.CLEAN_INSERT);
     }
 
-    @Override
-    public void tearDown() throws Exception {
-//        ITransactionManager tm = ctx.getBean("txn.ITransactionManager", ITransactionManager.class);
-//        tm.commit();
-    }
 
-    @Override
-    protected void setUpDatabaseConfig(DatabaseConfig config) {
-        config.setProperty(DatabaseConfig.FEATURE_BATCHED_STATEMENTS, true);
-    }
-
-    protected abstract String getSpringCfgFile();
-
+    @Test
     public void testRead() throws Exception {
-        BlobInputStream blobIS = getDBTool().getBlobInputStream("test_blob", "value", Arrays.asList(new KeyValue<String, Object>("id", 1)));
+        BlobInputStream blobIS = dbTool.getBlobInputStream("test_blob", "value", Arrays.asList(new KeyValue<String, Object>("id", 1)));
         assertEquals("hello", inputStreamToString(blobIS));
     }
 
+    @Test
     public void testReadFail() throws Exception {
         try {
             BlobInputStream blobIS =
-                    getDBTool().getBlobInputStream("test_blob", "value", Arrays.asList(new KeyValue<String, Object>("id", 3)));
+                    dbTool.getBlobInputStream("test_blob", "value", Arrays.asList(new KeyValue<String, Object>("id", 3)));
             fail("Expected " + IOException.class);
         } catch (IOException e) {
         }
-    }
-
-    public DBTool getDBTool() {
-        return ctx.getBean(DBTool.class);
     }
 
     private String inputStreamToString(BlobInputStream is) throws IOException {

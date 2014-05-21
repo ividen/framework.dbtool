@@ -2,17 +2,11 @@ package ru.kwanza.dbtool.core.blob;
 
 import org.dbunit.database.DatabaseConfig;
 import org.dbunit.ext.oracle.OracleDataTypeFactory;
+import org.springframework.test.context.ContextConfiguration;
 
 /**
  * @author: Ivan Baluk
  */
+@ContextConfiguration(locations = "classpath:mysql-config.xml")
 public class TestMySQLBlobOutputStream extends TestBlobOutputStream {
-    @Override
-    protected void setUpDatabaseConfig(DatabaseConfig config) {
-        config.setProperty(DatabaseConfig.PROPERTY_DATATYPE_FACTORY, new OracleDataTypeFactory());
-    }
-
-    protected String getSpringCfgFile() {
-        return "mysql-config.xml";
-    }
 }
