@@ -1,11 +1,7 @@
 package ru.kwanza.dbtool.core.fieldhelper;
 
-import junit.framework.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
@@ -16,10 +12,7 @@ import ru.kwanza.dbtool.core.UpdateSetter;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -46,13 +39,18 @@ public abstract class AbstractTestFieldHelper extends AbstractJUnit4SpringContex
 
     private static String POSTGRESQL_SELECT_SQL = "select xbool, xint, xbigint, xstring, xts1, xts2, xblob, xbigdecimal from test_table1 where not(xint = ?) LIMIT 10";
 
-    @Resource(name="dbtool.DBTool")
-    private  DBTool dbTool;
+    @Resource(name = "dbtool.DBTool")
+    private DBTool dbTool;
 
 
     @Before
     public void setUp() throws Exception {
-        dbTool.getDataSource().getConnection().prepareStatement(DELETE_SQL).execute();
+        Connection jdbcConnection = dbTool.getJDBCConnection();
+        try {
+            jdbcConnection.prepareStatement(DELETE_SQL).execute();
+        } finally {
+            jdbcConnection.close();
+        }
     }
 
     @Test
