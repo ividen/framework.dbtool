@@ -30,14 +30,14 @@
         <property name="defaultAutoCommit" value="false"/>
     </bean>
 
-
-    <bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
-        <property name="dataSource" ref="dataSource"/>
-    </bean>
-
-    <bean id="dbTester" class="org.dbunit.DataSourceDatabaseTester">
+    <bean id="dbTester" class="org.dbunit.DataSourceDatabaseTester" depends-on="springLiquibase">
         <constructor-arg index="0" ref="dataSource"/>
         <constructor-arg index="1" value="${jdbc.schema}"/>
+    </bean>
+
+    <bean id="springLiquibase" class="liquibase.integration.spring.SpringLiquibase">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="changeLog" value="classpath:init-test-schema.xml"/>
     </bean>
 
 </beans>

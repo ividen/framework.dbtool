@@ -34,6 +34,7 @@
         <commons.dbcp.version>1.4</commons.dbcp.version>
         <asm-all.version>2.1</asm-all.version>
         <cglib.version>2.2.2</cglib.version>
+        <liquibase.version>2.0.5</liquibase.version>
 
         <!-- Maven Plugins -->
         <maven.surefire.plugin.version>2.12</maven.surefire.plugin.version>
@@ -291,6 +292,13 @@
                 <artifactId>postgresql</artifactId>
                 <version>${postgresql.jdbc.version}</version>
                 <scope>compile</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.liquibase</groupId>
+                <artifactId>liquibase-core</artifactId>
+                <scope>test</scope>
+                <version>${liquibase.version}</version>
             </dependency>
 
             <!-- Spring libs -->
