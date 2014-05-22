@@ -1,21 +1,26 @@
 package ru.kwanza.dbtool.core.updateutil;
 
-import org.dbunit.DBTestCase;
-import org.dbunit.database.DatabaseConfig;
+import org.dbunit.IDatabaseTester;
+import org.dbunit.database.DatabaseConnection;
+import org.dbunit.database.IDatabaseConnection;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.IDataSet;
+import org.dbunit.dataset.ReplacementDataSet;
 import org.dbunit.dataset.SortedDataSet;
 import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
 import org.dbunit.operation.DatabaseOperation;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.stereotype.Component;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 import ru.kwanza.dbtool.core.*;
-import ru.kwanza.dbtool.core.selectutil.TestSelectUtil;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -25,8 +30,14 @@ import java.util.List;
 /**
  * @author Guzanov Alexander
  */
-public abstract class AbstractTestUpdateUtil extends DBTestCase {
-    protected ApplicationContext ctx;
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+public abstract class AbstractTestUpdateUtil extends AbstractTransactionalJUnit4SpringContextTests {
+    @Resource(name = "dbtool.DBTool")
+    protected DBTool dbTool;
+    @Resource(name = "dbTester")
+    protected IDatabaseTester dbTester;
+    @Resource(name = "transactionManager")
+    protected PlatformTransactionManager tm;
 
     public static final TestEntityRowMapper LIST_ROW_MAPPER = new TestEntityRowMapper();
     public static final TestEntityUpdateSetter1 TEST_BATCHER_1 = new TestEntityUpdateSetter1();
@@ -134,45 +145,58 @@ public abstract class AbstractTestUpdateUtil extends DBTestCase {
         }
     }
 
-    @Override
-    protected IDataSet getDataSet() throws Exception {
-        return new FlatXmlDataSetBuilder().build(this.getClass().getResourceAsStream("./data/data_set.xml"));
+    protected static interface TrxAction {
+        Object work();
     }
-
-    @Override
-    protected void setUp() throws Exception {
-        ctx = new ClassPathXmlApplicationContext(getSpringCfgFile(), TestSelectUtil.class);
-        DatabaseOperation.CLEAN_INSERT.execute(getConnection(), getDataSet());
-    }
-
-    @Override
-    protected void setUpDatabaseConfig(DatabaseConfig config) {
-        config.setProperty(DatabaseConfig.FEATURE_BATCHED_STATEMENTS, true);
-    }
-
-    protected abstract String getSpringCfgFile();
 
     protected IDataSet getResourceSet(String fileName) throws DataSetException {
         return new SortedDataSet(new FlatXmlDataSetBuilder().build(this.getClass().getResourceAsStream(fileName)));
     }
 
-    protected TransactionDefinition getTxDef() {
-        DefaultTransactionDefinition def = new DefaultTransactionDefinition();
-        def.setName("SomeTxName");
-        def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
-        return def;
-    }
+    @Component
+    public static class InitDB {
+        @Resource(name = "dbTester")
+        private IDatabaseTester dbTester;
 
-    protected PlatformTransactionManager getTxManager() {
-        return (PlatformTransactionManager) ctx.getBean("txManager");
+        private IDataSet getDataSet() throws Exception {
+            IDataSet tmpExpDataSet =
+                    new FlatXmlDataSetBuilder().build(this.getClass().getResourceAsStream("../data/data_set.xml"));
+            ReplacementDataSet rds = new ReplacementDataSet(tmpExpDataSet);
+            byte[] bytes = "hello".getBytes("UTF-8");
+            rds.addReplacementObject("[blob1]", bytes);
+            rds.addReplacementObject("[null]", null);
+            return rds;
+        }
+
+        @PostConstruct
+        protected void init() throws Exception {
+            dbTester.setDataSet(getDataSet());
+            dbTester.setOperationListener(new ConnectionConfigListener());
+            dbTester.setSetUpOperation(DatabaseOperation.CLEAN_INSERT);
+            dbTester.onSetup();
+        }
+
     }
 
     protected IDataSet getActualDataSet() throws Exception {
-        return new SortedDataSet(getConnection().createDataSet(new String[]{"test_table"}));
+        return new SortedDataSet(new DatabaseConnection(dbTool.getJDBCConnection()).createDataSet(new String[]{"test_table"}));
     }
 
-    public DBTool getDBTool() {
-        return ctx.getBean(DBTool.class);
+    protected Object invoke(TrxAction action) throws Exception {
+        DefaultTransactionDefinition def = new DefaultTransactionDefinition();
+        def.setName("SomeTxName");
+        def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
+        TransactionStatus transaction = tm.getTransaction(def);
+        Object result = null;
+        try {
+            result = action.work();
+            tm.commit(transaction);
+        } catch (Exception e) {
+            tm.rollback(transaction);
+            throw e;
+        }
+
+        return result;
     }
 
 }

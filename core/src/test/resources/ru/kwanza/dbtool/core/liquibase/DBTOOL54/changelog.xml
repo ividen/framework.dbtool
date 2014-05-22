@@ -14,11 +14,6 @@
                 <constraints nullable="false"/>
             </column>
             <column name="name" type="VARCHAR(255)"/>
-            <column name="bitmap" type="BLOB"/>
-            <column name="is_incoming" type="INTEGER"/>
-            <column name="recorded" type="INTEGER"/>
-            <column name="session_id" type="${long.type}"/>
-            <column name="write_trx_id" type="${long.type}"/>
         </createTable>
     </changeSet>
 

@@ -60,8 +60,6 @@ public abstract class TestSelectUtil extends AbstractJUnit4SpringContextTests {
     public static final TestEntityMapRowMapper MAP_ROW_MAPPER = new TestEntityMapRowMapper();
     public static final TestEntityMapOfMapRowMapper MAP_OF_MAP_ROW_MAPPER = new TestEntityMapOfMapRowMapper();
 
-    private ApplicationContext ctx;
-
     public static final class TestEntityRowMapper implements RowMapper<TestEntity> {
         public TestEntity mapRow(ResultSet rs, int rowNum) throws SQLException {
             return new TestEntity(rs.getInt("xkey"), rs.getString("name"), rs.getInt("version"));

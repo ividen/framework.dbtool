@@ -1,12 +1,11 @@
 package ru.kwanza.dbtool.core.updateutil;
 
+import org.springframework.test.context.ContextConfiguration;
+
 /**
  * @author Guzanov Alexander
  */
+@ContextConfiguration(locations = "classpath:mssql-config.xml")
 public class TestMSSQLUpdateUtil extends TestUpdateUtil {
-
-    protected String getSpringCfgFile() {
-        return "mssql_config_update_util.xml";
-    }
 
 }

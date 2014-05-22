@@ -1,19 +1,14 @@
 package ru.kwanza.dbtool.core.updateutil;
 
-import ru.kwanza.dbtool.core.updateutil.TestUpdateUtil;
+import org.springframework.test.context.ContextConfiguration;
 
 /**
- *
  * Date: 17.07.13
- * @author Michael Yeskov
  *
+ * @author Michael Yeskov
  */
 
+@ContextConfiguration(locations = "classpath:postgresql-config.xml")
 public class TestPostgresUpdateUtil extends TestUpdateUtil {
 
-
-    @Override
-    protected String getSpringCfgFile() {
-        return "postgresql_config_update_util.xml";
-    }
 }

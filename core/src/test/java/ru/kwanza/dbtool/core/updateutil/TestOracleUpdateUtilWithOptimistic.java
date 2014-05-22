@@ -1,10 +1,10 @@
 package ru.kwanza.dbtool.core.updateutil;
 
+import org.springframework.test.context.ContextConfiguration;
+
 /**
  * @author Guzanov Alexander
  */
+@ContextConfiguration(locations = "classpath:oracle-config.xml")
 public class TestOracleUpdateUtilWithOptimistic extends TestUpdateUtilWithOptimistic {
-    protected String getSpringCfgFile() {
-        return "oracle_config_update_util.xml";
-    }
 }
