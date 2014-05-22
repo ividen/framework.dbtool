@@ -6,8 +6,6 @@ import ru.kwanza.dbtool.core.DBTool;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -19,9 +17,6 @@ public abstract class AppLock extends ReentrantLock {
     protected DBTool dbTool;
     private String lockName;
     private boolean reentrant;
-
-    //todo aguzanov подумать над исспользованием easygrid для эффективности хранение
-    private static final ConcurrentMap<String, AppLock> locks = new ConcurrentHashMap<String, AppLock>();
 
     protected AppLock(DBTool dbTool, String lockName, boolean reentrant) throws SQLException {
         this.dbTool = dbTool;
@@ -61,10 +56,9 @@ public abstract class AppLock extends ReentrantLock {
 
     /**
      * Закрыть работу с блокировкой.
-     *
+     * <p/>
      * Этот метод обязательно нужно вызывать в секции <b>finally</b>,
      * хотя он не снимает блокировки, а только освобождает ресурсы.
-     *
      */
     public final void close() {
         if (exitReEnterLock()) {
@@ -113,23 +107,15 @@ public abstract class AppLock extends ReentrantLock {
     }
 
     public static AppLock defineLock(DBTool dbTool, String lockName, DBTool.DBType dbType, boolean reentrant) throws SQLException {
-        AppLock appLock = locks.get(lockName);
-        if (appLock == null) {
-            if (dbType.equals(DBTool.DBType.MSSQL)) {
-                appLock = new MSSQLAppLock(dbTool, lockName, reentrant);
-            } else if (dbType.equals(DBTool.DBType.ORACLE)) {
-                appLock = new OracleAppLock(dbTool, lockName, reentrant);
-            } else if (dbType.equals(DBTool.DBType.MYSQL)) {
-                appLock = new MySQLAppLock(dbTool, lockName, reentrant);
-            } else {
-                appLock = new DefaultAppLock(dbTool, lockName, reentrant);
-            }
-
-            if (null != locks.putIfAbsent(lockName, appLock)) {
-                appLock = locks.get(lockName);
-            }
+        if (dbType.equals(DBTool.DBType.MSSQL)) {
+            return new MSSQLAppLock(dbTool, lockName, reentrant);
+        } else if (dbType.equals(DBTool.DBType.ORACLE)) {
+            return new OracleAppLock(dbTool, lockName, reentrant);
+        } else if (dbType.equals(DBTool.DBType.MYSQL)) {
+            return new MySQLAppLock(dbTool, lockName, reentrant);
+        } else {
+            return new DefaultAppLock(dbTool, lockName, reentrant);
         }
 
-        return appLock;
     }
 }
