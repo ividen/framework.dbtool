@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
 import org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests;
+import ru.kwanza.dbtool.core.ConnectionConfigListener;
 import ru.kwanza.dbtool.core.DBTool;
 import ru.kwanza.dbtool.core.KeyValue;
 
@@ -49,8 +50,7 @@ public abstract class TestBlobOutputStream extends AbstractTransactionalJUnit4Sp
         @PostConstruct
         protected void init() throws Exception {
             dbTester.setDataSet(getDataSet());
-            dbTester.getConnection().getConfig().setProperty(DatabaseConfig.FEATURE_BATCHED_STATEMENTS, true);
-            dbTester.getConnection().getConfig().setProperty(DatabaseConfig.PROPERTY_FETCH_SIZE, 1000);
+            dbTester.setOperationListener(new ConnectionConfigListener());
             dbTester.setSetUpOperation(DatabaseOperation.CLEAN_INSERT);
             dbTester.onSetup();
         }

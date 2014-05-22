@@ -1,7 +1,6 @@
 package ru.kwanza.dbtool.core.blob;
 
 import org.dbunit.IDatabaseTester;
-import org.dbunit.database.DatabaseConfig;
 import org.dbunit.dataset.IDataSet;
 import org.dbunit.dataset.ReplacementDataSet;
 import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
@@ -11,6 +10,7 @@ import org.junit.Test;
 import org.springframework.stereotype.Component;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
+import ru.kwanza.dbtool.core.ConnectionConfigListener;
 import ru.kwanza.dbtool.core.DBTool;
 import ru.kwanza.dbtool.core.KeyValue;
 
@@ -53,8 +53,7 @@ public abstract class TestBlobInputStream extends AbstractJUnit4SpringContextTes
         @PostConstruct
         protected void init() throws Exception {
             dbTester.setDataSet(getDataSet());
-            dbTester.getConnection().getConfig().setProperty(DatabaseConfig.FEATURE_BATCHED_STATEMENTS, true);
-            dbTester.getConnection().getConfig().setProperty(DatabaseConfig.PROPERTY_FETCH_SIZE, 1000);
+            dbTester.setOperationListener(new ConnectionConfigListener());
             dbTester.setSetUpOperation(DatabaseOperation.CLEAN_INSERT);
             dbTester.onSetup();
         }
@@ -97,4 +96,5 @@ public abstract class TestBlobInputStream extends AbstractJUnit4SpringContextTes
         }
         return out.toString();
     }
+
 }
