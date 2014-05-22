@@ -6,8 +6,9 @@ import org.dbunit.dataset.IDataSet;
 import org.dbunit.dataset.ReplacementDataSet;
 import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
 import org.dbunit.operation.DatabaseOperation;
-import org.junit.Before;
+import org.junit.After;
 import org.junit.Test;
+import org.springframework.stereotype.Component;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
 import ru.kwanza.dbtool.core.DBTool;
@@ -31,39 +32,51 @@ public abstract class TestBlobInputStream extends AbstractJUnit4SpringContextTes
 
     @Resource(name = "dbtool.DBTool")
     private DBTool dbTool;
+    private BlobInputStream blobIS;
 
-    @Resource(name = "dbTester")
-    private IDatabaseTester dbTester;
 
-    private IDataSet getDataSet() throws Exception {
-        IDataSet tmpExpDataSet =
-                new FlatXmlDataSetBuilder().build(this.getClass().getResourceAsStream("./data/blob_input_stream_test.xml"));
-        ReplacementDataSet rds = new ReplacementDataSet(tmpExpDataSet);
-        byte[] bytes = "hello".getBytes("UTF-8");
-        rds.addReplacementObject("[blob1]", bytes);
-        rds.addReplacementObject("[null]", null);
-        return rds;
+    @Component
+    public static class InitDB {
+        @Resource(name = "dbTester")
+        private IDatabaseTester dbTester;
+
+        private IDataSet getDataSet() throws Exception {
+            IDataSet tmpExpDataSet =
+                    new FlatXmlDataSetBuilder().build(this.getClass().getResourceAsStream("../data/blob_input_stream_test.xml"));
+            ReplacementDataSet rds = new ReplacementDataSet(tmpExpDataSet);
+            byte[] bytes = "hello".getBytes("UTF-8");
+            rds.addReplacementObject("[blob1]", bytes);
+            rds.addReplacementObject("[null]", null);
+            return rds;
+        }
+
+        @PostConstruct
+        protected void init() throws Exception {
+            dbTester.setDataSet(getDataSet());
+            dbTester.getConnection().getConfig().setProperty(DatabaseConfig.FEATURE_BATCHED_STATEMENTS, true);
+            dbTester.getConnection().getConfig().setProperty(DatabaseConfig.PROPERTY_FETCH_SIZE, 1000);
+            dbTester.setSetUpOperation(DatabaseOperation.CLEAN_INSERT);
+            dbTester.onSetup();
+        }
+
     }
 
-    @PostConstruct
-    protected void init() throws Exception {
-        dbTester.setDataSet(getDataSet());
-        dbTester.getConnection().getConfig().setProperty(DatabaseConfig.FEATURE_BATCHED_STATEMENTS, true);
-        dbTester.getConnection().getConfig().setProperty(DatabaseConfig.PROPERTY_FETCH_SIZE, 1000);
-        dbTester.setSetUpOperation(DatabaseOperation.CLEAN_INSERT);
-    }
 
+    @After
+    public void tearDown() throws Exception {
+        dbTool.closeResources(blobIS);
+    }
 
     @Test
     public void testRead() throws Exception {
-        BlobInputStream blobIS = dbTool.getBlobInputStream("test_blob", "value", Arrays.asList(new KeyValue<String, Object>("id", 1)));
+        blobIS = dbTool.getBlobInputStream("test_blob", "value", Arrays.asList(new KeyValue<String, Object>("id", 1)));
         assertEquals("hello", inputStreamToString(blobIS));
     }
 
     @Test
     public void testReadFail() throws Exception {
         try {
-            BlobInputStream blobIS =
+            blobIS =
                     dbTool.getBlobInputStream("test_blob", "value", Arrays.asList(new KeyValue<String, Object>("id", 3)));
             fail("Expected " + IOException.class);
         } catch (IOException e) {

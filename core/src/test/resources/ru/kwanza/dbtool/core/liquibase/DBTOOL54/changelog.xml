@@ -24,57 +24,62 @@
 
     <changeSet author="aguzanov" id="21.05.2014 11:24-2" dbms="mysql">
         <createTable tableName="test_table1">
-            <column name="bool" type="BIT"/>
-            <column name="int" type="INT"/>
-            <column name="bigint" type="BIGINT"/>
-            <column name="string" type="VARCHAR(255)"/>
-            <column name="ts1" type="TIMESTAMPE"/>
-            <column name="ts2" type="TIMESTAMP"/>
-            <column name="blob" type="BLOB"/>
-            <column name="bigdecimal" type="DECIMAL(50)"/>
+            <column name="xbool" type="BIT"/>
+            <column name="xint" type="INT"/>
+            <column name="xbigint" type="BIGINT"/>
+            <column name="xstring" type="VARCHAR(255)"/>
+            <column name="xts1" type="TIMESTAMPE"/>
+            <column name="xts2" type="TIMESTAMP"/>
+            <column name="xblob" type="BLOB"/>
+            <column name="xbigdecimal" type="DECIMAL(50)"/>
         </createTable>
     </changeSet>
 
     <changeSet author="aguzanov" id="21.05.2014 11:24-2" dbms="posgresql">
         <createTable tableName="test_table1">
-            <column name="bool" type="boolean"/>
-            <column name="int" type="numeric"/>
-            <column name="bigint" type="numeric"/>
-            <column name="string" type="character varying(256)"/>
-            <column name="ts1" type="timestamp without time zone"/>
-            <column name="ts2" type="timestamp without time zone"/>
-            <column name="blob" type="bytea"/>
-            <column name="bigdecimal" type="numeric"/>
+            <column name="xbool" type="boolean"/>
+            <column name="xint" type="numeric"/>
+            <column name="xbigint" type="numeric"/>
+            <column name="xstring" type="character varying(256)"/>
+            <column name="xts1" type="timestamp without time zone"/>
+            <column name="xts2" type="timestamp without time zone"/>
+            <column name="xblob" type="bytea"/>
+            <column name="xbigdecimal" type="numeric"/>
         </createTable>
     </changeSet>
 
-
     <changeSet author="aguzanov" id="21.05.2014 11:24-2" dbms="oracle">
         <createTable tableName="test_table1">
-            <column name="bool" type=""/>
-            <column name="int" type=""/>
-            <column name="bigint" type=""/>
-            <column name="string" type=""/>
-            <column name="ts1" type=""/>
-            <column name="ts2" type=""/>
-            <column name="blob" type=""/>
-            <column name="bigdecimal" type=""/>
+            <column name="xbool" type=""/>
+            <column name="xint" type=""/>
+            <column name="xbigint" type=""/>
+            <column name="xstring" type=""/>
+            <column name="xts1" type=""/>
+            <column name="xts2" type=""/>
+            <column name="xblob" type=""/>
+            <column name="xbigdecimal" type=""/>
         </createTable>
     </changeSet>
 
     <changeSet author="aguzanov" id="21.05.2014 11:24-2" dbms="mssql">
         <createTable tableName="test_table1">
-            <column name="bool" type=""/>
-            <column name="int" type=""/>
-            <column name="bigint" type=""/>
-            <column name="string" type=""/>
-            <column name="ts1" type=""/>
-            <column name="ts2" type=""/>
-            <column name="blob" type=""/>
-            <column name="bigdecimal" type=""/>
+            <column name="bool" type="BIT"/>
+            <column name="int" type="INT"/>
+            <column name="bigint" type="BIGINT"/>
+            <column name="string" type="VARCHAR(255)"/>
+            <column name="ts1" type="DATETIME"/>
+            <column name="ts2" type="DATETIME"/>
+            <column name="blob" type="IMAGE"/>
+            <column name="bigdecimal" type="DECIMAL(18,0)"/>
         </createTable>
     </changeSet>
 
-
-
+    <changeSet author="aguzanov" id="22.05.2014 10:32-1">
+        <createTable tableName="test_blob">
+            <column name="id" type="${long.type}">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="value" type="BLOB"/>
+        </createTable>
+    </changeSet>
 </databaseChangeLog>

@@ -21,6 +21,7 @@
         <dbtool.version>1.1-SNAPSHOT</dbtool.version>
         <toolbox.version>1.0-SNAPSHOT</toolbox.version>
         <txn.version>1.0-SNAPSHOT</txn.version>
+        <projectversion.version>1.0-SNAPSHOT</projectversion.version>
 
         <!-- Thirdparty Framweorks -->
         <junit.version>4.10</junit.version>
@@ -220,6 +221,30 @@
                 <directory>${external.build.path}/${project.artifactId}</directory>
             </build>
         </profile>
+        <profile>
+            <id>projectversion</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>ru.kwanza.plugin.projectversion</groupId>
+                        <artifactId>projectversion</artifactId>
+                        <version>${projectversion.version}</version>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>project</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <issuerTokens>
+                                <value>TOOLBOX</value>
+                            </issuerTokens>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
     </profiles>
 
     <dependencyManagement>
@@ -297,7 +322,7 @@
             <dependency>
                 <groupId>org.liquibase</groupId>
                 <artifactId>liquibase-core</artifactId>
-                <scope>test</scope>
+
                 <version>${liquibase.version}</version>
             </dependency>
 

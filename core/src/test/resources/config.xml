@@ -1,38 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:util="http://www.springframework.org/schema/util"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+       xmlns:util="http://www.springframework.org/schema/util" xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
 
 
     <import resource="classpath:dbtool-config.xml"/>
 
-    <bean id="systemPrereqs"
-          class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
-        <property name="targetObject" value="#{@systemProperties}"/>
-        <property name="targetMethod" value="putAll"/>
-        <property name="arguments">
-            <!-- The new Properties -->
-            <util:properties>
-                <prop key="dbunit.connectionUrl">${jdbc.connectionUrl}</prop>
-                <prop key="dbunit.driverClass">${jdbc.driverClass}</prop>
-                <prop key="dbunit.username">${jdbc.username}</prop>
-                <prop key="dbunit.password">${jdbc.password}</prop>
-                <!--<prop key="dbunit.schema">${jdbc.schema}</prop>-->
-            </util:properties>
-        </property>
-    </bean>
+    <context:component-scan base-package="ru.kwanza.dbtool.core.blob"/>
+    <context:component-scan base-package="ru.kwanza.dbtool.core.fieldhelper"/>
+    <context:component-scan base-package="ru.kwanza.dbtool.core.lock"/>
+    <context:component-scan base-package="ru.kwanza.dbtool.core.selectutil"/>
+    <context:component-scan base-package="ru.kwanza.dbtool.core.updateutil"/>
 
     <bean id="dataSource" destroy-method="close" class="org.apache.commons.dbcp.BasicDataSource">
         <property name="driverClassName" value="${jdbc.driverClass}"/>
         <property name="url" value="${jdbc.connectionUrl}"/>
         <property name="username" value="${jdbc.username}"/>
         <property name="password" value="${jdbc.password}"/>
-        <property name="defaultAutoCommit" value="false"/>
+        <property name="defaultCatalog" value="${jdbc.schema}"/>
+        <property name="defaultAutoCommit" value="true"/>
+        <property name="maxActive" value="10"/>
+        <property name="maxIdle" value="10"/>
     </bean>
 
     <bean id="dbTester" class="org.dbunit.DataSourceDatabaseTester" depends-on="springLiquibase">
         <constructor-arg index="0" ref="dataSource"/>
-        <constructor-arg index="1" value="${jdbc.schema}"/>
+        <!--<constructor-arg index="1" value="${jdbc.schema}"/>-->
     </bean>
 
     <bean id="springLiquibase" class="liquibase.integration.spring.SpringLiquibase">
@@ -40,4 +33,7 @@
         <property name="changeLog" value="classpath:init-test-schema.xml"/>
     </bean>
 
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
 </beans>
