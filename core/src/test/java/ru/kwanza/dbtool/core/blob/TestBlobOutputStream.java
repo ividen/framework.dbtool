@@ -8,6 +8,7 @@ import org.dbunit.dataset.ReplacementDataSet;
 import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
 import org.dbunit.operation.DatabaseOperation;
 import org.junit.Test;
+import org.springframework.stereotype.Component;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
 import org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests;
@@ -30,26 +31,30 @@ public abstract class TestBlobOutputStream extends AbstractTransactionalJUnit4Sp
     @Resource(name = "dbtool.DBTool")
     private DBTool dbTool;
 
-    @Resource(name = "dbTester")
-    private IDatabaseTester dbTester;
+    @Component
+    public static class InitDB {
+        @Resource(name = "dbTester")
+        private IDatabaseTester dbTester;
 
+        private IDataSet getDataSet() throws Exception {
+            IDataSet tmpExpDataSet =
+                    new FlatXmlDataSetBuilder().build(this.getClass().getResourceAsStream("../data/blob_output_stream_test_init.xml"));
+            ReplacementDataSet rds = new ReplacementDataSet(tmpExpDataSet);
+            byte[] bytes = "hello".getBytes("UTF-8");
+            rds.addReplacementObject("[blob1]", bytes);
+            rds.addReplacementObject("[null]", null);
+            return rds;
+        }
 
-    private IDataSet getDataSet() throws Exception {
-        IDataSet tmpExpDataSet =
-                new FlatXmlDataSetBuilder().build(this.getClass().getResourceAsStream("./data/blob_output_stream_test_init.xml"));
-        ReplacementDataSet rds = new ReplacementDataSet(tmpExpDataSet);
-        byte[] bytes = "hello".getBytes("UTF-8");
-        rds.addReplacementObject("[blob1]", bytes);
-        rds.addReplacementObject("[null]", null);
-        return rds;
-    }
+        @PostConstruct
+        protected void init() throws Exception {
+            dbTester.setDataSet(getDataSet());
+            dbTester.getConnection().getConfig().setProperty(DatabaseConfig.FEATURE_BATCHED_STATEMENTS, true);
+            dbTester.getConnection().getConfig().setProperty(DatabaseConfig.PROPERTY_FETCH_SIZE, 1000);
+            dbTester.setSetUpOperation(DatabaseOperation.CLEAN_INSERT);
+            dbTester.onSetup();
+        }
 
-    @PostConstruct
-    protected void init() throws Exception {
-        dbTester.setDataSet(getDataSet());
-        dbTester.getConnection().getConfig().setProperty(DatabaseConfig.FEATURE_BATCHED_STATEMENTS, true);
-        dbTester.getConnection().getConfig().setProperty(DatabaseConfig.PROPERTY_FETCH_SIZE, 1000);
-        dbTester.setSetUpOperation(DatabaseOperation.CLEAN_INSERT);
     }
 
     @Test
