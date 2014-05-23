@@ -5,6 +5,6 @@ import org.springframework.test.context.ContextConfiguration;
 /**
  * @author Michael Yeskov
  */
-@ContextConfiguration(locations = "classpath:postgresql-config.xml")
+@ContextConfiguration(locations = "classpath:postgresql-config-updateutil.xml")
 public class TestPostgreSQLUpdateUtilWithOptimistic extends TestUpdateUtilWithOptimistic {
 }

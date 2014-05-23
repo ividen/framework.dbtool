@@ -5,7 +5,7 @@ import org.springframework.test.context.ContextConfiguration;
 /**
  * @author Guzanov Alexander
  */
-@ContextConfiguration(locations = "classpath:mysql-config.xml")
+@ContextConfiguration(locations = "classpath:mysql-config-selectutil.xml")
 public class TestOracleSelectUtil extends TestSelectUtil {
 
 }

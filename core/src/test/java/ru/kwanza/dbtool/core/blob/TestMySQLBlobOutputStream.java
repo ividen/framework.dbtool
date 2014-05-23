@@ -7,6 +7,6 @@ import org.springframework.test.context.ContextConfiguration;
 /**
  * @author: Ivan Baluk
  */
-@ContextConfiguration(locations = "classpath:mysql-config.xml")
+@ContextConfiguration(locations = "classpath:mysql-config-blob.xml")
 public class TestMySQLBlobOutputStream extends TestBlobOutputStream {
 }

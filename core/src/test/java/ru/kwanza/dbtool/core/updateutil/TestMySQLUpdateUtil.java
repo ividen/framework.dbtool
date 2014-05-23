@@ -5,6 +5,6 @@ import org.springframework.test.context.ContextConfiguration;
 /**
  * @author Guzanov Alexander
  */
-@ContextConfiguration(locations = "classpath:mysql-config.xml")
+@ContextConfiguration(locations = "classpath:mysql-config-updateutil.xml")
 public class TestMySQLUpdateUtil extends TestUpdateUtil {
 }

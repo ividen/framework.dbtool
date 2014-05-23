@@ -7,6 +7,6 @@ import org.springframework.test.context.ContextConfiguration;
 /**
  * @author: Ivan Baluk
  */
-@ContextConfiguration(locations = "classpath:oracle-config.xml")
+@ContextConfiguration(locations = "classpath:oracle-config-blob.xml")
 public class TestOracleBlobInputStream extends TestBlobInputStream {
 }

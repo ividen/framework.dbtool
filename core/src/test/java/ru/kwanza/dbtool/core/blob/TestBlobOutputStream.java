@@ -32,36 +32,11 @@ public abstract class TestBlobOutputStream extends AbstractTransactionalJUnit4Sp
     @Resource(name = "dbtool.DBTool")
     private DBTool dbTool;
 
-    @Component
-    public static class InitDB {
-        @Resource(name = "dbTester")
-        private IDatabaseTester dbTester;
-
-        private IDataSet getDataSet() throws Exception {
-            IDataSet tmpExpDataSet =
-                    new FlatXmlDataSetBuilder().build(this.getClass().getResourceAsStream("../data/blob_output_stream_test_init.xml"));
-            ReplacementDataSet rds = new ReplacementDataSet(tmpExpDataSet);
-            byte[] bytes = "hello".getBytes("UTF-8");
-            rds.addReplacementObject("[blob1]", bytes);
-            rds.addReplacementObject("[null]", null);
-            return rds;
-        }
-
-        @PostConstruct
-        protected void init() throws Exception {
-            dbTester.setDataSet(getDataSet());
-            dbTester.setOperationListener(new ConnectionConfigListener());
-            dbTester.setSetUpOperation(DatabaseOperation.CLEAN_INSERT);
-            dbTester.onSetup();
-        }
-
-    }
-
     @Test
     public void testReadAndWrite() throws Exception {
         BlobOutputStream blobOS;
 
-        blobOS = dbTool.getBlobOutputStream("test_blob", "value", Arrays.asList(new KeyValue<String, Object>("id", 1)));
+        blobOS = dbTool.getBlobOutputStream("test_blob", "value", Arrays.asList(new KeyValue<String, Object>("id", 2)));
         for (int i = 0; i < 5000; i++) {
 
             blobOS.write("hello".getBytes());
@@ -69,7 +44,7 @@ public abstract class TestBlobOutputStream extends AbstractTransactionalJUnit4Sp
         }
         blobOS.close();
         BlobInputStream blob =
-                dbTool.getBlobInputStream("test_blob", "value", Arrays.asList(new KeyValue<String, Object>("id", 1)));
+                dbTool.getBlobInputStream("test_blob", "value", Arrays.asList(new KeyValue<String, Object>("id", 2)));
         long size = blob.getSize();
 
         for (int i = 0; i < 5000; i++) {
@@ -90,13 +65,13 @@ public abstract class TestBlobOutputStream extends AbstractTransactionalJUnit4Sp
         BlobOutputStream blobOS;
 
         for (int i = 0; i < 10; i++) {
-            blobOS = dbTool.getBlobOutputStream("test_blob", "value", Arrays.asList(new KeyValue<String, Object>("id", 1)));
+            blobOS = dbTool.getBlobOutputStream("test_blob", "value", Arrays.asList(new KeyValue<String, Object>("id", 2)));
             blobOS.write(new byte[1000]);
             blobOS.close();
         }
 
         BlobInputStream blob =
-                dbTool.getBlobInputStream("test_blob", "value", Arrays.asList(new KeyValue<String, Object>("id", 1)));
+                dbTool.getBlobInputStream("test_blob", "value", Arrays.asList(new KeyValue<String, Object>("id", 2)));
         long size = blob.getSize();
         blob.close();
 
@@ -108,12 +83,12 @@ public abstract class TestBlobOutputStream extends AbstractTransactionalJUnit4Sp
     public void testWrite_2() throws Exception {
         BlobOutputStream blobOS;
 
-        blobOS = dbTool.getBlobOutputStream("test_blob", "value", Arrays.asList(new KeyValue<String, Object>("id", 1)));
+        blobOS = dbTool.getBlobOutputStream("test_blob", "value", Arrays.asList(new KeyValue<String, Object>("id", 2)));
         blobOS.write("hello".getBytes());
         blobOS.close();
 
         BlobInputStream blob =
-                dbTool.getBlobInputStream("test_blob", "value", Arrays.asList(new KeyValue<String, Object>("id", 1)));
+                dbTool.getBlobInputStream("test_blob", "value", Arrays.asList(new KeyValue<String, Object>("id", 2)));
         long size = blob.getSize();
         byte[] b = new byte[5];
         blob.read(b);
@@ -126,17 +101,17 @@ public abstract class TestBlobOutputStream extends AbstractTransactionalJUnit4Sp
     public void testWrite_3() throws Exception {
         BlobOutputStream blobOS;
 
-        blobOS = dbTool.getBlobOutputStream("test_blob", "value", Arrays.asList(new KeyValue<String, Object>("id", 1)));
+        blobOS = dbTool.getBlobOutputStream("test_blob", "value", Arrays.asList(new KeyValue<String, Object>("id", 2)));
         blobOS.write("hello".getBytes());
         blobOS.close();
 
-        blobOS = dbTool.getBlobOutputStream("test_blob", "value", Arrays.asList(new KeyValue<String, Object>("id", 1)));
+        blobOS = dbTool.getBlobOutputStream("test_blob", "value", Arrays.asList(new KeyValue<String, Object>("id", 2)));
         blobOS.setPosition(4);
         blobOS.write("OOOO".getBytes());
         blobOS.close();
 
         BlobInputStream blob =
-                dbTool.getBlobInputStream("test_blob", "value", Arrays.asList(new KeyValue<String, Object>("id", 1)));
+                dbTool.getBlobInputStream("test_blob", "value", Arrays.asList(new KeyValue<String, Object>("id", 2)));
         long size = blob.getSize();
         byte[] b = new byte[8];
         blob.read(b);
@@ -150,12 +125,12 @@ public abstract class TestBlobOutputStream extends AbstractTransactionalJUnit4Sp
     public void testWrite_4() throws Exception {
         BlobOutputStream blobOS;
 
-        blobOS = dbTool.getBlobOutputStream("test_blob", "value", Arrays.asList(new KeyValue<String, Object>("id", 1)));
+        blobOS = dbTool.getBlobOutputStream("test_blob", "value", Arrays.asList(new KeyValue<String, Object>("id", 2)));
         blobOS.write("hello".getBytes());
         blobOS.close();
 
         BlobInputStream blob =
-                dbTool.getBlobInputStream("test_blob", "value", Arrays.asList(new KeyValue<String, Object>("id", 1)));
+                dbTool.getBlobInputStream("test_blob", "value", Arrays.asList(new KeyValue<String, Object>("id", 2)));
         long size = blob.getSize();
         byte[] b = new byte[5];
         blob.read(b);
@@ -164,12 +139,12 @@ public abstract class TestBlobOutputStream extends AbstractTransactionalJUnit4Sp
         assertEquals(size, 5);
         assertEquals(new String(b), "hello");
 
-        blobOS = dbTool.getBlobOutputStream("test_blob", "value", Arrays.asList(new KeyValue<String, Object>("id", 1)));
+        blobOS = dbTool.getBlobOutputStream("test_blob", "value", Arrays.asList(new KeyValue<String, Object>("id", 2)));
         blobOS.reset();
         blobOS.close();
 
         blob =
-                dbTool.getBlobInputStream("test_blob", "value", Arrays.asList(new KeyValue<String, Object>("id", 1)));
+                dbTool.getBlobInputStream("test_blob", "value", Arrays.asList(new KeyValue<String, Object>("id", 2)));
         size = blob.getSize();
         blob.close();
 
@@ -180,13 +155,13 @@ public abstract class TestBlobOutputStream extends AbstractTransactionalJUnit4Sp
     public void testWrite_5() throws Exception {
         BlobOutputStream blobOS;
 
-        blobOS = dbTool.getBlobOutputStream("test_blob", "value", Arrays.asList(new KeyValue<String, Object>("id", 1)));
+        blobOS = dbTool.getBlobOutputStream("test_blob", "value", Arrays.asList(new KeyValue<String, Object>("id", 2)));
         blobOS.write("hello".getBytes());
         blobOS.reset();
         blobOS.close();
 
         BlobInputStream blob =
-                dbTool.getBlobInputStream("test_blob", "value", Arrays.asList(new KeyValue<String, Object>("id", 1)));
+                dbTool.getBlobInputStream("test_blob", "value", Arrays.asList(new KeyValue<String, Object>("id", 2)));
         long size = blob.getSize();
         blob.close();
 

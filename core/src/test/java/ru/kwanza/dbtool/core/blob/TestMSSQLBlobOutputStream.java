@@ -7,10 +7,7 @@ import org.springframework.test.context.ContextConfiguration;
 /**
  * @author: Ivan Baluk
  */
-@ContextConfiguration(locations = "classpath:mssql-config.xml")
+@ContextConfiguration(locations = "classpath:mssql-config-blob.xml")
 public class TestMSSQLBlobOutputStream extends TestBlobOutputStream {
-//    @Override
-//    protected void setUpDatabaseConfig(DatabaseConfig config) {
-//        config.setProperty(DatabaseConfig.PROPERTY_DATATYPE_FACTORY, new MsSqlDataTypeFactory());
-//    }
+
 }
