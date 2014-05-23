@@ -11,17 +11,20 @@ import java.util.concurrent.locks.ReentrantLock;
 /**
  * Класс поторый позволяет устанавливать блокировку
  */
-public abstract class AppLock extends ReentrantLock {
+public abstract class AppLock {
     public static final Logger logger = LoggerFactory.getLogger(AppLock.class);
 
     protected DBTool dbTool;
+    private ReentrantLock lock;
     private String lockName;
     private boolean reentrant;
 
-    protected AppLock(DBTool dbTool, String lockName, boolean reentrant) throws SQLException {
+
+    protected AppLock(DBTool dbTool, String lockName, ReentrantLock cachedLock, boolean reentrant) throws SQLException {
         this.dbTool = dbTool;
         this.lockName = lockName;
         this.reentrant = reentrant;
+        this.lock = cachedLock;
     }
 
     /**
@@ -77,9 +80,9 @@ public abstract class AppLock extends ReentrantLock {
     }
 
     private boolean exitReEnterLock() {
-        super.unlock();
+        lock.unlock();
 
-        if (reentrant && isHeldByCurrentThread()) {
+        if (reentrant && lock.isHeldByCurrentThread()) {
             return true;
         }
         return false;
@@ -88,12 +91,12 @@ public abstract class AppLock extends ReentrantLock {
     private boolean reEnterLock() {
 
         try {
-            if (reentrant && isHeldByCurrentThread()) {
+            if (reentrant && lock.isHeldByCurrentThread()) {
                 return true;
             }
             return false;
         } finally {
-            super.lock();
+            lock.lock();
         }
     }
 
@@ -106,15 +109,15 @@ public abstract class AppLock extends ReentrantLock {
         return connection;
     }
 
-    public static AppLock defineLock(DBTool dbTool, String lockName, DBTool.DBType dbType, boolean reentrant) throws SQLException {
+    public static AppLock defineLock(DBTool dbTool, String lockName, DBTool.DBType dbType, ReentrantLock lock, boolean reentrant) throws SQLException {
         if (dbType.equals(DBTool.DBType.MSSQL)) {
-            return new MSSQLAppLock(dbTool, lockName, reentrant);
+            return new MSSQLAppLock(dbTool, lockName, lock, reentrant);
         } else if (dbType.equals(DBTool.DBType.ORACLE)) {
-            return new OracleAppLock(dbTool, lockName, reentrant);
+            return new OracleAppLock(dbTool, lockName, lock, reentrant);
         } else if (dbType.equals(DBTool.DBType.MYSQL)) {
-            return new MySQLAppLock(dbTool, lockName, reentrant);
+            return new DefaultAppLock(dbTool, lockName, lock, reentrant);
         } else {
-            return new DefaultAppLock(dbTool, lockName, reentrant);
+            return new DefaultAppLock(dbTool, lockName, lock, reentrant);
         }
 
     }

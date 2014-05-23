@@ -4,7 +4,6 @@ import junit.framework.Assert;
 import org.dbunit.IDatabaseTester;
 import org.junit.Test;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
 import org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
@@ -14,7 +13,6 @@ import ru.kwanza.dbtool.core.DBTool;
 
 import javax.annotation.Resource;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -22,7 +20,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * @author Ivan Baluk
  */
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-public abstract class AbstractTestLock extends AbstractTransactionalJUnit4SpringContextTests{
+public abstract class AbstractTestLock extends AbstractTransactionalJUnit4SpringContextTests {
 
     @Resource(name = "dbtool.DBTool")
     protected DBTool dbTool;
@@ -66,7 +64,7 @@ public abstract class AbstractTestLock extends AbstractTransactionalJUnit4Spring
             }
 
 
-            lock.lock();
+            dbToolLock.lock();
 
             workedLock.lock();
             try {
@@ -77,14 +75,14 @@ public abstract class AbstractTestLock extends AbstractTransactionalJUnit4Spring
                 workedLock.unlock();
             }
 
-
             wasLocked = true;
+            lock.lock();
             try {
                 if (waitForFinish()) return;
             } finally {
+                lock.unlock();
                 dbToolLock.close();
                 tm.commit(transaction);
-                lock.unlock();
             }
         }
 
@@ -179,12 +177,9 @@ public abstract class AbstractTestLock extends AbstractTransactionalJUnit4Spring
         }
 
         for (int i = 0; i < 100; i++) {
-            lock1.unlock();
+            lock1.close();
         }
     }
-
-    private AtomicBoolean isMainLocked = new AtomicBoolean(false);
-    private AtomicBoolean isSecondLocked = new AtomicBoolean(false);
 
     @Test
     public void testWaiteLock_1() throws InterruptedException {
@@ -200,7 +195,7 @@ public abstract class AbstractTestLock extends AbstractTransactionalJUnit4Spring
         Assert.assertEquals(second.worked, false);
         Assert.assertEquals(second.finished, false);
         first.finish();
-        first.doWork(100);
+        second.doWork(100);
         Assert.assertEquals(first.worked, true);
         Assert.assertEquals(first.finished, true);
         Assert.assertEquals(second.worked, true);
@@ -213,5 +208,236 @@ public abstract class AbstractTestLock extends AbstractTransactionalJUnit4Spring
         Assert.assertEquals(second.finished, true);
     }
 
+    @Test
+    public void testWaiteLock_2() throws InterruptedException {
+        LockingThread first = new LockingThread("lock1", true);
+        LockingThread second = new LockingThread("lock2", true);
+
+        first.start();
+        second.start();
+
+        first.doWork(100);
+        second.doWork(100);
+        Assert.assertEquals(first.worked, true);
+        Assert.assertEquals(first.finished, false);
+        Assert.assertEquals(second.worked, true);
+        Assert.assertEquals(second.finished, false);
+        first.finish();
+        second.finish();
+        Assert.assertEquals(first.worked, true);
+        Assert.assertEquals(first.finished, true);
+        Assert.assertEquals(second.worked, true);
+        Assert.assertEquals(second.finished, true);
+    }
+
+
+    public final class DeadLockThead extends Thread {
+        private String lock1;
+        private String lock2;
+        private Throwable result;
+        private ReentrantLock lock = new ReentrantLock();
+        private Condition waiteL1Condition = lock.newCondition();
+        private Condition waiteL2Condition = lock.newCondition();
+        private Condition waiteL2ReleaseCondition = lock.newCondition();
+        private Condition doL1Condition = lock.newCondition();
+        private Condition doL2Condition = lock.newCondition();
+        private volatile boolean waitingL1 = false;
+        private volatile boolean waitingL2 = false;
+        private volatile boolean waitingL2Release = false;
+        private volatile boolean dolock1 = false;
+        private volatile boolean dolock2 = false;
+
+
+        public DeadLockThead(String lock1, String lock2) {
+            this.lock1 = lock1;
+            this.lock2 = lock2;
+        }
+
+        @Override
+        public void run() {
+
+            TransactionStatus transaction = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+            try {
+                AppLock l1 = createLockForDeadLockTest(lock1);
+                AppLock l2 = createLockForDeadLockTest(lock2);
+                try {
+
+                    waiteForDoL1();
+                    l1.lock();
+                    waitingL1 = true;
+                    lock.lock();
+                    try {
+                        waiteL1Condition.signalAll();
+                    } finally {
+                        lock.unlock();
+                    }
+
+                    System.out.println(System.currentTimeMillis() + " : " + this.getName() + ":" + lock1);
+
+                    try {
+                        waitForDoL2();
+                        l2.lock();
+                        lock.lock();
+                        try {
+                            waitingL2 = true;
+                            waiteL2Condition.signalAll();
+                        } finally {
+                            lock.unlock();
+                        }
+                        System.out.println(System.currentTimeMillis() + " : " + this.getName() + ":" + lock2);
+                        waitingL2Release();
+
+                    } catch (Throwable e) {
+                        e.printStackTrace();
+                        this.result = e;
+                    } finally {
+                        l2.close();
+                        System.out.println(System.currentTimeMillis() + " : " + this.getName() + ":-" + lock2);
+                    }
+
+                } catch (Exception e) {
+                    result = e;
+                    e.printStackTrace();
+
+                } finally {
+                    l1.close();
+                    System.out.println(System.currentTimeMillis() + " : " + this.getName() + ":-" + lock1);
+                }
+            } catch (Exception e) {
+                result = e;
+                e.printStackTrace();
+
+            } finally {
+                tm.commit(transaction);
+            }
+        }
+
+        private void waitingL2Release() throws InterruptedException {
+            lock.lock();
+            try {
+                while (!waitingL2Release) {
+                    waiteL2ReleaseCondition.await();
+                }
+            } finally {
+                lock.unlock();
+            }
+        }
+
+        private void waitForDoL2() throws InterruptedException {
+            lock.lock();
+            try {
+                while (!dolock2) {
+                    doL2Condition.await();
+                }
+            } finally {
+                lock.unlock();
+            }
+        }
+
+        private void waiteForDoL1() throws InterruptedException {
+            lock.lock();
+            try {
+                while (!dolock1) {
+                    doL1Condition.await();
+                }
+            } finally {
+                lock.unlock();
+            }
+        }
+
+        private void waitingL1() throws InterruptedException {
+            lock.lock();
+            try {
+                while (!waitingL1) {
+                    waiteL1Condition.await();
+                }
+            } finally {
+                lock.unlock();
+            }
+        }
+
+
+        private void doL1() throws InterruptedException {
+            lock.lock();
+            try {
+                dolock1 = true;
+                doL1Condition.signalAll();
+            } finally {
+                lock.unlock();
+            }
+        }
+
+        private void doL2() throws InterruptedException {
+            lock.lock();
+            try {
+                dolock2 = true;
+                doL2Condition.signalAll();
+            } finally {
+                lock.unlock();
+            }
+        }
+
+        private void waitingL2() throws InterruptedException {
+            lock.lock();
+            try {
+                while (!waitingL2) {
+                    waiteL2Condition.await();
+                }
+            } finally {
+                lock.unlock();
+            }
+        }
+
+
+        private void releaseL2() throws InterruptedException {
+            lock.lock();
+            try {
+                waitingL2Release = true;
+                waiteL2ReleaseCondition.signalAll();
+            } finally {
+                lock.unlock();
+            }
+        }
+
+
+    }
+
+    @Test
+    public void testDeadLock_1() throws InterruptedException {
+        DeadLockThead t1 = new DeadLockThead("l1", "l2");
+        DeadLockThead t2 = new DeadLockThead("l2", "l1");
+
+        t1.start();
+        t2.start();
+
+        t1.doL1();
+        t1.waitingL1();
+
+        t2.doL1();
+        t2.waitingL1();
+
+        t1.doL2();
+//        t1.waitingL2();
+
+        t2.doL2();
+//        t2.waitingL2();
+        Thread.sleep(100);
+        t1.releaseL2();
+        t2.releaseL2();
+
+        Throwable result = t1.result == null ? t2.result : t1.result;
+
+        assertDeadlockException(result);
+
+        t1.join();
+        t2.join();
+    }
+
+    protected void assertDeadlockException(Throwable result) {
+        Assert.assertTrue(result.getMessage().contains("Deadlock"));
+    }
+
+
+    protected abstract AppLock createLockForDeadLockTest(String name);
 
 }

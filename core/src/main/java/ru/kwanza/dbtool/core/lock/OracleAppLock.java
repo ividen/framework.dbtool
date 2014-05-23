@@ -5,13 +5,14 @@ import ru.kwanza.dbtool.core.DBTool;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.concurrent.locks.ReentrantLock;
 
 class OracleAppLock extends AppLock {
 
     private String lockHandle;
 
-    OracleAppLock(DBTool dbTool, String lockName, boolean reentrant) throws SQLException {
-        super(dbTool, lockName, reentrant);
+    OracleAppLock(DBTool dbTool, String lockName, ReentrantLock lock, boolean reentrant) throws SQLException {
+        super(dbTool, lockName, lock, reentrant);
     }
 
     @Override

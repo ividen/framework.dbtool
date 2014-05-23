@@ -6,11 +6,11 @@
 
     <import resource="classpath:dbtool-config.xml"/>
 
-    <context:component-scan base-package="ru.kwanza.dbtool.core.blob"/>
-    <context:component-scan base-package="ru.kwanza.dbtool.core.fieldhelper"/>
-    <context:component-scan base-package="ru.kwanza.dbtool.core.lock"/>
-    <context:component-scan base-package="ru.kwanza.dbtool.core.selectutil"/>
-    <context:component-scan base-package="ru.kwanza.dbtool.core.updateutil"/>
+    <!--<context:component-scan base-package="ru.kwanza.dbtool.core.blob"/>-->
+    <!--<context:component-scan base-package="ru.kwanza.dbtool.core.fieldhelper"/>-->
+    <!--<context:component-scan base-package="ru.kwanza.dbtool.core.lock"/>-->
+    <!--<context:component-scan base-package="ru.kwanza.dbtool.core.selectutil"/>-->
+    <!--<context:component-scan base-package="ru.kwanza.dbtool.core.updateutil"/>-->
 
     <bean id="dataSource" destroy-method="close" class="org.apache.commons.dbcp.BasicDataSource">
         <property name="driverClassName" value="${jdbc.driverClass}"/>

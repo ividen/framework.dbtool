@@ -7,4 +7,9 @@ import org.springframework.test.context.ContextConfiguration;
  */
 @ContextConfiguration(locations = "classpath:mssql-config.xml")
 public class TestMSSQLLock extends AbstractTestLock {
+
+    @Override
+    protected AppLock createLockForDeadLockTest(String name) {
+        return null;
+    }
 }

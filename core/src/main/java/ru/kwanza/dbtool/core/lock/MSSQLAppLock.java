@@ -6,11 +6,12 @@ import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.concurrent.locks.ReentrantLock;
 
 class MSSQLAppLock extends AppLock {
 
-    MSSQLAppLock(DBTool dbTool, String lockName, boolean reentrant) throws SQLException {
-        super(dbTool, lockName, reentrant);
+    MSSQLAppLock(DBTool dbTool, String lockName, ReentrantLock lock, boolean reentrant) throws SQLException {
+        super(dbTool, lockName, lock, reentrant);
     }
 
     @Override
