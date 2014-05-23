@@ -12,7 +12,7 @@ import java.util.concurrent.locks.ReentrantLock;
 /**
  * @author Alexander Guzanov
  */
-@ContextConfiguration(locations = "classpath:mysql-config.xml")
+@ContextConfiguration(locations = "classpath:base-mysql-config.xml")
 public class TestMySQLLock extends AbstractTestLock {
 
     @Override

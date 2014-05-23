@@ -1,12 +1,10 @@
 package ru.kwanza.dbtool.core.blob;
 
-import org.dbunit.database.DatabaseConfig;
-import org.dbunit.ext.oracle.OracleDataTypeFactory;
 import org.springframework.test.context.ContextConfiguration;
 
 /**
  * @author: Ivan Baluk
  */
-@ContextConfiguration(locations = "classpath:oracle-config-blob.xml")
+@ContextConfiguration(locations = "classpath:ru/kwanza/dbtool/core/blob/oracle-config-blob.xml")
 public class TestOracleBlobInputStream extends TestBlobInputStream {
 }
