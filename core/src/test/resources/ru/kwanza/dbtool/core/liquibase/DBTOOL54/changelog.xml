@@ -58,14 +58,14 @@
 
     <changeSet author="aguzanov" id="21.05.2014 11:24-2" dbms="mssql">
         <createTable tableName="test_table1">
-            <column name="bool" type="BIT"/>
-            <column name="int" type="INT"/>
-            <column name="bigint" type="BIGINT"/>
-            <column name="string" type="VARCHAR(255)"/>
-            <column name="ts1" type="DATETIME"/>
-            <column name="ts2" type="DATETIME"/>
-            <column name="blob" type="IMAGE"/>
-            <column name="bigdecimal" type="DECIMAL(18,0)"/>
+            <column name="xbool" type="BIT"/>
+            <column name="xint" type="INT"/>
+            <column name="xbigint" type="BIGINT"/>
+            <column name="xstring" type="VARCHAR(255)"/>
+            <column name="xts1" type="DATETIME"/>
+            <column name="xts2" type="DATETIME"/>
+            <column name="xblob" type="IMAGE"/>
+            <column name="xbigdecimal" type="DECIMAL(18,0)"/>
         </createTable>
     </changeSet>
 
@@ -74,7 +74,7 @@
             <column name="id" type="${long.type}">
                 <constraints nullable="false" primaryKey="true"/>
             </column>
-            <column name="value" type="BLOB"/>
+            <column name="value" type="${blob.type}"/>
         </createTable>
     </changeSet>
 </databaseChangeLog>

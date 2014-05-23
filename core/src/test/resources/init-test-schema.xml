@@ -4,6 +4,10 @@
                    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
     <property dbms="oracle" name="long.type" value="NUMBER(19,0)"/>
     <property dbms="mysql" name="long.type" value="bigint"/>
+    <property dbms="mssql" name="long.type" value="bigint"/>
+
+    <property dbms="mssql" name="blob.type" value="image"/>
+    <property dbms="mysql" name="blob.type" value="BLOB"/>
 
     <include file="ru/kwanza/dbtool/core/liquibase/DBTOOL54/changelog.xml"/>
 
