@@ -14,7 +14,7 @@ public class PostgreSQLNoWaitLockOperation<T> extends AbstractLockOperation<T> {
 
     protected String createSQL() {
         return "SELECT " + entityType.getIdField().getColumn() + " FROM " +
-                EntityInfo.getTableName(entityType) + " WHERE " + entityType.getIdField().getColumn()
+                EntityInfo.getTable(entityType) + " WHERE " + entityType.getIdField().getColumn()
                 + " IN (?) ORDER BY " + entityType.getIdField().getColumn() + " FOR UPDATE NOWAIT";
     }
 }

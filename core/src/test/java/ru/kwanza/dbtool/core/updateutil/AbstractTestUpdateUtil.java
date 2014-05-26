@@ -159,13 +159,8 @@ public abstract class AbstractTestUpdateUtil extends AbstractTransactionalJUnit4
         private IDatabaseTester dbTester;
 
         private IDataSet getDataSet() throws Exception {
-            IDataSet tmpExpDataSet =
+            return
                     new FlatXmlDataSetBuilder().build(this.getClass().getResourceAsStream("../data/data_set.xml"));
-            ReplacementDataSet rds = new ReplacementDataSet(tmpExpDataSet);
-            byte[] bytes = "hello".getBytes("UTF-8");
-            rds.addReplacementObject("[blob1]", bytes);
-            rds.addReplacementObject("[null]", null);
-            return rds;
         }
 
         @PostConstruct

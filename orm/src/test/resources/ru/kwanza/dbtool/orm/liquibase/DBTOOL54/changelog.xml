@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+
+    <changeSet author="aguzanov" id="26.05.2014 09:46-1">
+        <createTable tableName="test_entity">
+            <column name="id" type="${long.type}">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+
+            <column name="version" type="${long.type}" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="int_field" type="java.sql.Types.INTEGER"/>
+            <column name="string_field" type="java.sql.Types.VARCHAR(255)"/>
+            <column name="date_field" type="java.sql.Types.TIMESTAMP"/>
+            <column name="short_field" type="java.sql.Types.SMALLINT"/>
+            <column name="entity_aid" type="${long.type}"/>
+            <column name="entity_bid" type="${long.type}"/>
+            <column name="entity_cid" type="${long.type}"/>
+            <column name="entity_did" type="${long.type}"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="aguzanov" id="26.05.2014 09:46-2">
+        <createTable tableName="test_entity_a">
+            <column name="id" type="${long.type}">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+
+            <column name="title" type="java.sql.Types.VARCHAR(255)"/>
+
+            <column name="version" type="${long.type}" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="aguzanov" id="26.05.2014 09:46-3">
+        <createTable tableName="test_entity_b">
+            <column name="id" type="${long.type}">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+
+            <column name="title" type="java.sql.Types.VARCHAR(255)"/>
+
+            <column name="version" type="${long.type}" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="aguzanov" id="26.05.2014 09:46-4">
+        <createTable tableName="test_entity_c">
+            <column name="id" type="${long.type}">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+
+            <column name="title" type="java.sql.Types.VARCHAR(255)"/>
+
+            <column name="version" type="${long.type}" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="entity_eid" type="${long.type}"/>
+            <column name="entity_fid" type="${long.type}"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="aguzanov" id="26.05.2014 09:46-5">
+        <createTable tableName="test_entity_d">
+            <column name="id" type="${long.type}">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+
+            <column name="title" type="java.sql.Types.VARCHAR(255)"/>
+
+            <column name="version" type="${long.type}" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="aguzanov" id="26.05.2014 09:46-6">
+        <createTable tableName="test_entity_e">
+            <column name="id" type="${long.type}">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+
+            <column name="title" type="java.sql.Types.VARCHAR(255)"/>
+
+            <column name="version" type="${long.type}" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="entity_gid" type="${long.type}"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="aguzanov" id="26.05.2014 09:46-7">
+        <createTable tableName="test_entity_f">
+            <column name="id" type="${long.type}">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+
+            <column name="title" type="java.sql.Types.VARCHAR(255)"/>
+
+            <column name="version" type="${long.type}" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="aguzanov" id="26.05.2014 09:46-8">
+        <createTable tableName="test_entity_g">
+            <column name="id" type="${long.type}">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+
+            <column name="title" type="java.sql.Types.VARCHAR(255)"/>
+
+            <column name="version" type="${long.type}" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+</databaseChangeLog>

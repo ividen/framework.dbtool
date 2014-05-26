@@ -15,6 +15,6 @@ public class MSSQLSkipLockOperation<T> extends AbstractLockOperation<T> {
     @Override
     protected String createSQL() {
         return "SELECT " + entityType.getIdField().getColumn() + " FROM " +
-                EntityInfo.getTableName(entityType) + " WITH(UPDLOCK,READPAST) WHERE " + entityType.getIdField().getColumn() + " IN (?)";
+                EntityInfo.getTable(entityType) + " WITH(UPDLOCK,READPAST) WHERE " + entityType.getIdField().getColumn() + " IN (?)";
     }
 }

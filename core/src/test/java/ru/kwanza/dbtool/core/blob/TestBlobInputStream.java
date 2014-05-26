@@ -2,7 +2,6 @@ package ru.kwanza.dbtool.core.blob;
 
 import org.dbunit.IDatabaseTester;
 import org.dbunit.dataset.IDataSet;
-import org.dbunit.dataset.ReplacementDataSet;
 import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
 import org.dbunit.operation.DatabaseOperation;
 import org.junit.After;
@@ -41,13 +40,8 @@ public abstract class TestBlobInputStream extends AbstractJUnit4SpringContextTes
         private IDatabaseTester dbTester;
 
         private IDataSet getDataSet() throws Exception {
-            IDataSet tmpExpDataSet =
-                    new FlatXmlDataSetBuilder().build(this.getClass().getResourceAsStream("../data/blob_input_stream_test.xml"));
-            ReplacementDataSet rds = new ReplacementDataSet(tmpExpDataSet);
-            byte[] bytes = "hello".getBytes("UTF-8");
-            rds.addReplacementObject("[blob1]", bytes);
-            rds.addReplacementObject("[null]", null);
-            return rds;
+            return new FlatXmlDataSetBuilder().build(this.getClass()
+                    .getResourceAsStream("../data/blob_input_stream_test.xml"));
         }
 
         @PostConstruct

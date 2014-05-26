@@ -88,13 +88,8 @@ public abstract class TestSelectUtil extends AbstractJUnit4SpringContextTests {
         private IDatabaseTester dbTester;
 
         private IDataSet getDataSet() throws Exception {
-            IDataSet tmpExpDataSet =
+            return
                     new FlatXmlDataSetBuilder().build(this.getClass().getResourceAsStream("../data/big_data_1.xml"));
-            ReplacementDataSet rds = new ReplacementDataSet(tmpExpDataSet);
-            byte[] bytes = "hello".getBytes("UTF-8");
-            rds.addReplacementObject("[blob1]", bytes);
-            rds.addReplacementObject("[null]", null);
-            return rds;
         }
 
         @PostConstruct
