@@ -1,5 +1,5 @@
 <dataset>
-    <test_table xkey="0" name="n_0" version="3"/>
+    <test_table xkey="0" name="n_0" version="2"/>
     <test_table xkey="1" name="n_1" version="200"/>
     <test_table xkey="2" name="n_2" version="300"/>
     <test_table xkey="3" name="n_3" version="400"/>

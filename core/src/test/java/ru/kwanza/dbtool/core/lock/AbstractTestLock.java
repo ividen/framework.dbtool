@@ -4,6 +4,7 @@ import junit.framework.Assert;
 import org.dbunit.IDatabaseTester;
 import org.junit.Test;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.NotTransactional;
 import org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
@@ -12,6 +13,7 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
 import ru.kwanza.dbtool.core.DBTool;
 
 import javax.annotation.Resource;
+import java.sql.SQLException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
@@ -189,18 +191,18 @@ public abstract class AbstractTestLock extends AbstractTransactionalJUnit4Spring
         first.start();
         second.start();
 
-        first.doWork(100);
+        first.doWork(10000);
         Assert.assertEquals(first.worked, true);
         Assert.assertEquals(first.finished, false);
         Assert.assertEquals(second.worked, false);
         Assert.assertEquals(second.finished, false);
         first.finish();
-        second.doWork(100);
+        second.doWork(10000);
         Assert.assertEquals(first.worked, true);
         Assert.assertEquals(first.finished, true);
         Assert.assertEquals(second.worked, true);
         Assert.assertEquals(second.finished, false);
-        Thread.currentThread().sleep(100);
+        Thread.currentThread().sleep(1000);
         second.finish();
         Assert.assertEquals(first.worked, true);
         Assert.assertEquals(first.finished, true);
@@ -234,7 +236,7 @@ public abstract class AbstractTestLock extends AbstractTransactionalJUnit4Spring
     public final class DeadLockThead extends Thread {
         private String lock1;
         private String lock2;
-        private Throwable result;
+        private volatile Throwable result;
         private ReentrantLock lock = new ReentrantLock();
         private Condition waiteL1Condition = lock.newCondition();
         private Condition waiteL2Condition = lock.newCondition();
@@ -246,6 +248,7 @@ public abstract class AbstractTestLock extends AbstractTransactionalJUnit4Spring
         private volatile boolean waitingL2Release = false;
         private volatile boolean dolock1 = false;
         private volatile boolean dolock2 = false;
+        private volatile TransactionStatus transaction;
 
 
         public DeadLockThead(String lock1, String lock2) {
@@ -255,8 +258,7 @@ public abstract class AbstractTestLock extends AbstractTransactionalJUnit4Spring
 
         @Override
         public void run() {
-
-            TransactionStatus transaction = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+            transaction = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
             try {
                 AppLock l1 = createLockForDeadLockTest(lock1);
                 AppLock l2 = createLockForDeadLockTest(lock2);
@@ -404,8 +406,8 @@ public abstract class AbstractTestLock extends AbstractTransactionalJUnit4Spring
 
     @Test
     public void testDeadLock_1() throws InterruptedException {
-        DeadLockThead t1 = new DeadLockThead("l1", "l2");
-        DeadLockThead t2 = new DeadLockThead("l2", "l1");
+        DeadLockThead t1 = new DeadLockThead("l2", "l1");
+        DeadLockThead t2 = new DeadLockThead("l1", "l2");
 
         t1.start();
         t2.start();
@@ -417,15 +419,18 @@ public abstract class AbstractTestLock extends AbstractTransactionalJUnit4Spring
         t2.waitingL1();
 
         t1.doL2();
-//        t1.waitingL2();
+
+        Thread.sleep(100);
 
         t2.doL2();
-//        t2.waitingL2();
-        Thread.sleep(100);
-        t1.releaseL2();
-        t2.releaseL2();
 
+        Thread.sleep(100);
+//        t1.releaseL2();
+//        t2.releaseL2();
+//        Thread.sleep(100);
         Throwable result = t1.result == null ? t2.result : t1.result;
+
+        Thread.currentThread().join();
 
         assertDeadlockException(result);
 
@@ -438,6 +443,6 @@ public abstract class AbstractTestLock extends AbstractTransactionalJUnit4Spring
     }
 
 
-    protected abstract AppLock createLockForDeadLockTest(String name);
+    protected abstract AppLock createLockForDeadLockTest(String name) throws SQLException;
 
 }

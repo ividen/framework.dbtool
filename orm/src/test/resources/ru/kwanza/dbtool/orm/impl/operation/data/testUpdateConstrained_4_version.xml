@@ -4,7 +4,7 @@
     <test_table xkey="2" name="n_2" version="300"/>
     <test_table xkey="3" name="n_3" version="400"/>
     <test_table xkey="4" name="n_4" version="500"/>
-    <test_table xkey="5" name="n_5" version="1"/>
+    <test_table xkey="5" name="n_5" version="0"/>
     <test_table xkey="6" name="n_6" version="700"/>
     <test_table xkey="7" name="n_7" version="800"/>
     <test_table xkey="8" name="n_8" version="900"/>

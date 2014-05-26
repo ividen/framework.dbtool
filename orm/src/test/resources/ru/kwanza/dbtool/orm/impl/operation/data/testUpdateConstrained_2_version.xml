@@ -9,5 +9,5 @@
     <test_table xkey="7" name="n_7" version="800"/>
     <test_table xkey="8" name="n_8" version="900"/>
     <test_table xkey="9" name="n_9" version="1000"/>
-    <test_table xkey="10" name="n_10" version="1"/>
+    <test_table xkey="10" name="n_10" version="0"/>
 </dataset>

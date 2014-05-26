@@ -45,14 +45,14 @@
 
     <changeSet author="aguzanov" id="21.05.2014 11:24-2" dbms="oracle">
         <createTable tableName="test_table1">
-            <column name="xbool" type=""/>
-            <column name="xint" type=""/>
-            <column name="xbigint" type=""/>
-            <column name="xstring" type=""/>
-            <column name="xts1" type=""/>
-            <column name="xts2" type=""/>
-            <column name="xblob" type=""/>
-            <column name="xbigdecimal" type=""/>
+            <column name="xbool" type="NUMBER(1)"/>
+            <column name="xint" type="NUMBER(12)"/>
+            <column name="xbigint" type="NUMBER(19)"/>
+            <column name="xstring" type="VARCHAR(255)"/>
+            <column name="xts1" type="TIMESTAMP"/>
+            <column name="xts2" type="TIMESTAMP"/>
+            <column name="xblob" type="BLOB"/>
+            <column name="xbigdecimal" type="NUMBER(38)"/>
         </createTable>
     </changeSet>
 

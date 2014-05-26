@@ -1,12 +1,10 @@
 package ru.kwanza.dbtool.orm.impl.operation;
 
+import org.springframework.test.context.ContextConfiguration;
+
 /**
  * @author Kiryl Karatsetski
  */
+@ContextConfiguration(locations = "mysql-config.xml")
 public class MySQLUpdateOperationTest extends UpdateOperationTest {
-
-    @Override
-    protected String getSpringConfigFile() {
-        return "mssql-dbtool-orm-operation-test-config.xml";
-    }
 }

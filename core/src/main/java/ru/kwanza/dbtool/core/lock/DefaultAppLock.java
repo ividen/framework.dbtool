@@ -55,7 +55,7 @@ class DefaultAppLock extends AppLock {
             try {
                 st.executeUpdate();
             } catch (SQLException e) {
-               throw e;
+              throw e;
             }
         } finally {
             dbTool.closeResources(rs, st);

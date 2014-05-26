@@ -124,11 +124,11 @@ public class EntityMappingTest extends AbstractJUnit4SpringContextTests {
     public void getColumnNamesTest() throws Exception {
         final Collection<String> columnNamesByEntityClass = FieldHelper
                 .getFieldCollection(entityMappingRegistry.getEntityType(PAYMENT_TRX_CLASS).getFields(),
-                        FieldHelper.<IFieldMapping,String>construct(IFieldMapping.class, "column"));
+                        FieldHelper.<FieldMapping,String>construct(FieldMapping.class, "column"));
 
         final Collection<String> columnNamesByEntityName = FieldHelper
                 .getFieldCollection(entityMappingRegistry.getEntityType(PAYMENT_TRX_NAME).getFields(),
-                        FieldHelper.<IFieldMapping,String>construct(IFieldMapping.class, "column"));
+                        FieldHelper.<FieldMapping,String>construct(FieldMapping.class, "column"));
 
         assertNotNull(columnNamesByEntityClass);
         assertNotNull(columnNamesByEntityName);
