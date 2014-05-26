@@ -1,15 +1,22 @@
 package ru.kwanza.dbtool.orm.impl.fetcher;
 
 import junit.framework.Assert;
+import org.dbunit.IDatabaseTester;
+import org.dbunit.dataset.IDataSet;
+import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
+import org.dbunit.operation.DatabaseOperation;
 import org.junit.Test;
+import org.springframework.stereotype.Component;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
+import ru.kwanza.dbtool.core.ConnectionConfigListener;
 import ru.kwanza.dbtool.orm.api.IEntityManager;
 import ru.kwanza.dbtool.orm.api.IQuery;
 import ru.kwanza.dbtool.orm.api.If;
 import ru.kwanza.dbtool.orm.impl.mapping.EntityMappingRegistry;
 import ru.kwanza.toolbox.SerializationHelper;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,8 +34,25 @@ public abstract class TestFetcherIml extends AbstractJUnit4SpringContextTests {
     private IEntityManager em;
     @Resource(name = "dbtool.IEntityMappingRegistry")
     private EntityMappingRegistry registry;
-    @Resource(name = "initTests")
-    private InitRegistryAndDB initTests;
+
+
+    @Component
+    public static class InitDB {
+        @Resource(name = "dbTester")
+        private IDatabaseTester dbTester;
+
+        private IDataSet getDataSet() throws Exception {
+            return new FlatXmlDataSetBuilder().build(this.getClass().getResourceAsStream("initdb.xml"));
+        }
+
+        @PostConstruct
+        protected void init() throws Exception {
+            dbTester.setDataSet(getDataSet());
+            dbTester.setOperationListener(new ConnectionConfigListener());
+            dbTester.setSetUpOperation(DatabaseOperation.CLEAN_INSERT);
+            dbTester.onSetup();
+        }
+    }
 
     @Test
     public void testFetch1() {

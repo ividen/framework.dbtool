@@ -41,14 +41,12 @@ public abstract class TestAbstractEntity extends AbstractJUnit4SpringContextTest
 
         @PostConstruct
         protected void init() throws Exception {
-//            dbTester.setDataSet(getDataSet());
-//            dbTester.setOperationListener(new ConnectionConfigListener());
-//            dbTester.setSetUpOperation(DatabaseOperation.CLEAN_INSERT);
-//            dbTester.onSetup();
+            dbTester.setDataSet(getDataSet());
+            dbTester.setOperationListener(new ConnectionConfigListener());
+            dbTester.setSetUpOperation(DatabaseOperation.CLEAN_INSERT);
+            dbTester.onSetup();
         }
-
     }
-
 
     @Test
     public void testQuieryBuilder_1() {
