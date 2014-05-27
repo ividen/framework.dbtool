@@ -16,7 +16,7 @@ import java.util.concurrent.locks.ReentrantLock;
 public class TestMySQLLock extends AbstractTestLock {
 
     @Override
-    protected AppLock createLockForDeadLockTest(String name) {
+    protected AppLock createLockForDeadLockTest(String name) throws SQLException {
         try {
             return new DefaultAppLock(dbTool, name, new ReentrantLock(), true);
         } catch (SQLException e) {

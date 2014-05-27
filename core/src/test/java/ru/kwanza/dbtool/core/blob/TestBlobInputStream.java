@@ -39,21 +39,22 @@ public abstract class TestBlobInputStream extends AbstractJUnit4SpringContextTes
         @Resource(name = "dbTester")
         private IDatabaseTester dbTester;
 
+        @Resource(name = "dbtool.DBTool")
+        private DBTool dbTool;
+
         private IDataSet getDataSet() throws Exception {
-            return new FlatXmlDataSetBuilder().build(this.getClass()
-                    .getResourceAsStream("../data/blob_input_stream_test.xml"));
+            return
+                    new FlatXmlDataSetBuilder().build(this.getClass().getResourceAsStream("../data/blob_input_stream_test.xml"));
         }
 
         @PostConstruct
         protected void init() throws Exception {
             dbTester.setDataSet(getDataSet());
-            dbTester.setOperationListener(new ConnectionConfigListener());
+            dbTester.setOperationListener(new ConnectionConfigListener(dbTool.getDbType()));
             dbTester.setSetUpOperation(DatabaseOperation.CLEAN_INSERT);
             dbTester.onSetup();
         }
-
     }
-
 
     @After
     public void tearDown() throws Exception {

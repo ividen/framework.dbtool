@@ -113,7 +113,7 @@ public abstract class AppLock {
         if (dbType.equals(DBTool.DBType.MSSQL)) {
             return new MSSQLAppLock(dbTool, lockName, lock, reentrant);
         } else if (dbType.equals(DBTool.DBType.ORACLE)) {
-            return new OracleAppLock(dbTool, lockName, lock, reentrant);
+            return new DefaultAppLock(dbTool, lockName, lock, reentrant);
         } else if (dbType.equals(DBTool.DBType.MYSQL)) {
             return new DefaultAppLock(dbTool, lockName, lock, reentrant);
         } else {

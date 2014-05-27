@@ -22,9 +22,9 @@ class DefaultAppLock extends AppLock {
     public void doLock(Connection connection) throws SQLException {
         if (!isLockExists(connection)) {
             allocateUnique(connection);
+        }else{
+            updateLock(connection);
         }
-        updateLock(connection);
-
     }
 
     private void updateLock(Connection connection) throws SQLException {

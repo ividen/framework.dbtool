@@ -30,7 +30,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet author="aguzanov" id="21.05.2014 11:24-2" dbms="posgresql">
+    <changeSet author="aguzanov" id="21.05.2014 11:24-2" dbms="postgresql">
         <createTable tableName="test_table1">
             <column name="xbool" type="boolean"/>
             <column name="xint" type="numeric"/>

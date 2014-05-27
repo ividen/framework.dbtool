@@ -6,12 +6,6 @@
 
     <import resource="classpath:dbtool-config.xml"/>
 
-
-    <!--<context:component-scan base-package="ru.kwanza.dbtool.core.fieldhelper"/>-->
-    <!--<context:component-scan base-package="ru.kwanza.dbtool.core.lock"/>-->
-    <!--<context:component-scan base-package="ru.kwanza.dbtool.core.selectutil"/>-->
-    <!--<context:component-scan base-package="ru.kwanza.dbtool.core.updateutil"/>-->
-
     <bean id="dataSource" destroy-method="close" class="org.apache.commons.dbcp.BasicDataSource">
         <property name="driverClassName" value="${jdbc.driverClass}"/>
         <property name="url" value="${jdbc.connectionUrl}"/>
@@ -19,14 +13,24 @@
         <property name="password" value="${jdbc.password}"/>
         <property name="defaultCatalog" value="${jdbc.schema}"/>
         <property name="defaultAutoCommit" value="true"/>
+        <property name="poolPreparedStatements" value="false"/>
+
         <property name="maxActive" value="10"/>
         <property name="maxIdle" value="10"/>
     </bean>
 
-    <bean id="dbTester" class="org.dbunit.DataSourceDatabaseTester" depends-on="springLiquibase">
-        <constructor-arg index="0" ref="dataSource"/>
-        <!--<constructor-arg index="1" value="${jdbc.schema}"/>-->
+    <!--<bean id="dbTester" class="org.dbunit.DataSourceDatabaseTester" depends-on="springLiquibase">-->
+        <!--<constructor-arg index="0" ref="dataSource"/>-->
+    <!--</bean>-->
+
+    <bean id="dbTester" class="org.dbunit.JdbcDatabaseTester" depends-on="springLiquibase">
+        <constructor-arg index="0" value="${jdbc.driverClass}"/>
+        <constructor-arg index="1" value="${jdbc.connectionUrl}"/>
+        <constructor-arg index="2" value="${jdbc.username}"/>
+        <constructor-arg index="3" value="${jdbc.password}"/>
     </bean>
+
+
 
     <bean id="springLiquibase" class="liquibase.integration.spring.SpringLiquibase">
         <property name="dataSource" ref="dataSource"/>

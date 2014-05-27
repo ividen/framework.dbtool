@@ -4,7 +4,6 @@ import junit.framework.Assert;
 import org.dbunit.IDatabaseTester;
 import org.junit.Test;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.annotation.NotTransactional;
 import org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
@@ -287,13 +286,13 @@ public abstract class AbstractTestLock extends AbstractTransactionalJUnit4Spring
                             lock.unlock();
                         }
                         System.out.println(System.currentTimeMillis() + " : " + this.getName() + ":" + lock2);
-                        waitingL2Release();
 
                     } catch (Throwable e) {
                         e.printStackTrace();
                         this.result = e;
                     } finally {
                         l2.close();
+                        releaseL2();
                         System.out.println(System.currentTimeMillis() + " : " + this.getName() + ":-" + lock2);
                     }
 
@@ -302,6 +301,7 @@ public abstract class AbstractTestLock extends AbstractTransactionalJUnit4Spring
                     e.printStackTrace();
 
                 } finally {
+                    waitingL2Release();
                     l1.close();
                     System.out.println(System.currentTimeMillis() + " : " + this.getName() + ":-" + lock1);
                 }
@@ -419,18 +419,11 @@ public abstract class AbstractTestLock extends AbstractTransactionalJUnit4Spring
         t2.waitingL1();
 
         t1.doL2();
-
-        Thread.sleep(100);
-
         t2.doL2();
 
-        Thread.sleep(100);
-//        t1.releaseL2();
-//        t2.releaseL2();
-//        Thread.sleep(100);
+        t1.waitingL2Release();
+        t2.waitingL2Release();
         Throwable result = t1.result == null ? t2.result : t1.result;
-
-        Thread.currentThread().join();
 
         assertDeadlockException(result);
 
@@ -439,7 +432,7 @@ public abstract class AbstractTestLock extends AbstractTransactionalJUnit4Spring
     }
 
     protected void assertDeadlockException(Throwable result) {
-        Assert.assertTrue(result.getMessage().contains("Deadlock"));
+        Assert.assertTrue(result.getMessage().toUpperCase().contains("DEADLOCK"));
     }
 
 
