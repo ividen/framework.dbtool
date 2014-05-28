@@ -125,4 +125,19 @@
         </createTable>
     </changeSet>
 
+
+    <changeSet author="aguzanov" id="28.05.2014 12:08-1">
+        <createTable tableName="locked_entity">
+            <column name="id" type="${long.type}">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+
+            <column name="name" type="java.sql.Types.VARCHAR(255)"/>
+
+            <column name="version" type="${long.type}" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
 </databaseChangeLog>
