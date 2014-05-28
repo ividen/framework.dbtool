@@ -323,7 +323,7 @@
             <dependency>
                 <groupId>com.h2database</groupId>
                 <artifactId>h2</artifactId>
-                <scope>test</scope>
+                <scope>compile</scope>
                 <version>${h2.version}</version>
             </dependency>
 

@@ -43,7 +43,9 @@ public abstract class BlobOutputStream extends OutputStream implements Closeable
             return new OracleBlobOutputStream(dbTool, tableName, fieldName, keyValues);
         } else if (dbTool.getDbType().equals(DBTool.DBType.MYSQL)) {
             return new MySQLBlobOutputStream(dbTool, tableName, fieldName, keyValues);
-        } else {
+        } else if (dbTool.getDbType().equals(DBTool.DBType.H2)) {
+            return new H2BlobOutputStream(dbTool, tableName, fieldName, keyValues);
+        }  else {
             throw new RuntimeException("Unsupported type of database");
         }
     }
