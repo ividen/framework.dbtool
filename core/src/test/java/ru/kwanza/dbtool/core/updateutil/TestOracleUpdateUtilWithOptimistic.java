@@ -5,6 +5,6 @@ import org.springframework.test.context.ContextConfiguration;
 /**
  * @author Guzanov Alexander
  */
-@ContextConfiguration(locations = "classpath:ru/kwanza/dbtool/core/updateutil/oracle-config-updateutil.xml")
+@ContextConfiguration(locations = "oracle-config-updateutil.xml")
 public class TestOracleUpdateUtilWithOptimistic extends TestUpdateUtilWithOptimistic {
 }
