@@ -6,7 +6,7 @@ import org.springframework.test.context.ContextConfiguration;
 /**
  * @author Michael Yeskov
  */
-@ContextConfiguration(locations = "postgresql-querybuilder-config.xml")
+@ContextConfiguration(locations = "postgresql-config.xml")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class PostgreSQLQueryTest extends QueryTest {
 }
