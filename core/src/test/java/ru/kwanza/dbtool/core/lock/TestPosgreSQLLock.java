@@ -18,7 +18,7 @@ import java.util.concurrent.locks.ReentrantLock;
 public class TestPosgreSQLLock extends TestMySQLLock {
     @Override
     protected void assertDeadlockException(Throwable result) {
-        Assert.assertTrue(result.getMessage().contains("взаимоблокировка"));
+        Assert.assertTrue(result.getMessage().contains("ShareLock"));
     }
 }
 
