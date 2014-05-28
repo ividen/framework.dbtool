@@ -20,7 +20,6 @@
         <!-- KWANZA Framweorks -->
         <dbtool.version>1.1-SNAPSHOT</dbtool.version>
         <toolbox.version>1.0-SNAPSHOT</toolbox.version>
-        <txn.version>1.0-SNAPSHOT</txn.version>
         <projectversion.version>1.0-SNAPSHOT</projectversion.version>
 
         <!-- Thirdparty Framweorks -->
@@ -268,13 +267,6 @@
                 <groupId>ru.kwanza.toolbox</groupId>
                 <artifactId>toolbox</artifactId>
                 <version>${toolbox.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>ru.kwanza.txn</groupId>
-                <artifactId>txn</artifactId>
-                <version>${txn.version}</version>
-                <scope>test</scope>
             </dependency>
 
             <!-- Thrirdparty Frameworks -->
