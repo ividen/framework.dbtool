@@ -5,6 +5,6 @@ import org.springframework.test.context.ContextConfiguration;
 /**
  * @author Alexander Guzanov
  */
-@ContextConfiguration(locations = "mssql-config.xml")
+@ContextConfiguration(locations = "mssql-querybuilder-config.xml")
 public class MSSQLQueryBuilderWithJoinTest extends QueryBuilderWithJoinTest {
 }

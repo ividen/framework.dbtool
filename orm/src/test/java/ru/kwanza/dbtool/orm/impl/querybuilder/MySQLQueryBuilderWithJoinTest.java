@@ -5,6 +5,6 @@ import org.springframework.test.context.ContextConfiguration;
 /**
  * @author Alexander Guzanov
  */
-@ContextConfiguration(locations = "mysql-config.xml")
+@ContextConfiguration(locations = "mysql-querybuilder-config.xml")
 public class MySQLQueryBuilderWithJoinTest extends QueryBuilderWithJoinTest {
 }

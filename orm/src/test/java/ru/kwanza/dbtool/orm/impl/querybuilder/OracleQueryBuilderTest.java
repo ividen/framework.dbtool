@@ -17,7 +17,7 @@ import static junit.framework.Assert.assertEquals;
  * @author Alexander Guzanov
  */
 
-@ContextConfiguration(locations = "oracle-config.xml")
+@ContextConfiguration(locations = "oracle-querybuilder-config.xml")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class OracleQueryBuilderTest extends AbstractJUnit4SpringContextTests {
     @Resource(name = "dbtool.IEntityManager")
