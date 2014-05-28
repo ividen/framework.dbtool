@@ -79,6 +79,8 @@ public abstract class AbstractTestFieldHelper extends AbstractJUnit4SpringContex
             sql = MYSQL_SELECT_SQL;
         } else if (dbTool.getDbType() == DBTool.DBType.POSTGRESQL) {
             sql = POSTGRESQL_SELECT_SQL;
+        }  else if (dbTool.getDbType() == DBTool.DBType.H2) {
+            sql = MYSQL_SELECT_SQL;
         } else {
             throw new RuntimeException("Unsupported database type!");
         }
@@ -124,7 +126,9 @@ public abstract class AbstractTestFieldHelper extends AbstractJUnit4SpringContex
             sql = MYSQL_SELECT_SQL;
         } else if (dbTool.getDbType() == DBTool.DBType.POSTGRESQL) {
             sql = POSTGRESQL_SELECT_SQL;
-        } else {
+        }  else if (dbTool.getDbType() == DBTool.DBType.H2) {
+            sql = MYSQL_SELECT_SQL;
+        }else {
             throw new RuntimeException("Unsupported database type!");
         }
         dbTool.selectList(sql, new RowMapper<Object>() {
