@@ -2,8 +2,8 @@ package ru.kwanza.dbtool.orm.impl.querybuilder;
 
 import ru.kwanza.dbtool.core.DBTool;
 import ru.kwanza.dbtool.orm.api.IQueryBuilder;
-import ru.kwanza.dbtool.orm.api.internal.IEntityMappingRegistry;
 import ru.kwanza.dbtool.orm.impl.EntityManagerImpl;
+import ru.kwanza.dbtool.orm.impl.querybuilder.db.h2.H2QueryBuilder;
 import ru.kwanza.dbtool.orm.impl.querybuilder.db.mssql.MSSQLQueryBuilder;
 import ru.kwanza.dbtool.orm.impl.querybuilder.db.mysql.MySQLQueryBuilder;
 import ru.kwanza.dbtool.orm.impl.querybuilder.db.oracle.OracleQueryBuilder;
@@ -24,6 +24,8 @@ public abstract class QueryBuilderFactory {
             return new MSSQLQueryBuilder<T>(em, entityClass);
         } else if (dbType == DBTool.DBType.POSTGRESQL) {
             return new PostgreSQLQueryBuilder<T>(em, entityClass);
+        } else if (dbType == DBTool.DBType.H2) {
+            return new H2QueryBuilder<T>(em, entityClass);
         } else {
             throw new RuntimeException("Unsupported database type!");
         }
