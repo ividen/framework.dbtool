@@ -4,7 +4,7 @@
        xmlns:context="http://www.springframework.org/schema/context"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.kwanza-systems.ru/schema/dbtool-orm http://www.kwanza-systems.ru/schema/dbtool-orm.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
 
-    <import resource="classpath:base-postgresql-config.xml"/>
+    <import resource="classpath:base-h2-config.xml"/>
     <import resource="classpath:dbtool-orm-config.xml"/>
 
     <dbtool-orm:entityMapping scan-package="ru.kwanza.dbtool.orm.impl.fetcher"/>
