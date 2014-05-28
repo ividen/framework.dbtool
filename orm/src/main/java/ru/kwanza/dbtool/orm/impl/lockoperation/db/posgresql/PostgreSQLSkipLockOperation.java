@@ -15,13 +15,13 @@ public class PostgreSQLSkipLockOperation<T> extends AbstractLockOperation<T> {
 
     public PostgreSQLSkipLockOperation(EntityManagerImpl em, Class<T> entityClass) {
         super(em, entityClass);
-        tableId = EntityInfo.getTableName(entityType).hashCode();
+        tableId = EntityInfo.getTable(entityType).hashCode();
     }
 
     @Override
     protected String createSQL() {
         return "SELECT " + entityType.getIdField().getColumn() + " FROM " +
-                EntityInfo.getTableName(entityType) + " WHERE " + entityType.getIdField().getColumn()
+                EntityInfo.getTable(entityType) + " WHERE " + entityType.getIdField().getColumn()
                 + " IN (?) and pg_try_advisory_xact_lock(CAST(((CAST(? AS numeric)*31 + CAST("
                 + entityType.getIdField().getColumn() + " AS numeric))%9223372036854775807) as bigint)) ORDER BY "
                 + entityType.getIdField().getColumn();

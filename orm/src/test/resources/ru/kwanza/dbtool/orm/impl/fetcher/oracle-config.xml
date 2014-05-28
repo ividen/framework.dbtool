@@ -1,29 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:dbtool-orm="http://www.kwanza-systems.ru/schema/dbtool-orm"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.kwanza-systems.ru/schema/dbtool-orm http://www.kwanza-systems.ru/schema/dbtool-orm.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
 
-    <import resource="classpath:dbtool-config.xml"/>
+    <import resource="classpath:base-oracle-config.xml"/>
     <import resource="classpath:dbtool-orm-config.xml"/>
 
-    <bean id="propertyPlaceholderConfigurer"
-          class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-        <property name="locations">
-            <list>
-                <value>classpath:db_oracle.properties</value>
-            </list>
-        </property>
-    </bean>
-
-
-    <bean id="initTests" class="ru.kwanza.dbtool.orm.impl.fetcher.InitRegistryAndDB" init-method="init">
-    </bean>
-
-    <bean id="dataSource" destroy-method="close" class="org.apache.commons.dbcp.BasicDataSource">
-        <property name="driverClassName" value="${jdbc.driverClass}"/>
-        <property name="url" value="${jdbc.connectionUrl}"/>
-        <property name="username" value="${jdbc.username}"/>
-        <property name="password" value="${jdbc.password}"/>
-    </bean>
+    <context:component-scan base-package="ru.kwanza.dbtool.orm.impl.fetcher"/>
+    <dbtool-orm:entityMapping scan-package="ru.kwanza.dbtool.orm.impl.fetcher"/>
 
 </beans>

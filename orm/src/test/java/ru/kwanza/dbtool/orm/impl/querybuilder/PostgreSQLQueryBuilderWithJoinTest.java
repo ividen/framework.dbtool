@@ -5,6 +5,6 @@ import org.springframework.test.context.ContextConfiguration;
 /**
  * @author Alexander Guzanov
  */
-@ContextConfiguration(locations = "postgresql-config.xml")
+@ContextConfiguration(locations = "postgresql-querybuilder-config.xml")
 public class PostgreSQLQueryBuilderWithJoinTest extends QueryBuilderWithJoinTest {
 }

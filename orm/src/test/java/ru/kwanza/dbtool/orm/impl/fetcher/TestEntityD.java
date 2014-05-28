@@ -10,7 +10,7 @@ import java.io.Serializable;
 /**
  * @author Alexander Guzanov
  */
-@Entity(name = "TestEntityD", table = "test_entity_D")
+@Entity(name = "TestEntityD", table = "test_entity_d")
 public class TestEntityD   implements Serializable {
     @IdField( "id")
     private Long id;

@@ -20,7 +20,7 @@
         <!-- KWANZA Framweorks -->
         <dbtool.version>1.1-SNAPSHOT</dbtool.version>
         <toolbox.version>1.0-SNAPSHOT</toolbox.version>
-        <txn.version>1.0-SNAPSHOT</txn.version>
+        <projectversion.version>1.0-SNAPSHOT</projectversion.version>
 
         <!-- Thirdparty Framweorks -->
         <junit.version>4.10</junit.version>
@@ -29,11 +29,12 @@
         <mysql.jdbc.version>5.1.24</mysql.jdbc.version>
         <postgresql.jdbc.version>9.2-X_INV-jdbc4-SNAPSHOT</postgresql.jdbc.version>
         <jtds.version>1.2.1</jtds.version>
-        <dbunit.version>2.4.8</dbunit.version>
+        <dbunit.version>2.5.0</dbunit.version>
         <springframework.version>3.2.0.RELEASE</springframework.version>
         <commons.dbcp.version>1.4</commons.dbcp.version>
         <asm-all.version>2.1</asm-all.version>
-        <cglib.version>2.2.2</cglib.version>
+        <cglib.version>3.1</cglib.version>
+        <liquibase.version>2.0.5</liquibase.version>
 
         <!-- Maven Plugins -->
         <maven.surefire.plugin.version>2.12</maven.surefire.plugin.version>
@@ -219,6 +220,30 @@
                 <directory>${external.build.path}/${project.artifactId}</directory>
             </build>
         </profile>
+        <profile>
+            <id>projectversion</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>ru.kwanza.plugin.projectversion</groupId>
+                        <artifactId>projectversion</artifactId>
+                        <version>${projectversion.version}</version>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>project</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <issuerTokens>
+                                <value>TOOLBOX</value>
+                            </issuerTokens>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
     </profiles>
 
     <dependencyManagement>
@@ -231,16 +256,17 @@
             </dependency>
 
             <dependency>
-                <groupId>ru.kwanza.toolbox</groupId>
-                <artifactId>toolbox</artifactId>
-                <version>${toolbox.version}</version>
+                <groupId>ru.kwanza.dbtool</groupId>
+                <artifactId>dbtool-core</artifactId>
+                <version>${dbtool.version}</version>
+                <scope>test</scope>
+                <classifier>tests</classifier>
             </dependency>
 
             <dependency>
-                <groupId>ru.kwanza.txn</groupId>
-                <artifactId>txn</artifactId>
-                <version>${txn.version}</version>
-                <scope>test</scope>
+                <groupId>ru.kwanza.toolbox</groupId>
+                <artifactId>toolbox</artifactId>
+                <version>${toolbox.version}</version>
             </dependency>
 
             <!-- Thrirdparty Frameworks -->
@@ -291,6 +317,13 @@
                 <artifactId>postgresql</artifactId>
                 <version>${postgresql.jdbc.version}</version>
                 <scope>compile</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.liquibase</groupId>
+                <artifactId>liquibase-core</artifactId>
+
+                <version>${liquibase.version}</version>
             </dependency>
 
             <!-- Spring libs -->

@@ -2,16 +2,25 @@ package ru.kwanza.dbtool.orm.impl.lockoperation;
 
 import junit.framework.Assert;
 import junit.framework.AssertionFailedError;
-import org.junit.Before;
+import org.dbunit.IDatabaseTester;
+import org.dbunit.dataset.IDataSet;
+import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
+import org.dbunit.operation.DatabaseOperation;
 import org.junit.Test;
-import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
+import org.springframework.stereotype.Component;
+import org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
+import ru.kwanza.dbtool.core.ConnectionConfigListener;
 import ru.kwanza.dbtool.core.DBTool;
 import ru.kwanza.dbtool.orm.api.IEntityManager;
 import ru.kwanza.dbtool.orm.api.LockResult;
 import ru.kwanza.dbtool.orm.api.LockType;
 import ru.kwanza.dbtool.orm.impl.mapping.EntityMappingRegistry;
-import ru.kwanza.txn.api.spi.ITransactionManager;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.util.Arrays;
 import java.util.Collection;
@@ -24,24 +33,34 @@ import java.util.concurrent.locks.ReentrantLock;
  * @author Alexander Guzanov
  */
 
-public class TestLockOperation extends AbstractJUnit4SpringContextTests {
+public abstract class TestLockOperation extends AbstractTransactionalJUnit4SpringContextTests {
     @Resource(name = "dbtool.IEntityManager")
     protected IEntityManager em;
-    @Resource(name = "txn.ITransactionManager")
-    protected ITransactionManager tm;
     @Resource(name = "dbtool.DBTool")
     protected DBTool dbTool;
     @Resource(name = "dbtool.IEntityMappingRegistry")
     protected EntityMappingRegistry registry;
-    @Resource(name = "initBean")
-    protected InitBean initBean;
+    @Resource(name = "transactionManager")
+    protected PlatformTransactionManager tm;
 
 
-    @Before
-    public void init() {
-        registry.registerEntityClass(LockedEntity.class);
+    @Component
+    public static class InitDB {
+        @Resource(name = "dbTester")
+        private IDatabaseTester dbTester;
+
+        private IDataSet getDataSet() throws Exception {
+            return new FlatXmlDataSetBuilder().build(this.getClass().getResourceAsStream("initdb.xml"));
+        }
+
+        @PostConstruct
+        protected void init() throws Exception {
+            dbTester.setDataSet(getDataSet());
+            dbTester.setOperationListener(new ConnectionConfigListener());
+            dbTester.setSetUpOperation(DatabaseOperation.CLEAN_INSERT);
+            dbTester.onSetup();
+        }
     }
-
 
     private final class LockingThread extends Thread {
         private Collection<Long> ids;
@@ -64,10 +83,11 @@ public class TestLockOperation extends AbstractJUnit4SpringContextTests {
         @Override
         public void run() {
             lock.lock();
-
+            TransactionStatus transaction;
             try {
                 if (waitForNotify()) return;
-                tm.begin();
+
+                transaction = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
 
                 Collection<LockedEntity> entities = em.readByKeys(LockedEntity.class, ids);
                 result = em.lock(type, LockedEntity.class, entities);
@@ -90,7 +110,7 @@ public class TestLockOperation extends AbstractJUnit4SpringContextTests {
             try {
                 if (waitForFinish()) return;
             } finally {
-                tm.commit();
+                tm.commit(transaction);
                 lock.unlock();
             }
         }

@@ -3,8 +3,6 @@ package ru.kwanza.dbtool.orm.impl.querybuilder;
 import ru.kwanza.dbtool.orm.api.Join;
 import ru.kwanza.dbtool.orm.api.internal.IEntityType;
 
-import java.util.ArrayList;
-
 /**
  * @author Alexander Guzanov
  */
@@ -31,6 +29,7 @@ class FromFragmentHelper {
         return fromPart.toString();
     }
 
+
     private void processJoin(StringBuilder fromPart, EntityInfo root, Parameters holder) {
         if (root.hasJoins()) {
             for (EntityInfo entityInfo : root.getJoins().values()) {
@@ -47,11 +46,11 @@ class FromFragmentHelper {
                 fromPart.append(entityInfo.getJoinType() == Join.Type.LEFT ? " LEFT JOIN " : " INNER JOIN ");
                 final IEntityType entityType = builder.getRegistry().getEntityType(relationClass);
                 if (entityInfo.hasJoins()) {
-                    fromPart.append('(').append(entityType.getTableName()).append(' ').append(entityInfo.getAlias());
+                    fromPart.append('(').append(EntityInfo.getTable(entityType)).append(' ').append(entityInfo.getAlias());
                     processJoin(fromPart, entityInfo, holder);
                     fromPart.append(')');
                 } else {
-                    fromPart.append(entityType.getTableName()).append(' ').append(entityInfo.getAlias());
+                    fromPart.append(EntityInfo.getTable(entityType)).append(' ').append(entityInfo.getAlias());
                 }
 
                 fromPart.append(" ON ").append(root.getAlias() == null

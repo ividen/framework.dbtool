@@ -41,7 +41,7 @@ public abstract class QueryBuilderWithJoinTest extends AbstractJUnit4SpringConte
                         + "t4.entity_gid t4_entity_gid,t5.id t5_id,t5.title t5_title,t5.version t5_version " + "FROM test_entity "
                         + "INNER JOIN test_entity_a t1 ON test_entity.entity_aid=t1.id  "
                         + "INNER JOIN test_entity_b t2 ON test_entity.entity_bid=t2.id  "
-                        + "INNER JOIN test_entity_D t7 ON test_entity.entity_did=t7.id  "
+                        + "INNER JOIN test_entity_d t7 ON test_entity.entity_did=t7.id  "
                         + "INNER JOIN (test_entity_c t3 INNER JOIN test_entity_f t6 ON t3.entity_fid=t6.id  "
                         + "INNER JOIN (test_entity_e t4 INNER JOIN test_entity_g t5 ON t4.entity_gid=t5.id ) ON t3.entity_eid=t4.id ) "
                         + "ON test_entity.entity_cid=t3.id ");
@@ -63,7 +63,7 @@ public abstract class QueryBuilderWithJoinTest extends AbstractJUnit4SpringConte
                 + "t4.id t4_id,t4.title t4_title,t4.version t4_version,t4.entity_gid t4_entity_gid,t5.id t5_id,t5.title t5_title,"
                 + "t5.version t5_version " + "FROM test_entity " + "LEFT JOIN test_entity_a t1 ON test_entity.entity_aid=t1.id  "
                 + "LEFT JOIN test_entity_b t2 ON test_entity.entity_bid=t2.id  "
-                + "LEFT JOIN test_entity_D t7 ON test_entity.entity_did=t7.id  " + "LEFT JOIN (test_entity_c t3 "
+                + "LEFT JOIN test_entity_d t7 ON test_entity.entity_did=t7.id  " + "LEFT JOIN (test_entity_c t3 "
                 + "LEFT JOIN test_entity_f t6 ON t3.entity_fid=t6.id  " + "LEFT JOIN (test_entity_e t4 "
                 + "INNER JOIN test_entity_g t5 ON t4.entity_gid=t5.id ) ON t3.entity_eid=t4.id ) ON test_entity.entity_cid=t3.id  "
                 + "ORDER BY test_entity.id ASC");
@@ -86,7 +86,7 @@ public abstract class QueryBuilderWithJoinTest extends AbstractJUnit4SpringConte
                 + "t5.id t5_id,t5.title t5_title,t5.version t5_version "
                 + "FROM test_entity INNER JOIN test_entity_a t1 ON test_entity.entity_aid=t1.id  "
                 + "INNER JOIN test_entity_b t2 ON test_entity.entity_bid=t2.id  "
-                + "INNER JOIN test_entity_D t7 ON test_entity.entity_did=t7.id  " + "INNER JOIN (test_entity_c t3 "
+                + "INNER JOIN test_entity_d t7 ON test_entity.entity_did=t7.id  " + "INNER JOIN (test_entity_c t3 "
                 + "LEFT JOIN test_entity_f t6 ON t3.entity_fid=t6.id  " + "LEFT JOIN (test_entity_e t4 "
                 + "LEFT JOIN test_entity_g t5 ON t4.entity_gid=t5.id ) ON t3.entity_eid=t4.id ) ON test_entity.entity_cid=t3.id ");
     }
@@ -108,7 +108,7 @@ public abstract class QueryBuilderWithJoinTest extends AbstractJUnit4SpringConte
                 + "t4.entity_gid t4_entity_gid,t5.id t5_id,t5.title t5_title,t5.version t5_version "
                 + "FROM test_entity LEFT JOIN test_entity_a t1 ON test_entity.entity_aid=t1.id  "
                 + "LEFT JOIN test_entity_b t2 ON test_entity.entity_bid=t2.id  "
-                + "LEFT JOIN test_entity_D t7 ON test_entity.entity_did=t7.id  "
+                + "LEFT JOIN test_entity_d t7 ON test_entity.entity_did=t7.id  "
                 + "LEFT JOIN (test_entity_c t3 INNER JOIN test_entity_f t6 ON t3.entity_fid=t6.id  "
                 + "INNER JOIN (test_entity_e t4 INNER JOIN test_entity_g t5 ON t4.entity_gid=t5.id ) ON t3.entity_eid=t4.id ) "
                 + "ON test_entity.entity_cid=t3.id ");
@@ -133,7 +133,7 @@ public abstract class QueryBuilderWithJoinTest extends AbstractJUnit4SpringConte
                 + "t5.id t5_id,t5.title t5_title,t5.version t5_version " + "FROM test_entity "
                 + "LEFT JOIN test_entity_a t1 ON test_entity.entity_aid=t1.id  "
                 + "LEFT JOIN test_entity_b t2 ON test_entity.entity_bid=t2.id  "
-                + "LEFT JOIN test_entity_D t7 ON test_entity.entity_did=t7.id " + " LEFT JOIN (test_entity_c t3 "
+                + "LEFT JOIN test_entity_d t7 ON test_entity.entity_did=t7.id " + " LEFT JOIN (test_entity_c t3 "
                 + "INNER JOIN test_entity_f t6 ON t3.entity_fid=t6.id  "
                 + "INNER JOIN (test_entity_e t4 INNER JOIN test_entity_g t5 ON t4.entity_gid=t5.id ) "
                 + "ON t3.entity_eid=t4.id ) ON test_entity.entity_cid=t3.id ");
@@ -156,7 +156,7 @@ public abstract class QueryBuilderWithJoinTest extends AbstractJUnit4SpringConte
                 + "t5.id t5_id,t5.title t5_title,t5.version t5_version "
                 + "FROM test_entity LEFT JOIN test_entity_a t1 ON test_entity.entity_aid=t1.id  "
                 + "LEFT JOIN test_entity_b t2 ON test_entity.entity_bid=t2.id  "
-                + "LEFT JOIN test_entity_D t7 ON test_entity.entity_did=t7.id  "
+                + "LEFT JOIN test_entity_d t7 ON test_entity.entity_did=t7.id  "
                 + "LEFT JOIN (test_entity_c t3 INNER JOIN test_entity_f t6 ON t3.entity_fid=t6.id  "
                 + "INNER JOIN (test_entity_e t4 INNER JOIN test_entity_g t5 ON t4.entity_gid=t5.id ) ON t3.entity_eid=t4.id ) "
                 + "ON test_entity.entity_cid=t3.id ");
@@ -180,7 +180,7 @@ public abstract class QueryBuilderWithJoinTest extends AbstractJUnit4SpringConte
                 + "t5.id t5_id,t5.title t5_title,t5.version t5_version " + "FROM test_entity "
                 + "INNER JOIN test_entity_a t1 ON test_entity.entity_aid=t1.id  "
                 + "INNER JOIN test_entity_b t2 ON test_entity.entity_bid=t2.id  "
-                + "INNER JOIN test_entity_D t7 ON test_entity.entity_did=t7.id  " + "INNER JOIN (test_entity_c t3 "
+                + "INNER JOIN test_entity_d t7 ON test_entity.entity_did=t7.id  " + "INNER JOIN (test_entity_c t3 "
                 + "INNER JOIN test_entity_f t6 ON t3.entity_fid=t6.id  "
                 + "INNER JOIN (test_entity_e t4 INNER JOIN test_entity_g t5 ON t4.entity_gid=t5.id ) ON t3.entity_eid=t4.id ) ON test_entity.entity_cid=t3.id  "
                 + "WHERE (test_entity.date_field BETWEEN ? AND ?) AND (test_entity.id = ?) ORDER BY test_entity.date_field ASC");
@@ -205,7 +205,7 @@ public abstract class QueryBuilderWithJoinTest extends AbstractJUnit4SpringConte
                 + "t4.entity_gid t4_entity_gid,t5.id t5_id,t5.title t5_title,t5.version t5_version " + "FROM test_entity "
                 + "INNER JOIN test_entity_a t1 ON test_entity.entity_aid=t1.id  "
                 + "INNER JOIN test_entity_b t2 ON test_entity.entity_bid=t2.id  "
-                + "INNER JOIN test_entity_D t7 ON test_entity.entity_did=t7.id  " + "INNER JOIN (test_entity_c t3 "
+                + "INNER JOIN test_entity_d t7 ON test_entity.entity_did=t7.id  " + "INNER JOIN (test_entity_c t3 "
                 + "INNER JOIN test_entity_f t6 ON t3.entity_fid=t6.id  " + "INNER JOIN (test_entity_e t4 "
                 + "INNER JOIN test_entity_g t5 ON t4.entity_gid=t5.id ) ON t3.entity_eid=t4.id ) ON test_entity.entity_cid=t3.id  "
                 + "WHERE (t1.title = ?) AND (t2.title = ?) AND (t3.title = ?) ORDER BY test_entity.date_field ASC");
@@ -333,7 +333,7 @@ public abstract class QueryBuilderWithJoinTest extends AbstractJUnit4SpringConte
                 + "t1.title t1_title,t1.version t1_version,t4.id t4_id,t4.title t4_title,t4.version t4_version,"
                 + "t4.entity_eid t4_entity_eid,t4.entity_fid t4_entity_fid FROM test_entity "
                 + "INNER JOIN test_entity_a t2 ON test_entity.entity_aid=t2.id  "
-                + "INNER JOIN test_entity_b t3 ON test_entity.entity_bid=t3.id  INNER JOIN test_entity_D t1 "
+                + "INNER JOIN test_entity_b t3 ON test_entity.entity_bid=t3.id  INNER JOIN test_entity_d t1 "
                 + "ON test_entity.entity_did=t1.id  INNER JOIN test_entity_c t4 ON test_entity.entity_cid=t4.id  "
                 + "WHERE (t2.title = ?) AND (t3.title = ?) AND (t4.title = ?) ORDER BY test_entity.date_field ASC");
     }

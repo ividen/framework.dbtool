@@ -1,28 +1,23 @@
 package ru.kwanza.dbtool.orm.impl.filtering;
 
-import org.dbunit.DatabaseUnitException;
-import org.dbunit.database.DatabaseConfig;
-import org.dbunit.database.DatabaseConnection;
-import org.dbunit.database.IDatabaseConnection;
-import org.dbunit.dataset.DataSetException;
+import org.dbunit.IDatabaseTester;
 import org.dbunit.dataset.IDataSet;
-import org.dbunit.dataset.SortedDataSet;
 import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
 import org.dbunit.operation.DatabaseOperation;
-import org.junit.Before;
 import org.junit.Test;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
-import ru.kwanza.dbtool.orm.api.If;
+import ru.kwanza.dbtool.core.ConnectionConfigListener;
 import ru.kwanza.dbtool.orm.api.IEntityManager;
 import ru.kwanza.dbtool.orm.api.IFiltering;
+import ru.kwanza.dbtool.orm.api.If;
 import ru.kwanza.dbtool.orm.impl.fetcher.TestEntity;
 import ru.kwanza.dbtool.orm.impl.mapping.EntityMappingRegistry;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.sql.DataSource;
-import java.io.IOException;
-import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -32,42 +27,35 @@ import static junit.framework.Assert.assertEquals;
 /**
  * @author Alexander Guzanov
  */
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public abstract class FilteringTest extends AbstractJUnit4SpringContextTests {
     @Resource(name = "dbtool.IEntityManager")
     private IEntityManager em;
-    @Resource(name = "dbtool.IEntityMappingRegistry")
-    private EntityMappingRegistry registry;
+
     @Resource(name = "dataSource")
     private DataSource dataSource;
 
-    @Value("${jdbc.schema}")
-    private String schema;
+    @Component
+    public static class InitDB {
+        @Resource(name = "dbTester")
+        private IDatabaseTester dbTester;
+        @Resource(name = "dbtool.IEntityMappingRegistry")
+        private EntityMappingRegistry registry;
 
-    @Before
-    public void setUpDV() throws Exception {
-        DatabaseOperation.CLEAN_INSERT.execute(getConnection(), getDataSet());
+        private IDataSet getDataSet() throws Exception {
+            return new FlatXmlDataSetBuilder().build(this.getClass().getResourceAsStream("initdb.xml"));
+        }
+
+        @PostConstruct
+        protected void init() throws Exception {
+            registry.registerEntityClass(TestEntity.class);
+            dbTester.setDataSet(getDataSet());
+            dbTester.setOperationListener(new ConnectionConfigListener());
+            dbTester.setSetUpOperation(DatabaseOperation.CLEAN_INSERT);
+            dbTester.onSetup();
+        }
     }
 
-    private static IDataSet getDataSet() throws IOException,
-                                                DataSetException {
-
-        return new FlatXmlDataSetBuilder().build(FilteringTest.class.getResourceAsStream("initdb.xml"));
-    }
-
-    public IDatabaseConnection getConnection() throws SQLException, DatabaseUnitException {
-        DatabaseConnection connection = new DatabaseConnection(dataSource.getConnection(), schema);
-        connection.getConfig().setProperty(DatabaseConfig.FEATURE_BATCHED_STATEMENTS, true);
-        return connection;
-    }
-
-    @Before
-    public void init() {
-        registry.registerEntityClass(TestEntity.class);
-    }
-
-    public IDataSet getActualDataSet() throws Exception {
-        return new SortedDataSet(getConnection().createDataSet(new String[]{"test_entity"}));
-    }
 
     @Test
     public void testSimpleSelect() throws Exception {

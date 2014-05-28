@@ -1,0 +1,12 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+    <property dbms="oracle" name="long.type" value="NUMBER(19,0)"/>
+    <property dbms="mysql" name="long.type" value="bigint"/>
+    <property dbms="mssql" name="long.type" value="bigint"/>
+    <property dbms="postgresql" name="long.type" value="bigint"/>
+
+    <include file="ru/kwanza/dbtool/core/liquibase/DBTOOL55/changelog.xml"/>
+
+</databaseChangeLog>

@@ -38,11 +38,6 @@ public abstract class AbstractEntityType implements IEntityType {
         return name;
     }
 
-    public String getFromClause() {
-        if (getSql() == null) return getTableName();
-        return "(" + getSql() + ")";
-    }
-
     public String getTableName() {
         return tableName;
     }

@@ -22,6 +22,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Утилита работы с базой данных.
@@ -37,6 +40,7 @@ public class DBTool extends JdbcDaoSupport {
     private static final Logger logger = LoggerFactory.getLogger(DBTool.class);
     private DBType dbType;
     private int dbVersion;
+    private ConcurrentMap<String,ReentrantLock> locks = new ConcurrentHashMap<String, ReentrantLock>();
 
     @Override
     protected void initDao() throws Exception {
@@ -253,7 +257,7 @@ public class DBTool extends JdbcDaoSupport {
      */
     public AppLock getLock(String lockName, boolean reentrant) {
         try {
-            return AppLock.defineLock(this, lockName, dbType, reentrant);
+            return AppLock.defineLock(this, lockName, dbType,getReentrantLock(lockName), reentrant);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -267,10 +271,22 @@ public class DBTool extends JdbcDaoSupport {
      */
     public AppLock getDefaultLock(String lockName, boolean reentrant) {
         try {
-            return AppLock.defineLock(this, lockName, DBType.OTHER, reentrant);
+            return AppLock.defineLock(this, lockName, DBType.OTHER,getReentrantLock(lockName), reentrant);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private ReentrantLock getReentrantLock(String name){
+        ReentrantLock result = locks.get(name);
+        if(result==null){
+            result = new ReentrantLock();
+            if(null!=locks.putIfAbsent(name,result)){
+                result = locks.get(name);
+            }
+        }
+
+        return result;
     }
 
     /**

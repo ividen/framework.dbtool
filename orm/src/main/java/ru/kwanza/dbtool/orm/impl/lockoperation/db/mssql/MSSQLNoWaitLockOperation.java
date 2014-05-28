@@ -15,6 +15,6 @@ public class MSSQLNoWaitLockOperation<T> extends AbstractLockOperation<T> {
     @Override
     protected String createSQL() {
         return "SELECT " + entityType.getIdField().getColumn() + " FROM " +
-                EntityInfo.getTableName(entityType) + " WITH(UPDLOCK,ROWLOCK,NOWAIT) WHERE " + entityType.getIdField().getColumn() + " IN (?)";
+                EntityInfo.getTable(entityType) + " WITH(UPDLOCK,ROWLOCK,NOWAIT) WHERE " + entityType.getIdField().getColumn() + " IN (?)";
     }
 }

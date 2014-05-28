@@ -1,16 +1,22 @@
 package ru.kwanza.dbtool.orm.impl.abstractentity;
 
 import junit.framework.Assert;
+import org.dbunit.IDatabaseTester;
+import org.dbunit.dataset.IDataSet;
+import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
+import org.dbunit.operation.DatabaseOperation;
 import org.junit.Test;
+import org.springframework.stereotype.Component;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
+import ru.kwanza.dbtool.core.ConnectionConfigListener;
 import ru.kwanza.dbtool.orm.api.IEntityManager;
 import ru.kwanza.dbtool.orm.api.IQuery;
 import ru.kwanza.dbtool.orm.api.If;
-import ru.kwanza.dbtool.orm.api.LockType;
 import ru.kwanza.dbtool.orm.impl.fetcher.proxy.Proxy;
 import ru.kwanza.dbtool.orm.impl.querybuilder.AbstractQuery;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.util.List;
 
@@ -22,6 +28,25 @@ import java.util.List;
 public abstract class TestAbstractEntity extends AbstractJUnit4SpringContextTests {
     @Resource(name = "dbtool.IEntityManager")
     private IEntityManager em;
+
+
+    @Component
+    public static class InitDB {
+        @Resource(name = "dbTester")
+        private IDatabaseTester dbTester;
+
+        private IDataSet getDataSet() throws Exception {
+            return new FlatXmlDataSetBuilder().build(this.getClass().getResourceAsStream("initdb.xml"));
+        }
+
+        @PostConstruct
+        protected void init() throws Exception {
+            dbTester.setDataSet(getDataSet());
+            dbTester.setOperationListener(new ConnectionConfigListener());
+            dbTester.setSetUpOperation(DatabaseOperation.CLEAN_INSERT);
+            dbTester.onSetup();
+        }
+    }
 
     @Test
     public void testQuieryBuilder_1() {
@@ -268,17 +293,17 @@ public abstract class TestAbstractEntity extends AbstractJUnit4SpringContextTest
         for (TestEntity testEntity : testEntities) {
             Assert.assertEquals(testEntity.getEntityAID(), testEntity.getEntity().getId());
             Assert.assertTrue(Proxy.isProxy(testEntity.getEntity()));
-            Assert.assertEquals(((TestEntityA)Proxy.getDelegate(testEntity.getEntity())).getTitle(),
+            Assert.assertEquals(((TestEntityA) Proxy.getDelegate(testEntity.getEntity())).getTitle(),
                     "test_entity_a" + testEntity.getEntityAID());
 
             Assert.assertEquals(testEntity.getEntityAID(), testEntity.getEntityWithCondition().getId());
             Assert.assertTrue(Proxy.isProxy(testEntity.getEntityWithCondition()));
-            Assert.assertEquals(((TestEntityA)Proxy.getDelegate(testEntity.getEntityWithCondition())).getTitle(),
+            Assert.assertEquals(((TestEntityA) Proxy.getDelegate(testEntity.getEntityWithCondition())).getTitle(),
                     "test_entity_a" + testEntity.getEntityAID());
 
             Assert.assertEquals(testEntity.getEntityBID(), testEntity.getOtherEntity().getId());
             Assert.assertTrue(Proxy.isProxy(testEntity.getOtherEntity()));
-            Assert.assertEquals(((TestEntityB)Proxy.getDelegate(testEntity.getOtherEntity())).getTitle(),
+            Assert.assertEquals(((TestEntityB) Proxy.getDelegate(testEntity.getOtherEntity())).getTitle(),
                     "test_entity_b" + testEntity.getEntityBID());
         }
     }

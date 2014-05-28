@@ -2,6 +2,7 @@ package ru.kwanza.dbtool.orm.impl.querybuilder;
 
 import junit.framework.Assert;
 import org.dbunit.DatabaseUnitException;
+import org.dbunit.IDatabaseTester;
 import org.dbunit.database.DatabaseConfig;
 import org.dbunit.database.DatabaseConnection;
 import org.dbunit.database.IDatabaseConnection;
@@ -13,8 +14,10 @@ import org.dbunit.operation.DatabaseOperation;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
+import org.springframework.stereotype.Component;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
+import ru.kwanza.dbtool.core.ConnectionConfigListener;
 import ru.kwanza.dbtool.orm.api.IEntityManager;
 import ru.kwanza.dbtool.orm.api.IQuery;
 import ru.kwanza.dbtool.orm.api.IStatement;
@@ -46,40 +49,23 @@ public abstract class QueryTest extends AbstractJUnit4SpringContextTests {
     @Resource(name = "dataSource")
     public DataSource dataSource;
 
-    @Value("${jdbc.schema}")
-    private String schema;
 
+    @Component
     public static class InitDB {
-        @Resource(name = "dataSource")
-        public DataSource dataSource;
+        @Resource(name = "dbTester")
+        private IDatabaseTester dbTester;
 
-        @Value("${jdbc.schema}")
-        private String schema;
+        private IDataSet getDataSet() throws Exception {
+            return new FlatXmlDataSetBuilder().build(this.getClass().getResourceAsStream("initdb.xml"));
+        }
 
         @PostConstruct
-        public void setUpDV() throws Exception {
-            DatabaseOperation.CLEAN_INSERT.execute(getConnection(), getDataSet());
+        protected void init() throws Exception {
+            dbTester.setDataSet(getDataSet());
+            dbTester.setOperationListener(new ConnectionConfigListener());
+            dbTester.setSetUpOperation(DatabaseOperation.CLEAN_INSERT);
+            dbTester.onSetup();
         }
-
-        private static IDataSet getDataSet() throws IOException, DataSetException {
-            return new FlatXmlDataSetBuilder().build(QueryTest.class.getResourceAsStream("initdb.xml"));
-        }
-
-        public IDatabaseConnection getConnection() throws SQLException, DatabaseUnitException {
-            DatabaseConnection connection = new DatabaseConnection(dataSource.getConnection(), schema);
-            connection.getConfig().setProperty(DatabaseConfig.FEATURE_BATCHED_STATEMENTS, true);
-            return connection;
-        }
-    }
-
-    public IDatabaseConnection getConnection() throws SQLException, DatabaseUnitException {
-        DatabaseConnection connection = new DatabaseConnection(dataSource.getConnection(), schema);
-        connection.getConfig().setProperty(DatabaseConfig.FEATURE_BATCHED_STATEMENTS, true);
-        return connection;
-    }
-
-    public IDataSet getActualDataSet() throws Exception {
-        return new SortedDataSet(getConnection().createDataSet(new String[]{"test_entity"}));
     }
 
     @Test

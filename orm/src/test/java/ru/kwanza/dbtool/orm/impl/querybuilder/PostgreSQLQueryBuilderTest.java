@@ -17,7 +17,7 @@ import static junit.framework.Assert.assertEquals;
  * @author Michael Yeskov
  */
 
-@ContextConfiguration(locations = "postgresql-config.xml")
+@ContextConfiguration(locations = "postgresql-querybuilder-config.xml")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class PostgreSQLQueryBuilderTest extends AbstractJUnit4SpringContextTests {
     @Resource(name = "dbtool.IEntityManager")

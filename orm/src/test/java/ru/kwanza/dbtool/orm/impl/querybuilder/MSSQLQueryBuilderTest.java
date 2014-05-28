@@ -17,7 +17,7 @@ import static junit.framework.Assert.assertEquals;
  * @author Alexander Guzanov
  */
 
-@ContextConfiguration(locations = "mssql-config.xml")
+@ContextConfiguration(locations = "mssql-querybuilder-config.xml")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class MSSQLQueryBuilderTest extends AbstractJUnit4SpringContextTests {
     @Resource(name = "dbtool.IEntityManager")

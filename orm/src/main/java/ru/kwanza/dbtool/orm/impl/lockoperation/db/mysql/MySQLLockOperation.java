@@ -15,7 +15,7 @@ public class MySQLLockOperation<T> extends AbstractLockOperation<T> {
     @Override
     protected String createSQL() {
         return "SELECT " + entityType.getIdField().getColumn() + " FROM " +
-                EntityInfo.getTableName(entityType) + " WHERE " + entityType.getIdField().getColumn() + " IN (?) FOR UPDATE";
+                EntityInfo.getTable(entityType) + " WHERE " + entityType.getIdField().getColumn() + " IN (?) FOR UPDATE";
     }
 
     protected void setLockTimeout(int timeout) {

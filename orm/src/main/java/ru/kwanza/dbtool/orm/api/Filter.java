@@ -22,6 +22,7 @@ public class Filter {
     public Filter(boolean use, If condition, Object... params) {
         this.use = use;
         this.condition = condition;
+        this.params = params;
     }
 
     /**
