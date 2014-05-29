@@ -3,6 +3,9 @@ package ru.kwanza.dbtool.orm.impl.lockoperation;
 import ru.kwanza.dbtool.core.DBTool;
 import ru.kwanza.dbtool.orm.api.LockType;
 import ru.kwanza.dbtool.orm.impl.EntityManagerImpl;
+import ru.kwanza.dbtool.orm.impl.lockoperation.db.h2.H2NoWaitLockOperation;
+import ru.kwanza.dbtool.orm.impl.lockoperation.db.h2.H2SkipLockOperation;
+import ru.kwanza.dbtool.orm.impl.lockoperation.db.h2.H2WaitLockOperation;
 import ru.kwanza.dbtool.orm.impl.lockoperation.db.mssql.MSSQLNoWaitLockOperation;
 import ru.kwanza.dbtool.orm.impl.lockoperation.db.mssql.MSSQLSkipLockOperation;
 import ru.kwanza.dbtool.orm.impl.lockoperation.db.mssql.MSSQLWaitLockOperation;
@@ -18,6 +21,9 @@ import ru.kwanza.dbtool.orm.impl.lockoperation.db.posgresql.PostgreSQLWaitLockOp
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+
+import static ru.kwanza.dbtool.core.DBTool.DBType.*;
+import static ru.kwanza.dbtool.orm.api.LockType.*;
 
 /**
  * @author Alexander Guzanov
@@ -48,37 +54,45 @@ public class LockOperationFactory {
         EntryKey key = new EntryKey(entityClass, type);
         ILockOperation result = cache.get(key);
         if (result == null) {
-            if (em.getDbTool().getDbType() == DBTool.DBType.ORACLE) {
-                if (type == LockType.WAIT) {
+            if (em.getDbTool().getDbType() == ORACLE) {
+                if (type == WAIT) {
                     result = new OracleWaitLockOperation<T>(em, entityClass);
-                } else if (type == LockType.NOWAIT) {
+                } else if (type == NOWAIT) {
                     result = new OracleNoWaitLockOperation(em, entityClass);
-                } else if (type == LockType.SKIP_LOCKED) {
+                } else if (type == SKIP_LOCKED) {
                     result = new OracleSkipLockOperation<T>(em, entityClass);
                 }
-            } else if (em.getDbTool().getDbType() == DBTool.DBType.MSSQL) {
-                if (type == LockType.WAIT) {
+            } else if (em.getDbTool().getDbType() == MSSQL) {
+                if (type == WAIT) {
                     result = new MSSQLWaitLockOperation<T>(em, entityClass);
-                } else if (type == LockType.NOWAIT) {
+                } else if (type == NOWAIT) {
                     result = new MSSQLNoWaitLockOperation<T>(em, entityClass);
-                } else if (type == LockType.SKIP_LOCKED) {
+                } else if (type == SKIP_LOCKED) {
                     result = new MSSQLSkipLockOperation<T>(em, entityClass);
                 }
-            } else if (em.getDbTool().getDbType() == DBTool.DBType.MYSQL) {
-                if (type == LockType.WAIT) {
+            } else if (em.getDbTool().getDbType() == MYSQL) {
+                if (type == WAIT) {
                     result = new MySQLWaitLockOperation<T>(em, entityClass);
-                } else if (type == LockType.NOWAIT) {
+                } else if (type == NOWAIT) {
                     result = new MySQLNoWaitLockOperation<T>(em, entityClass);
-                } else if (type == LockType.SKIP_LOCKED) {
+                } else if (type == SKIP_LOCKED) {
                     result = new MySQLSkipLockOperation<T>(em, entityClass);
                 }
-            } else if (em.getDbTool().getDbType() == DBTool.DBType.POSTGRESQL) {
-                if (type == LockType.WAIT) {
+            } else if (em.getDbTool().getDbType() == POSTGRESQL) {
+                if (type == WAIT) {
                     result = new PostgreSQLWaitLockOperation<T>(em, entityClass);
-                } else if (type == LockType.NOWAIT) {
+                } else if (type == NOWAIT) {
                     result = new PostgreSQLNoWaitLockOperation<T>(em, entityClass);
-                } else if (type == LockType.SKIP_LOCKED) {
+                } else if (type == SKIP_LOCKED) {
                     result = new PostgreSQLSkipLockOperation<T>(em, entityClass);
+                }
+            }  else if (em.getDbTool().getDbType() == H2) {
+                if (type == WAIT) {
+                    result = new H2WaitLockOperation<T>(em, entityClass);
+                } else if (type == NOWAIT) {
+                    result = new H2NoWaitLockOperation<T>(em, entityClass);
+                } else if (type == SKIP_LOCKED) {
+                    result = new H2SkipLockOperation<T>(em, entityClass);
                 }
             } else {
                 throw new UnsupportedOperationException("Lock operation is not supported for database " + em.getDbTool().getDbType());

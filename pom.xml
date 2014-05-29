@@ -29,6 +29,7 @@
         <mysql.jdbc.version>5.1.24</mysql.jdbc.version>
         <postgresql.jdbc.version>9.2-X_INV-jdbc4-SNAPSHOT</postgresql.jdbc.version>
         <jtds.version>1.2.1</jtds.version>
+        <h2.version>1.4.178</h2.version>
         <dbunit.version>2.5.0</dbunit.version>
         <springframework.version>3.2.0.RELEASE</springframework.version>
         <commons.dbcp.version>1.4</commons.dbcp.version>
@@ -317,6 +318,13 @@
                 <artifactId>postgresql</artifactId>
                 <version>${postgresql.jdbc.version}</version>
                 <scope>compile</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>com.h2database</groupId>
+                <artifactId>h2</artifactId>
+                <scope>compile</scope>
+                <version>${h2.version}</version>
             </dependency>
 
             <dependency>

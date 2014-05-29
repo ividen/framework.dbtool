@@ -6,6 +6,6 @@ import org.springframework.test.context.ContextConfiguration;
  * @author Michael Yeskov
  */
 
-@ContextConfiguration(locations = "postgresql-config-selectutil.xml")
-public class TestPostgreSQLSelectUtil extends TestSelectUtil {
+@ContextConfiguration(locations = "h2-config-selectutil.xml")
+public class TestH2SQLSelectUtil extends TestSelectUtil {
 }

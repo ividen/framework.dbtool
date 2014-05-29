@@ -49,6 +49,8 @@ public abstract class BlobInputStream extends InputStream implements Closeable {
             return new OracleBlobInputStream(dbTool, tableName, fieldName, keyValues);
         } else if (dbTool.getDbType().equals(DBTool.DBType.MYSQL)) {
             return new MySQLBlobInputStream(dbTool, tableName, fieldName, keyValues);
+        } else if (dbTool.getDbType().equals(DBTool.DBType.H2)) {
+            return new H2BlobInputStream(dbTool, tableName, fieldName, keyValues);
         } else {
             throw new RuntimeException("Unsupported type of database");
         }
@@ -83,7 +85,6 @@ public abstract class BlobInputStream extends InputStream implements Closeable {
 
     /**
      * Текущая позиция.
-     *
      */
     public long getPosition() {
         return position;
@@ -121,7 +122,7 @@ public abstract class BlobInputStream extends InputStream implements Closeable {
         }
     }
 
-    public abstract byte[] dbRead(long position, int blockSize) throws SQLException;
+    protected abstract byte[] dbRead(long position, int blockSize) throws SQLException;
 
     public int available() throws IOException {
         return (int) (getSize() - getPosition());
@@ -130,7 +131,6 @@ public abstract class BlobInputStream extends InputStream implements Closeable {
     @Override
     public void close() throws IOException {
         dbTool.closeResources(connection);
-
     }
 
     @Override

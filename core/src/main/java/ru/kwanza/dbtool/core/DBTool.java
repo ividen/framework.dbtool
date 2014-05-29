@@ -1,5 +1,6 @@
 package ru.kwanza.dbtool.core;
 
+import liquibase.database.jvm.JdbcConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.RowMapper;
@@ -40,7 +41,7 @@ public class DBTool extends JdbcDaoSupport {
     private static final Logger logger = LoggerFactory.getLogger(DBTool.class);
     private DBType dbType;
     private int dbVersion;
-    private ConcurrentMap<String,ReentrantLock> locks = new ConcurrentHashMap<String, ReentrantLock>();
+    private ConcurrentMap<String, ReentrantLock> locks = new ConcurrentHashMap<String, ReentrantLock>();
 
     @Override
     protected void initDao() throws Exception {
@@ -55,11 +56,14 @@ public class DBTool extends JdbcDaoSupport {
                 dbType = DBType.MYSQL;
             } else if ("PostgreSQL".equalsIgnoreCase(databaseProductName)) {
                 dbType = DBType.POSTGRESQL;
-
+            } else if ("H2".equalsIgnoreCase(databaseProductName)) {
+                dbType = DBType.H2;
             } else {
                 dbType = DBType.OTHER;
             }
             dbVersion = conn.getMetaData().getDatabaseMajorVersion();
+            JdbcConnection connection;
+
             conn.close();
         } catch (SQLException e) {
             throw new RuntimeException("Error in taking the type and version of database", e);
@@ -257,7 +261,7 @@ public class DBTool extends JdbcDaoSupport {
      */
     public AppLock getLock(String lockName, boolean reentrant) {
         try {
-            return AppLock.defineLock(this, lockName, dbType,getReentrantLock(lockName), reentrant);
+            return AppLock.defineLock(this, lockName, dbType, getReentrantLock(lockName), reentrant);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -271,17 +275,17 @@ public class DBTool extends JdbcDaoSupport {
      */
     public AppLock getDefaultLock(String lockName, boolean reentrant) {
         try {
-            return AppLock.defineLock(this, lockName, DBType.OTHER,getReentrantLock(lockName), reentrant);
+            return AppLock.defineLock(this, lockName, DBType.OTHER, getReentrantLock(lockName), reentrant);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private ReentrantLock getReentrantLock(String name){
+    private ReentrantLock getReentrantLock(String name) {
         ReentrantLock result = locks.get(name);
-        if(result==null){
+        if (result == null) {
             result = new ReentrantLock();
-            if(null!=locks.putIfAbsent(name,result)){
+            if (null != locks.putIfAbsent(name, result)) {
                 result = locks.get(name);
             }
         }
@@ -339,7 +343,7 @@ public class DBTool extends JdbcDaoSupport {
     }
 
     public static enum DBType {
-        MSSQL, ORACLE, MYSQL, OTHER, POSTGRESQL
+        MSSQL, ORACLE, MYSQL, OTHER, H2, POSTGRESQL
     }
 
     /**

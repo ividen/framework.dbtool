@@ -5,6 +5,7 @@ import org.springframework.test.context.ContextConfiguration;
 /**
  * @author: Ivan Baluk
  */
-@ContextConfiguration(locations = "oracle-config-blob.xml")
-public class TestOracleBlobInputStream extends TestBlobInputStream {
+@ContextConfiguration(locations = "h2-config-blob.xml")
+public class TestH2BlobOutputStream extends TestBlobOutputStream {
+
 }

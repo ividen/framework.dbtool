@@ -23,6 +23,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 
+import static ru.kwanza.dbtool.core.DBTool.DBType.H2;
 import static ru.kwanza.dbtool.core.DBTool.DBType.MYSQL;
 import static ru.kwanza.dbtool.core.DBTool.DBType.POSTGRESQL;
 
@@ -251,7 +252,7 @@ public abstract class StatementImpl<T> implements IStatement<T> {
 
             Integer offset = StatementImpl.this.offset;
             DBTool.DBType dbType = config.getEntityManager().getDbTool().getDbType();
-            if ((MYSQL != dbType && POSTGRESQL != dbType && offset != null && offset > 0) || (MYSQL == dbType && offset != null
+            if ((MYSQL != dbType && POSTGRESQL != dbType && H2 != dbType && offset != null && offset > 0) || (MYSQL == dbType && offset != null
                     && offset > 0 && StatementImpl.this.maxSize == null)) {
                 if (rs.next()) {
                     rs.absolute(offset);
