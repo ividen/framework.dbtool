@@ -424,7 +424,7 @@ public abstract class AbstractTestLock extends AbstractTransactionalJUnit4Spring
         t1.waitingL2Release();
         t2.waitingL2Release();
         Throwable result = t1.result == null ? t2.result : t1.result;
-
+        result.printStackTrace();
         assertDeadlockException(result);
 
         t1.join();

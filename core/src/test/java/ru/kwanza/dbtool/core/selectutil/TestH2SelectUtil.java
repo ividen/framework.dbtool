@@ -7,5 +7,5 @@ import org.springframework.test.context.ContextConfiguration;
  */
 
 @ContextConfiguration(locations = "h2-config-selectutil.xml")
-public class TestH2SQLSelectUtil extends TestSelectUtil {
+public class TestH2SelectUtil extends TestSelectUtil {
 }
