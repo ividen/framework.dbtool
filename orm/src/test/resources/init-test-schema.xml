@@ -10,9 +10,12 @@
 
     <property dbms="mssql" name="blob.type" value="image"/>
     <property dbms="mysql" name="blob.type" value="BLOB"/>
+    <property dbms="oracle" name="blob.type" value="BLOB"/>
+    <property dbms="postgresql" name="blob.type" value="bytea"/>
     <property dbms="h2" name="blob.type" value="BLOB"/>
-    <property dbms="postgresql" name="long.type" value="bytea"/>
 
+
+    <include file="ru/kwanza/dbtool/core/liquibase/DBTOOL54/changelog.xml"/>
     <include file="ru/kwanza/dbtool/orm/liquibase/DBTOOL54/changelog.xml"/>
 
 </databaseChangeLog>
