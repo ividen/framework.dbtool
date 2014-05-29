@@ -9,7 +9,7 @@ import java.util.Collection;
 /**
  * @author Alexander Guzanov
  */
-public class H2NoWaitLockOperation<T> extends H2WaitLockOperation<T> {
+public class H2NoWaitLockOperation<T> extends H2LockOperation<T> {
     public H2NoWaitLockOperation(EntityManagerImpl em, Class<T> entityClass) {
         super(em, entityClass);
     }
