@@ -2,23 +2,30 @@ package ru.kwanza.dbtool.orm.impl.querybuilder;
 
 import ru.kwanza.dbtool.core.DBTool;
 import ru.kwanza.dbtool.orm.api.IQueryBuilder;
-import ru.kwanza.dbtool.orm.impl.mapping.IEntityMappingRegistry;
+import ru.kwanza.dbtool.orm.impl.EntityManagerImpl;
+import ru.kwanza.dbtool.orm.impl.querybuilder.db.h2.H2QueryBuilder;
+import ru.kwanza.dbtool.orm.impl.querybuilder.db.mssql.MSSQLQueryBuilder;
+import ru.kwanza.dbtool.orm.impl.querybuilder.db.mysql.MySQLQueryBuilder;
+import ru.kwanza.dbtool.orm.impl.querybuilder.db.oracle.OracleQueryBuilder;
+import ru.kwanza.dbtool.orm.impl.querybuilder.db.postgresql.PostgreSQLQueryBuilder;
 
 /**
  * @author Alexander Guzanov
  */
-public class QueryBuilderFactory {
+public abstract class QueryBuilderFactory {
 
-    public static  <T> IQueryBuilder<T> createBuilder(DBTool dbTool, IEntityMappingRegistry mappingRegistry, Class<T> entityClass) {
-        DBTool.DBType dbType = dbTool.getDbType();
+    public static <T> IQueryBuilder<T> createBuilder(EntityManagerImpl em, Class<T> entityClass) {
+        DBTool.DBType dbType = em.getDbTool().getDbType();
         if (dbType == DBTool.DBType.ORACLE) {
-            return new OracleQueryBuilder<T>(dbTool, mappingRegistry, entityClass);
+            return new OracleQueryBuilder<T>(em, entityClass);
         } else if (dbType == DBTool.DBType.MYSQL) {
-            return new MySQLQueryBuilder<T>(dbTool, mappingRegistry, entityClass);
+            return new MySQLQueryBuilder<T>(em, entityClass);
         } else if (dbType == DBTool.DBType.MSSQL) {
-            return new MSSQLQueryBuilder<T>(dbTool, mappingRegistry, entityClass);
+            return new MSSQLQueryBuilder<T>(em, entityClass);
         } else if (dbType == DBTool.DBType.POSTGRESQL) {
-            return new PostgreSQLQueryBuilder<T>(dbTool, mappingRegistry, entityClass);
+            return new PostgreSQLQueryBuilder<T>(em, entityClass);
+        } else if (dbType == DBTool.DBType.H2) {
+            return new H2QueryBuilder<T>(em, entityClass);
         } else {
             throw new RuntimeException("Unsupported database type!");
         }

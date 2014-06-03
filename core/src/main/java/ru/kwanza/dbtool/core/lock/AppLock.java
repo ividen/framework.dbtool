@@ -6,90 +6,119 @@ import ru.kwanza.dbtool.core.DBTool;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReentrantLock;
 
+/**
+ * Класс поторый позволяет устанавливать блокировку
+ */
 public abstract class AppLock {
     public static final Logger logger = LoggerFactory.getLogger(AppLock.class);
 
     protected DBTool dbTool;
+    private ReentrantLock lock;
     private String lockName;
+    private boolean reentrant;
 
-    private static Map<String, AppLock> locks = new ConcurrentHashMap<String, AppLock>();
 
-    protected AppLock(DBTool dbTool, String lockName) throws SQLException {
+    protected AppLock(DBTool dbTool, String lockName, ReentrantLock cachedLock, boolean reentrant) throws SQLException {
         this.dbTool = dbTool;
         this.lockName = lockName;
+        this.reentrant = reentrant;
+        this.lock = cachedLock;
     }
 
+    /**
+     * Имя блокировки
+     */
     public String getLockName() {
         return lockName;
     }
 
     /**
-     * ��������� ������� ������� ������� � ������������ ������.
+     * Установить блокировку
      */
-    public abstract void lock();
+    public final void lock() {
+        if (reEnterLock()) {
+            return;
+        }
 
-    public void close() {
-//        try {
-//            if (conn!=null && conn.isClosed()) {
-//                throw new RuntimeException("Connection is closed");
-//            }
-//            conn.close();
-//        } catch (SQLException e) {
-//            throw new RuntimeException(e);
-//        }
-    }
-
-    public void lockAndClose() {
+        Connection connection = null;
         try {
-            lock();
+            connection = checkNewConnection();
+            doLock(connection);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         } finally {
-//            if (null != conn) {
-//                try {
-//                    conn.close();
-//                } catch (SQLException e) {
-//                    logger.error("Can't close connection", e);
-//                }
-//            }
+            dbTool.closeResources(connection);
         }
     }
 
-    protected Connection checkNewConnection() throws SQLException {
-       Connection conn = dbTool.getJDBCConnection();
-        if (conn.getAutoCommit()) {
-            conn.setAutoCommit(false);
-        }
+    protected abstract void doLock(Connection connection) throws SQLException;
 
-        return conn;
-    }
+    protected abstract void doUnLock(Connection connection);
 
     /**
-     * ����������� ������ ��� ��������� ����������.
+     * Закрыть работу с блокировкой.
      * <p/>
-     * ��� ������� ��������� ������ ����������, ������� ����������� � ���������
-     * ���� ��� ��������.
-     *
-     * @param dbTool
-     * @param lockName  ��� �������
-     * @param dbType    ��� ���� ������
-     * @param dbVersion ������ ���� ������
-     * @return ������ ��� ������������� ���������� �� ������ ������
-     * @throws SQLException
+     * Этот метод обязательно нужно вызывать в секции <b>finally</b>,
+     * хотя он не снимает блокировки, а только освобождает ресурсы.
      */
-    public static synchronized AppLock defineLock(DBTool dbTool, String lockName, DBTool.DBType dbType, int dbVersion) throws SQLException {
-        AppLock lock = locks.get(lockName);
-        if (null == lock) {
-            if ((dbType.equals(DBTool.DBType.MSSQL)) && (dbVersion > 8)) {
-                lock = new MSSQLAppLock(dbTool, lockName);
-            } else if ((dbType.equals(DBTool.DBType.ORACLE)) && (dbVersion > 8)) {
-                lock = new OracleAppLock(dbTool, lockName);
-            } else {
-                lock = new DefaultAppLock(dbTool, lockName);
-            }
-            locks.put(lockName, lock);
+    public final void close() {
+        if (exitReEnterLock()) {
+            return;
         }
-        return lock;
+
+        Connection connection = null;
+        try {
+            connection = checkNewConnection();
+            doUnLock(connection);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } finally {
+            dbTool.closeResources(connection);
+        }
+    }
+
+    private boolean exitReEnterLock() {
+        lock.unlock();
+
+        if (reentrant && lock.isHeldByCurrentThread()) {
+            return true;
+        }
+        return false;
+    }
+
+    private boolean reEnterLock() {
+
+        try {
+            if (reentrant && lock.isHeldByCurrentThread()) {
+                return true;
+            }
+            return false;
+        } finally {
+            lock.lock();
+        }
+    }
+
+    private Connection checkNewConnection() throws SQLException {
+        Connection connection = dbTool.getJDBCConnection();
+        if (connection.getAutoCommit()) {
+            connection.setAutoCommit(false);
+        }
+
+        return connection;
+    }
+
+    public static AppLock defineLock(DBTool dbTool, String lockName, DBTool.DBType dbType, ReentrantLock lock, boolean reentrant) throws SQLException {
+        if (dbType.equals(DBTool.DBType.MSSQL)) {
+            return new MSSQLAppLock(dbTool, lockName, lock, reentrant);
+        } else if (dbType.equals(DBTool.DBType.ORACLE)) {
+            return new DefaultAppLock(dbTool, lockName, lock, reentrant);
+        } else if (dbType.equals(DBTool.DBType.MYSQL)) {
+            return new DefaultAppLock(dbTool, lockName, lock, reentrant);
+        } else {
+            return new DefaultAppLock(dbTool, lockName, lock, reentrant);
+        }
+
     }
 }

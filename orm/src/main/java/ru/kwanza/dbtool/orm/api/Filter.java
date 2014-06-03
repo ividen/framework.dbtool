@@ -1,38 +1,50 @@
 package ru.kwanza.dbtool.orm.api;
 
 /**
+ * объект описывающий фильтр для использования в {@link ru.kwanza.dbtool.orm.api.IFiltering}
+ *
  * @author Alexander Guzanov
  */
 public class Filter {
+    private If condition;
     private boolean use;
-    private Condition condition;
-    private Object[] value;
-    private boolean hasParams = true;
+    private Object[] params;
 
-    public Filter(boolean use, Condition condition, Object ... value) {
+    /**
+     * Конструктор
+     *
+     * @param use       использовать ли предикат при построении запроса
+     * @param condition sql-предикат
+     * @param params    список параметров для предиката
+     * @see ru.kwanza.dbtool.orm.api.IFiltering
+     * @see ru.kwanza.dbtool.orm.api.If
+     */
+    public Filter(boolean use, If condition, Object... params) {
         this.use = use;
         this.condition = condition;
-        this.value = value;
+        this.params = params;
     }
 
-    public Filter(boolean use, Condition condition) {
-        this(use, condition, null);
-        this.hasParams = false;
+    /**
+     * sql предикат для фильтра
+     *
+     * @see ru.kwanza.dbtool.orm.api.IFiltering
+     */
+    public If getCondition() {
+        return condition;
     }
 
+    /**
+     * использовать ли фильтр при построении запроса
+     */
     public boolean isUse() {
         return use;
     }
 
-    public boolean isHasParams() {
-        return hasParams;
-    }
-
-    public Condition getCondition() {
-        return condition;
-    }
-
-    public Object[] getValue() {
-        return value;
+    /**
+     * Параметры для sql-предиката
+     */
+    public Object[] getParams() {
+        return params;
     }
 }

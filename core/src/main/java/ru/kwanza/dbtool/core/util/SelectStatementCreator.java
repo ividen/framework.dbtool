@@ -3,6 +3,7 @@ package ru.kwanza.dbtool.core.util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.*;
+import ru.kwanza.dbtool.core.FieldSetter;
 import ru.kwanza.dbtool.core.SqlCollectionParameterValue;
 
 import java.sql.Connection;

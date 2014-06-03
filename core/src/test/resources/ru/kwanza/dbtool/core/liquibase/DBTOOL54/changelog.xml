@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+
+    <changeSet author="aguzanov" id="21.05.2014 11:24-1">
+        <createTable tableName="test_table">
+            <column name="xkey" type="${long.type}">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_bitmap_story"/>
+            </column>
+
+            <column name="version" type="${long.type}" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(255)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="aguzanov" id="21.05.2014 11:24-2" dbms="mysql">
+        <createTable tableName="test_table1">
+            <column name="xbool" type="BIT"/>
+            <column name="xint" type="INT"/>
+            <column name="xbigint" type="BIGINT"/>
+            <column name="xstring" type="VARCHAR(255)"/>
+            <column name="xts1" type="TIMESTAMPE"/>
+            <column name="xts2" type="TIMESTAMP"/>
+            <column name="xblob" type="BLOB"/>
+            <column name="xbigdecimal" type="DECIMAL(50)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="aguzanov" id="21.05.2014 11:24-2" dbms="postgresql">
+        <createTable tableName="test_table1">
+            <column name="xbool" type="boolean"/>
+            <column name="xint" type="numeric"/>
+            <column name="xbigint" type="numeric"/>
+            <column name="xstring" type="character varying(256)"/>
+            <column name="xts1" type="timestamp without time zone"/>
+            <column name="xts2" type="timestamp without time zone"/>
+            <column name="xblob" type="bytea"/>
+            <column name="xbigdecimal" type="numeric"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="aguzanov" id="21.05.2014 11:24-2" dbms="oracle">
+        <createTable tableName="test_table1">
+            <column name="xbool" type="NUMBER(1)"/>
+            <column name="xint" type="NUMBER(12)"/>
+            <column name="xbigint" type="NUMBER(19)"/>
+            <column name="xstring" type="VARCHAR(255)"/>
+            <column name="xts1" type="TIMESTAMP"/>
+            <column name="xts2" type="TIMESTAMP"/>
+            <column name="xblob" type="BLOB"/>
+            <column name="xbigdecimal" type="NUMBER(38)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="aguzanov" id="21.05.2014 11:24-2" dbms="mssql">
+        <createTable tableName="test_table1">
+            <column name="xbool" type="BIT"/>
+            <column name="xint" type="INT"/>
+            <column name="xbigint" type="BIGINT"/>
+            <column name="xstring" type="VARCHAR(255)"/>
+            <column name="xts1" type="DATETIME"/>
+            <column name="xts2" type="DATETIME"/>
+            <column name="xblob" type="IMAGE"/>
+            <column name="xbigdecimal" type="DECIMAL(18,0)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="aguzanov" id="22.05.2014 10:32-1">
+        <createTable tableName="test_blob">
+            <column name="id" type="${long.type}">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="value" type="${blob.type}"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="aguzanov" id="28.05.2014 15:55-1" dbms="h2">
+        <createTable tableName="test_table1">
+            <column name="xbool" type="BIT"/>
+            <column name="xint" type="INT"/>
+            <column name="xbigint" type="BIGINT"/>
+            <column name="xstring" type="VARCHAR(255)"/>
+            <column name="xts1" type="TIMESTAMP"/>
+            <column name="xts2" type="TIMESTAMP"/>
+            <column name="xblob" type="BLOB"/>
+            <column name="xbigdecimal" type="DECIMAL(18,0)"/>
+        </createTable>
+    </changeSet>
+
+</databaseChangeLog>

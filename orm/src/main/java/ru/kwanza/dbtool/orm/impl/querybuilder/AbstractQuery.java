@@ -9,13 +9,11 @@ import ru.kwanza.dbtool.orm.api.IStatement;
 public abstract class AbstractQuery<T> implements IQuery<T> {
     protected QueryConfig config;
 
-
     public AbstractQuery(QueryConfig<T> config) {
         this.config = config;
     }
 
     public abstract IStatement<T> prepare();
-
 
     public QueryConfig getConfig() {
         return config;
@@ -27,6 +25,5 @@ public abstract class AbstractQuery<T> implements IQuery<T> {
                 "query='" + config.getSql() + '\'' +
                 '}';
     }
-
 
 }

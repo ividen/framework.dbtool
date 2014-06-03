@@ -2,230 +2,171 @@ package ru.kwanza.dbtool.orm.impl.querybuilder;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.kwanza.dbtool.core.DBTool;
-import ru.kwanza.dbtool.orm.api.Condition;
-import ru.kwanza.dbtool.orm.api.IQuery;
-import ru.kwanza.dbtool.orm.api.IQueryBuilder;
-import ru.kwanza.dbtool.orm.api.OrderBy;
-import ru.kwanza.dbtool.orm.impl.mapping.FieldMapping;
-import ru.kwanza.dbtool.orm.impl.mapping.IEntityMappingRegistry;
+import ru.kwanza.dbtool.orm.api.*;
+import ru.kwanza.dbtool.orm.api.internal.IEntityMappingRegistry;
+import ru.kwanza.dbtool.orm.impl.EntityManagerImpl;
+import ru.kwanza.dbtool.orm.impl.fetcher.FetchInfo;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Alexander Guzanov
  */
 public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
-    protected static final Logger logger = LoggerFactory.getLogger(AbstractQuery.class);
-    protected IEntityMappingRegistry registry;
-    protected DBTool dbTool;
-    protected Class entityClass;
-    protected Condition condition;
-    protected OrderBy[] orderBy;
-    protected Integer maxSize;
-    protected Integer offset;
-    protected Map<String, List<Integer>> namedParams = new HashMap<String, List<Integer>>();
+    private static final Logger logger = LoggerFactory.getLogger(AbstractQuery.class);
+    private EntityManagerImpl em;
+    private Class entityClass;
+    private If condition;
+    private List<OrderBy> orderBy = null;
 
-    public AbstractQueryBuilder(DBTool dbTool, IEntityMappingRegistry registry, Class entityClass) {
-        this.registry = registry;
-        this.entityClass = entityClass;
-        this.dbTool = dbTool;
+    private EntityInfoFactory entityInfoFactory;
+    private ColumnFactory columnFactory;
 
+    private WhereFragmentHelper whereFragmentHelper;
+    private FieldFragmentHelper fieldFragmentHelper;
+    private FromFragmentHelper fromFragmentHelper;
+    private OrderByFragmentHelper orderByFragmentHelper;
+    private boolean lazy = false;
 
-        if (!registry.isRegisteredEntityClass(entityClass)) {
+    public AbstractQueryBuilder(EntityManagerImpl em, Class entityClass) {
+        if (!em.getRegistry().isRegisteredEntityClass(entityClass)) {
             throw new RuntimeException("Not registered entity class: " + entityClass);
         }
+        this.em = em;
+        this.entityClass = entityClass;
+        this.entityInfoFactory = new EntityInfoFactory(this);
+        this.columnFactory = new ColumnFactory(this);
+        this.whereFragmentHelper = new WhereFragmentHelper(this);
+        this.fieldFragmentHelper = new FieldFragmentHelper(this);
+        this.fromFragmentHelper = new FromFragmentHelper(this);
+        this.orderByFragmentHelper = new OrderByFragmentHelper(this);
+    }
+
+    EntityInfoFactory getEntityInfoFactory() {
+        return entityInfoFactory;
+    }
+
+    ColumnFactory getColumnFactory() {
+        return columnFactory;
+    }
+
+    Class getEntityClass() {
+        return entityClass;
+    }
+
+    IEntityMappingRegistry getRegistry() {
+        return em.getRegistry();
+    }
+
+    EntityManagerImpl getEm() {
+        return em;
+    }
+
+    WhereFragmentHelper getWhereFragmentHelper() {
+        return whereFragmentHelper;
+    }
+
+    FieldFragmentHelper getFieldFragmentHelper() {
+        return fieldFragmentHelper;
+    }
+
+    FromFragmentHelper getFromFragmentHelper() {
+        return fromFragmentHelper;
+    }
+
+    OrderByFragmentHelper getOrderByFragmentHelper() {
+        return orderByFragmentHelper;
+    }
+
+    public List<OrderBy> getOrderBy() {
+        return orderBy;
     }
 
     public final IQuery<T> create() {
-        StringBuilder sql;
-        List<Integer> paramsTypes = new LinkedList<Integer>();
+        Parameters whereParams = new Parameters();
+        Parameters joinParams = new Parameters();
 
-        namedParams.clear();
-        String conditions = getConditionStringAndTypes(this.condition, paramsTypes);
-        String orderBy = createOrderBy();
-        String fieldsString = getFieldsString(registry.getFieldMappings(entityClass));
+        final String where = whereFragmentHelper.createWhereFragment(this.condition, whereParams);
+        final String orderBy = orderByFragmentHelper.createOrderByFragment();
+        final String from = fromFragmentHelper.createFromFragment(joinParams);
+        final String fieldsString = fieldFragmentHelper.createFieldsFragment();
+        final StringBuilder sql = createSQLString(fieldsString, from, where, orderBy);
 
-        sql = createSQLString(conditions, orderBy, fieldsString);
-
-        String sqlString = sql.toString();
+        final String sqlString = sql.toString();
         logger.debug("Creating query {}", sqlString);
-        return createQuery(paramsTypes, sqlString);
+
+        return createQuery(createConfig(entityInfoFactory.getRoot(), sqlString, joinParams.join(whereParams), createFetchInfo(), lazy));
     }
 
+    private List<FetchInfo> createFetchInfo() {
+        List<FetchInfo> result = new ArrayList<FetchInfo>();
 
-    protected abstract IQuery<T> createQuery(List<Integer> paramsTypes, String sqlString);
+        createFetchList(entityInfoFactory.getRoot(), result, lazy);
 
-    protected abstract StringBuilder createSQLString(String conditions, String orderBy, String fieldsString);
+
+        return result;
+    }
+
+    private void createFetchList(EntityInfo entityInfo, List<FetchInfo> result, boolean lazy) {
+        if (entityInfo.hasFetches()) {
+            for (Map.Entry<String, Join> entry : entityInfo.getFetches().entrySet()) {
+                result.addAll(em.getFetcher()
+                        .getFetchInfo(entityInfo.getEntityType().getEntityClass(), Collections.singletonList(entry.getValue())));
+            }
+        }
+
+        if (entityInfo.hasJoins()) {
+            for (EntityInfo info : entityInfo.getJoins().values()) {
+                createFetchList(info, result, lazy);
+            }
+
+        }
+    }
+
+    public IQueryBuilder<T> join(String string) {
+        for (Join join : JoinHelper.parse(string)) {
+            processJoin(entityInfoFactory.getRoot(), join);
+        }
+
+        return this;
+    }
+
+    public IQueryBuilder<T> join(Join join) {
+        processJoin(entityInfoFactory.getRoot(), join);
+
+        return this;
+    }
+
+    public IQueryBuilder<T> lazy() {
+        this.lazy = true;
+
+        return this;
+    }
+
+    private void processJoin(EntityInfo root, Join join) {
+        entityInfoFactory.registerInfo(root, join);
+    }
+
+    protected abstract IQuery<T> createQuery(QueryConfig config);
 
     public IQuery<T> createNative(String sql) {
-        namedParams.clear();
-        LinkedList<Integer> paramTypes = new LinkedList<Integer>();
-        String preparedSql = parseSql(sql, paramTypes);
-        return createQuery(paramTypes, preparedSql);
+        Parameters holder = new Parameters();
+        String preparedSql = SQLParser.prepareSQL(sql, holder);
+        return createQuery(createConfig(entityInfoFactory.getRoot(), preparedSql, holder, Collections.<FetchInfo>emptyList(), lazy));
     }
 
-    private String parseSql(String sql, List<Integer> paramTypes) {
-        StringBuilder sqlBuilder = new StringBuilder();
-        StringBuilder paramBuilder = null;
-        char[] chars = sql.toCharArray();
-        boolean variableMatch = false;
-        for (int i = 0; i < chars.length; i++) {
-            char c = chars[i];
-            if (c == '?') {
-                paramTypes.add(Integer.MAX_VALUE);
-                paramBuilder = new StringBuilder();
-                variableMatch = false;
-                sqlBuilder.append('?');
-            } else if (c == ':') {
-                variableMatch = true;
-                sqlBuilder.append('?');
-                paramTypes.add(Integer.MAX_VALUE);
-                paramBuilder = new StringBuilder();
-            } else if (variableMatch) {
-                if (isDelimiter(c)) {
-                    String paramName = paramBuilder.toString();
-                    List<Integer> indexes = namedParams.get(paramName);
-                    if (indexes == null) {
-                        indexes = new LinkedList<Integer>();
-                        namedParams.put(paramName, indexes);
-                    }
-                    indexes.add(paramTypes.size());
-                    variableMatch = false;
-
-                    sqlBuilder.append(c);
-                } else {
-                    paramBuilder.append(c);
-                }
-            } else {
-                sqlBuilder.append(c);
-            }
-        }
-
-        if (variableMatch) {
-            String paramName = paramBuilder.toString();
-            List<Integer> indexes = namedParams.get(paramName);
-            if (indexes == null) {
-                indexes = new LinkedList<Integer>();
-                namedParams.put(paramName, indexes);
-            }
-            indexes.add(paramTypes.size());
-        }
-
-        return sqlBuilder.toString();
+    private QueryConfig<T> createConfig(EntityInfo rootRelations, String sqlString, Parameters holder, List<FetchInfo> fetchInfo, boolean lazy) {
+        return new QueryConfig<T>(em, entityClass, sqlString, rootRelations, holder, fetchInfo, lazy);
     }
 
-    private boolean isDelimiter(char c) {
-        return c == '+' || c == '-' || c == ' ' || c == ')' || c == '(' || c == '\n' || c == '\t' || c == ',';
-    }
-
-    protected String getConditionStringAndTypes(Condition condition, List<Integer> paramsTypes) {
-        StringBuilder result = new StringBuilder();
-
-        createConditionString(condition, paramsTypes, result);
-
-        return result.toString();
-    }
-
-    private void createConditionString(Condition condition, List<Integer> paramsTypes, StringBuilder where) {
-        if (condition == null) {
-            return;
-        }
-
-        Condition[] childs = condition.getChilds();
-        Condition.Type type = condition.getType();
-        if (childs != null && childs.length > 0) {
-            if (type != Condition.Type.NOT) {
-                where.append('(');
-                createConditionString(childs[0], paramsTypes, where);
-                where.append(')');
-
-                for (int i = 1; i < childs.length; i++) {
-                    Condition c = childs[i];
-                    where.append(' ').append(type.name()).append(" (");
-                    createConditionString(c, paramsTypes, where);
-                    where.append(')');
-                }
-            } else {
-                where.append("NOT (");
-                createConditionString(childs[0], paramsTypes, where);
-                where.append(')');
-            }
-        } else if (type == Condition.Type.NATIVE) {
-            where.append(parseSql(condition.getSql(), paramsTypes));
-        } else {
-            FieldMapping fieldMapping =
-                    registry.getFieldMappingByPropertyName(entityClass, condition.getPropertyName());
-            if (fieldMapping == null) {
-                throw new IllegalArgumentException("Unknown field!");
-            }
-            where.append(fieldMapping.getColumn());
-            if (type == Condition.Type.IS_EQUAL) {
-                addParam(condition, paramsTypes, fieldMapping.getType());
-                where.append(" = ?");
-            } else if (type == Condition.Type.NOT_EQUAL) {
-                addParam(condition, paramsTypes, fieldMapping.getType());
-                where.append(" <> ?");
-            } else if (type == Condition.Type.IS_NOT_NULL) {
-                where.append(" IS NOT NULL");
-            } else if (type == Condition.Type.IS_NULL) {
-                where.append(" IS NULL");
-            } else if (type == Condition.Type.IS_GREATER) {
-                addParam(condition, paramsTypes, fieldMapping.getType());
-                where.append(" > ?");
-            } else if (type == Condition.Type.IS_GREATER_OR_EQUAL) {
-                addParam(condition, paramsTypes, fieldMapping.getType());
-                where.append(" >= ?");
-            } else if (type == Condition.Type.IS_LESS) {
-                addParam(condition, paramsTypes, fieldMapping.getType());
-                where.append(" < ?");
-            } else if (type == Condition.Type.IS_LESS_OR_EQUAL) {
-                addParam(condition, paramsTypes, fieldMapping.getType());
-                where.append(" <= ?");
-            } else if (type == Condition.Type.IN) {
-                addParam(condition, paramsTypes, fieldMapping.getType());
-                where.append(" IN (?)");
-            } else if (type == Condition.Type.LIKE) {
-                addParam(condition, paramsTypes, fieldMapping.getType());
-                where.append(" LIKE ?");
-            } else if (type == Condition.Type.BETWEEN) {
-                addParam(condition, paramsTypes, fieldMapping.getType());
-                addParam(condition, paramsTypes, fieldMapping.getType());
-                where.append(" BETWEEN ? AND ?");
-            } else {
-                throw new IllegalArgumentException("Unknown condition type!");
-            }
-        }
-    }
-
-    protected String createOrderBy() {
-        StringBuilder orderBy = new StringBuilder();
-        if (this.orderBy != null && this.orderBy.length > 0) {
-            for (OrderBy ob : this.orderBy) {
-                FieldMapping fieldMapping = registry.getFieldMappingByPropertyName(entityClass, ob.getPropertyName());
-                if (fieldMapping == null) {
-                    throw new IllegalArgumentException("Unknown field!");
-                }
-                orderBy.append(fieldMapping.getColumn())
-                        .append(' ')
-                        .append(ob.getType())
-                        .append(", ");
-            }
-
-            orderBy.deleteCharAt(orderBy.length() - 2);
-        }
-
-        return orderBy.toString();
-    }
-
-    protected StringBuilder createDefaultSQLString(String fieldsString, String conditions, String orderBy) {
+    protected StringBuilder createSQLString(String fieldsString, String from, String where, String orderBy) {
         StringBuilder sql;
-        sql = new StringBuilder("SELECT ")
-                .append(fieldsString)
-                .append("FROM ")
-                .append(registry.getTableName(entityClass));
-        if (conditions.length() > 0) {
-            sql.append(" WHERE ").append(conditions);
+        sql = new StringBuilder("SELECT ").append(fieldsString).append(" FROM ").append(from);
+        if (where.length() > 0) {
+            sql.append(" WHERE ").append(where);
         }
 
         if (orderBy.length() > 0) {
@@ -234,53 +175,33 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
         return sql;
     }
 
-    private void addParam(Condition condition, List<Integer> paramsTypes, int type) {
-        paramsTypes.add(type);
-        String paramName = condition.getParamName();
-        if (paramName != null) {
-            List<Integer> indexes = namedParams.get(paramName);
-            if (indexes == null) {
-                indexes = new LinkedList<Integer>();
-                namedParams.put(paramName, indexes);
-            }
-            indexes.add(paramsTypes.size());
-        }
-    }
-
-    protected String getFieldsString(Collection<FieldMapping> fields) {
-        StringBuilder result = new StringBuilder();
-        if (fields != null) {
-            for (FieldMapping fm : fields) {
-                result.append(fm.getColumn()).append(", ");
-            }
-        }
-        result.deleteCharAt(result.length() - 2);
-        return result.toString();
-    }
-
-    public IQueryBuilder<T> setMaxSize(Integer maxSize) {
-        this.maxSize = maxSize;
-        return this;
-    }
-
-    public IQueryBuilder<T> setOffset(Integer offset) {
-        this.offset = offset;
-        return this;
-    }
-
-    public IQueryBuilder<T> where(Condition condition) {
+    public IQueryBuilder<T> where(If condition) {
         if (this.condition != null) {
             throw new IllegalStateException("Condition statement is set already in WHERE clause!");
         }
         this.condition = condition;
+
         return this;
     }
 
-    public IQueryBuilder<T> orderBy(OrderBy... orderBy) {
-        if (this.orderBy != null) {
-            throw new IllegalStateException("Order statement is set already in ORDER BY clause!");
-        }
-        this.orderBy = orderBy;
+    public IQueryBuilder<T> orderBy(String orderByClause) {
+        final List<OrderBy> parse = OrderByFragmentHelper.parse(orderByClause);
+        checkOrderBy();
+        orderBy.addAll(parse);
+
         return this;
     }
+
+    public IQueryBuilder<T> orderBy(OrderBy orderBy) {
+        checkOrderBy();
+        this.orderBy.add(orderBy);
+        return this;
+    }
+
+    private void checkOrderBy() {
+        if (orderBy == null) {
+            orderBy = new ArrayList<OrderBy>();
+        }
+    }
+
 }

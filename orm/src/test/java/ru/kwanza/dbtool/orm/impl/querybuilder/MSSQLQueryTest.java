@@ -8,6 +8,5 @@ import org.springframework.test.context.ContextConfiguration;
  */
 
 @ContextConfiguration(locations = "mssql-config.xml")
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class MSSQLQueryTest extends QueryTest {
 }

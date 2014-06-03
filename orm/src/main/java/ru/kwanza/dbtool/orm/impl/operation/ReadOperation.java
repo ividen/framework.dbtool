@@ -1,10 +1,11 @@
 package ru.kwanza.dbtool.orm.impl.operation;
 
 import ru.kwanza.dbtool.core.DBTool;
-import ru.kwanza.dbtool.orm.api.Condition;
 import ru.kwanza.dbtool.orm.api.IQuery;
-import ru.kwanza.dbtool.orm.impl.mapping.FieldMapping;
-import ru.kwanza.dbtool.orm.impl.mapping.IEntityMappingRegistry;
+import ru.kwanza.dbtool.orm.api.If;
+import ru.kwanza.dbtool.orm.api.internal.IEntityMappingRegistry;
+import ru.kwanza.dbtool.orm.api.internal.IFieldMapping;
+import ru.kwanza.dbtool.orm.impl.EntityManagerImpl;
 import ru.kwanza.dbtool.orm.impl.querybuilder.QueryBuilderFactory;
 
 import java.util.Collection;
@@ -19,25 +20,23 @@ public class ReadOperation extends Operation implements IReadOperation {
 
     private IQuery queryForCollection;
 
-    public ReadOperation(IEntityMappingRegistry entityMappingRegistry, DBTool dbTool, Class entityClass) {
-        super(entityMappingRegistry, dbTool, entityClass);
+    public ReadOperation(EntityManagerImpl em, Class entityClass) {
+        super(em,  entityClass);
     }
 
     @Override
     protected void initOperation() {
-        final Collection<FieldMapping> idFieldMappings = entityMappingRegistry.getIdFields(entityClass);
-        if (idFieldMappings == null || idFieldMappings.isEmpty()) {
+        final IFieldMapping idFieldMapping = em.getRegistry().getEntityType(entityClass).getIdField();
+        if (idFieldMapping==null) {
             throw new RuntimeException("IdFieldMapping for entity class" + entityClass + " not found");
         }
 
-        final FieldMapping idFieldMapping = idFieldMappings.iterator().next();
         final String propertyName = idFieldMapping.getName();
 
         this.queryForObject =
-                QueryBuilderFactory.createBuilder(dbTool, entityMappingRegistry, entityClass).where(Condition.isEqual(propertyName))
-                        .create();
+                QueryBuilderFactory.createBuilder(em, entityClass).where(If.isEqual(propertyName)).create();
         this.queryForCollection =
-                QueryBuilderFactory.createBuilder(dbTool, entityMappingRegistry, entityClass).where(Condition.in(propertyName)).create();
+                QueryBuilderFactory.createBuilder(em, entityClass).where(If.in(propertyName)).create();
     }
 
     public Object selectByKey(Object key) {

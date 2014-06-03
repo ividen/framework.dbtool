@@ -1,77 +1,69 @@
 package ru.kwanza.dbtool.orm.impl.operation;
 
-import org.dbunit.DBTestCase;
-import org.dbunit.database.DatabaseConfig;
+import org.dbunit.IDatabaseTester;
+import org.dbunit.database.DatabaseConnection;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.IDataSet;
 import org.dbunit.dataset.SortedDataSet;
 import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
 import org.dbunit.operation.DatabaseOperation;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.support.DefaultTransactionDefinition;
+import org.springframework.stereotype.Component;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests;
+import org.springframework.test.context.transaction.TransactionConfiguration;
+import ru.kwanza.dbtool.core.ConnectionConfigListener;
 import ru.kwanza.dbtool.core.DBTool;
 import ru.kwanza.dbtool.orm.api.IEntityManager;
-import ru.kwanza.dbtool.orm.impl.mapping.IEntityMappingRegistry;
+import ru.kwanza.dbtool.orm.impl.mapping.EntityMappingRegistry;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 
 /**
  * @author Kiryl Karatsetski
  */
-public abstract class AbstractOperationTest extends DBTestCase {
 
-    protected ApplicationContext applicationContext;
 
-    @Override
-    protected IDataSet getDataSet() throws Exception {
-        return new FlatXmlDataSetBuilder().build(this.getClass().getResourceAsStream("./data/data_set.xml"));
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@TransactionConfiguration(defaultRollback = true)
+public abstract class AbstractOperationTest extends AbstractTransactionalJUnit4SpringContextTests {
+    @Resource(name = "dbtool.DBTool")
+    protected DBTool dbTool;
+
+
+    @Resource(name = "dbtool.IEntityManager")
+    protected IEntityManager em;
+
+
+    @Component
+    public static class InitDB {
+        @Resource(name = "dbTester")
+        private IDatabaseTester dbTester;
+        @Resource(name = "dbtool.IEntityMappingRegistry")
+        private EntityMappingRegistry registry;
+
+        private IDataSet getDataSet() throws Exception {
+            return new FlatXmlDataSetBuilder().build(this.getClass().getResourceAsStream("./data/data_set.xml"));
+        }
+
+        @PostConstruct
+        protected void init() throws Exception {
+            registry.registerEntityClass(TestEntity.class);
+            registry.registerEntityClass(TestEntityVersion.class);
+            dbTester.setDataSet(getDataSet());
+            dbTester.setOperationListener(new ConnectionConfigListener());
+            dbTester.setSetUpOperation(DatabaseOperation.CLEAN_INSERT);
+            dbTester.onSetup();
+        }
     }
-
-    @Override
-    protected void setUp() throws Exception {
-        applicationContext = new ClassPathXmlApplicationContext(getSpringConfigFile(), AbstractOperationTest.class);
-        DatabaseOperation.CLEAN_INSERT.execute(getConnection(), getDataSet());
-        getEntityMappingRegistry().registerEntityClass(TestEntity.class);
-        getEntityMappingRegistry().registerEntityClass(TestEntityVersion.class);
-    }
-
-    @Override
-    protected void setUpDatabaseConfig(DatabaseConfig config) {
-        config.setProperty(DatabaseConfig.FEATURE_BATCHED_STATEMENTS, true);
-    }
-
-    protected abstract String getSpringConfigFile();
 
     protected IDataSet getResourceSet(String fileName) throws DataSetException {
         return new SortedDataSet(new FlatXmlDataSetBuilder().build(this.getClass().getResourceAsStream(fileName)));
     }
 
-    protected TransactionDefinition getTxDef() {
-        final DefaultTransactionDefinition definition = new DefaultTransactionDefinition();
-        definition.setName("SomeTxName");
-        definition.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
-        return definition;
-    }
-
-    protected PlatformTransactionManager getTxManager() {
-        return (PlatformTransactionManager) applicationContext.getBean("txManager");
-    }
-
     protected IDataSet getActualDataSet() throws Exception {
-        return new SortedDataSet(getConnection().createDataSet(new String[]{"test_table"}));
+        return new SortedDataSet(new DatabaseConnection(dbTool.getJDBCConnection()).createDataSet(new String[]{"test_table"}));
     }
 
-    protected IEntityMappingRegistry getEntityMappingRegistry() {
-        return applicationContext.getBean(IEntityMappingRegistry.class);
-    }
-
-    protected IEntityManager getEntityManager() {
-        return applicationContext.getBean(IEntityManager.class);
-    }
-
-    protected DBTool getDBTool() {
-        return applicationContext.getBean(DBTool.class);
-    }
 }
 

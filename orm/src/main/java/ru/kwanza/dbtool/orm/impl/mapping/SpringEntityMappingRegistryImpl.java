@@ -11,11 +11,13 @@ import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.SystemPropertyUtils;
+import ru.kwanza.dbtool.orm.annotations.AbstractEntity;
 import ru.kwanza.dbtool.orm.annotations.Entity;
+import ru.kwanza.dbtool.orm.api.internal.IEntityMappingRegistry;
+import ru.kwanza.dbtool.orm.api.internal.IEntityType;
 import ru.kwanza.dbtool.orm.springintegration.DBToolOrmNamespaceHandler;
 
 import java.io.IOException;
-import java.util.Collection;
 
 /**
  * @author Kiryl Karatsetski
@@ -29,9 +31,9 @@ public class SpringEntityMappingRegistryImpl implements IEntityMappingRegistry {
     private ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
     private MetadataReaderFactory metadataReaderFactory = new CachingMetadataReaderFactory(resourcePatternResolver);
 
-    private IEntityMappingRegistry delegate;
+    private EntityMappingRegistry delegate;
 
-    public SpringEntityMappingRegistryImpl(IEntityMappingRegistry delegate, String[] basePackages) {
+    public SpringEntityMappingRegistryImpl(EntityMappingRegistry delegate, String[] basePackages) {
         this.delegate = delegate;
         for (String basePackage : basePackages) {
             scanPackage(basePackage);
@@ -55,7 +57,7 @@ public class SpringEntityMappingRegistryImpl implements IEntityMappingRegistry {
                             log.trace(className);
                             final ClassLoader classLoader = resourcePatternResolver.getClassLoader();
                             Class<?> entityClass = classLoader.loadClass(className);
-                            if (entityClass.isAnnotationPresent(Entity.class)) {
+                            if (entityClass.isAnnotationPresent(Entity.class) || entityClass.isAnnotationPresent(AbstractEntity.class)) {
                                 delegate.registerEntityClass(entityClass);
                             }
                         }
@@ -93,79 +95,11 @@ public class SpringEntityMappingRegistryImpl implements IEntityMappingRegistry {
         return delegate.isRegisteredEntityName(entityName);
     }
 
-    public void validateEntityMapping() {
-        delegate.validateEntityMapping();
+    public IEntityType getEntityType(String name) {
+        return delegate.getEntityType(name);
     }
 
-    public String getTableName(Class entityClass) {
-        return delegate.getTableName(entityClass);
-    }
-
-    public String getTableName(String entityName) {
-        return delegate.getTableName(entityName);
-    }
-
-    public String getEntityName(Class entityClass) {
-        return delegate.getEntityName(entityClass);
-    }
-
-    public Class getEntityClass(String entityName) {
-        return delegate.getEntityClass(entityName);
-    }
-
-    public Collection<String> getColumnNames(Class entityClass) {
-        return delegate.getColumnNames(entityClass);
-    }
-
-    public Collection<String> getColumnNames(String entityName) {
-        return delegate.getColumnNames(entityName);
-    }
-
-    public Collection<FieldMapping> getFieldMappings(Class entityClass) {
-        return delegate.getFieldMappings(entityClass);
-    }
-
-    public Collection<FieldMapping> getFieldMappings(String entityName) {
-        return delegate.getFieldMappings(entityName);
-    }
-
-    public Collection<FieldMapping> getIdFields(Class entityClass) {
-        return delegate.getIdFields(entityClass);
-    }
-
-    public Collection<FieldMapping> getIdFields(String entityName) {
-        return delegate.getIdFields(entityName);
-    }
-
-    public FieldMapping getVersionField(Class entityClass) {
-        return delegate.getVersionField(entityClass);
-    }
-
-    public FieldMapping getVersionField(String entityName) {
-        return delegate.getVersionField(entityName);
-    }
-
-    public Collection<FetchMapping> getFetchMapping(Class entityClass) {
-        return delegate.getFetchMapping(entityClass);
-    }
-
-    public Collection<FetchMapping> getFetchMapping(String entityName) {
-        return delegate.getFetchMapping(entityName);
-    }
-
-    public FieldMapping getFieldMappingByPropertyName(Class entityClass, String propertyName) {
-        return delegate.getFieldMappingByPropertyName(entityClass, propertyName);
-    }
-
-    public FieldMapping getFieldMappingByPropertyName(String entityName, String propertyName) {
-        return delegate.getFieldMappingByPropertyName(entityName, propertyName);
-    }
-
-    public FetchMapping getFetchMappingByPropertyName(Class entityClass, String propertyName) {
-        return delegate.getFetchMappingByPropertyName(entityClass, propertyName);
-    }
-
-    public FetchMapping getFetchMappingByPropertyName(String entityName, String propertyName) {
-        return delegate.getFetchMappingByPropertyName(entityName, propertyName);
+    public IEntityType getEntityType(Class entityClass) {
+        return delegate.getEntityType(entityClass);
     }
 }

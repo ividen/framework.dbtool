@@ -4,36 +4,44 @@ import ru.kwanza.dbtool.core.DBTool;
 import ru.kwanza.dbtool.core.UpdateException;
 import ru.kwanza.dbtool.core.VersionGenerator;
 import ru.kwanza.dbtool.orm.api.*;
-import ru.kwanza.dbtool.orm.impl.fetcher.FetcherImpl;
+import ru.kwanza.dbtool.orm.api.internal.IEntityMappingRegistry;
+import ru.kwanza.dbtool.orm.api.internal.IFieldMapping;
+import ru.kwanza.dbtool.orm.impl.fetcher.Fetcher;
+import ru.kwanza.dbtool.orm.impl.fetcher.proxy.Proxy;
 import ru.kwanza.dbtool.orm.impl.filtering.FilteringImpl;
-import ru.kwanza.dbtool.orm.impl.mapping.FieldMapping;
-import ru.kwanza.dbtool.orm.impl.mapping.IEntityMappingRegistry;
+import ru.kwanza.dbtool.orm.impl.lockoperation.LockOperationFactory;
 import ru.kwanza.dbtool.orm.impl.operation.OperationFactory;
 import ru.kwanza.dbtool.orm.impl.querybuilder.QueryBuilderFactory;
+import ru.kwanza.toolbox.SpringSerializable;
 
+import javax.annotation.Resource;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 /**
  * @author Kiryl Karatsetski
  */
-public class EntityManagerImpl implements IEntityManager {
+public class EntityManagerImpl extends SpringSerializable implements IEntityManager {
 
+    @Resource(name = "dbtool.DBTool")
     private DBTool dbTool;
 
+    @Resource(name = "dbtool.VersionGenerator")
     private VersionGenerator versionGenerator;
 
-    private IEntityMappingRegistry mappingRegistry;
+    @Resource(name = "dbtool.IEntityMappingRegistry")
+    private IEntityMappingRegistry registry;
 
+    @Resource(name = "dbtool.OperationFactory")
     private OperationFactory operationFactory;
 
-    private IFetcher fetcher;
+    @Resource(name = "dbtool.LockOperationFactory")
+    private LockOperationFactory lockOperationFactory;
 
-    public void init() {
-        this.operationFactory = new OperationFactory(mappingRegistry, dbTool);
-        this.fetcher = new FetcherImpl(mappingRegistry, this);
-    }
+    @Resource(name = "dbtool.Fetcher")
+    private Fetcher fetcher;
 
     public <T> T create(T object) throws UpdateException {
         final Class entityClass = object.getClass();
@@ -93,14 +101,12 @@ public class EntityManagerImpl implements IEntityManager {
 
     @SuppressWarnings("unchecked")
     public <F, T> Map<F, T> readMapByKeys(Class<T> entityClass, Collection keys) {
-        Collection<FieldMapping> idFieldMappings = mappingRegistry.getIdFields(entityClass);
-        if (idFieldMappings == null || idFieldMappings.isEmpty()) {
+        final IFieldMapping idFieldMapping = registry.getEntityType(entityClass).getIdField();
+        if (idFieldMapping == null) {
             throw new RuntimeException("IdFieldMapping for entity class" + entityClass + " not found");
         }
 
-        String idField = idFieldMappings.iterator().next().getName();
-
-        return (Map<F, T>) operationFactory.getReadOperation(entityClass).selectMapByKeys(keys, idField);
+        return (Map<F, T>) operationFactory.getReadOperation(entityClass).selectMapByKeys(keys, idFieldMapping.getName());
     }
 
     @SuppressWarnings("unchecked")
@@ -109,7 +115,7 @@ public class EntityManagerImpl implements IEntityManager {
     }
 
     public <T> IQueryBuilder<T> queryBuilder(Class<T> entityClass) {
-        return QueryBuilderFactory.createBuilder(dbTool, mappingRegistry, entityClass);
+        return QueryBuilderFactory.createBuilder(this, entityClass);
     }
 
     public <T> IFiltering<T> filtering(Class<T> entityClass) {
@@ -120,19 +126,56 @@ public class EntityManagerImpl implements IEntityManager {
         return new EntityBatcherImpl(this);
     }
 
-    public IFetcher getFetcher() {
+    public <T> void fetch(Class<T> entityClass, Collection<T> items, String relationPath) {
+        fetcher.fetch(entityClass, items, relationPath);
+    }
+
+    public <T> void fetch(T object, String relationPath) {
+        fetcher.fetch(object, relationPath);
+    }
+
+    public <T> void fetchLazy(Class<T> entityClass, Collection<T> items) {
+        fetcher.fetchLazy(entityClass, items);
+    }
+
+    public <T> void fetchLazy(T object) {
+        fetcher.fetchLazy(object);
+    }
+
+    public boolean isProxy(Object object) {
+        return Proxy.isProxy(object);
+    }
+
+    public <T> T unwrapProxy(T object) {
+        if (isProxy(object)){
+            //emulate load on-demand
+            object.toString();
+            return Proxy.getDelegate(object);
+        }
+        else return object;
+    }
+
+    public boolean isNull(Object object) {
+        return object == null || (isProxy(object) && unwrapProxy(object) == null);
+    }
+
+    public <T> LockResult<T> lock(LockType type, Class<T> entityClass, Collection<T> items) {
+        return lockOperationFactory.createOperation(this, type, entityClass).lock(items);
+    }
+
+    public <T> LockResult<T> lock(LockType type, T item) {
+        return lock(type, (Class<T>) item.getClass(), Collections.singleton(item));
+    }
+
+    public Fetcher getFetcher() {
         return fetcher;
     }
 
-    public void setDbTool(DBTool dbTool) {
-        this.dbTool = dbTool;
+    public IEntityMappingRegistry getRegistry() {
+        return registry;
     }
 
-    public void setVersionGenerator(VersionGenerator versionGenerator) {
-        this.versionGenerator = versionGenerator;
-    }
-
-    public void setMappingRegistry(IEntityMappingRegistry mappingRegistry) {
-        this.mappingRegistry = mappingRegistry;
+    public DBTool getDbTool() {
+        return dbTool;
     }
 }

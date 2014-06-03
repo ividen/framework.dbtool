@@ -6,10 +6,12 @@ import org.springframework.jdbc.core.RowMapper;
 import ru.kwanza.dbtool.core.*;
 import ru.kwanza.dbtool.core.util.FieldValueExtractor;
 import ru.kwanza.dbtool.core.util.UpdateUtil;
-import ru.kwanza.dbtool.orm.impl.mapping.EntityField;
-import ru.kwanza.dbtool.orm.impl.mapping.FieldMapping;
-import ru.kwanza.dbtool.orm.impl.mapping.IEntityMappingRegistry;
+import ru.kwanza.dbtool.orm.api.internal.IEntityMappingRegistry;
+import ru.kwanza.dbtool.orm.api.internal.IEntityType;
+import ru.kwanza.dbtool.orm.api.internal.IFieldMapping;
+import ru.kwanza.dbtool.orm.impl.EntityManagerImpl;
 import ru.kwanza.toolbox.fieldhelper.FieldHelper;
+import ru.kwanza.toolbox.fieldhelper.Property;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -24,13 +26,13 @@ public class UpdateOperation extends Operation implements IUpdateOperation {
 
     private static final Logger log = LoggerFactory.getLogger(UpdateOperation.class);
 
-    private Collection<FieldMapping> fieldMappings;
+    private Collection<IFieldMapping> fieldMappings;
 
-    private FieldMapping idFieldMapping;
-    private EntityField idEntityField;
+    private IFieldMapping idFieldMapping;
+    private Property idEntityField;
 
-    private FieldMapping versionFieldMapping;
-    private EntityField versionEntityField;
+    private IFieldMapping versionFieldMapping;
+    private Property versionEntityField;
 
     private boolean versionSupport;
 
@@ -46,35 +48,34 @@ public class UpdateOperation extends Operation implements IUpdateOperation {
 
     private VersionGenerator versionGenerator;
 
-    public UpdateOperation(IEntityMappingRegistry entityMappingRegistry, DBTool dbTool, Class entityClass,
+    public UpdateOperation(EntityManagerImpl em, Class entityClass,
                            VersionGenerator versionGenerator) {
-        super(entityMappingRegistry, dbTool, entityClass);
+        super(em, entityClass);
         this.versionGenerator = versionGenerator;
     }
 
     protected void initOperation() {
-        this.fieldMappings = entityMappingRegistry.getFieldMappings(entityClass);
+        final IEntityType entityType = em.getRegistry().getEntityType(entityClass);
+        this.fieldMappings = entityType.getFields();
 
-        final Collection<FieldMapping> idFieldMappings = entityMappingRegistry.getIdFields(entityClass);
+        this.idFieldMapping = entityType.getIdField();
 
-        if (idFieldMappings == null || idFieldMappings.isEmpty()) {
+        if (idFieldMapping == null) {
             throw new RuntimeException("IdFieldMapping for entity class" + entityClass + " not found");
         }
 
-        this.idFieldMapping = idFieldMappings.iterator().next();
-        this.idEntityField = idFieldMapping != null ? idFieldMapping.getEntityFiled() : null;
+        this.idEntityField = idFieldMapping.getProperty();
 
-        this.versionFieldMapping = entityMappingRegistry.getVersionField(entityClass);
-        this.versionEntityField = versionFieldMapping != null ? versionFieldMapping.getEntityFiled() : null;
+        this.versionFieldMapping = entityType.getVersionField();
+        this.versionEntityField = versionFieldMapping != null ? versionFieldMapping.getProperty() : null;
 
         this.versionSupport = versionEntityField != null;
 
-        final String tableName = entityMappingRegistry.getTableName(entityClass);
-        final Collection<String> columnNames = entityMappingRegistry.getColumnNames(entityClass);
+        final String tableName = entityType.getTableName();
         final String idColumnName = idFieldMapping != null ? idFieldMapping.getColumn() : null;
         final String versionColumnName = versionFieldMapping != null ? versionFieldMapping.getColumn() : null;
 
-        this.updateQuery = buildUpdateQuery(tableName, columnNames, idColumnName, versionColumnName);
+        this.updateQuery = buildUpdateQuery(tableName, fieldMappings, idColumnName, versionColumnName);
         this.checkQuery = buildCheckQuery(tableName, idColumnName, versionColumnName);
 
         if (log.isTraceEnabled()) {
@@ -83,13 +84,13 @@ public class UpdateOperation extends Operation implements IUpdateOperation {
         }
     }
 
-    private String buildUpdateQuery(String tableName, Collection<String> columnNames, String idColumnName, String versionColumnName) {
+    private String buildUpdateQuery(String tableName, Collection<IFieldMapping> fields, String idColumnName, String versionColumnName) {
         final StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("update ");
         stringBuilder.append(tableName);
         stringBuilder.append(" set ");
-        for (String columnName : columnNames) {
-            stringBuilder.append(columnName).append("=?, ");
+        for (IFieldMapping field : fields) {
+            stringBuilder.append(field.getColumn()).append("=?, ");
         }
         stringBuilder.deleteCharAt(stringBuilder.length() - 2);
         stringBuilder.append("where ");
@@ -119,10 +120,11 @@ public class UpdateOperation extends Operation implements IUpdateOperation {
     @SuppressWarnings("unchecked")
     public void executeUpdate(Collection objects) throws UpdateException {
         if (versionSupport) {
-            UpdateUtil.batchUpdate(getJdbcTemplate(), updateQuery, objects, updateOperationSetter, checkQuery, keyVersionRowMapper, keyField,
-                    versionField, dbTool.getDbType());
+            UpdateUtil
+                    .batchUpdate(getJdbcTemplate(), updateQuery, objects, updateOperationSetter, checkQuery, keyVersionRowMapper, keyField,
+                            versionField, em.getDbTool().getDbType());
         } else {
-            UpdateUtil.batchUpdate(getJdbcTemplate(), updateQuery, objects, updateSetter, dbTool.getDbType());
+            UpdateUtil.batchUpdate(getJdbcTemplate(), updateQuery, objects, updateSetter, em.getDbTool().getDbType());
         }
     }
 
@@ -131,11 +133,11 @@ public class UpdateOperation extends Operation implements IUpdateOperation {
         public boolean setValues(PreparedStatement pst, Object object) throws SQLException {
             try {
                 int index = 0;
-                for (FieldMapping fieldMapping : fieldMappings) {
-                    final EntityField entityFiled = fieldMapping.getEntityFiled();
-                    FieldSetter.setValue(pst, ++index, entityFiled.getType(), entityFiled.getValue(object));
+                for (IFieldMapping fieldMapping : fieldMappings) {
+                    final Property entityFiled = fieldMapping.getProperty();
+                    FieldSetter.setValue(pst, ++index, entityFiled.getType(), entityFiled.value(object));
                 }
-                FieldSetter.setValue(pst, ++index, idEntityField.getType(), idEntityField.getValue(object));
+                FieldSetter.setValue(pst, ++index, idEntityField.getType(), idEntityField.value(object));
             } catch (SQLException e) {
                 throw e;
             } catch (Exception e) {
@@ -147,15 +149,15 @@ public class UpdateOperation extends Operation implements IUpdateOperation {
         public boolean setValues(PreparedStatement pst, Object object, Long newVersion, Long oldVersion) throws SQLException {
             try {
                 int index = 0;
-                for (FieldMapping fieldMapping : fieldMappings) {
-                    final EntityField entityFiled = fieldMapping.getEntityFiled();
+                for (IFieldMapping fieldMapping : fieldMappings) {
+                    final Property entityFiled = fieldMapping.getProperty();
                     if (fieldMapping.getColumn().equals(versionFieldMapping.getColumn())) {
                         FieldSetter.setLong(pst, ++index, newVersion);
                     } else {
-                        FieldSetter.setValue(pst, ++index, entityFiled.getType(), entityFiled.getValue(object));
+                        FieldSetter.setValue(pst, ++index, entityFiled.getType(), entityFiled.value(object));
                     }
                 }
-                FieldSetter.setValue(pst, ++index, idEntityField.getType(), idEntityField.getValue(object));
+                FieldSetter.setValue(pst, ++index, idEntityField.getType(), idEntityField.value(object));
                 FieldSetter.setLong(pst, ++index, oldVersion);
             } catch (SQLException e) {
                 throw e;
@@ -176,21 +178,21 @@ public class UpdateOperation extends Operation implements IUpdateOperation {
 
     private class KeyField implements FieldHelper.Field<Object, Comparable> {
         public Comparable value(Object object) {
-            return (Comparable) idEntityField.getValue(object);
+            return (Comparable) idEntityField.value(object);
         }
     }
 
     private class VersionField implements FieldHelper.VersionField<Object, Long> {
         public Long value(Object object) {
-            return (Long) versionEntityField.getValue(object);
+            return (Long) versionEntityField.value(object);
         }
 
         public Long generateNewValue(Object object) {
-            return versionGenerator.generate(entityClass.getName(), (Long) versionEntityField.getValue(object));
+            return versionGenerator.generate(entityClass.getName(), (Long) versionEntityField.value(object));
         }
 
         public void setValue(Object object, Long value) {
-            versionEntityField.setValue(object, value);
+            versionEntityField.set(object, value);
         }
     }
 }

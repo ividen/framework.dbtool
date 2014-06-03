@@ -95,7 +95,7 @@ public class EntityBatcherImpl implements IEntityBatcher {
             }
         }
 
-        for (Map.Entry<Class, Collection> e :  updateObjectStore.entrySet()) {
+        for (Map.Entry<Class, Collection> e : updateObjectStore.entrySet()) {
             try {
                 entityManager.update(e.getKey(), e.getValue());
             } catch (UpdateException ex) {
@@ -103,7 +103,7 @@ public class EntityBatcherImpl implements IEntityBatcher {
             }
         }
 
-        for (Map.Entry<Class, Collection> e :  deleteObjectStore.entrySet()) {
+        for (Map.Entry<Class, Collection> e : deleteObjectStore.entrySet()) {
             try {
                 entityManager.delete(e.getKey(), e.getValue());
             } catch (UpdateException ex) {
@@ -111,7 +111,7 @@ public class EntityBatcherImpl implements IEntityBatcher {
             }
         }
 
-        for (Map.Entry<Class, Collection> e :  deleteKeyStore.entrySet()) {
+        for (Map.Entry<Class, Collection> e : deleteKeyStore.entrySet()) {
             try {
                 entityManager.deleteByKeys(e.getKey(), e.getValue());
             } catch (UpdateException ex) {

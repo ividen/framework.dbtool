@@ -1,7 +1,10 @@
 package ru.kwanza.dbtool.orm.impl.filtering;
 
 import ru.kwanza.dbtool.orm.api.*;
+import ru.kwanza.dbtool.orm.impl.querybuilder.JoinHelper;
+import ru.kwanza.dbtool.orm.impl.querybuilder.OrderByFragmentHelper;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -15,32 +18,115 @@ public class FilteringImpl<T> implements IFiltering<T> {
     private Class<T> entityClass;
     private Integer offset;
     private Integer maxSize;
-    private Filter[] filters = null;
-    private OrderBy[] orders = null;
+    private List<Filter> filters = null;
+    private List<Join> joins = null;
+    private List<OrderBy> orderBys = null;
 
     public FilteringImpl(IEntityManager em, Class<T> entityClass) {
         this.em = em;
         this.entityClass = entityClass;
     }
 
-    public IFiltering setOffset(Integer offset) {
-        this.offset = offset;
-        return this;
-    }
-
-    public IFiltering setMaxSize(Integer maxSize) {
+    public IFiltering<T> paging(Integer offset, Integer maxSize) {
         this.maxSize = maxSize;
+        this.offset = offset;
+
         return this;
     }
 
-    public IFiltering filter(Filter... filters) {
-        this.filters = filters;
+    public IFiltering<T> join(String join) {
+        getJoins().addAll(JoinHelper.parse(join));
         return this;
     }
 
-    public IFiltering orderBy(OrderBy... orderBy) {
-        orders = orderBy;
+    public IFiltering<T> join(Join join) {
+        getJoins().add(join);
         return this;
+    }
+
+    public IFiltering<T> join(boolean use, String join) {
+        if (!use) {
+            return this;
+        }
+
+        return join(join);
+    }
+
+    public IFiltering<T> join(boolean use, Join join) {
+        if (!use) {
+            return this;
+        }
+
+        return join(join);
+    }
+
+    public IFiltering<T> filter(boolean use, If condition, Object... params) {
+        if (use) {
+            getFilters().add(new Filter(true, condition, params));
+        }
+
+        return this;
+    }
+
+    private List<Filter> getFilters() {
+        if (filters == null) {
+            filters = new ArrayList<Filter>();
+        }
+        return filters;
+    }
+
+    private List<Join> getJoins() {
+        if (joins == null) {
+            joins = new ArrayList<Join>();
+        }
+        return joins;
+    }
+
+    private List<OrderBy> getOrderBys() {
+        if (orderBys == null) {
+            orderBys = new ArrayList<OrderBy>();
+        }
+        return orderBys;
+    }
+
+    public IFiltering<T> filter(If condition, Object... params) {
+        return filter(true, condition, params);
+    }
+
+    public IFiltering<T> filter(Filter... filters) {
+        for (Filter filter : filters) {
+            if (filter.isUse()) {
+                getFilters().add(filter);
+            }
+        }
+
+        return this;
+    }
+
+    public IFiltering<T> orderBy(String orderByClause) {
+        getOrderBys().addAll(OrderByFragmentHelper.parse(orderByClause));
+        return this;
+    }
+
+    public IFiltering<T> orderBy(OrderBy orderBy) {
+        getOrderBys().add(orderBy);
+        return this;
+    }
+
+    public IFiltering<T> orderBy(boolean use, String orderByClause) {
+        if (!use) {
+            return this;
+        }
+
+        return orderBy(orderByClause);
+    }
+
+    public IFiltering<T> orderBy(boolean use, OrderBy orderBy) {
+        if (!use) {
+            return this;
+        }
+
+        return orderBy(orderBy);
     }
 
     public T select() {
@@ -63,7 +149,7 @@ public class FilteringImpl<T> implements IFiltering<T> {
         createStatement().selectList(result);
     }
 
-    public <F> void selectMapList(String propertyName, Map<F, List<T>> result,ListProducer<T> listProducer) {
+    public <F> void selectMapList(String propertyName, Map<F, List<T>> result, ListProducer<T> listProducer) {
         createStatement().selectMapList(propertyName, result, listProducer);
     }
 
@@ -73,39 +159,43 @@ public class FilteringImpl<T> implements IFiltering<T> {
 
     private IStatement<T> createStatement() {
         IQueryBuilder<T> queryBuilder = em.queryBuilder(entityClass);
-        if (maxSize != null) {
-            queryBuilder.setMaxSize(maxSize);
-        }
-
-        if (offset != null) {
-            queryBuilder.setOffset(offset);
-        }
+        final boolean usePaging = maxSize != null && offset != null;
 
         LinkedList params = new LinkedList();
-        LinkedList<Condition> conditions = new LinkedList<Condition>();
+        LinkedList<If> conditions = new LinkedList<If>();
         if (filters != null) {
             for (Filter f : filters) {
-                if (f != null && f.isUse()) {
-                    if (f.isHasParams()) {
-                        for (Object p : f.getValue()) {
-                            params.add(p);
-                        }
+                if (f.getParams() != null) {
+                    for (Object p : f.getParams()) {
+                        params.add(p);
                     }
-                    conditions.add(f.getCondition());
                 }
+                conditions.add(f.getCondition());
+
             }
         }
 
         if (!conditions.isEmpty()) {
-            Condition[] cns = new Condition[conditions.size()];
-            queryBuilder.where(Condition.and(conditions.toArray(cns)));
+            If[] cns = new If[conditions.size()];
+            queryBuilder.where(If.and(conditions.toArray(cns)));
         }
 
-        if (orders != null) {
-            queryBuilder.orderBy(orders);
+        if (joins != null) {
+            for (Join join : joins) {
+                queryBuilder.join(join);
+            }
+        }
+
+        if (orderBys != null) {
+            for (OrderBy orderBy : orderBys) {
+                queryBuilder.orderBy(orderBy);
+            }
         }
 
         IStatement<T> statement = queryBuilder.create().prepare();
+        if (usePaging) {
+            statement.paging(offset, maxSize);
+        }
         for (int i = 0; i < params.size(); i++) {
             statement.setParameter(i + 1, params.get(i));
         }

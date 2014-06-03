@@ -11,13 +11,13 @@ import ru.kwanza.dbtool.orm.annotations.VersionField;
 @Entity(name = "TestEntityVersion", table = "test_table")
 public final class TestEntityVersion {
 
-    @IdField(column = "xkey")
+    @IdField( "xkey")
     private Long key;
 
-    @Field(column = "name")
+    @Field( "name")
     private String name;
 
-    @VersionField(column = "version")
+    @VersionField( "version")
     private Long version;
 
     public TestEntityVersion() {

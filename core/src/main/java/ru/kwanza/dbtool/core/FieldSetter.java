@@ -4,10 +4,17 @@ import java.math.BigDecimal;
 import java.sql.*;
 
 /**
+ * Установка парметров PreparedStatement.
+ * <p/>
+ * Основное назначение: используется функционал {@link java.sql.PreparedStatement#setNull(int, int)}
+ *
  * @author Ivan Baluk
  */
 public class FieldSetter {
 
+    /**
+     * @see ru.kwanza.dbtool.core.FieldGetter
+     */
     public static void setValue(PreparedStatement preparedStatement, int index, Class type, Object value) throws SQLException {
         if (String.class.equals(type)) {
             setString(preparedStatement, index, (String) value);
@@ -46,6 +53,9 @@ public class FieldSetter {
         }
     }
 
+    /**
+     * @see ru.kwanza.dbtool.core.FieldGetter
+     */
     public static void setByte(PreparedStatement pst, int index, Byte value) throws SQLException {
         if (value == null) {
             pst.setNull(index, Types.TINYINT);
@@ -53,7 +63,9 @@ public class FieldSetter {
             pst.setByte(index, value);
         }
     }
-
+    /**
+     * @see ru.kwanza.dbtool.core.FieldGetter
+     */
     public static void setShort(PreparedStatement pst, int index, Short value) throws SQLException {
         if (value == null) {
             pst.setNull(index, Types.SMALLINT);
@@ -61,7 +73,9 @@ public class FieldSetter {
             pst.setShort(index, value);
         }
     }
-
+    /**
+     * @see ru.kwanza.dbtool.core.FieldGetter
+     */
     public static void setInt(PreparedStatement pst, int index, Integer value) throws SQLException {
         if (value == null) {
             pst.setNull(index, Types.INTEGER);
@@ -69,7 +83,9 @@ public class FieldSetter {
             pst.setInt(index, value);
         }
     }
-
+    /**
+     * @see ru.kwanza.dbtool.core.FieldGetter
+     */
     public static void setLong(PreparedStatement pst, int index, Long value) throws SQLException {
         if (value == null) {
             pst.setNull(index, Types.BIGINT);
@@ -77,7 +93,9 @@ public class FieldSetter {
             pst.setLong(index, value);
         }
     }
-
+    /**
+     * @see ru.kwanza.dbtool.core.FieldGetter
+     */
     public static void setFloat(PreparedStatement pst, int index, Float value) throws SQLException {
         if (value == null) {
             pst.setNull(index, Types.FLOAT);
@@ -85,7 +103,9 @@ public class FieldSetter {
             pst.setFloat(index, value);
         }
     }
-
+    /**
+     * @see ru.kwanza.dbtool.core.FieldGetter
+     */
     public static void setDouble(PreparedStatement pst, int index, Double value) throws SQLException {
         if (value == null) {
             pst.setNull(index, Types.DOUBLE);
@@ -93,7 +113,9 @@ public class FieldSetter {
             pst.setDouble(index, value);
         }
     }
-
+    /**
+     * @see ru.kwanza.dbtool.core.FieldGetter
+     */
     public static void setString(PreparedStatement pst, int index, String value) throws SQLException {
         if (value == null) {
             pst.setNull(index, Types.VARCHAR);
@@ -101,7 +123,9 @@ public class FieldSetter {
             pst.setString(index, value);
         }
     }
-
+    /**
+     * @see ru.kwanza.dbtool.core.FieldGetter
+     */
     public static void setBoolean(PreparedStatement pst, int index, Boolean value) throws SQLException {
         if (value == null) {
             pst.setNull(index, Types.BIT);
@@ -109,7 +133,9 @@ public class FieldSetter {
             pst.setBoolean(index, value);
         }
     }
-
+    /**
+     * @see ru.kwanza.dbtool.core.FieldGetter
+     */
     public static void setTimestamp(PreparedStatement pst, int index, Timestamp value) throws SQLException {
         if (value == null) {
             pst.setNull(index, Types.TIMESTAMP);
@@ -117,7 +143,9 @@ public class FieldSetter {
             pst.setTimestamp(index, value);
         }
     }
-
+    /**
+     * @see ru.kwanza.dbtool.core.FieldGetter
+     */
     public static void setTimestamp(PreparedStatement pst, int index, java.util.Date value) throws SQLException {
         if (value == null) {
             pst.setNull(index, Types.TIMESTAMP);
@@ -125,7 +153,9 @@ public class FieldSetter {
             pst.setTimestamp(index, new Timestamp(value.getTime()));
         }
     }
-
+    /**
+     * @see ru.kwanza.dbtool.core.FieldGetter
+     */
     public static void setBlob(PreparedStatement pst, int index, byte[] value) throws SQLException {
         if (value == null) {
             pst.setNull(index, Types.BINARY);
@@ -133,7 +163,9 @@ public class FieldSetter {
             pst.setBytes(index, value);
         }
     }
-
+    /**
+     * @see ru.kwanza.dbtool.core.FieldGetter
+     */
     public static void setBlob(PreparedStatement pst, int index, Blob value) throws SQLException {
         if (value == null) {
             pst.setNull(index, Types.BLOB);
@@ -141,7 +173,9 @@ public class FieldSetter {
             pst.setBlob(index, value);
         }
     }
-
+    /**
+     * @see ru.kwanza.dbtool.core.FieldGetter
+     */
     public static void setClob(PreparedStatement pst, int index, Clob value) throws SQLException {
         if (value == null) {
             pst.setNull(index, Types.CLOB);
@@ -149,7 +183,9 @@ public class FieldSetter {
             pst.setClob(index, value);
         }
     }
-
+    /**
+     * @see ru.kwanza.dbtool.core.FieldGetter
+     */
     public static void setBigDecimal(PreparedStatement pst, int index, BigDecimal value) throws SQLException {
         if (value == null) {
             pst.setNull(index, Types.DECIMAL);

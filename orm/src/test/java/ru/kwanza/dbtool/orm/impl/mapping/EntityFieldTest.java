@@ -2,6 +2,7 @@ package ru.kwanza.dbtool.orm.impl.mapping;
 
 import org.junit.Test;
 import org.springframework.test.context.ContextConfiguration;
+import ru.kwanza.toolbox.fieldhelper.Property;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -14,45 +15,45 @@ import static org.junit.Assert.assertEquals;
 @ContextConfiguration(locations = "dbtool-orm-mapping-test-config.xml")
 public abstract class EntityFieldTest {
 
-    protected abstract EntityField getEntityField() throws Exception;
+    protected abstract Property getproperty() throws Exception;
 
     @Test
     public void testGetType() throws Exception {
-        final EntityField entityField = getEntityField();
-        assertEquals(Long.class, entityField.getType());
+        final Property property = getproperty();
+        assertEquals(Long.class, property.getType());
     }
 
     @Test
     public void testGetter() throws Exception {
-        final EntityField entityField = getEntityField();
+        final Property property = getproperty();
         final Entity entity = new Entity();
         entity.setLongValue(1L);
 
-        assertEquals(1L, entityField.getValue(entity));
+        assertEquals(1L, property.value(entity));
     }
 
     @Test
     public void testSetter() throws Exception {
-        final EntityField entityField = getEntityField();
+        final Property property = getproperty();
         final Entity entity = new Entity();
-        entityField.setValue(entity, 1L);
+        property.set(entity, 1L);
 
         assertEquals(1L, entity.getLongValue().longValue());
     }
 
     @Test(expected = RuntimeException.class)
     public void testFailGetter() throws Exception {
-        final EntityField entityField = getEntityField();
+        final Property property = getproperty();
         final String wrongObject = "wrongObject";
-        entityField.getValue(wrongObject);
+        property.value(wrongObject);
     }
 
     @Test(expected = RuntimeException.class)
     public void testFailSetter() throws Exception {
-        final EntityField entityField = getEntityField();
+        final Property property = getproperty();
         final String wrongObject = "wrongObject";
         final Entity entity = new Entity();
-        entityField.setValue(entity, wrongObject);
+        property.set(entity, wrongObject);
     }
 
     protected Field getField() throws NoSuchFieldException {

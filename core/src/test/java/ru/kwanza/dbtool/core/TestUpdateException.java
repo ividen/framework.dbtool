@@ -15,51 +15,19 @@ public class TestUpdateException extends TestCase {
         List<TestEntity> list2 = Arrays.asList(new TestEntity(4, "Value 4"), new TestEntity(5, "Value 5"));
 
         try {
-            UpdateException updateException = new UpdateException();
-            updateException.setConstrainted(list);
-            updateException.setOptimistic(list2);
-
-            throw updateException;
+            throw new UpdateException("Error!",null,null,0);
         } catch (UpdateException e) {
-            assertEquals("Wrong constrained ", list, e.<TestEntity>getConstrainted());
-            assertEquals("Wrong optimistic ", list2, e.<TestEntity>getOptimistic());
-            assertNull(e.getMessage());
-            assertNull(e.getCause());
+            assertEquals(e.getMessage(),"Error!");
+            assertEquals(e.getConstrainted().size(),0);
+            assertEquals(e.getOptimistic().size(),0);
         }
 
         try {
-            UpdateException updateException = new UpdateException("Test Message");
-            updateException.setConstrainted(list2);
-            updateException.setOptimistic(list);
-
-            throw updateException;
+            throw new UpdateException("Error!",list,list2,0);
         } catch (UpdateException e) {
-            assertEquals("Wrong constrained ", list2, e.<TestEntity>getConstrainted());
-            assertEquals("Wrong optimistic ", list, e.<TestEntity>getOptimistic());
-            assertEquals("Test Message", e.getMessage());
-            assertNull(e.getCause());
-        }
-
-        try {
-            UpdateException updateException = new UpdateException("Test Message", new RuntimeException());
-
-            throw updateException;
-        } catch (UpdateException e) {
-            assertNull("Wrong constrained ", e.<TestEntity>getConstrainted());
-            assertNull("Wrong optimistic ", e.<TestEntity>getOptimistic());
-            assertEquals("Test Message", e.getMessage());
-            assertEquals(RuntimeException.class, e.getCause().getClass());
-        }
-
-        try {
-            UpdateException updateException = new UpdateException(new RuntimeException());
-
-            throw updateException;
-        } catch (UpdateException e) {
-            assertNull("Wrong constrained ", e.<TestEntity>getConstrainted());
-            assertNull("Wrong optimistic ", e.<TestEntity>getOptimistic());
-            assertEquals(RuntimeException.class.getName(), e.getMessage());
-            assertEquals(RuntimeException.class, e.getCause().getClass());
+            assertEquals(e.getMessage(),"Error!");
+            assertEquals(e.getConstrainted(),list);
+            assertEquals(e.getOptimistic(),list2);
         }
     }
 }

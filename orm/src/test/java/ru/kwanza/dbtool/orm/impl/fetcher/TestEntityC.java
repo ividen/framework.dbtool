@@ -2,33 +2,32 @@ package ru.kwanza.dbtool.orm.impl.fetcher;
 
 import ru.kwanza.dbtool.orm.annotations.*;
 
+import java.io.Serializable;
 import java.util.Collection;
 
 /**
  * @author Alexander Guzanov
  */
 @Entity(name = "TestEntityC", table = "test_entity_c")
-public class TestEntityC {
-    @IdField(column = "id")
+public class TestEntityC implements Serializable {
+    @IdField("id")
     private Long id;
-    @Field(column = "title")
+    @Field("title")
     private String title;
-    @VersionField(column = "version")
+    @VersionField("version")
     private Long version;
 
-
-    @Field(column = "entity_eid")
+    @Field("entity_eid")
     private Long entityEID;
-    @Field(column = "entity_fid")
+    @Field("entity_fid")
     private Long entityFID;
-
 
     @ManyToOne(property = "entityEID")
     private TestEntityE entityE;
     @ManyToOne(property = "entityFID")
     private TestEntityF entityF;
 
-    @OneToMany(relationClass = TestEntity.class,relationProperty = "entityCID")
+    @OneToMany(relationClass = TestEntity.class, relationProperty = "entityCID")
     private Collection<TestEntity> testEntities;
 
     public Long getId() {

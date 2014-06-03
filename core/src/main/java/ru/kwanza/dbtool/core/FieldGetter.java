@@ -4,12 +4,49 @@ import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.Date;
 
 /**
+ * Утилита для чтения значений полей из ResultSet.
+ * <p/>
+ * Основное значение: дополнительно используется функционал {@link java.sql.ResultSet#wasNull()}
+ *
  * @author Ivan Baluk
  */
 public class FieldGetter {
 
+    public static <T> T getValue(ResultSet rs, String column, Class<T> type) throws SQLException {
+        if (type == String.class) {
+            return (T) getString(rs, column);
+        } else if (type == Long.class) {
+            return (T) getLong(rs, column);
+        } else if (type == Integer.class) {
+            return (T) getInteger(rs, column);
+        } else if (type == Boolean.class) {
+            return (T) getBoolean(rs, column);
+        } else if (type == BigDecimal.class) {
+            return (T) getBigDecimal(rs, column);
+        } else if (type == byte[].class) {
+            return (T) getBytes(rs, column);
+        } else if (Date.class.isAssignableFrom(type)) {
+            return (T) getTimestamp(rs, column);
+        }
+
+        return (T) getObject(rs, column);
+    }
+
+    private static Object getObject(ResultSet rs, String column) throws SQLException {
+        Object result = rs.getObject(column);
+        if (rs.wasNull()) {
+            result = null;
+        }
+
+        return result;
+    }
+
+    /**
+     * @see ru.kwanza.dbtool.core.FieldGetter
+     */
     public static Integer getInteger(ResultSet rs, String col) throws SQLException {
         Integer res = rs.getInt(col);
         if (rs.wasNull()) {
@@ -18,6 +55,9 @@ public class FieldGetter {
         return res;
     }
 
+    /**
+     * @see ru.kwanza.dbtool.core.FieldGetter
+     */
     public static Long getLong(ResultSet rs, String col) throws SQLException {
         Long res = rs.getLong(col);
         if (rs.wasNull()) {
@@ -26,14 +66,31 @@ public class FieldGetter {
         return res;
     }
 
+    /**
+     * @see ru.kwanza.dbtool.core.FieldGetter
+     */
     public static Timestamp getTimestamp(ResultSet rs, String col) throws SQLException {
-        return rs.getTimestamp(col);
+        Timestamp result = rs.getTimestamp(col);
+        if (rs.wasNull()) {
+            result = null;
+        }
+        return result;
     }
 
+    /**
+     * @see ru.kwanza.dbtool.core.FieldGetter
+     */
     public static String getString(ResultSet rs, String col) throws SQLException {
-        return rs.getString(col);
+        String result = rs.getString(col);
+        if (rs.wasNull()) {
+            result = null;
+        }
+        return result;
     }
 
+    /**
+     * @see ru.kwanza.dbtool.core.FieldGetter
+     */
     public static Boolean getBoolean(ResultSet rs, String col) throws SQLException {
         Boolean res = rs.getBoolean(col);
         if (rs.wasNull()) {
@@ -42,11 +99,25 @@ public class FieldGetter {
         return res;
     }
 
+    /**
+     * @see ru.kwanza.dbtool.core.FieldGetter
+     */
     public static BigDecimal getBigDecimal(ResultSet rs, String col) throws SQLException {
-        return rs.getBigDecimal(col);
+        BigDecimal result = rs.getBigDecimal(col);
+        if (rs.wasNull()) {
+            result = null;
+        }
+        return result;
     }
 
+    /**
+     * @see ru.kwanza.dbtool.core.FieldGetter
+     */
     public static byte[] getBytes(ResultSet rs, String col) throws SQLException {
-        return rs.getBytes(col);
+        byte[] result = rs.getBytes(col);
+        if (rs.wasNull()) {
+            result = null;
+        }
+        return result;
     }
 }

@@ -138,7 +138,6 @@ public class SelectUtil {
 
     public static void batchSelect(JdbcOperations template, String selectSQL, ResultSetExtractor extractor, Container result,
                                    Object[] inValues, int resultSetType) {
-
         if (logger.isDebugEnabled()) {
             if (logger.isTraceEnabled()) {
                 logger.trace("Executing query \n{} \nwith params:{} ", selectSQL, traceParams(inValues));

@@ -10,13 +10,13 @@ import ru.kwanza.dbtool.orm.annotations.IdField;
 @Entity(name = "TestEntity", table = "test_table")
 public final class TestEntity {
 
-    @IdField(column = "xkey")
+    @IdField( "xkey")
     private Long key;
 
-    @Field(column = "name")
+    @Field( "name")
     private String name;
 
-    @Field(column = "version")
+    @Field( "version")
     private Long version;
 
     public TestEntity() {
