@@ -38,6 +38,7 @@
         <maven-pmd-plugin.version>2.5</maven-pmd-plugin.version>
         <findbugs-maven-plugin.version>2.3.2</findbugs-maven-plugin.version>
         <cobertura-maven-plugin.version>2.5.1</cobertura-maven-plugin.version>
+        <projectversion.version>1.0</projectversion.version>
 
         <!-- Project config -->
         <project.sourceEncoding>UTF-8</project.sourceEncoding>
