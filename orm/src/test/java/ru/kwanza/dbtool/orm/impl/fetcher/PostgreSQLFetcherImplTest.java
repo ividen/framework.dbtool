@@ -6,5 +6,5 @@ import org.springframework.test.context.ContextConfiguration;
  * @author Michael Yeskov
  */
 @ContextConfiguration(locations = "postgresql-config.xml")
-public class PostgreSQLTestFetcherImpl extends TestFetcherIml {
+public class PostgreSQLFetcherImplTest extends FetcherTest {
 }

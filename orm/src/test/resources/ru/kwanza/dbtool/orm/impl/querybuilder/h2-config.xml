@@ -5,5 +5,5 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.kwanza-systems.ru/schema/dbtool-orm http://www.kwanza-systems.ru/schema/dbtool-orm.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
     <import resource="h2-querybuilder-config.xml"/>
 
-    <context:component-scan base-package="ru.kwanza.dbtool.orm.impl.abstractentity"/>
+    <context:component-scan base-package="ru.kwanza.dbtool.orm.impl.querybuilder"/>
 </beans>

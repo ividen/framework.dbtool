@@ -5,6 +5,6 @@ import org.springframework.test.context.ContextConfiguration;
 /**
  * @author Alexander Guzanov
  */
-@ContextConfiguration(locations = "mysql-config.xml")
-public class MySQLTestAbstractEntity extends TestAbstractEntity {
+@ContextConfiguration(locations = "h2-config.xml")
+public class H2SQLAbstractEntityTest extends AbstractEntityTest {
 }

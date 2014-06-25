@@ -6,7 +6,7 @@ import org.springframework.test.context.ContextConfiguration;
 /**
  * @author Alexander Guzanov
  */
-@ContextConfiguration(locations = "mysql-config.xml" )
+@ContextConfiguration(locations = "postgresql-config.xml" )
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-public class TestMySQLLockOperation extends TestLockOperation {
+public class PosgreSQLLockOperationTest extends LockOperationTest {
 }

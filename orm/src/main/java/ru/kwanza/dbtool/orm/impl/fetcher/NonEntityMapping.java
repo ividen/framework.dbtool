@@ -50,16 +50,16 @@ class NonEntityMapping implements IEntityMappingRegistry {
     }
 
     private void processAssociation(Class aClass, Map<String, IRelationMapping> mappings, AnnotatedElement annotatedElement) {
-//        final IRelationMapping relationMapping = registry.parseAssociation(aClass, annotatedElement);
-//        mappings.put(relationMapping.getName(), relationMapping);
+        final IRelationMapping relationMapping = registry.parseAssociation(aClass, annotatedElement);
+        mappings.put(relationMapping.getName(), relationMapping);
     }
 
     private void processManyToOne(Class aClass, Map<String, IRelationMapping> mappings, AnnotatedElement annotatedElement) {
-//        final IRelationMapping relationMapping = registry.parseManyToOne(aClass, annotatedElement);
-//        mappings.put(relationMapping.getName(), relationMapping);
+        final IRelationMapping relationMapping = registry.parseManyToOne(aClass, annotatedElement);
+        mappings.put(relationMapping.getName(), relationMapping);
     }
 
-    public void registerEntityClass(Class entityClass) {
+    public IEntityType registerEntityClass(Class entityClass) {
         IEntityType type = cache.get(entityClass);
         if (type == null) {
             Map<String, IRelationMapping> relations = new HashMap<String, IRelationMapping>();
@@ -69,7 +69,7 @@ class NonEntityMapping implements IEntityMappingRegistry {
                 type = cache.get(entityClass);
             }
         }
-
+        return type;
     }
 
     public boolean isRegisteredEntityClass(Class entityClass) {

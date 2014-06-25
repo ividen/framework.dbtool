@@ -40,20 +40,25 @@ public class EntityMappingRegistry implements IEntityMappingRegistry {
 
     private ExpressionParser conditionParser = new SpelExpressionParser();
 
-    public void registerEntityClass(Class entityClass) {
+    public ru.kwanza.dbtool.orm.api.internal.IEntityType registerEntityClass(Class entityClass) {
         registerLock.lock();
         try {
-            if (!entityTypeByEntityClass.containsKey(entityClass)) {
-                AbstractEntityType entityType = registerEntity(entityClass);
+            AbstractEntityType result = entityTypeByEntityClass.get(entityClass);
+            if (result == null) {
+                result = registerEntity(entityClass);
 
-                processMembers(entityType, entityClass);
+                processMembers(result, entityClass);
+
+                return result;
+            } else {
+                return result;
             }
         } finally {
             registerLock.unlock();
         }
     }
 
-    private  void processMembers(AbstractEntityType entityType, Class targetClass) {
+    private void processMembers(AbstractEntityType entityType, Class targetClass) {
         if (Object.class.equals(targetClass)) {
             return;
         }
@@ -103,7 +108,7 @@ public class EntityMappingRegistry implements IEntityMappingRegistry {
                 continue;
             }
 
-            tryCreateFieldMapping(entityType,annotatedElement);
+            tryCreateFieldMapping(entityType, annotatedElement);
         }
     }
 
@@ -136,19 +141,27 @@ public class EntityMappingRegistry implements IEntityMappingRegistry {
         addFetchMapping(entityType, parseManyToOne(entityType, annotatedElement));
     }
 
-    public IRelationMapping parseAssociation(final AbstractEntityType entityType, final AnnotatedElement element) {
+    public IRelationMapping parseAssociation(final Class entityClass, final AnnotatedElement element) {
+        return parseAssociation(null, entityClass, element);
+    }
+
+    private IRelationMapping parseAssociation(final AbstractEntityType entityType, final AnnotatedElement element) {
+        return parseAssociation(entityType, entityType.getEntityClass(), element);
+    }
+
+    private IRelationMapping parseAssociation(final AbstractEntityType entityType, final Class entityClass, final AnnotatedElement element) {
         final Association association = element.getAnnotation(Association.class);
         final String name = getPropertyName(element);
 
 
         final IFieldMapping propertyMapping = entityType != null
                 ? entityType.getField(association.property())
-                : new FieldMapping(name, null, Types.BIGINT, FieldHelper.constructProperty(entityType.getEntityClass(), association.property()));
-        final Property fetchField = FieldHelper.constructProperty(entityType.getEntityClass(), name);
+                : new FieldMapping(name, null, Types.BIGINT, FieldHelper.constructProperty(entityClass, association.property()));
+        final Property fetchField = FieldHelper.constructProperty(entityClass, name);
         final Class relationClass = association.relationClass() != Object.class ? association.relationClass() : fetchField.getType();
         if (relationClass == Object.class) {
             throw new RuntimeException(
-                    "Relation @OneToMany in  " + entityType.getEntityClass().getName() + "." + name + " must have relativeClass() specified!");
+                    "Relation @OneToMany in  " + entityClass.getName() + "." + name + " must have relativeClass() specified!");
         }
 
         final Condition ifConfig = element.getAnnotation(Condition.class);
@@ -166,7 +179,7 @@ public class EntityMappingRegistry implements IEntityMappingRegistry {
         if (relationPropertyMapping == null) {
             throw new RuntimeException(
                     "Not found relational property mapping " + relationClass.getName() + "." + association.relationProperty()
-                            + " for @Association " + entityType.getEntityClass().getName() + "." + name + "!");
+                            + " for @Association " + entityClass.getName() + "." + name + "!");
         }
 
         return new RelationMapping(name, relationClass, propertyMapping, relationPropertyMapping, fetchField, condition, groupBy,
@@ -212,19 +225,27 @@ public class EntityMappingRegistry implements IEntityMappingRegistry {
     }
 
     public IRelationMapping parseManyToOne(final AbstractEntityType entityType, final AnnotatedElement element) {
+        return parseManyToOne(entityType, entityType.getEntityClass(), element);
+    }
+
+    public IRelationMapping parseManyToOne(final Class entityClass, final AnnotatedElement element) {
+        return parseManyToOne(null, entityClass, element);
+    }
+
+    private IRelationMapping parseManyToOne(final AbstractEntityType entityType, final Class entityClass, final AnnotatedElement element) {
         final ManyToOne manyToOne = element.getAnnotation(ManyToOne.class);
         final String name = getPropertyName(element);
 
         final IFieldMapping propertyMapping = entityType != null
                 ? entityType.getField(manyToOne.property())
-                : new FieldMapping(name, null, Types.BIGINT, FieldHelper.constructProperty(entityType.getEntityClass(), manyToOne.property()));
+                : new FieldMapping(name, null, Types.BIGINT, FieldHelper.constructProperty(entityClass, manyToOne.property()));
         if (propertyMapping == null) {
             throw new RuntimeException(
-                    "Not found property " + manyToOne.property() + "for @ManyToOne " + entityType.getEntityClass().getName() + "." + getPropertyName(
+                    "Not found property " + manyToOne.property() + "for @ManyToOne " + entityClass.getName() + "." + getPropertyName(
                             element) + "!");
         }
 
-        final Property fetchField = FieldHelper.constructProperty(entityType.getEntityClass(), name);
+        final Property fetchField = FieldHelper.constructProperty(entityClass, name);
         final Class relationClass = fetchField.getType();
         if (!entityTypeByEntityClass.containsKey(relationClass)) {
             registerEntityClass(relationClass);

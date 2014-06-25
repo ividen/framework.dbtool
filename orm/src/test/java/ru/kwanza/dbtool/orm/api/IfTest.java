@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * @author Alexander Guzanov
  */
-public class TestIf {
+public class IfTest {
 
     @Test
     public void testIsEquals() {

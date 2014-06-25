@@ -83,8 +83,8 @@ public class SpringEntityMappingRegistryImpl implements IEntityMappingRegistry {
         return ClassUtils.convertClassNameToResourcePath(SystemPropertyUtils.resolvePlaceholders(basePackage));
     }
 
-    public void registerEntityClass(Class entityClass) {
-        delegate.registerEntityClass(entityClass);
+    public IEntityType registerEntityClass(Class entityClass) {
+        return delegate.registerEntityClass(entityClass);
     }
 
     public boolean isRegisteredEntityClass(Class entityClass) {

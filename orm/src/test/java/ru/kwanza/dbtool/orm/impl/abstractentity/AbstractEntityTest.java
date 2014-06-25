@@ -6,6 +6,7 @@ import org.dbunit.dataset.IDataSet;
 import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
 import org.dbunit.operation.DatabaseOperation;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
@@ -13,6 +14,7 @@ import ru.kwanza.dbtool.core.ConnectionConfigListener;
 import ru.kwanza.dbtool.orm.api.IEntityManager;
 import ru.kwanza.dbtool.orm.api.IQuery;
 import ru.kwanza.dbtool.orm.api.If;
+import ru.kwanza.dbtool.orm.api.internal.IEntityMappingRegistry;
 import ru.kwanza.dbtool.orm.impl.fetcher.proxy.Proxy;
 import ru.kwanza.dbtool.orm.impl.querybuilder.AbstractQuery;
 
@@ -25,15 +27,29 @@ import java.util.List;
  */
 
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-public abstract class TestAbstractEntity extends AbstractJUnit4SpringContextTests {
+public abstract class AbstractEntityTest extends AbstractJUnit4SpringContextTests {
     @Resource(name = "dbtool.IEntityManager")
     private IEntityManager em;
+
+
+    @Autowired
+    private InitDB initDB;
 
 
     @Component
     public static class InitDB {
         @Resource(name = "dbTester")
         private IDatabaseTester dbTester;
+
+        public InitDB(IEntityMappingRegistry registry) {
+            registry.registerEntityClass(TestEntityA.class);
+            registry.registerEntityClass(TestEntityE.class);
+            registry.registerEntityClass(TestEntityF.class);
+            registry.registerEntityClass(TestEntityB.class);
+            registry.registerEntityClass(TestEntityC.class);
+            registry.registerEntityClass(TestEntityD.class);
+            registry.registerEntityClass(TestEntity.class);
+        }
 
         private IDataSet getDataSet() throws Exception {
             return new FlatXmlDataSetBuilder().build(this.getClass().getResourceAsStream("initdb.xml"));

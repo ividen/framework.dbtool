@@ -6,5 +6,5 @@ import org.springframework.test.context.ContextConfiguration;
  * @author Alexander Guzanov
  */
 @ContextConfiguration(locations = "h2-config.xml")
-public class H2TestFetcherImpl extends TestFetcherIml{
+public class H2FetcherTest extends FetcherTest {
 }

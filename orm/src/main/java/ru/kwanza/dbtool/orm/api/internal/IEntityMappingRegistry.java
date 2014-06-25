@@ -16,7 +16,7 @@ public interface IEntityMappingRegistry {
      *
      * @param entityClass класс регистрируемой сущности
      */
-    void registerEntityClass(Class entityClass);
+    IEntityType registerEntityClass(Class entityClass);
 
     /**
      * Проверить, рарегистрирован ли класс.

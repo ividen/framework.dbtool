@@ -15,11 +15,12 @@ public class UnionEntityType extends AbstractEntityType {
 
     private List<IEntityType> entityTypes = new ArrayList<IEntityType>();
     private List<SubUnionEntityType> subUnionEntityTypes;
-    private Map<String,IFieldMapping> allFields = new HashMap<String, IFieldMapping>();
+    private Map<String, IFieldMapping> allFields = new HashMap<String, IFieldMapping>();
     private int alias;
+    private boolean validated = false;
 
     public UnionEntityType(String name, Class entityClass) {
-        super(entityClass,name,name + "_",null);
+        super(entityClass, name, name + "_", null);
     }
 
     @Override
@@ -36,15 +37,18 @@ public class UnionEntityType extends AbstractEntityType {
     }
 
     public synchronized void validate() {
-        if (subUnionEntityTypes == null) {
-            subUnionEntityTypes = new ArrayList<SubUnionEntityType>();
+        if (!validated) {
+            if (subUnionEntityTypes == null) {
+                subUnionEntityTypes = new ArrayList<SubUnionEntityType>();
 
-            for (IEntityType entity : entityTypes) {
-                validateEntityType(entity);
+                for (IEntityType entity : entityTypes) {
+                    validateEntityType(entity);
+                }
+                addField(CLAZZ_FIELD);
+                prepareSql();
             }
-            entityTypes = null;
-            addField(CLAZZ_FIELD);
-            prepareSql();
+
+            validated = true;
         }
     }
 
@@ -106,18 +110,18 @@ public class UnionEntityType extends AbstractEntityType {
             SubUnionEntityType subUnionEntityType = new SubUnionEntityType(entityType, this);
             subUnionEntityTypes.add(subUnionEntityType);
             for (IFieldMapping field : subUnionEntityType.getSubFields()) {
-                allFields.put(field.getName(),field);
+                allFields.put(field.getName(), field);
             }
 
         }
     }
 
-    public Collection<IFieldMapping> getCommonFields(){
+    public Collection<IFieldMapping> getCommonFields() {
         return super.getFields();
     }
 
-    public IFieldMapping getCommonField(String name){
-        return  super.getField(name);
+    public IFieldMapping getCommonField(String name) {
+        return super.getField(name);
     }
 
     @Override
@@ -133,7 +137,7 @@ public class UnionEntityType extends AbstractEntityType {
     @Override
     public void addField(IFieldMapping field) {
         super.addField(field);
-        allFields.put(field.getName(),field);
+        allFields.put(field.getName(), field);
     }
 
     public boolean isAbstract() {
