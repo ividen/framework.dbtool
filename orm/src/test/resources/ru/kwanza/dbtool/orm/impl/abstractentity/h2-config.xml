@@ -8,10 +8,9 @@
     <import resource="classpath:base-h2-config.xml"/>
     <import resource="classpath:dbtool-orm-config.xml"/>
 
-    <context:component-scan base-package="ru.kwanza.dbtool.orm.impl.abstractentity"/>
-
-    <dbtool-orm:entityMapping scan-package="ru.kwanza.dbtool.orm.impl.abstractentity"/>
-
+   <bean class="ru.kwanza.dbtool.orm.impl.abstractentity.AbstractEntityTest$InitDB">
+       <constructor-arg ref="dbtool.IEntityMappingRegistry"/>
+   </bean>
 
 
 </beans>

@@ -7,10 +7,10 @@ import java.io.Serializable;
 /**
  * @author Alexander Guzanov
  */
-public class TestEvent   implements Serializable {
+public class Event implements Serializable {
     private Long entityId;
 
-    public TestEvent(Long entityId) {
+    public Event(Long entityId) {
         this.entityId = entityId;
     }
 

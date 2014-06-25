@@ -59,7 +59,7 @@ class NonEntityMapping implements IEntityMappingRegistry {
         mappings.put(relationMapping.getName(), relationMapping);
     }
 
-    public void registerEntityClass(Class entityClass) {
+    public IEntityType registerEntityClass(Class entityClass) {
         IEntityType type = cache.get(entityClass);
         if (type == null) {
             Map<String, IRelationMapping> relations = new HashMap<String, IRelationMapping>();
@@ -69,7 +69,7 @@ class NonEntityMapping implements IEntityMappingRegistry {
                 type = cache.get(entityClass);
             }
         }
-
+        return type;
     }
 
     public boolean isRegisteredEntityClass(Class entityClass) {

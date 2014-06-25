@@ -10,7 +10,7 @@ import org.springframework.test.context.ContextConfiguration;
 public class TestH2Lock extends TestMySQLLock {
     @Override
     protected void assertDeadlockException(Throwable result) {
-        Assert.assertTrue(result.getMessage().contains("Timeout trying to lock table"));
+        Assert.assertTrue(result.getMessage().contains("Timeout trying to lock table") || result.getMessage().contains("Unique index or primary key"));
     }
 }
 

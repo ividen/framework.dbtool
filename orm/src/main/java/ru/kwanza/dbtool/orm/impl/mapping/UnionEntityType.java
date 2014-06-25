@@ -3,6 +3,7 @@ package ru.kwanza.dbtool.orm.impl.mapping;
 import ru.kwanza.dbtool.orm.api.internal.IEntityType;
 import ru.kwanza.dbtool.orm.api.internal.IFieldMapping;
 
+import java.sql.Types;
 import java.util.*;
 
 /**
@@ -11,15 +12,16 @@ import java.util.*;
 public class UnionEntityType extends AbstractEntityType {
     private static final String UNION_ALL = " UNION ALL ";
     private static final String CLAZZ_ = "clazz_";
-    public static final FieldMapping CLAZZ_FIELD = new FieldMapping(null, CLAZZ_, 0, null);
+    public FieldMapping CLAZZ_FIELD ;
 
     private List<IEntityType> entityTypes = new ArrayList<IEntityType>();
     private List<SubUnionEntityType> subUnionEntityTypes;
-    private Map<String,IFieldMapping> allFields = new HashMap<String, IFieldMapping>();
-    private int alias;
+    private Map<String, IFieldMapping> allFields = new LinkedHashMap<String, IFieldMapping>();
+    private int id;
+    private boolean validated = false;
 
     public UnionEntityType(String name, Class entityClass) {
-        super(entityClass,name,name + "_",null);
+        super(entityClass, name, name + "_", null);
     }
 
     @Override
@@ -36,19 +38,24 @@ public class UnionEntityType extends AbstractEntityType {
     }
 
     public synchronized void validate() {
-        if (subUnionEntityTypes == null) {
-            subUnionEntityTypes = new ArrayList<SubUnionEntityType>();
+        if (!validated) {
+            if (subUnionEntityTypes == null) {
+                subUnionEntityTypes = new ArrayList<SubUnionEntityType>();
 
-            for (IEntityType entity : entityTypes) {
-                validateEntityType(entity);
+                for (IEntityType entity : entityTypes) {
+                    validateEntityType(entity);
+                }
+
+                this.CLAZZ_FIELD = FieldMapping.create(this, null, CLAZZ_, Types.BIGINT); ;
+
+                prepareSql();
             }
-            entityTypes = null;
-            addField(CLAZZ_FIELD);
-            prepareSql();
+
+            validated = true;
         }
     }
 
-    public static FieldMapping getClazzField() {
+    public FieldMapping getClazzField() {
         return CLAZZ_FIELD;
     }
 
@@ -105,19 +112,15 @@ public class UnionEntityType extends AbstractEntityType {
         } else {
             SubUnionEntityType subUnionEntityType = new SubUnionEntityType(entityType, this);
             subUnionEntityTypes.add(subUnionEntityType);
-            for (IFieldMapping field : subUnionEntityType.getSubFields()) {
-                allFields.put(field.getName(),field);
-            }
-
         }
     }
 
-    public Collection<IFieldMapping> getCommonFields(){
+    public Collection<IFieldMapping> getCommonFields() {
         return super.getFields();
     }
 
-    public IFieldMapping getCommonField(String name){
-        return  super.getField(name);
+    public IFieldMapping getCommonField(String name) {
+        return super.getField(name);
     }
 
     @Override
@@ -131,9 +134,14 @@ public class UnionEntityType extends AbstractEntityType {
     }
 
     @Override
+    protected int getFieldsCount() {
+        return allFields.size();
+    }
+
+    @Override
     public void addField(IFieldMapping field) {
         super.addField(field);
-        allFields.put(field.getName(),field);
+        allFields.put(field.getName(), field);
     }
 
     public boolean isAbstract() {
@@ -157,6 +165,6 @@ public class UnionEntityType extends AbstractEntityType {
     }
 
     public int nextFieldAlias() {
-        return alias++;
+        return id++;
     }
 }

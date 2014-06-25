@@ -2,7 +2,7 @@ package ru.kwanza.dbtool.orm.impl.lockoperation.db.h2;
 
 import ru.kwanza.dbtool.orm.api.LockResult;
 import ru.kwanza.dbtool.orm.impl.EntityManagerImpl;
-import ru.kwanza.dbtool.orm.impl.querybuilder.EntityInfo;
+import ru.kwanza.dbtool.orm.impl.querybuilder.QueryEntityInfo;
 
 import java.util.Collection;
 
@@ -31,6 +31,6 @@ public class H2WaitLockOperation<T> extends H2LockOperation<T> {
     @Override
     protected String createSQL() {
         return "SELECT " + entityType.getIdField().getColumn() + " FROM " +
-                EntityInfo.getTable(entityType) + " WHERE " + entityType.getIdField().getColumn() + " IN (?) FOR UPDATE";
+                QueryEntityInfo.getTable(entityType) + " WHERE " + entityType.getIdField().getColumn() + " IN (?) FOR UPDATE";
     }
 }

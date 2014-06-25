@@ -6,7 +6,7 @@ import org.springframework.test.context.ContextConfiguration;
 /**
  * @author Alexander Guzanov
  */
-@ContextConfiguration(locations = "oracle-config.xml" )
+@ContextConfiguration(locations = "h2-config.xml" )
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-public class TestOracleLockOperation extends TestLockOperation {
+public class H2LockOperationTest extends LockOperationTest {
 }

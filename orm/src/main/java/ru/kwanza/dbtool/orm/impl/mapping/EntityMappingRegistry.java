@@ -11,7 +11,6 @@ import ru.kwanza.dbtool.orm.annotations.*;
 import ru.kwanza.dbtool.orm.api.If;
 import ru.kwanza.dbtool.orm.api.Join;
 import ru.kwanza.dbtool.orm.api.internal.IEntityMappingRegistry;
-import ru.kwanza.dbtool.orm.api.internal.IEntityType;
 import ru.kwanza.dbtool.orm.api.internal.IFieldMapping;
 import ru.kwanza.dbtool.orm.api.internal.IRelationMapping;
 import ru.kwanza.toolbox.fieldhelper.FieldHelper;
@@ -41,36 +40,40 @@ public class EntityMappingRegistry implements IEntityMappingRegistry {
 
     private ExpressionParser conditionParser = new SpelExpressionParser();
 
-    public void registerEntityClass(Class entityClass) {
+    public ru.kwanza.dbtool.orm.api.internal.IEntityType registerEntityClass(Class entityClass) {
         registerLock.lock();
         try {
-            if (!entityTypeByEntityClass.containsKey(entityClass)) {
-                processRegisterEntityClass(entityClass, entityClass);
+            AbstractEntityType result = entityTypeByEntityClass.get(entityClass);
+            if (result == null) {
+                result = registerEntity(entityClass);
+
+                processMembers(result, entityClass);
+
+                return result;
+            } else {
+                return result;
             }
         } finally {
             registerLock.unlock();
         }
     }
 
-    public void processRegisterEntityClass(Class entityClass, Class targetClass) {
+    private void processMembers(AbstractEntityType entityType, Class targetClass) {
         if (Object.class.equals(targetClass)) {
             return;
         }
 
-        if (entityClass == targetClass) {
-            registerEntity(entityClass);
-        }
-
-        processRegisterEntityClass(entityClass, targetClass.getSuperclass());
+        processMembers(entityType, targetClass.getSuperclass());
 
         final java.lang.reflect.Field[] declaredFields = targetClass.getDeclaredFields();
         final java.lang.reflect.Method[] methods = targetClass.getDeclaredMethods();
 
-        processFields(entityClass, declaredFields);
-        processFields(entityClass, methods);
 
-        processFetches(entityClass, declaredFields);
-        processFetches(entityClass, methods);
+        processFields(entityType, declaredFields);
+        processFields(entityType, methods);
+
+        processFetches(entityType, declaredFields);
+        processFetches(entityType, methods);
 
     }
 
@@ -98,30 +101,18 @@ public class EntityMappingRegistry implements IEntityMappingRegistry {
         return result;
     }
 
-    private void processFields(Class entityClass, AnnotatedElement[] annotatedElements) {
+    private void processFields(AbstractEntityType entityType, AnnotatedElement[] annotatedElements) {
         for (AnnotatedElement annotatedElement : annotatedElements) {
 
             if (isTransient(annotatedElement)) {
                 continue;
             }
 
-            if (annotatedElement.isAnnotationPresent(Field.class)) {
-                final FieldMapping fieldMapping =
-                        createFieldMapping(entityClass, annotatedElement, annotatedElement.getAnnotation(Field.class));
-                addFieldMapping(entityClass, fieldMapping);
-            } else if (annotatedElement.isAnnotationPresent(IdField.class)) {
-                final FieldMapping fieldMapping =
-                        createFieldMapping(entityClass, annotatedElement, annotatedElement.getAnnotation(IdField.class));
-                addIdFieldMapping(entityClass, fieldMapping);
-            } else if (annotatedElement.isAnnotationPresent(VersionField.class)) {
-                final FieldMapping fieldMapping =
-                        createFieldMapping(entityClass, annotatedElement, annotatedElement.getAnnotation(VersionField.class));
-                addVersionFieldMapping(entityClass, fieldMapping);
-            }
+            tryCreateFieldMapping(entityType, annotatedElement);
         }
     }
 
-    private void processFetches(Class entityClass, AnnotatedElement[] annotatedElements) {
+    private void processFetches(AbstractEntityType entityType, AnnotatedElement[] annotatedElements) {
         for (AnnotatedElement annotatedElement : annotatedElements) {
 
             if (isTransient(annotatedElement)) {
@@ -129,36 +120,44 @@ public class EntityMappingRegistry implements IEntityMappingRegistry {
             }
 
             if (annotatedElement.isAnnotationPresent(ManyToOne.class)) {
-                processManyToOne(entityClass, annotatedElement);
+                processManyToOne(entityType, annotatedElement);
             } else if (annotatedElement.isAnnotationPresent(OneToMany.class)) {
-                processOneToMany(entityClass, annotatedElement);
+                processOneToMany(entityType, annotatedElement);
             } else if (annotatedElement.isAnnotationPresent(Association.class)) {
-                processAssociation(entityClass, annotatedElement);
+                processAssociation(entityType, annotatedElement);
             }
         }
     }
 
-    private void processAssociation(final Class entityClass, AnnotatedElement annotatedElement) {
-        addFetchMapping(entityClass, parseAssociation(entityClass, annotatedElement));
+    private void processAssociation(final AbstractEntityType entityType, AnnotatedElement annotatedElement) {
+        addFetchMapping(entityType, parseAssociation(entityType, annotatedElement));
     }
 
-    private void processOneToMany(final Class entityClass, final AnnotatedElement annotatedElement) {
-        addFetchMapping(entityClass, parseOneToMany(entityClass, annotatedElement));
+    private void processOneToMany(final AbstractEntityType entityType, final AnnotatedElement annotatedElement) {
+        addFetchMapping(entityType, parseOneToMany(entityType, annotatedElement));
     }
 
-    private void processManyToOne(final Class entityClass, final AnnotatedElement annotatedElement) {
-        addFetchMapping(entityClass, parseManyToOne(entityClass, annotatedElement));
+    private void processManyToOne(final AbstractEntityType entityType, final AnnotatedElement annotatedElement) {
+        addFetchMapping(entityType, parseManyToOne(entityType, annotatedElement));
     }
 
     public IRelationMapping parseAssociation(final Class entityClass, final AnnotatedElement element) {
+        return parseAssociation(null, entityClass, element);
+    }
+
+    private IRelationMapping parseAssociation(final AbstractEntityType entityType, final AnnotatedElement element) {
+        return parseAssociation(entityType, entityType.getEntityClass(), element);
+    }
+
+    private IRelationMapping parseAssociation(final AbstractEntityType entityType, final Class entityClass, final AnnotatedElement element) {
         final Association association = element.getAnnotation(Association.class);
         final String name = getPropertyName(element);
 
-        final AbstractEntityType entityType = entityTypeByEntityClass.get(entityClass);
 
         final IFieldMapping propertyMapping = entityType != null
                 ? entityType.getField(association.property())
-                : new FieldMapping(name, null, Types.BIGINT, FieldHelper.constructProperty(entityClass, association.property()));
+                : FieldMapping.createFakeField(name, FieldHelper.constructProperty(entityClass, association.property()));
+
         final Property fetchField = FieldHelper.constructProperty(entityClass, name);
         final Class relationClass = association.relationClass() != Object.class ? association.relationClass() : fetchField.getType();
         if (relationClass == Object.class) {
@@ -188,15 +187,15 @@ public class EntityMappingRegistry implements IEntityMappingRegistry {
                 groupByType, getJoinsForGroupBy(relationClass, groupBy));
     }
 
-    public IRelationMapping parseOneToMany(final Class entityClass, final AnnotatedElement element) {
+    public IRelationMapping parseOneToMany(final AbstractEntityType entityType, final AnnotatedElement element) {
         final OneToMany oneToMany = element.getAnnotation(OneToMany.class);
         final String name = getPropertyName(element);
-        final IFieldMapping propertyMapping = getEntityType(entityClass).getIdField();
-        final Property fetchField = FieldHelper.constructProperty(entityClass, name);
+        final IFieldMapping propertyMapping = entityType.getIdField();
+        final Property fetchField = FieldHelper.constructProperty(entityType.getEntityClass(), name);
         final Class relationClass = oneToMany.relationClass() != Object.class ? oneToMany.relationClass() : fetchField.getType();
         if (relationClass == Object.class) {
             throw new RuntimeException(
-                    "Relation @OneToMany in  " + entityClass.getName() + "." + name + " must have relativeClass() specified!");
+                    "Relation @OneToMany in  " + entityType.getEntityClass().getName() + "." + name + " must have relativeClass() specified!");
         }
 
         if (!entityTypeByEntityClass.containsKey(relationClass)) {
@@ -218,7 +217,7 @@ public class EntityMappingRegistry implements IEntityMappingRegistry {
         if (relationPropertyMapping == null) {
             throw new RuntimeException(
                     "Not found relational property mapping " + relationClass.getName() + "." + oneToMany.relationProperty()
-                            + " for @OneToMany " + entityClass.getName() + "." + name + "!");
+                            + " for @OneToMany " + entityType.getEntityClass().getName() + "." + name + "!");
         }
 
         return new RelationMapping(name, relationClass, propertyMapping, relationPropertyMapping, fetchField, condition, groupBy,
@@ -226,14 +225,21 @@ public class EntityMappingRegistry implements IEntityMappingRegistry {
 
     }
 
+    public IRelationMapping parseManyToOne(final AbstractEntityType entityType, final AnnotatedElement element) {
+        return parseManyToOne(entityType, entityType.getEntityClass(), element);
+    }
+
     public IRelationMapping parseManyToOne(final Class entityClass, final AnnotatedElement element) {
+        return parseManyToOne(null, entityClass, element);
+    }
+
+    private IRelationMapping parseManyToOne(final AbstractEntityType entityType, final Class entityClass, final AnnotatedElement element) {
         final ManyToOne manyToOne = element.getAnnotation(ManyToOne.class);
         final String name = getPropertyName(element);
 
-        final AbstractEntityType entityType = entityTypeByEntityClass.get(entityClass);
         final IFieldMapping propertyMapping = entityType != null
                 ? entityType.getField(manyToOne.property())
-                : new FieldMapping(name, null, Types.BIGINT, FieldHelper.constructProperty(entityClass, manyToOne.property()));
+                : FieldMapping.createFakeField(name, FieldHelper.constructProperty(entityClass, manyToOne.property()));
         if (propertyMapping == null) {
             throw new RuntimeException(
                     "Not found property " + manyToOne.property() + "for @ManyToOne " + entityClass.getName() + "." + getPropertyName(
@@ -312,13 +318,13 @@ public class EntityMappingRegistry implements IEntityMappingRegistry {
     }
 
     @SuppressWarnings("unchecked")
-    private IEntityType registerEntity(Class entityClass) {
+    private AbstractEntityType registerEntity(Class entityClass) {
         if (entityClass.isAnnotationPresent(Entity.class)) {
             final Entity entity = (Entity) entityClass.getAnnotation(Entity.class);
             final String entityName = getEntityNameFromAnnotation(entity, entityClass);
             final String tableName = getEntityTableName(entity, entityClass);
             if (!entityTypeByEntityClass.containsKey(entityClass) && !entityTypeByEntityName.containsKey(entityName)) {
-                SimpleEntityType entityType = new SimpleEntityType(entityClass, entityName, tableName, getEntitySql(entity, entityClass));
+                SimpleEntityType entityType = new SimpleEntityType(entityClass, entityName, tableName, getEntitySql(entity));
                 entityTypeByEntityClass.put(entityClass, entityType);
                 entityTypeByEntityName.put(entityName, entityType);
                 logRegisterEntity(entityClass, entityName, tableName);
@@ -366,46 +372,14 @@ public class EntityMappingRegistry implements IEntityMappingRegistry {
         }
     }
 
-    private void addFieldMapping(Class entityClass, FieldMapping fieldMapping) {
-        final AbstractEntityType entityType = getEntityType(entityClass);
-
-        entityType.addField(fieldMapping);
-
-        logRegisterFieldMapping(entityClass, fieldMapping);
-    }
-
-    private void addIdFieldMapping(Class entityClass, FieldMapping fieldMapping) {
-        final AbstractEntityType entityType = getEntityType(entityClass);
-
-        if (entityType.getIdField() != null) {
-            throw new RuntimeException("Duplicate @IdField definition in class " + entityClass);
-        }
-
-        entityType.setIdField(fieldMapping);
-        addFieldMapping(entityClass, fieldMapping);
-    }
-
-    private void addVersionFieldMapping(Class entityClass, FieldMapping fieldMapping) {
-        final AbstractEntityType entityType = getEntityType(entityClass);
-
-        if (entityType.getVersionField() != null) {
-            throw new RuntimeException("Duplicate @VersionField definition in class " + entityClass);
-        }
-
-        entityType.setVersionField(fieldMapping);
-        addFieldMapping(entityClass, fieldMapping);
-    }
-
-    private void addFetchMapping(Class entityClass, IRelationMapping relationMapping) {
-        final AbstractEntityType entityType = getEntityType(entityClass);
-
+    private void addFetchMapping(AbstractEntityType entityType, IRelationMapping relationMapping) {
         if (entityType.getRelation(relationMapping.getName()) != null) {
-            throw new RuntimeException("Duplicate property name '" + relationMapping.getName() + "' in class " + entityClass);
+            throw new RuntimeException("Duplicate property name '" + relationMapping.getName() + "' in class " + entityType.getEntityClass());
         }
 
         entityType.addRelation(relationMapping);
 
-        logRegisterFetchMapping(entityClass, relationMapping);
+        logRegisterFetchMapping(entityType.getEntityClass(), relationMapping);
     }
 
     private Property[] parseGroupBy(Class entityClass, GroupBy groupByConfig) {
@@ -419,19 +393,19 @@ public class EntityMappingRegistry implements IEntityMappingRegistry {
         return fields.toArray(new Property[]{});
     }
 
-    private static void logRegisterEntity(Class entityClass, String entityName, String tableName) {
+    static void logRegisterEntity(Class entityClass, String entityName, String tableName) {
         log.trace("Register entity '{}' with '{}' name and '{}' table name", new Object[]{entityClass, entityName, tableName});
     }
 
-    private static void logRegisterColumn(Class entityClass, String columnName) {
+    static void logRegisterColumn(Class entityClass, String columnName) {
         log.trace("{}: Register column '{}'", new Object[]{entityClass, columnName});
     }
 
-    private static void logRegisterFieldMapping(Class entityClass, FieldMapping fieldMapping) {
+    static void logRegisterFieldMapping(Class entityClass, FieldMapping fieldMapping) {
         log.trace("{}: Register Field Mapping {}", new Object[]{entityClass, fieldMapping});
     }
 
-    private static void logRegisterFetchMapping(Class entityClass, IRelationMapping relationMapping) {
+    static void logRegisterFetchMapping(Class entityClass, IRelationMapping relationMapping) {
         log.trace("{}: Register ManyToOne Mapping {}", new Object[]{entityClass, relationMapping});
     }
 }

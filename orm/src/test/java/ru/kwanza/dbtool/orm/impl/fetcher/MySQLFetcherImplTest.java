@@ -5,6 +5,6 @@ import org.springframework.test.context.ContextConfiguration;
 /**
  * @author Alexander Guzanov
  */
-@ContextConfiguration(locations = "mssql-config.xml")
-public class MSSQLTestFetcherImpl extends TestFetcherIml{
+@ContextConfiguration(locations = "mysql-config.xml")
+public class MySQLFetcherImplTest extends FetcherTest {
 }

@@ -1,4 +1,4 @@
-package ru.kwanza.dbtool.orm.impl.abstractentity;
+package ru.kwanza.dbtool.orm.impl.fetcher;
 
 import org.springframework.test.context.ContextConfiguration;
 
@@ -6,5 +6,5 @@ import org.springframework.test.context.ContextConfiguration;
  * @author Alexander Guzanov
  */
 @ContextConfiguration(locations = "oracle-config.xml")
-public class OracleTestAbstractEntity extends TestAbstractEntity {
+public class OracleFetcherImplTest extends FetcherTest {
 }

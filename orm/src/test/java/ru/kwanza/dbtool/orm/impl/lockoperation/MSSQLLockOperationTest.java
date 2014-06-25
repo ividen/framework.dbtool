@@ -8,5 +8,5 @@ import org.springframework.test.context.ContextConfiguration;
  */
 @ContextConfiguration(locations = "mssql-config.xml" )
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-public class TestMSSQLLockOperation extends TestLockOperation {
+public class MSSQLLockOperationTest extends LockOperationTest {
 }

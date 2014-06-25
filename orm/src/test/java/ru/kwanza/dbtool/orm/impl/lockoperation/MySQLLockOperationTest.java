@@ -6,7 +6,7 @@ import org.springframework.test.context.ContextConfiguration;
 /**
  * @author Alexander Guzanov
  */
-@ContextConfiguration(locations = "h2-config.xml" )
+@ContextConfiguration(locations = "mysql-config.xml" )
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-public class TestH2LockOperation extends TestLockOperation {
+public class MySQLLockOperationTest extends LockOperationTest {
 }

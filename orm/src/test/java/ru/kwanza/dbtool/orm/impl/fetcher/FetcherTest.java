@@ -28,7 +28,7 @@ import java.util.Map;
  * @author Alexander Guzanov
  */
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-public abstract class TestFetcherIml extends AbstractJUnit4SpringContextTests {
+public abstract class FetcherTest extends AbstractJUnit4SpringContextTests {
 
     @Resource(name = "dbtool.IEntityManager")
     private IEntityManager em;
@@ -224,17 +224,17 @@ public abstract class TestFetcherIml extends AbstractJUnit4SpringContextTests {
     public void testNoEntityFetch1() {
         List<TestEntity> testEntities = query().prepare().selectList();
 
-        List<TestEvent> testEvents = new ArrayList<TestEvent>(testEntities.size());
+        List<Event> events = new ArrayList<Event>(testEntities.size());
 
         for (TestEntity testEntity : testEntities) {
-            testEvents.add(new TestEvent(testEntity.getId()));
+            events.add(new Event(testEntity.getId()));
         }
 
-        em.fetch(TestEvent.class, testEvents, "testEntity{entityA,entityB,entityC{entityF,entityE{entityG}},entityD}");
+        em.fetch(Event.class, events, "testEntity{entityA,entityB,entityC{entityF,entityE{entityG}},entityD}");
         for (int i = 0; i < 1500; i++) {
-            final TestEvent testEvent = testEvents.get(i);
-            TestEntity testEntity = testEvent.getTestEntity();
-            Assert.assertEquals(testEntity.getId().intValue(), testEvent.getEntityId().intValue());
+            final Event event = events.get(i);
+            TestEntity testEntity = event.getTestEntity();
+            Assert.assertEquals(testEntity.getId().intValue(), event.getEntityId().intValue());
 
             Assert.assertEquals(testEntity.getId().intValue(), i);
             Assert.assertEquals(testEntity.getEntityA().getId().intValue(), i);
@@ -247,9 +247,9 @@ public abstract class TestFetcherIml extends AbstractJUnit4SpringContextTests {
         }
 
         for (int i = 0; i < 1500; i++) {
-            final TestEvent testEvent = testEvents.get(i + 1500);
-            TestEntity testEntity = testEvent.getTestEntity();
-            Assert.assertEquals(testEntity.getId().intValue(), testEvent.getEntityId().intValue());
+            final Event event = events.get(i + 1500);
+            TestEntity testEntity = event.getTestEntity();
+            Assert.assertEquals(testEntity.getId().intValue(), event.getEntityId().intValue());
             Assert.assertEquals(testEntity.getId().intValue(), i + 1500);
             Assert.assertEquals(testEntity.getEntityA().getId().intValue(), i);
             Assert.assertEquals(testEntity.getEntityB().getId().intValue() - 1500, i);
@@ -265,15 +265,15 @@ public abstract class TestFetcherIml extends AbstractJUnit4SpringContextTests {
     public void testNoEntityFetch2() {
         List<TestEntityA> testEntities = queryEntityA().prepare().selectList();
 
-        List<TestEventWithAssociation> testEvents = new ArrayList<TestEventWithAssociation>(testEntities.size());
+        List<EventWithAssociation> testEvents = new ArrayList<EventWithAssociation>(testEntities.size());
 
         for (TestEntityA testEntity : testEntities) {
-            testEvents.add(new TestEventWithAssociation(testEntity.getId()));
+            testEvents.add(new EventWithAssociation(testEntity.getId()));
         }
 
-        em.fetch(TestEventWithAssociation.class, testEvents, "entities{entityB,entityC{entityF,entityE{entityG}},entityD}");
+        em.fetch(EventWithAssociation.class, testEvents, "entities{entityB,entityC{entityF,entityE{entityG}},entityD}");
 
-        for (TestEventWithAssociation testEvent : testEvents) {
+        for (EventWithAssociation testEvent : testEvents) {
             Assert.assertEquals(testEvent.getEntities().size(), 2);
             for (TestEntity testEntity : testEvent.getEntities()) {
                 Assert.assertEquals(testEntity.getEntityBID(), testEntity.getEntityB().getId());
@@ -335,17 +335,17 @@ public abstract class TestFetcherIml extends AbstractJUnit4SpringContextTests {
     public void testLazyFetch_3() {
         List<TestEntity> testEntities = query().prepare().selectList();
 
-        List<TestEvent> testEvents = new ArrayList<TestEvent>(testEntities.size());
+        List<Event> events = new ArrayList<Event>(testEntities.size());
 
         for (TestEntity testEntity : testEntities) {
-            testEvents.add(new TestEvent(testEntity.getId()));
+            events.add(new Event(testEntity.getId()));
         }
 
-        em.fetchLazy(TestEvent.class, testEvents);
+        em.fetchLazy(Event.class, events);
         for (int i = 0; i < 1500; i++) {
-            final TestEvent testEvent = testEvents.get(i);
-            TestEntity testEntity = testEvent.getTestEntity();
-            Assert.assertEquals(testEntity.getId().intValue(), testEvent.getEntityId().intValue());
+            final Event event = events.get(i);
+            TestEntity testEntity = event.getTestEntity();
+            Assert.assertEquals(testEntity.getId().intValue(), event.getEntityId().intValue());
 
             Assert.assertEquals(testEntity.getId().intValue(), i);
             Assert.assertEquals(testEntity.getEntityA().getId().intValue(), i);
@@ -358,9 +358,9 @@ public abstract class TestFetcherIml extends AbstractJUnit4SpringContextTests {
         }
 
         for (int i = 0; i < 1500; i++) {
-            final TestEvent testEvent = testEvents.get(i + 1500);
-            TestEntity testEntity = testEvent.getTestEntity();
-            Assert.assertEquals(testEntity.getId().intValue(), testEvent.getEntityId().intValue());
+            final Event event = events.get(i + 1500);
+            TestEntity testEntity = event.getTestEntity();
+            Assert.assertEquals(testEntity.getId().intValue(), event.getEntityId().intValue());
             Assert.assertEquals(testEntity.getId().intValue(), i + 1500);
             Assert.assertEquals(testEntity.getEntityA().getId().intValue(), i);
             Assert.assertEquals(testEntity.getEntityB().getId().intValue() - 1500, i);
@@ -376,15 +376,15 @@ public abstract class TestFetcherIml extends AbstractJUnit4SpringContextTests {
     public void testLazyFetch_4() {
         List<TestEntityA> testEntities = queryEntityA().prepare().selectList();
 
-        List<TestEventWithAssociation> testEvents = new ArrayList<TestEventWithAssociation>(testEntities.size());
+        List<EventWithAssociation> testEvents = new ArrayList<EventWithAssociation>(testEntities.size());
 
         for (TestEntityA testEntity : testEntities) {
-            testEvents.add(new TestEventWithAssociation(testEntity.getId()));
+            testEvents.add(new EventWithAssociation(testEntity.getId()));
         }
 
-        em.fetchLazy(TestEventWithAssociation.class, testEvents);
+        em.fetchLazy(EventWithAssociation.class, testEvents);
 
-        for (TestEventWithAssociation testEvent : testEvents) {
+        for (EventWithAssociation testEvent : testEvents) {
             Assert.assertEquals(testEvent.getEntities().size(), 2);
             for (TestEntity testEntity : testEvent.getEntities()) {
                 Assert.assertEquals(testEntity.getEntityBID(), testEntity.getEntityB().getId());
@@ -432,15 +432,15 @@ public abstract class TestFetcherIml extends AbstractJUnit4SpringContextTests {
     public void testAssociationWithCondition_1() {
         List<TestEntity> testEntities = query().prepare().selectList();
 
-        List<TestEventWithIfAssociation> testEvents = new ArrayList<TestEventWithIfAssociation>(testEntities.size());
+        List<EventWithIfAssociation> testEvents = new ArrayList<EventWithIfAssociation>(testEntities.size());
 
         for (TestEntity testEntity : testEntities) {
-            testEvents.add(new TestEventWithIfAssociation(testEntity.getId()));
+            testEvents.add(new EventWithIfAssociation(testEntity.getId()));
         }
 
-        em.fetchLazy(TestEventWithIfAssociation.class, testEvents);
+        em.fetchLazy(EventWithIfAssociation.class, testEvents);
 
-        for (TestEventWithIfAssociation testEvent : testEvents) {
+        for (EventWithIfAssociation testEvent : testEvents) {
             final TestEntity testEntity = testEvent.getEntity();
             Assert.assertEquals(testEntity.getEntityAID(), testEntity.getEntityA().getId());
             Assert.assertEquals(testEntity.getEntityBID(), testEntity.getEntityB().getId());
@@ -460,15 +460,15 @@ public abstract class TestFetcherIml extends AbstractJUnit4SpringContextTests {
     public void testAssociationWithCondition_2() {
         List<TestEntity> testEntities = query().prepare().selectList();
 
-        List<TestEventWithIfAssociation> testEvents = new ArrayList<TestEventWithIfAssociation>(testEntities.size());
+        List<EventWithIfAssociation> testEvents = new ArrayList<EventWithIfAssociation>(testEntities.size());
 
         for (TestEntity testEntity : testEntities) {
-            testEvents.add(new TestEventWithIfAssociation(testEntity.getId()));
+            testEvents.add(new EventWithIfAssociation(testEntity.getId()));
         }
 
-        em.fetch(TestEventWithIfAssociation.class, testEvents, "entity{entityA,entityB,entityC{entityF,entityE{entityG}},entityD}");
+        em.fetch(EventWithIfAssociation.class, testEvents, "entity{entityA,entityB,entityC{entityF,entityE{entityG}},entityD}");
 
-        for (TestEventWithIfAssociation testEvent : testEvents) {
+        for (EventWithIfAssociation testEvent : testEvents) {
             final TestEntity testEntity = testEvent.getEntity();
             Assert.assertEquals(testEntity.getEntityAID(), testEntity.getEntityA().getId());
             Assert.assertEquals(testEntity.getEntityBID(), testEntity.getEntityB().getId());
@@ -487,15 +487,15 @@ public abstract class TestFetcherIml extends AbstractJUnit4SpringContextTests {
     public void testAssociationWithGroupBy_1() {
         List<TestEntityA> testEntities = queryEntityA().prepare().selectList();
 
-        List<TestEventWithAssociation> testEvents = new ArrayList<TestEventWithAssociation>(testEntities.size());
+        List<EventWithAssociation> testEvents = new ArrayList<EventWithAssociation>(testEntities.size());
 
         for (TestEntityA testEntity : testEntities) {
-            testEvents.add(new TestEventWithAssociation(testEntity.getId()));
+            testEvents.add(new EventWithAssociation(testEntity.getId()));
         }
 
-        em.fetch(TestEventWithAssociation.class, testEvents, "entitiesById");
+        em.fetch(EventWithAssociation.class, testEvents, "entitiesById");
 
-        for (TestEventWithAssociation testEvent : testEvents) {
+        for (EventWithAssociation testEvent : testEvents) {
             final Map<Long, TestEntity> entitiesById = testEvent.getEntitiesById();
             for (Map.Entry<Long, TestEntity> e : entitiesById.entrySet()) {
                 Assert.assertEquals(e.getKey(), e.getValue().getId());
@@ -511,15 +511,15 @@ public abstract class TestFetcherIml extends AbstractJUnit4SpringContextTests {
     public void testAssociationWithGroupBy_2() {
         List<TestEntityA> testEntities = queryEntityA().prepare().selectList();
 
-        List<TestEventWithAssociation> testEvents = new ArrayList<TestEventWithAssociation>(testEntities.size());
+        List<EventWithAssociation> testEvents = new ArrayList<EventWithAssociation>(testEntities.size());
 
         for (TestEntityA testEntity : testEntities) {
-            testEvents.add(new TestEventWithAssociation(testEntity.getId()));
+            testEvents.add(new EventWithAssociation(testEntity.getId()));
         }
 
-        em.fetch(TestEventWithAssociation.class, testEvents, "entitiesByEntityA");
+        em.fetch(EventWithAssociation.class, testEvents, "entitiesByEntityA");
 
-        for (TestEventWithAssociation testEvent : testEvents) {
+        for (EventWithAssociation testEvent : testEvents) {
             final Map<TestEntityA, List<TestEntity>> entitiesByEntityA = testEvent.getEntitiesByEntityA();
             for (Map.Entry<TestEntityA, List<TestEntity>> entry : entitiesByEntityA.entrySet()) {
                 for (TestEntity testEntity : entry.getValue()) {
@@ -536,15 +536,15 @@ public abstract class TestFetcherIml extends AbstractJUnit4SpringContextTests {
     public void testAssociationWithGroupBy_3() {
         List<TestEntityA> testEntities = queryEntityA().prepare().selectList();
 
-        List<TestEventWithAssociation> testEvents = new ArrayList<TestEventWithAssociation>(testEntities.size());
+        List<EventWithAssociation> testEvents = new ArrayList<EventWithAssociation>(testEntities.size());
 
         for (TestEntityA testEntity : testEntities) {
-            testEvents.add(new TestEventWithAssociation(testEntity.getId()));
+            testEvents.add(new EventWithAssociation(testEntity.getId()));
         }
 
-        em.fetch(TestEventWithAssociation.class, testEvents, "entitiesByACEId");
+        em.fetch(EventWithAssociation.class, testEvents, "entitiesByACEId");
 
-        for (TestEventWithAssociation testEvent : testEvents) {
+        for (EventWithAssociation testEvent : testEvents) {
             final Map<TestEntityA, Map<Long, List<TestEntity>>> entitiesByACEId = testEvent.getEntitiesByACEId();
             for (Map.Entry<TestEntityA, Map<Long, List<TestEntity>>> e : entitiesByACEId.entrySet()) {
                 for (Map.Entry<Long, List<TestEntity>> entry : e.getValue().entrySet()) {
@@ -565,15 +565,15 @@ public abstract class TestFetcherIml extends AbstractJUnit4SpringContextTests {
     public void testAssociationWithGroupBy_4() {
         List<TestEntityA> testEntities = queryEntityA().prepare().selectList();
 
-        List<TestEventWithAssociation> testEvents = new ArrayList<TestEventWithAssociation>(testEntities.size());
+        List<EventWithAssociation> testEvents = new ArrayList<EventWithAssociation>(testEntities.size());
 
         for (TestEntityA testEntity : testEntities) {
-            testEvents.add(new TestEventWithAssociation(testEntity.getId()));
+            testEvents.add(new EventWithAssociation(testEntity.getId()));
         }
 
-        em.fetch(TestEventWithAssociation.class, testEvents, "entitiesById{entityA,entityB,entityC{entityF},entityD}");
+        em.fetch(EventWithAssociation.class, testEvents, "entitiesById{entityA,entityB,entityC{entityF},entityD}");
 
-        for (TestEventWithAssociation testEvent : testEvents) {
+        for (EventWithAssociation testEvent : testEvents) {
             final Map<Long, TestEntity> entitiesById = testEvent.getEntitiesById();
             for (Map.Entry<Long, TestEntity> e : entitiesById.entrySet()) {
                 Assert.assertEquals(e.getKey(), e.getValue().getId());
@@ -592,15 +592,15 @@ public abstract class TestFetcherIml extends AbstractJUnit4SpringContextTests {
     public void testAssociationWithGroupBy_5() {
         List<TestEntityA> testEntities = queryEntityA().prepare().selectList();
 
-        List<TestEventWithAssociation> testEvents = new ArrayList<TestEventWithAssociation>(testEntities.size());
+        List<EventWithAssociation> testEvents = new ArrayList<EventWithAssociation>(testEntities.size());
 
         for (TestEntityA testEntity : testEntities) {
-            testEvents.add(new TestEventWithAssociation(testEntity.getId()));
+            testEvents.add(new EventWithAssociation(testEntity.getId()));
         }
 
-        em.fetch(TestEventWithAssociation.class, testEvents, "entitiesByACEId{entityA,entityB,entityC,entityD}");
+        em.fetch(EventWithAssociation.class, testEvents, "entitiesByACEId{entityA,entityB,entityC,entityD}");
 
-        for (TestEventWithAssociation testEvent : testEvents) {
+        for (EventWithAssociation testEvent : testEvents) {
             final Map<TestEntityA, Map<Long, List<TestEntity>>> entitiesByACEId = testEvent.getEntitiesByACEId();
             for (Map.Entry<TestEntityA, Map<Long, List<TestEntity>>> e : entitiesByACEId.entrySet()) {
                 for (Map.Entry<Long, List<TestEntity>> entry : e.getValue().entrySet()) {
@@ -626,16 +626,16 @@ public abstract class TestFetcherIml extends AbstractJUnit4SpringContextTests {
     public void testAssociationWithGroupBy_6() {
         List<TestEntityA> testEntities = queryEntityA().prepare().selectList();
 
-        List<TestEventWithAssociation> testEvents = new ArrayList<TestEventWithAssociation>(testEntities.size());
+        List<EventWithAssociation> testEvents = new ArrayList<EventWithAssociation>(testEntities.size());
 
         for (TestEntityA testEntity : testEntities) {
-            testEvents.add(new TestEventWithAssociation(testEntity.getId()));
+            testEvents.add(new EventWithAssociation(testEntity.getId()));
         }
 
-        em.fetchLazy(TestEventWithAssociation.class, testEvents);
+        em.fetchLazy(EventWithAssociation.class, testEvents);
 
 
-        for (TestEventWithAssociation testEvent : testEvents) {
+        for (EventWithAssociation testEvent : testEvents) {
             final Map<Long, TestEntity> entitiesById = testEvent.getEntitiesById();
             for (Map.Entry<Long, TestEntity> e : entitiesById.entrySet()) {
                 Assert.assertEquals(e.getKey(), e.getValue().getId());
@@ -653,15 +653,15 @@ public abstract class TestFetcherIml extends AbstractJUnit4SpringContextTests {
     public void testAssociationWithGroupBy_7() {
         List<TestEntityA> testEntities = queryEntityA().prepare().selectList();
 
-        List<TestEventWithAssociation> testEvents = new ArrayList<TestEventWithAssociation>(testEntities.size());
+        List<EventWithAssociation> testEvents = new ArrayList<EventWithAssociation>(testEntities.size());
 
         for (TestEntityA testEntity : testEntities) {
-            testEvents.add(new TestEventWithAssociation(testEntity.getId()));
+            testEvents.add(new EventWithAssociation(testEntity.getId()));
         }
 
-        em.fetchLazy(TestEventWithAssociation.class, testEvents);
+        em.fetchLazy(EventWithAssociation.class, testEvents);
 
-        for (TestEventWithAssociation testEvent : testEvents) {
+        for (EventWithAssociation testEvent : testEvents) {
             final Map<TestEntityA, Map<Long, List<TestEntity>>> entitiesByACEId = testEvent.getEntitiesByACEId();
             for (Map.Entry<TestEntityA, Map<Long, List<TestEntity>>> e : entitiesByACEId.entrySet()) {
                 for (Map.Entry<Long, List<TestEntity>> entry : e.getValue().entrySet()) {

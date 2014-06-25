@@ -22,9 +22,11 @@ public class SubUnionEntityType extends AbstractEntityType {
         final Collection<IFieldMapping> fields1 = original.getFields();
         for (IFieldMapping field : fields1) {
             if (unionEntityType.getCommonField(field.getName()) == null) {
-                SubEntityFieldMapping newField = new SubEntityFieldMapping(original, field,unionEntityType.nextFieldAlias());
+                SubEntityFieldMapping newField = new SubEntityFieldMapping(original, field,
+                        unionEntityType,unionEntityType.getFieldsCount()+1);
                 fields.put(field.getName(), newField);
                 addField(newField);
+                unionEntityType.addField(newField);
             } else {
                 addField(field);
             }

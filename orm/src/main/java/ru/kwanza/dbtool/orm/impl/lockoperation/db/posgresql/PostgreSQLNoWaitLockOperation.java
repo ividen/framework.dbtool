@@ -2,7 +2,7 @@ package ru.kwanza.dbtool.orm.impl.lockoperation.db.posgresql;
 
 import ru.kwanza.dbtool.orm.impl.EntityManagerImpl;
 import ru.kwanza.dbtool.orm.impl.lockoperation.AbstractLockOperation;
-import ru.kwanza.dbtool.orm.impl.querybuilder.EntityInfo;
+import ru.kwanza.dbtool.orm.impl.querybuilder.QueryEntityInfo;
 
 /**
  * @author Alexander Guzanov
@@ -14,7 +14,7 @@ public class PostgreSQLNoWaitLockOperation<T> extends AbstractLockOperation<T> {
 
     protected String createSQL() {
         return "SELECT " + entityType.getIdField().getColumn() + " FROM " +
-                EntityInfo.getTable(entityType) + " WHERE " + entityType.getIdField().getColumn()
+                QueryEntityInfo.getTable(entityType) + " WHERE " + entityType.getIdField().getColumn()
                 + " IN (?) ORDER BY " + entityType.getIdField().getColumn() + " FOR UPDATE NOWAIT";
     }
 }

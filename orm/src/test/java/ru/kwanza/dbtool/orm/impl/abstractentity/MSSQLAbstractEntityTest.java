@@ -6,5 +6,5 @@ import org.springframework.test.context.ContextConfiguration;
  * @author Alexander Guzanov
  */
 @ContextConfiguration(locations = "mssql-config.xml")
-public class MSSQLTestAbstractEntity extends TestAbstractEntity {
+public class MSSQLAbstractEntityTest extends AbstractEntityTest {
 }

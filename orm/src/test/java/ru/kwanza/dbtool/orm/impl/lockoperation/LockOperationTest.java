@@ -33,7 +33,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * @author Alexander Guzanov
  */
 
-public abstract class TestLockOperation extends AbstractTransactionalJUnit4SpringContextTests {
+public abstract class LockOperationTest extends AbstractTransactionalJUnit4SpringContextTests {
     @Resource(name = "dbtool.IEntityManager")
     protected IEntityManager em;
     @Resource(name = "dbtool.DBTool")

@@ -12,6 +12,8 @@ import ru.kwanza.toolbox.fieldhelper.Property;
  */
 public interface IFieldMapping {
 
+    public int getId();
+
     public String getColumn();
 
     public int getType();

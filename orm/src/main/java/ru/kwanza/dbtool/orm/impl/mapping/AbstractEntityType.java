@@ -66,6 +66,10 @@ public abstract class AbstractEntityType implements IEntityType {
         return Collections.unmodifiableCollection(fields.values());
     }
 
+    protected int getFieldsCount(){
+        return fields.size();
+    }
+
     public IRelationMapping getRelation(String name) {
         return relations.get(name);
     }

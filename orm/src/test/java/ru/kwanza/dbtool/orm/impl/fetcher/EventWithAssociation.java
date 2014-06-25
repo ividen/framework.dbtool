@@ -12,7 +12,7 @@ import java.util.Map;
 /**
  * @author Alexander Guzanov
  */
-public class TestEventWithAssociation implements Serializable {
+public class EventWithAssociation implements Serializable {
     private Long entityAID;
 
     @Association(property = "entityAID", relationProperty = "entityAID", relationClass = TestEntity.class)
@@ -30,7 +30,7 @@ public class TestEventWithAssociation implements Serializable {
     @GroupBy("id")
     private Map<Long, TestEntity> entitiesById;
 
-    public TestEventWithAssociation(Long entityAID) {
+    public EventWithAssociation(Long entityAID) {
         this.entityAID = entityAID;
     }
 

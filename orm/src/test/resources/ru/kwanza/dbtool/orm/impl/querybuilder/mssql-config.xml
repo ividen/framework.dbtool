@@ -7,6 +7,6 @@
 
     <import resource="mssql-querybuilder-config.xml"/>
 
-    <context:component-scan base-package="ru.kwanza.dbtool.orm.impl.abstractentity"/>
+    <context:component-scan base-package="ru.kwanza.dbtool.orm.impl.querybuilder"/>
 
 </beans>
