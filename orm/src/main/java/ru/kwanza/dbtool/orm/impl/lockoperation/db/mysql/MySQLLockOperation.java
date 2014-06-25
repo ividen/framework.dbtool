@@ -2,7 +2,7 @@ package ru.kwanza.dbtool.orm.impl.lockoperation.db.mysql;
 
 import ru.kwanza.dbtool.orm.impl.EntityManagerImpl;
 import ru.kwanza.dbtool.orm.impl.lockoperation.AbstractLockOperation;
-import ru.kwanza.dbtool.orm.impl.querybuilder.EntityInfo;
+import ru.kwanza.dbtool.orm.impl.querybuilder.QueryEntityInfo;
 
 /**
  * @author Alexander Guzanov
@@ -15,7 +15,7 @@ public class MySQLLockOperation<T> extends AbstractLockOperation<T> {
     @Override
     protected String createSQL() {
         return "SELECT " + entityType.getIdField().getColumn() + " FROM " +
-                EntityInfo.getTable(entityType) + " WHERE " + entityType.getIdField().getColumn() + " IN (?) FOR UPDATE";
+                QueryEntityInfo.getTable(entityType) + " WHERE " + entityType.getIdField().getColumn() + " IN (?) FOR UPDATE";
     }
 
     protected void setLockTimeout(int timeout) {

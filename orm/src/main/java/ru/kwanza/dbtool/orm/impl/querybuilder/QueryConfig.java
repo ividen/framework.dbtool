@@ -12,13 +12,13 @@ public class QueryConfig<T> {
     private final String sql;
     private final EntityManagerImpl em;
     private final Class<T> entityClass;
-    private final EntityInfo rootRelation;
+    private final QueryEntityInfo rootRelation;
     private final ParamsHolder holder;
     private final boolean lazy;
 
     private List<FetchInfo> fetchEntities;
 
-    QueryConfig(EntityManagerImpl em, Class<T> entityClass, String sql, EntityInfo rootRelations, Parameters parameters,
+    QueryConfig(EntityManagerImpl em, Class<T> entityClass, String sql, QueryEntityInfo rootRelations, Parameters parameters,
                 List<FetchInfo> fetchEntities, boolean lazy) {
         this.sql = sql;
         this.em = em;
@@ -29,7 +29,7 @@ public class QueryConfig<T> {
         this.lazy = lazy;
     }
 
-    public EntityInfo getRoot() {
+    public QueryEntityInfo getRoot() {
         return rootRelation;
     }
 

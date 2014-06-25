@@ -2,32 +2,33 @@ package ru.kwanza.dbtool.orm.impl.querybuilder;
 
 import ru.kwanza.dbtool.orm.api.Join;
 import ru.kwanza.dbtool.orm.api.internal.IEntityType;
+import ru.kwanza.dbtool.orm.api.internal.IFieldMapping;
 import ru.kwanza.dbtool.orm.api.internal.IRelationMapping;
 
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
  * @author Alexander Guzanov
  */
-public class EntityInfo {
+public class QueryEntityInfo {
     private String alias;
     private Join join;
     private IEntityType entityType;
     private IRelationMapping relationMapping;
-    private Map<String, EntityInfo> joins;
+    private Map<String, QueryEntityInfo> joins;
     private Map<String, Join> fetches;
 
-    EntityInfo(Join join, IEntityType entityType, String alias, IRelationMapping relationMapping) {
+    QueryEntityInfo(Join join, IEntityType entityType, String alias, IRelationMapping relationMapping) {
         this.join = join;
         this.alias = alias;
         this.entityType = entityType;
         this.relationMapping = relationMapping;
-
     }
 
-    EntityInfo(IEntityType entityType) {
+    QueryEntityInfo(IEntityType entityType) {
         this.entityType = entityType;
         this.alias = entityType.getTableName();
     }
@@ -56,9 +57,9 @@ public class EntityInfo {
         return relationMapping;
     }
 
-    void addJoin(String name, EntityInfo relation) {
+    void addJoin(String name, QueryEntityInfo relation) {
         if (joins == null) {
-            joins = new HashMap<String, EntityInfo>();
+            joins = new HashMap<String, QueryEntityInfo>();
         }
 
         joins.put(name, relation);
@@ -72,11 +73,11 @@ public class EntityInfo {
         fetches.put(join.getPropertyName(), join);
     }
 
-    EntityInfo getJoin(String propertyName) {
+    QueryEntityInfo getJoin(String propertyName) {
         return hasJoins() ? joins.get(propertyName) : null;
     }
 
-    Map<String, EntityInfo> getJoins() {
+    Map<String, QueryEntityInfo> getJoins() {
         return joins;
     }
 

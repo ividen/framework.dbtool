@@ -25,7 +25,7 @@ class FieldFragmentHelper {
         return result.toString();
     }
 
-    private void processFields(String alias, EntityInfo root, StringBuilder result) {
+    private void processFields(String alias, QueryEntityInfo root, StringBuilder result) {
         Collection<IFieldMapping> fields = root.getRelationMapping() == null
                 ? builder.getRegistry().getEntityType(builder.getEntityClass()).getFields()
                 : builder.getRegistry().getEntityType(root.getRelationMapping().getRelationClass()).getFields();
@@ -41,9 +41,9 @@ class FieldFragmentHelper {
 
         }
         if (root != null && root.getJoins() != null) {
-            for (EntityInfo entityInfo : root.getJoins().values()) {
-                if (entityInfo.getJoinType() != Join.Type.FETCH) {
-                    processFields(entityInfo.getAlias(), entityInfo, result);
+            for (QueryEntityInfo queryEntityInfo : root.getJoins().values()) {
+                if (queryEntityInfo.getJoinType() != Join.Type.FETCH) {
+                    processFields(queryEntityInfo.getAlias(), queryEntityInfo, result);
                 }
             }
         }

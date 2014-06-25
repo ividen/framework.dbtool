@@ -24,7 +24,7 @@ class WhereFragmentHelper {
         createConditionString(builder.getEntityInfoFactory().getRoot(), condition, where, holder);
     }
 
-    public void createConditionString(EntityInfo root, If condition, StringBuilder where, Parameters holder) {
+    public void createConditionString(QueryEntityInfo root, If condition, StringBuilder where, Parameters holder) {
         if (condition == null) {
             return;
         }

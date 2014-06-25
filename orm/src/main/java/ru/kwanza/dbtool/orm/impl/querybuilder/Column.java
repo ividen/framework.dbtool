@@ -6,15 +6,15 @@ import ru.kwanza.dbtool.orm.api.internal.IFieldMapping;
  * @author Alexander Guzanov
  */
 class Column {
-    private EntityInfo relation;
+    private QueryEntityInfo relation;
     private IFieldMapping fieldMapping;
 
-    Column(EntityInfo relation, IFieldMapping fieldMapping) {
+    Column(QueryEntityInfo relation, IFieldMapping fieldMapping) {
         this.relation = relation;
         this.fieldMapping = fieldMapping;
     }
 
-    static String getFullColumnName(EntityInfo relation, IFieldMapping fieldMapping) {
+    static String getFullColumnName(QueryEntityInfo relation, IFieldMapping fieldMapping) {
         if (relation.isRoot() && relation.getJoins() == null) {
             return fieldMapping.getColumn();
         }

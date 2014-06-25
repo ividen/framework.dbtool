@@ -39,7 +39,8 @@ class FieldMapping implements IFieldMapping {
     public String toString() {
         final StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("FieldMapping{");
-        stringBuilder.append("name='").append(name).append('\'');
+//        stringBuilder.append("id='").append(id).append('\'');
+        stringBuilder.append(", name='").append(name).append('\'');
         stringBuilder.append(", column='").append(column).append('\'');
         stringBuilder.append(", type=").append(type);
         stringBuilder.append(", property=").append(property != null ? property.getClass() : null);

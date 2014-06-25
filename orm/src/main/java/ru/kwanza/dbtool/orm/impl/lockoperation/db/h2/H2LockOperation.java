@@ -4,7 +4,7 @@ import org.h2.engine.Session;
 import org.h2.jdbc.JdbcConnection;
 import ru.kwanza.dbtool.orm.impl.EntityManagerImpl;
 import ru.kwanza.dbtool.orm.impl.lockoperation.AbstractLockOperation;
-import ru.kwanza.dbtool.orm.impl.querybuilder.EntityInfo;
+import ru.kwanza.dbtool.orm.impl.querybuilder.QueryEntityInfo;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -20,7 +20,7 @@ public class H2LockOperation<T> extends AbstractLockOperation<T> {
     @Override
     protected String createSQL() {
         return "SELECT " + entityType.getIdField().getColumn() + " FROM " +
-                EntityInfo.getTable(entityType) + " WHERE " + entityType.getIdField().getColumn() + " IN (?) FOR UPDATE";
+                QueryEntityInfo.getTable(entityType) + " WHERE " + entityType.getIdField().getColumn() + " IN (?) FOR UPDATE";
     }
 
     protected void setLockTimeout(int timeout) {

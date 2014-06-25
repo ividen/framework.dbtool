@@ -110,16 +110,16 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
         return result;
     }
 
-    private void createFetchList(EntityInfo entityInfo, List<FetchInfo> result, boolean lazy) {
-        if (entityInfo.hasFetches()) {
-            for (Map.Entry<String, Join> entry : entityInfo.getFetches().entrySet()) {
+    private void createFetchList(QueryEntityInfo queryEntityInfo, List<FetchInfo> result, boolean lazy) {
+        if (queryEntityInfo.hasFetches()) {
+            for (Map.Entry<String, Join> entry : queryEntityInfo.getFetches().entrySet()) {
                 result.addAll(em.getFetcher()
-                        .getFetchInfo(entityInfo.getEntityType().getEntityClass(), Collections.singletonList(entry.getValue())));
+                        .getFetchInfo(queryEntityInfo.getEntityType().getEntityClass(), Collections.singletonList(entry.getValue())));
             }
         }
 
-        if (entityInfo.hasJoins()) {
-            for (EntityInfo info : entityInfo.getJoins().values()) {
+        if (queryEntityInfo.hasJoins()) {
+            for (QueryEntityInfo info : queryEntityInfo.getJoins().values()) {
                 createFetchList(info, result, lazy);
             }
 
@@ -146,7 +146,7 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
         return this;
     }
 
-    private void processJoin(EntityInfo root, Join join) {
+    private void processJoin(QueryEntityInfo root, Join join) {
         entityInfoFactory.registerInfo(root, join);
     }
 
@@ -158,7 +158,7 @@ public abstract class AbstractQueryBuilder<T> implements IQueryBuilder<T> {
         return createQuery(createConfig(entityInfoFactory.getRoot(), preparedSql, holder, Collections.<FetchInfo>emptyList(), lazy));
     }
 
-    private QueryConfig<T> createConfig(EntityInfo rootRelations, String sqlString, Parameters holder, List<FetchInfo> fetchInfo, boolean lazy) {
+    private QueryConfig<T> createConfig(QueryEntityInfo rootRelations, String sqlString, Parameters holder, List<FetchInfo> fetchInfo, boolean lazy) {
         return new QueryConfig<T>(em, entityClass, sqlString, rootRelations, holder, fetchInfo, lazy);
     }
 

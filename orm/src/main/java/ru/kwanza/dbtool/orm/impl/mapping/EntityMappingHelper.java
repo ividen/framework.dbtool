@@ -13,31 +13,51 @@ import java.sql.Types;
  */
 public class EntityMappingHelper {
 
-    public static FieldMapping createFieldMapping(Class entityClass, AnnotatedElement annotatedElement, Annotation annotation) {
+    public static void tryCreateFieldMapping(AbstractEntityType entityType, AnnotatedElement annotatedElement) {
         final String columnName;
         final int type;
+        boolean isId = false;
+        boolean isVersion = false;
 
-        if (annotation instanceof Field) {
-            final Field fieldAnnotation = (Field) annotation;
+        if (annotatedElement.isAnnotationPresent(Field.class)) {
+            final Field fieldAnnotation = annotatedElement.getAnnotation(Field.class);
             columnName = getColumnName(fieldAnnotation, annotatedElement);
             type = fieldAnnotation.type();
-        } else if (annotation instanceof IdField) {
-            final IdField idFieldAnnotation = (IdField) annotation;
-            columnName = getColumnName(idFieldAnnotation, annotatedElement);
-            type = idFieldAnnotation.type();
-        } else if (annotation instanceof VersionField) {
-            final VersionField versionFieldAnnotation = (VersionField) annotation;
-            columnName = getColumnName(versionFieldAnnotation, annotatedElement);
+        } else if (annotatedElement.isAnnotationPresent(IdField.class)) {
+            final IdField fieldAnnotation = annotatedElement.getAnnotation(IdField.class);
+            columnName = getColumnName(fieldAnnotation, annotatedElement);
+            type = fieldAnnotation.type();
+            isId = true;
+        } else if (annotatedElement.isAnnotationPresent(VersionField.class)) {
+            final VersionField fieldAnnotation = annotatedElement.getAnnotation(VersionField.class);
+            columnName = getColumnName(fieldAnnotation, annotatedElement);
             type = Types.BIGINT;
+            isVersion = true;
         } else {
-            throw new RuntimeException("Unknown annotation: " + annotation);
+            return;
         }
 
         final String propertyName = getPropertyName(annotatedElement);
+        final Property property = FieldHelper.constructProperty(entityType.getEntityClass(), propertyName);
+        final FieldMapping result = new FieldMapping(propertyName, columnName, type, property);
+        entityType.addField(result);
 
-        final Property property = FieldHelper.constructProperty(entityClass, propertyName);
+        if (isId) {
+            if (entityType.getIdField() != null) {
+                throw new RuntimeException("Duplicate @IdField definition in class " + entityType.getEntityClass());
+            }
 
-        return new FieldMapping(propertyName, columnName, type, property);
+            entityType.setIdField(result);
+        }
+
+        if (isVersion) {
+            if (entityType.getVersionField() != null) {
+                throw new RuntimeException("Duplicate @VersionField definition in class " + entityType.getEntityClass());
+            }
+            entityType.setVersionField(result);
+        }
+
+        EntityMappingRegistry.logRegisterFieldMapping(entityType.getEntityClass(), result);
     }
 
     public static String getEntityTableName(Entity entity, Class entityClass) {
@@ -49,7 +69,7 @@ public class EntityMappingHelper {
     }
 
 
-    public static String getEntitySql(Entity entity, Class entityClass) {
+    public static String getEntitySql(Entity entity) {
         final String sql = entity.sql();
         if (sql.trim().isEmpty()) {
             return null;
