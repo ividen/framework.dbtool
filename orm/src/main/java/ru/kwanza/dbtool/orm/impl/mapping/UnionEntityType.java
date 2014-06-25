@@ -12,7 +12,7 @@ import java.util.*;
 public class UnionEntityType extends AbstractEntityType {
     private static final String UNION_ALL = " UNION ALL ";
     private static final String CLAZZ_ = "clazz_";
-    public final FieldMapping CLAZZ_FIELD ;
+    public FieldMapping CLAZZ_FIELD ;
 
     private List<IEntityType> entityTypes = new ArrayList<IEntityType>();
     private List<SubUnionEntityType> subUnionEntityTypes;
@@ -22,7 +22,6 @@ public class UnionEntityType extends AbstractEntityType {
 
     public UnionEntityType(String name, Class entityClass) {
         super(entityClass, name, name + "_", null);
-        this.CLAZZ_FIELD = FieldMapping.create(this, null, CLAZZ_, Types.BIGINT); ;
     }
 
     @Override
@@ -46,6 +45,8 @@ public class UnionEntityType extends AbstractEntityType {
                 for (IEntityType entity : entityTypes) {
                     validateEntityType(entity);
                 }
+
+                this.CLAZZ_FIELD = FieldMapping.create(this, null, CLAZZ_, Types.BIGINT); ;
 
                 prepareSql();
             }
@@ -111,10 +112,6 @@ public class UnionEntityType extends AbstractEntityType {
         } else {
             SubUnionEntityType subUnionEntityType = new SubUnionEntityType(entityType, this);
             subUnionEntityTypes.add(subUnionEntityType);
-            for (IFieldMapping field : subUnionEntityType.getSubFields()) {
-                allFields.put(field.getName(), field);
-            }
-
         }
     }
 
@@ -134,6 +131,11 @@ public class UnionEntityType extends AbstractEntityType {
     @Override
     public Collection<IFieldMapping> getFields() {
         return Collections.unmodifiableCollection(allFields.values());
+    }
+
+    @Override
+    protected int getFieldsCount() {
+        return allFields.size();
     }
 
     @Override

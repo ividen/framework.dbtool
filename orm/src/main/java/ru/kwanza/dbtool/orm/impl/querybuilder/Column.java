@@ -14,15 +14,8 @@ class Column {
         this.fieldMapping = fieldMapping;
     }
 
-    static String getFullColumnName(QueryEntityInfo relation, IFieldMapping fieldMapping) {
-        if (relation.isRoot() && relation.getJoins() == null) {
-            return fieldMapping.getColumn();
-        }
-        return relation.getAlias() + "_" + fieldMapping.getColumn();
-    }
-
-    String getColumnName() {
-        return relation.getAlias() + "." + fieldMapping.getColumn();
+    public String getColumnName() {
+        return relation.getColumnName(fieldMapping);
     }
 
     int getType() {

@@ -17,11 +17,8 @@ class FromFragmentHelper {
     String createFromFragment(Parameters holder) {
         final QueryEntityInfo root = builder.getEntityInfoFactory().getRoot();
         final StringBuilder fromPart = new StringBuilder();
-        if (root.getEntityType().getSql() != null) {
-            fromPart.append('(').append(root.getEntityType().getSql()).append(") ");
-        }
 
-        fromPart.append(root.getAlias());
+        fromPart.append(root.getTableWithAlias());
 
         if (root != null) {
             processJoin(fromPart, root, holder);
@@ -44,13 +41,12 @@ class FromFragmentHelper {
                                     joinHolder);
                 }
                 fromPart.append(queryEntityInfo.getJoinType() == Join.Type.LEFT ? " LEFT JOIN " : " INNER JOIN ");
-                final IEntityType entityType = builder.getRegistry().getEntityType(relationClass);
                 if (queryEntityInfo.hasJoins()) {
-                    fromPart.append('(').append(QueryEntityInfo.getTable(entityType)).append(' ').append(queryEntityInfo.getAlias());
+                    fromPart.append('(').append(queryEntityInfo.getTableWithAlias());
                     processJoin(fromPart, queryEntityInfo, holder);
                     fromPart.append(')');
                 } else {
-                    fromPart.append(QueryEntityInfo.getTable(entityType)).append(' ').append(queryEntityInfo.getAlias());
+                    fromPart.append(queryEntityInfo.getTableWithAlias());
                 }
 
                 fromPart.append(" ON ").append(root.getAlias() == null

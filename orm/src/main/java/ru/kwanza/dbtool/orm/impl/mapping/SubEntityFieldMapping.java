@@ -17,11 +17,11 @@ public class SubEntityFieldMapping implements IFieldMapping {
     private final String column;
 
 
-    public SubEntityFieldMapping(IEntityType entityType, IFieldMapping originalField, int id) {
+    public SubEntityFieldMapping(IEntityType entityType, IFieldMapping originalField, UnionEntityType unionType, int id) {
         this.entityType = entityType;
         this.originalField = originalField;
         this.id = id;
-        this.name = this.column = FIELD_PREFIX + id;
+        this.name = this.column = FIELD_PREFIX + unionType.nextFieldAlias();
     }
 
     public int getId() {

@@ -15,7 +15,7 @@ class EntityInfoFactory {
     EntityInfoFactory(AbstractQueryBuilder builder) {
         this.builder = builder;
         this.aliasCounter = 1;
-        this.root = new QueryEntityInfo(builder.getRegistry().getEntityType(builder.getEntityClass()));
+        this.root = new QueryEntityInfo.RootQueryEntityInfo(builder.getRegistry().getEntityType(builder.getEntityClass()));
     }
 
     QueryEntityInfo getRoot() {
@@ -52,7 +52,8 @@ class EntityInfoFactory {
                         "Wrong relation name for " + entityClass.getName() + " : " + join.getPropertyName() + " !");
             }
 
-            QueryEntityInfo queryEntityInfo = new QueryEntityInfo(join, entityType, "t" + aliasCounter++, relationMapping);
+            QueryEntityInfo queryEntityInfo = new QueryEntityInfo(join,
+                    builder.getRegistry().getEntityType(relationMapping.getRelationClass()), "t" + aliasCounter++, relationMapping);
             root.addJoin(join.getPropertyName(), queryEntityInfo);
             return queryEntityInfo;
         }
