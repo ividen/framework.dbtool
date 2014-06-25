@@ -16,48 +16,21 @@ public class EntityMappingHelper {
     public static void tryCreateFieldMapping(AbstractEntityType entityType, AnnotatedElement annotatedElement) {
         final String columnName;
         final int type;
-        boolean isId = false;
-        boolean isVersion = false;
 
         if (annotatedElement.isAnnotationPresent(Field.class)) {
             final Field fieldAnnotation = annotatedElement.getAnnotation(Field.class);
-            columnName = getColumnName(fieldAnnotation, annotatedElement);
-            type = fieldAnnotation.type();
+            FieldMapping.create(entityType, getPropertyName(annotatedElement),
+                    getColumnName(fieldAnnotation, annotatedElement), fieldAnnotation.type());
         } else if (annotatedElement.isAnnotationPresent(IdField.class)) {
             final IdField fieldAnnotation = annotatedElement.getAnnotation(IdField.class);
             columnName = getColumnName(fieldAnnotation, annotatedElement);
             type = fieldAnnotation.type();
-            isId = true;
+            FieldMapping.createIdField(entityType, getPropertyName(annotatedElement), columnName, type);
         } else if (annotatedElement.isAnnotationPresent(VersionField.class)) {
             final VersionField fieldAnnotation = annotatedElement.getAnnotation(VersionField.class);
-            columnName = getColumnName(fieldAnnotation, annotatedElement);
-            type = Types.BIGINT;
-            isVersion = true;
-        } else {
-            return;
+            FieldMapping.createVersionField(entityType, getPropertyName(annotatedElement),
+                    getColumnName(fieldAnnotation, annotatedElement), Types.BIGINT);
         }
-
-        final String propertyName = getPropertyName(annotatedElement);
-        final Property property = FieldHelper.constructProperty(entityType.getEntityClass(), propertyName);
-        final FieldMapping result = new FieldMapping(propertyName, columnName, type, property);
-        entityType.addField(result);
-
-        if (isId) {
-            if (entityType.getIdField() != null) {
-                throw new RuntimeException("Duplicate @IdField definition in class " + entityType.getEntityClass());
-            }
-
-            entityType.setIdField(result);
-        }
-
-        if (isVersion) {
-            if (entityType.getVersionField() != null) {
-                throw new RuntimeException("Duplicate @VersionField definition in class " + entityType.getEntityClass());
-            }
-            entityType.setVersionField(result);
-        }
-
-        EntityMappingRegistry.logRegisterFieldMapping(entityType.getEntityClass(), result);
     }
 
     public static String getEntityTableName(Entity entity, Class entityClass) {

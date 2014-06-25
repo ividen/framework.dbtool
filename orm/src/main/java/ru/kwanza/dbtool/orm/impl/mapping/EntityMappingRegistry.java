@@ -156,7 +156,8 @@ public class EntityMappingRegistry implements IEntityMappingRegistry {
 
         final IFieldMapping propertyMapping = entityType != null
                 ? entityType.getField(association.property())
-                : new FieldMapping(name, null, Types.BIGINT, FieldHelper.constructProperty(entityClass, association.property()));
+                : FieldMapping.createFakeField(name, FieldHelper.constructProperty(entityClass, association.property()));
+
         final Property fetchField = FieldHelper.constructProperty(entityClass, name);
         final Class relationClass = association.relationClass() != Object.class ? association.relationClass() : fetchField.getType();
         if (relationClass == Object.class) {
@@ -238,7 +239,7 @@ public class EntityMappingRegistry implements IEntityMappingRegistry {
 
         final IFieldMapping propertyMapping = entityType != null
                 ? entityType.getField(manyToOne.property())
-                : new FieldMapping(name, null, Types.BIGINT, FieldHelper.constructProperty(entityClass, manyToOne.property()));
+                : FieldMapping.createFakeField(name, FieldHelper.constructProperty(entityClass, manyToOne.property()));
         if (propertyMapping == null) {
             throw new RuntimeException(
                     "Not found property " + manyToOne.property() + "for @ManyToOne " + entityClass.getName() + "." + getPropertyName(

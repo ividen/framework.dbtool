@@ -3,6 +3,7 @@ package ru.kwanza.dbtool.orm.impl.mapping;
 import ru.kwanza.dbtool.orm.api.internal.IEntityType;
 import ru.kwanza.dbtool.orm.api.internal.IFieldMapping;
 
+import java.sql.Types;
 import java.util.*;
 
 /**
@@ -11,16 +12,17 @@ import java.util.*;
 public class UnionEntityType extends AbstractEntityType {
     private static final String UNION_ALL = " UNION ALL ";
     private static final String CLAZZ_ = "clazz_";
-    public static final FieldMapping CLAZZ_FIELD = new FieldMapping(null, CLAZZ_, 0, null);
+    public final FieldMapping CLAZZ_FIELD ;
 
     private List<IEntityType> entityTypes = new ArrayList<IEntityType>();
     private List<SubUnionEntityType> subUnionEntityTypes;
-    private Map<String, IFieldMapping> allFields = new HashMap<String, IFieldMapping>();
-    private int alias;
+    private Map<String, IFieldMapping> allFields = new LinkedHashMap<String, IFieldMapping>();
+    private int id;
     private boolean validated = false;
 
     public UnionEntityType(String name, Class entityClass) {
         super(entityClass, name, name + "_", null);
+        this.CLAZZ_FIELD = FieldMapping.create(this, null, CLAZZ_, Types.BIGINT); ;
     }
 
     @Override
@@ -44,7 +46,7 @@ public class UnionEntityType extends AbstractEntityType {
                 for (IEntityType entity : entityTypes) {
                     validateEntityType(entity);
                 }
-                addField(CLAZZ_FIELD);
+
                 prepareSql();
             }
 
@@ -52,7 +54,7 @@ public class UnionEntityType extends AbstractEntityType {
         }
     }
 
-    public static FieldMapping getClazzField() {
+    public FieldMapping getClazzField() {
         return CLAZZ_FIELD;
     }
 
@@ -161,6 +163,6 @@ public class UnionEntityType extends AbstractEntityType {
     }
 
     public int nextFieldAlias() {
-        return alias++;
+        return id++;
     }
 }

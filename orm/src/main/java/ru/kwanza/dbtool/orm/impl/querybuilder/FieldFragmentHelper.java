@@ -32,7 +32,7 @@ class FieldFragmentHelper {
         if (fields != null) {
             for (IFieldMapping fm : fields) {
                 if (alias != null) {
-                    result.append(alias).append('.').append(fm.getColumn()).append(' ').append(alias).append('_').append(fm.getColumn())
+                    result.append(alias).append('.').append(fm.getColumn()).append(' ').append(Column.getFullColumnName(root,fm))
                             .append(",");
                 } else {
                     result.append(fm.getColumn()).append(",");

@@ -326,7 +326,7 @@ public abstract class StatementImpl<T> implements IStatement<T> {
             if (entityType instanceof UnionEntityType) {
 
                 final UnionEntityType unionEntityType = (UnionEntityType) entityType;
-                entityType = unionEntityType.getEntity(rs.getInt(Column.getFullColumnName(queryEntityInfo, UnionEntityType.getClazzField())));
+                entityType = unionEntityType.getEntity(rs.getInt(Column.getFullColumnName(queryEntityInfo, unionEntityType.getClazzField())));
             }
             return entityType;
         }
