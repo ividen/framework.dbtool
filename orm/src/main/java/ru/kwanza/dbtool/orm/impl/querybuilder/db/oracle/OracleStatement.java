@@ -22,6 +22,11 @@ public class OracleStatement<T> extends StatementImpl<T> {
     }
 
     @Override
+    protected boolean isSupportAbsoluteOffset() {
+        return true;
+    }
+
+    @Override
     protected Object[] prepareParams(Object[] params) {
         if (!isUsePaging()) {
             return params;

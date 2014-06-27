@@ -251,9 +251,8 @@ public abstract class StatementImpl<T> implements IStatement<T> {
         public Collection<TYPE> extractData(ResultSet rs) throws SQLException, DataAccessException {
 
             Integer offset = StatementImpl.this.offset;
-            DBTool.DBType dbType = config.getEntityManager().getDbTool().getDbType();
-            if ((MYSQL != dbType && POSTGRESQL != dbType && H2 != dbType && offset != null && offset > 0) || (MYSQL == dbType && offset != null
-                    && offset > 0 && StatementImpl.this.maxSize == null)) {
+
+            if (offset!=null && offset>0 && isSupportAbsoluteOffset()) {
                 if (rs.next()) {
                     rs.absolute(offset);
                 } else {
@@ -345,6 +344,10 @@ public abstract class StatementImpl<T> implements IStatement<T> {
                 idf.getProperty().set(obj, value);
             }
         }
+    }
+
+    protected boolean isSupportAbsoluteOffset() {
+        return false;
     }
 
     private class SingleObjectObjectExtractor<T> extends ObjectExtractor<T> {

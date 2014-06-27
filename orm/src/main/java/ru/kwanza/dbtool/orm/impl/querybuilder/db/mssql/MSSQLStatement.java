@@ -23,4 +23,8 @@ public class MSSQLStatement<T> extends StatementImpl<T> {
         return sql;
     }
 
+    @Override
+    protected boolean isSupportAbsoluteOffset() {
+        return true;
+    }
 }
