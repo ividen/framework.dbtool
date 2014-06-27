@@ -16,8 +16,7 @@ public class UnionEntityType extends AbstractEntityType {
 
     private List<IEntityType> entityTypes = new ArrayList<IEntityType>();
     private List<SubUnionEntityType> subUnionEntityTypes;
-    private Map<String, IFieldMapping> allFields = new LinkedHashMap<String, IFieldMapping>();
-    private int id;
+    private int aliasCounter;
     private boolean validated = false;
 
     public UnionEntityType(String name, Class entityClass) {
@@ -115,33 +114,8 @@ public class UnionEntityType extends AbstractEntityType {
         }
     }
 
-    public Collection<IFieldMapping> getCommonFields() {
-        return super.getFields();
-    }
-
     public IFieldMapping getCommonField(String name) {
         return super.getField(name);
-    }
-
-    @Override
-    public IFieldMapping getField(String name) {
-        return allFields.get(name);
-    }
-
-    @Override
-    public Collection<IFieldMapping> getFields() {
-        return Collections.unmodifiableCollection(allFields.values());
-    }
-
-    @Override
-    protected int getFieldsCount() {
-        return allFields.size();
-    }
-
-    @Override
-    public void addField(IFieldMapping field) {
-        super.addField(field);
-        allFields.put(field.getName(), field);
     }
 
     public boolean isAbstract() {
@@ -150,10 +124,6 @@ public class UnionEntityType extends AbstractEntityType {
 
     public void addEntity(IEntityType entityType) {
         entityTypes.add(entityType);
-    }
-
-    public static final String getClassColumnName() {
-        return CLAZZ_;
     }
 
     public IEntityType getEntity(int index) {
@@ -165,6 +135,6 @@ public class UnionEntityType extends AbstractEntityType {
     }
 
     public int nextFieldAlias() {
-        return id++;
+        return aliasCounter++;
     }
 }

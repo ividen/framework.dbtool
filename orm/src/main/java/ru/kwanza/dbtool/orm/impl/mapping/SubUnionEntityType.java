@@ -13,22 +13,25 @@ import java.util.Map;
  * @author Alexander Guzanov
  */
 public class SubUnionEntityType extends AbstractEntityType {
-    private IEntityType original;
+    private static final String FIELD_PREFIX = "f_";
 
+    private IEntityType original;
     private Map<String, SubEntityFieldMapping> fields = new HashMap<String, SubEntityFieldMapping>();
 
     public SubUnionEntityType(IEntityType original, UnionEntityType unionEntityType) {
         this.original = original;
-        final Collection<IFieldMapping> fields1 = original.getFields();
-        for (IFieldMapping field : fields1) {
+        final Collection<AbstractFieldMapping> fields1 = original.getFields();
+        for (AbstractFieldMapping field : fields1) {
             if (unionEntityType.getCommonField(field.getName()) == null) {
-                SubEntityFieldMapping newField = new SubEntityFieldMapping(original, field,
-                        unionEntityType,unionEntityType.getFieldsCount()+1);
-                fields.put(field.getName(), newField);
-                addField(newField);
-                unionEntityType.addField(newField);
+                String alias = FIELD_PREFIX + unionEntityType.nextFieldAlias();
+                SubEntityFieldMapping subEntityField = new SubEntityFieldMapping(original, field, alias);
+                SubEntityFieldMapping unionField = new SubEntityFieldMapping(original, field, alias);
+
+                fields.put(field.getName(), subEntityField);
+                addField(subEntityField);
+                unionEntityType.addField(unionField);
             } else {
-                addField(field);
+                addField(new CommondFieldMapping(field));
             }
         }
     }

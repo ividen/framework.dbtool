@@ -9,25 +9,21 @@ import java.sql.Types;
 /**
  * @author Kiryl Karatsetski
  */
-class FieldMapping implements IFieldMapping {
-    private int id;
+class FieldMapping extends AbstractFieldMapping {
     private String name;
     private String column;
     public int type;
     private Property property;
 
-    private FieldMapping(int id, String name, String column, int type, Property property) {
-        this.id = id;
+    private FieldMapping(String name, String column, int type, Property property) {
         this.name = name;
         this.column = column;
         this.type = type;
         this.property = property;
-
-
     }
 
     public static FieldMapping createFakeField(String name, Property property) {
-        return new FieldMapping(-1, name, null, Types.BIGINT, property);
+        return new FieldMapping(name, null, Types.BIGINT, property);
     }
 
     public static FieldMapping createIdField(AbstractEntityType entityType, String name, String column, int type) {
@@ -52,17 +48,13 @@ class FieldMapping implements IFieldMapping {
 
     public static FieldMapping create(AbstractEntityType entityType, String name, String column, int type) {
         final Property property = name == null ? null : FieldHelper.constructProperty(entityType.getEntityClass(), name);
-        final FieldMapping result = new FieldMapping(entityType.getFieldsCount() + 1, name, column, type, property);
+        final FieldMapping result = new FieldMapping(name, column, type, property);
 
         entityType.addField(result);
 
         EntityMappingRegistry.logRegisterFieldMapping(entityType.getEntityClass(), result);
 
         return result;
-    }
-
-    public int getId() {
-        return id;
     }
 
     public String getColumn() {
@@ -85,7 +77,7 @@ class FieldMapping implements IFieldMapping {
     public String toString() {
         final StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("FieldMapping{");
-        stringBuilder.append("id='").append(id).append('\'');
+        stringBuilder.append("id='").append(getId()).append('\'');
         stringBuilder.append(", name='").append(name).append('\'');
         stringBuilder.append(", column='").append(column).append('\'');
         stringBuilder.append(", type=").append(type);

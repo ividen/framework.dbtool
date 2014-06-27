@@ -68,7 +68,7 @@ public interface IEntityType<T> {
     /**
      * Список полей, для которых описан мэпинг
      */
-    Collection<IFieldMapping> getFields();
+    Collection<? extends IFieldMapping> getFields();
 
     /**
      * Получение поля, описывающего связь между сущностями

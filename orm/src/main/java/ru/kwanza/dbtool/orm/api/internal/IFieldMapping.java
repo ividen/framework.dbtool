@@ -12,7 +12,7 @@ import ru.kwanza.toolbox.fieldhelper.Property;
  */
 public interface IFieldMapping {
 
-    public int getId();
+    public Integer getId();
 
     public String getColumn();
 

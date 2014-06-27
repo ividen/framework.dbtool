@@ -7,25 +7,17 @@ import ru.kwanza.toolbox.fieldhelper.Property;
 /**
  * @author Alexander Guzanov
  */
-public class SubEntityFieldMapping implements IFieldMapping {
-    public static final String FIELD_PREFIX = "f_";
-
-    private final int id;
+public class SubEntityFieldMapping extends AbstractFieldMapping {
     private final String name;
     private final IEntityType entityType;
     private final IFieldMapping originalField;
     private final String column;
 
 
-    public SubEntityFieldMapping(IEntityType entityType, IFieldMapping originalField, UnionEntityType unionType, int id) {
+    public SubEntityFieldMapping(IEntityType entityType, IFieldMapping originalField, String alias) {
         this.entityType = entityType;
         this.originalField = originalField;
-        this.id = id;
-        this.name = this.column = FIELD_PREFIX + unionType.nextFieldAlias();
-    }
-
-    public int getId() {
-        return id;
+        this.name = this.column = alias;
     }
 
     public String getColumn() {
@@ -43,7 +35,6 @@ public class SubEntityFieldMapping implements IFieldMapping {
     public String getName() {
         return name;
     }
-
 
     public Property getProperty() {
         return originalField.getProperty();

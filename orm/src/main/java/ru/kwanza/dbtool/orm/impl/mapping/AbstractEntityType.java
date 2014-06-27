@@ -20,8 +20,8 @@ public abstract class AbstractEntityType implements IEntityType {
     private IFieldMapping versionField;
     private IFieldMapping idField;
 
-    private Map<String, IFieldMapping> fields = new LinkedHashMap<String, IFieldMapping>();
-    private Map<String, IFieldMapping> fieldsByColumnName = new LinkedHashMap<String, IFieldMapping>();
+    private Map<String, AbstractFieldMapping> fields = new LinkedHashMap<String, AbstractFieldMapping>();
+    private Map<String, AbstractFieldMapping> fieldsByColumnName = new LinkedHashMap<String, AbstractFieldMapping>();
     private Map<String, IRelationMapping> relations = new LinkedHashMap<String, IRelationMapping>();
 
     protected AbstractEntityType() {
@@ -62,7 +62,7 @@ public abstract class AbstractEntityType implements IEntityType {
         return fields.get(name);
     }
 
-    public Collection<IFieldMapping> getFields() {
+    public Collection<AbstractFieldMapping> getFields() {
         return Collections.unmodifiableCollection(fields.values());
     }
 
@@ -90,7 +90,7 @@ public abstract class AbstractEntityType implements IEntityType {
         this.idField = idField;
     }
 
-    public void addField(IFieldMapping field) {
+    public void addField(AbstractFieldMapping field) {
         if (fields.get(field.getName()) != null) {
             throw new RuntimeException("Duplicate property name '" + field.getName() + "' in class " + entityClass);
         }
@@ -101,6 +101,7 @@ public abstract class AbstractEntityType implements IEntityType {
         }
 
         fieldsByColumnName.put(field.getColumn(), field);
+        field.setId(getFieldsCount());
     }
 
     public void addRelation(IRelationMapping relation) {
