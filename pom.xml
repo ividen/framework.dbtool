@@ -30,7 +30,7 @@
         <toolbox.version>1.0</toolbox.version>
         <asm-all.version>2.1</asm-all.version>
         <cglib.version>3.1</cglib.version>
-        <liquibase.version>2.0.5</liquibase.version>
+        <liquibase.version>3.0.8</liquibase.version>
         <!-- Maven Plugins -->
         <maven.surefire.plugin.version>2.12</maven.surefire.plugin.version>
         <maven-source-plugin.version>2.1.2</maven-source-plugin.version>
