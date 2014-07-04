@@ -34,6 +34,8 @@ public abstract class AbstractEntityType implements IEntityType {
         setSql(sql);
     }
 
+    protected abstract void validate();
+
     public String getName() {
         return name;
     }

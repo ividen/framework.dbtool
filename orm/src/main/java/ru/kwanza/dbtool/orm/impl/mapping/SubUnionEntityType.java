@@ -36,6 +36,10 @@ public class SubUnionEntityType extends AbstractEntityType {
         }
     }
 
+    @Override
+    protected void validate() {
+    }
+
     public String getName() {
         return original.getName();
     }

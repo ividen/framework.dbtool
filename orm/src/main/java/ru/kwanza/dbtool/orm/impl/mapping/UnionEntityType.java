@@ -12,46 +12,30 @@ import java.util.*;
 public class UnionEntityType extends AbstractEntityType {
     private static final String UNION_ALL = " UNION ALL ";
     private static final String CLAZZ_ = "clazz_";
-    public FieldMapping CLAZZ_FIELD ;
+    public FieldMapping CLAZZ_FIELD;
 
     private List<IEntityType> entityTypes = new ArrayList<IEntityType>();
     private List<SubUnionEntityType> subUnionEntityTypes;
     private int aliasCounter;
-    private boolean validated = false;
 
     public UnionEntityType(String name, Class entityClass) {
         super(entityClass, name, name + "_", null);
     }
 
-    @Override
-    public String getSql() {
+    public void validate() {
         if (subUnionEntityTypes == null) {
-            validate();
-        }
+            subUnionEntityTypes = new ArrayList<SubUnionEntityType>();
 
-        if (subUnionEntityTypes.isEmpty()) {
-            throw new RuntimeException("Can't find any descendants for entity " + getEntityClass().getName());
-        }
-
-        return super.getSql();
-    }
-
-    public synchronized void validate() {
-        if (!validated) {
-            if (subUnionEntityTypes == null) {
-                subUnionEntityTypes = new ArrayList<SubUnionEntityType>();
-
-                for (IEntityType entity : entityTypes) {
-                    validateEntityType(entity);
-                }
-
-                this.CLAZZ_FIELD = FieldMapping.create(this, null, CLAZZ_, Types.BIGINT); ;
-
-                prepareSql();
+            for (IEntityType entity : entityTypes) {
+                validateEntityType(entity);
             }
 
-            validated = true;
+            this.CLAZZ_FIELD = FieldMapping.create(this, null, CLAZZ_, Types.BIGINT);
+            ;
+
+            prepareSql();
         }
+
     }
 
     public FieldMapping getClazzField() {

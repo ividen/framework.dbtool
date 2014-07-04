@@ -2,6 +2,9 @@ package ru.kwanza.dbtool.orm.impl.mapping;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
@@ -29,7 +32,7 @@ import static ru.kwanza.dbtool.orm.impl.mapping.EntityMappingHelper.*;
 /**
  * @author Kiryl Karatsetski
  */
-public class EntityMappingRegistry implements IEntityMappingRegistry {
+public class EntityMappingRegistry implements IEntityMappingRegistry, ApplicationListener<ContextRefreshedEvent> {
 
     private static final Logger log = LoggerFactory.getLogger(EntityMappingRegistry.class);
 
@@ -407,5 +410,12 @@ public class EntityMappingRegistry implements IEntityMappingRegistry {
 
     static void logRegisterFetchMapping(Class entityClass, IRelationMapping relationMapping) {
         log.trace("{}: Register ManyToOne Mapping {}", new Object[]{entityClass, relationMapping});
+    }
+
+    public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
+        for (AbstractEntityType entityType : entityTypeByEntityName.values()) {
+            log.trace("Validate entity: {}",entityType.getEntityClass());
+            entityType.validate();
+        }
     }
 }
