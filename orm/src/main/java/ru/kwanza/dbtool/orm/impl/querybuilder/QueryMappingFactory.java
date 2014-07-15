@@ -7,38 +7,38 @@ import ru.kwanza.dbtool.orm.api.internal.IRelationMapping;
 /**
  * @author Alexander Guzanov
  */
-class EntityInfoFactory {
+class QueryMappingFactory {
     private final AbstractQueryBuilder builder;
-    private final QueryEntityInfo root;
+    private final QueryMapping root;
     private int aliasCounter;
 
-    EntityInfoFactory(AbstractQueryBuilder builder) {
+    QueryMappingFactory(AbstractQueryBuilder builder) {
         this.builder = builder;
         this.aliasCounter = 1;
-        this.root = new QueryEntityInfo.RootQueryEntityInfo(builder.getRegistry().getEntityType(builder.getEntityClass()));
+        this.root = new QueryMapping.QueryRootMapping(builder.getRegistry().getEntityType(builder.getEntityClass()));
     }
 
-    QueryEntityInfo getRoot() {
+    QueryMapping getRoot() {
         return root;
     }
 
-    QueryEntityInfo registerInfo(QueryEntityInfo root, Join join) {
-        QueryEntityInfo queryEntityInfo = root.getJoin(join.getPropertyName());
+    QueryMapping registerInfo(QueryMapping root, Join join) {
+        QueryMapping queryMapping = root.getJoin(join.getPropertyName());
 
-        if (queryEntityInfo == null) {
-            queryEntityInfo = doRegister(root, join);
+        if (queryMapping == null) {
+            queryMapping = doRegister(root, join);
         }
 
-        if (queryEntityInfo != null) {
-            for (Join subJoin : queryEntityInfo.getJoin().getSubJoins()) {
-                registerInfo(queryEntityInfo, subJoin);
+        if (queryMapping != null) {
+            for (Join subJoin : queryMapping.getJoin().getSubJoins()) {
+                registerInfo(queryMapping, subJoin);
             }
         }
 
-        return queryEntityInfo;
+        return queryMapping;
     }
 
-    private QueryEntityInfo doRegister(QueryEntityInfo root, Join join) {
+    private QueryMapping doRegister(QueryMapping root, Join join) {
         if (join.getType() == Join.Type.FETCH) {
             root.addFetch(join);
             return null;
@@ -52,10 +52,10 @@ class EntityInfoFactory {
                         "Wrong relation name for " + entityClass.getName() + " : " + join.getPropertyName() + " !");
             }
 
-            QueryEntityInfo queryEntityInfo = new QueryEntityInfo(join,
+            QueryMapping queryMapping = new QueryMapping(join,
                     builder.getRegistry().getEntityType(relationMapping.getRelationClass()), "t" + aliasCounter++, relationMapping);
-            root.addJoin(join.getPropertyName(), queryEntityInfo);
-            return queryEntityInfo;
+            root.addJoin(join.getPropertyName(), queryMapping);
+            return queryMapping;
         }
     }
 }

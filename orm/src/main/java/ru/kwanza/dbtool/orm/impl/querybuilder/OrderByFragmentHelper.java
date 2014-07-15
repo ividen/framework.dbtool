@@ -44,7 +44,7 @@ public class OrderByFragmentHelper {
         if (orderByList != null && !orderByList.isEmpty()) {
             for (OrderBy ob : orderByList) {
                 orderBy.append(
-                        builder.getColumnFactory().findColumn(builder.getEntityInfoFactory().getRoot(), ob.getPropertyName()).getColumnName())
+                        builder.getColumnFactory().findColumn(builder.getQueryMappingFactory().getRoot(), ob.getPropertyName()).getColumnName())
                         .append(' ').append(ob.getType()).append(',');
             }
 

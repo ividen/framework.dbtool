@@ -16,7 +16,7 @@ class ColumnFactory {
         this.builder = builder;
     }
 
-    Column findColumn(QueryEntityInfo root, String propertyName) {
+    Column findColumn(QueryMapping root, String propertyName) {
         final int index = propertyName.lastIndexOf(DOT_CHAR);
         Class entityClass = builder.getEntityClass();
         if (index > 0) {
@@ -26,7 +26,7 @@ class ColumnFactory {
             StringTokenizer st = new StringTokenizer(path, ".");
             while (st.hasMoreElements()) {
                 final String token = st.nextToken();
-                root = builder.getEntityInfoFactory().registerInfo(root, Join.inner(token));
+                root = builder.getQueryMappingFactory().registerInfo(root, Join.inner(token));
                 entityClass = root.getRelationMapping().getRelationClass();
             }
         }

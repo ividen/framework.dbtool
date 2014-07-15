@@ -2,7 +2,7 @@ package ru.kwanza.dbtool.orm.impl.lockoperation.db.mssql;
 
 import ru.kwanza.dbtool.orm.impl.EntityManagerImpl;
 import ru.kwanza.dbtool.orm.impl.lockoperation.AbstractLockOperation;
-import ru.kwanza.dbtool.orm.impl.querybuilder.QueryEntityInfo;
+import ru.kwanza.dbtool.orm.impl.querybuilder.QueryMapping;
 
 /**
  * @author Alexander Guzanov
@@ -15,6 +15,6 @@ public class MSSQLNoWaitLockOperation<T> extends AbstractLockOperation<T> {
     @Override
     protected String createSQL() {
         return "SELECT " + entityType.getIdField().getColumn() + " FROM " +
-                QueryEntityInfo.getTable(entityType) + " WITH(UPDLOCK,ROWLOCK,NOWAIT) WHERE " + entityType.getIdField().getColumn() + " IN (?)";
+                QueryMapping.getTable(entityType) + " WITH(UPDLOCK,ROWLOCK,NOWAIT) WHERE " + entityType.getIdField().getColumn() + " IN (?)";
     }
 }

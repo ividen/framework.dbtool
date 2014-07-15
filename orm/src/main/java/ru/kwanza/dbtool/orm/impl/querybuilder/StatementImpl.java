@@ -5,10 +5,8 @@ import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.SqlParameterValue;
 import org.springframework.jdbc.core.SqlTypeValue;
-import ru.kwanza.dbtool.core.DBTool;
 import ru.kwanza.dbtool.core.KeyValue;
 import ru.kwanza.dbtool.core.SqlCollectionParameterValue;
-import ru.kwanza.dbtool.core.util.FieldValueExtractor;
 import ru.kwanza.dbtool.core.util.SelectUtil;
 import ru.kwanza.dbtool.orm.api.IStatement;
 import ru.kwanza.dbtool.orm.api.ListProducer;
@@ -22,10 +20,6 @@ import ru.kwanza.toolbox.fieldhelper.Property;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
-
-import static ru.kwanza.dbtool.core.DBTool.DBType.H2;
-import static ru.kwanza.dbtool.core.DBTool.DBType.MYSQL;
-import static ru.kwanza.dbtool.core.DBTool.DBType.POSTGRESQL;
 
 /**
  * @author Alexander Guzanov
@@ -46,12 +40,12 @@ public abstract class StatementImpl<T> implements IStatement<T> {
 
         SelectUtil.batchSelect(config.getEntityManager().getDbTool().getJdbcTemplate(), prepareSql(config.getSql()),
                 new SingleObjectObjectExtractor<T>(), new SelectUtil.Container<Collection<T>>() {
-            public void add(Collection<T> objects) {
-                if (objects != null && !objects.isEmpty()) {
-                    result[0] = objects.iterator().next();
-                }
-            }
-        }, getParamValues(), getResultSetType());
+                    public void add(Collection<T> objects) {
+                        if (objects != null && !objects.isEmpty()) {
+                            result[0] = objects.iterator().next();
+                        }
+                    }
+                }, getParamValues(), getResultSetType());
 
         return (T) result[0];
     }
@@ -125,20 +119,20 @@ public abstract class StatementImpl<T> implements IStatement<T> {
 
         SelectUtil.batchSelect(config.getEntityManager().getDbTool().getJdbcTemplate(), prepareSql(config.getSql()),
                 new MapExtractor(fieldMapping), new SelectUtil.Container<Collection<KeyValue<F, T>>>() {
-            public void add(Collection<KeyValue<F, T>> objects) {
-                for (KeyValue<F, T> kv : objects) {
-                    List<T> vs = result.get(kv.getKey());
-                    if (vs == null) {
-                        vs = listProducer.create();
-                        result.put(kv.getKey(), vs);
+                    public void add(Collection<KeyValue<F, T>> objects) {
+                        for (KeyValue<F, T> kv : objects) {
+                            List<T> vs = result.get(kv.getKey());
+                            if (vs == null) {
+                                vs = listProducer.create();
+                                result.put(kv.getKey(), vs);
+                            }
+                            vs.add(kv.getValue());
+                            if (config.isLazy()) {
+                                containerForLazy.add(kv.getValue());
+                            }
+                        }
                     }
-                    vs.add(kv.getValue());
-                    if (config.isLazy()) {
-                        containerForLazy.add(kv.getValue());
-                    }
-                }
-            }
-        }, getParamValues(), getResultSetType());
+                }, getParamValues(), getResultSetType());
 
         fetchLazyIfNeed(containerForLazy);
     }
@@ -151,12 +145,12 @@ public abstract class StatementImpl<T> implements IStatement<T> {
 
         SelectUtil.batchSelect(config.getEntityManager().getDbTool().getJdbcTemplate(), prepareSql(config.getSql()),
                 new MapExtractor(fieldMapping), new SelectUtil.Container<Collection<KeyValue<F, T>>>() {
-            public void add(Collection<KeyValue<F, T>> objects) {
-                for (KeyValue<F, T> kv : objects) {
-                    result.put(kv.getKey(), kv.getValue());
-                }
-            }
-        }, getParamValues(), getResultSetType());
+                    public void add(Collection<KeyValue<F, T>> objects) {
+                        for (KeyValue<F, T> kv : objects) {
+                            result.put(kv.getKey(), kv.getValue());
+                        }
+                    }
+                }, getParamValues(), getResultSetType());
 
         fetchLazyIfNeed(result.values());
     }
@@ -252,7 +246,7 @@ public abstract class StatementImpl<T> implements IStatement<T> {
 
             Integer offset = StatementImpl.this.offset;
 
-            if (offset!=null && offset>0 && isSupportAbsoluteOffset()) {
+            if (offset != null && offset > 0 && isSupportAbsoluteOffset()) {
                 if (rs.next()) {
                     rs.absolute(offset);
                 } else {
@@ -282,31 +276,31 @@ public abstract class StatementImpl<T> implements IStatement<T> {
 
         public abstract TYPE getValue(Object e);
 
-        private void readEntities(Object parentObj, QueryEntityInfo queryEntityInfo, ResultSet rs) throws SQLException {
+        private void readEntities(Object parentObj, QueryMapping queryMapping, ResultSet rs) throws SQLException {
             Object obj;
-            if (!queryEntityInfo.isRoot()) {
-                final Class relationClass = queryEntityInfo.getRelationMapping().getRelationClass();
-                if (!hasIdValue(queryEntityInfo, rs, relationClass)) {
+            if (!queryMapping.isRoot()) {
+                final Class relationClass = queryMapping.getRelationMapping().getRelationClass();
+                if (!hasIdValue(queryMapping, rs, relationClass)) {
                     return;
                 }
 
-                IEntityType entityType = getEntityType(queryEntityInfo, rs, relationClass);
+                IEntityType entityType = getEntityType(queryMapping, rs, relationClass);
 
                 obj = createObject(entityType);
 
-                readAndFill(rs, entityType.getFields(), queryEntityInfo, obj);
+                readAndFill(rs, entityType.getFields(), queryMapping, obj);
             } else {
                 obj = parentObj;
             }
 
-            if (queryEntityInfo.getJoins() != null) {
-                for (QueryEntityInfo subEntityInfo : queryEntityInfo.getJoins().values()) {
+            if (queryMapping.getJoins() != null) {
+                for (QueryMapping subEntityInfo : queryMapping.getJoins().values()) {
                     readEntities(obj, subEntityInfo, rs);
                 }
             }
 
-            if (queryEntityInfo.getRelationMapping() != null) {
-                queryEntityInfo.getRelationMapping().getProperty().set(parentObj, obj);
+            if (queryMapping.getRelationMapping() != null) {
+                queryMapping.getRelationMapping().getProperty().set(parentObj, obj);
             }
         }
 
@@ -320,27 +314,27 @@ public abstract class StatementImpl<T> implements IStatement<T> {
             return obj;
         }
 
-        private IEntityType getEntityType(QueryEntityInfo queryEntityInfo, ResultSet rs, Class entityClass) throws SQLException {
+        private IEntityType getEntityType(QueryMapping queryMapping, ResultSet rs, Class entityClass) throws SQLException {
             IEntityType entityType = config.getEntityManager().getRegistry().getEntityType(entityClass);
             if (entityType instanceof UnionEntityType) {
 
                 final UnionEntityType unionEntityType = (UnionEntityType) entityType;
-                entityType = unionEntityType.getEntity(rs.getInt(queryEntityInfo.getColumnIndex(unionEntityType.getClazzField())));
+                entityType = unionEntityType.getEntity(rs.getInt(queryMapping.getColumnIndex(unionEntityType.getClazzField())));
             }
             return entityType;
         }
 
-        private boolean hasIdValue(QueryEntityInfo queryEntityInfo, ResultSet rs, Class entityClass) throws SQLException {
+        private boolean hasIdValue(QueryMapping queryMapping, ResultSet rs, Class entityClass) throws SQLException {
             IFieldMapping idField = config.getEntityManager().getRegistry().getEntityType(entityClass).getIdField();
-            if (FieldValueExtractor.getValue(rs, queryEntityInfo.getColumnIndex(idField), idField.getProperty().getType()) == null) {
+            if (config.getExtractor().readColumnValue(rs, queryMapping, idField) == null) {
                 return false;
             }
             return true;
         }
 
-        private void readAndFill(ResultSet rs, Collection<IFieldMapping> fields, QueryEntityInfo queryEntityInfo, Object obj) throws SQLException {
+        private void readAndFill(ResultSet rs, Collection<IFieldMapping> fields, QueryMapping queryMapping, Object obj) throws SQLException {
             for (IFieldMapping idf : fields) {
-                Object value = FieldValueExtractor.getValue(rs, queryEntityInfo.getColumnIndex(idf), idf.getProperty().getType());
+                Object value = config.getExtractor().readColumnValue(rs, queryMapping, idf);
                 idf.getProperty().set(obj, value);
             }
         }

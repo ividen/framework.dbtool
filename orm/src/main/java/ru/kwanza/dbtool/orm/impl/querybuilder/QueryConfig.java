@@ -12,14 +12,15 @@ public class QueryConfig<T> {
     private final String sql;
     private final EntityManagerImpl em;
     private final Class<T> entityClass;
-    private final QueryEntityInfo rootRelation;
+    private final QueryMapping rootRelation;
     private final ParamsHolder holder;
     private final boolean lazy;
+    private final QueryColumnExtractor extractor;
 
     private List<FetchInfo> fetchEntities;
 
-    QueryConfig(EntityManagerImpl em, Class<T> entityClass, String sql, QueryEntityInfo rootRelations, Parameters parameters,
-                List<FetchInfo> fetchEntities, boolean lazy) {
+    QueryConfig(EntityManagerImpl em, Class<T> entityClass, String sql, QueryMapping rootRelations, Parameters parameters,
+                List<FetchInfo> fetchEntities, QueryColumnExtractor extractor, boolean lazy) {
         this.sql = sql;
         this.em = em;
         this.entityClass = entityClass;
@@ -27,9 +28,10 @@ public class QueryConfig<T> {
         this.holder = parameters.createHolder();
         this.fetchEntities = fetchEntities;
         this.lazy = lazy;
+        this.extractor = extractor;
     }
 
-    public QueryEntityInfo getRoot() {
+    public QueryMapping getRoot() {
         return rootRelation;
     }
 
@@ -55,5 +57,9 @@ public class QueryConfig<T> {
 
     public boolean isLazy() {
         return lazy;
+    }
+
+    public QueryColumnExtractor getExtractor() {
+        return extractor;
     }
 }

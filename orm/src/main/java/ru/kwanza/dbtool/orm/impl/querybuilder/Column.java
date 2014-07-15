@@ -6,10 +6,10 @@ import ru.kwanza.dbtool.orm.api.internal.IFieldMapping;
  * @author Alexander Guzanov
  */
 class Column {
-    private QueryEntityInfo relation;
+    private QueryMapping relation;
     private IFieldMapping fieldMapping;
 
-    Column(QueryEntityInfo relation, IFieldMapping fieldMapping) {
+    Column(QueryMapping relation, IFieldMapping fieldMapping) {
         this.relation = relation;
         this.fieldMapping = fieldMapping;
     }

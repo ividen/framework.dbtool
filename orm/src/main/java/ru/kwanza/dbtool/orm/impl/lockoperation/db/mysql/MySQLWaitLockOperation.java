@@ -1,7 +1,7 @@
 package ru.kwanza.dbtool.orm.impl.lockoperation.db.mysql;
 
 import ru.kwanza.dbtool.orm.impl.EntityManagerImpl;
-import ru.kwanza.dbtool.orm.impl.querybuilder.QueryEntityInfo;
+import ru.kwanza.dbtool.orm.impl.querybuilder.QueryMapping;
 
 /**
  * @author Alexander Guzanov
@@ -14,6 +14,6 @@ public class MySQLWaitLockOperation<T> extends MySQLLockOperation<T> {
     @Override
     protected String createSQL() {
         return "SELECT " + entityType.getIdField().getColumn() + " FROM " +
-                QueryEntityInfo.getTable(entityType) + " WHERE " + entityType.getIdField().getColumn() + " IN (?) FOR UPDATE";
+                QueryMapping.getTable(entityType) + " WHERE " + entityType.getIdField().getColumn() + " IN (?) FOR UPDATE";
     }
 }

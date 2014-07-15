@@ -2,7 +2,7 @@ package ru.kwanza.dbtool.orm.impl.lockoperation.db.posgresql;
 
 import ru.kwanza.dbtool.orm.impl.EntityManagerImpl;
 import ru.kwanza.dbtool.orm.impl.lockoperation.AbstractLockOperation;
-import ru.kwanza.dbtool.orm.impl.querybuilder.QueryEntityInfo;
+import ru.kwanza.dbtool.orm.impl.querybuilder.QueryMapping;
 import ru.kwanza.toolbox.fieldhelper.FieldHelper;
 
 import java.util.Collection;
@@ -15,13 +15,13 @@ public class PostgreSQLSkipLockOperation<T> extends AbstractLockOperation<T> {
 
     public PostgreSQLSkipLockOperation(EntityManagerImpl em, Class<T> entityClass) {
         super(em, entityClass);
-        tableId = QueryEntityInfo.getTable(entityType).hashCode();
+        tableId = QueryMapping.getTable(entityType).hashCode();
     }
 
     @Override
     protected String createSQL() {
         return "SELECT " + entityType.getIdField().getColumn() + " FROM " +
-                QueryEntityInfo.getTable(entityType) + " WHERE " + entityType.getIdField().getColumn()
+                QueryMapping.getTable(entityType) + " WHERE " + entityType.getIdField().getColumn()
                 + " IN (?) and pg_try_advisory_xact_lock(CAST(((CAST(? AS numeric)*31 + CAST("
                 + entityType.getIdField().getColumn() + " AS numeric))%9223372036854775807) as bigint)) ORDER BY "
                 + entityType.getIdField().getColumn();

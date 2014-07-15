@@ -11,16 +11,16 @@ import java.util.Map;
 /**
  * @author Alexander Guzanov
  */
-public class QueryEntityInfo {
+public class QueryMapping {
     private String alias;
     private Join join;
     private IEntityType entityType;
     private IRelationMapping relationMapping;
-    private Map<String, QueryEntityInfo> joins;
+    private Map<String, QueryMapping> joins;
     private Map<String, Join> fetches;
     private int fieldStartIndex;
 
-    QueryEntityInfo(Join join, IEntityType entityType, String alias, IRelationMapping relationMapping) {
+    QueryMapping(Join join, IEntityType entityType, String alias, IRelationMapping relationMapping) {
         this.join = join;
         this.alias = alias;
         this.entityType = entityType;
@@ -59,9 +59,9 @@ public class QueryEntityInfo {
         return relationMapping;
     }
 
-    void addJoin(String name, QueryEntityInfo relation) {
+    void addJoin(String name, QueryMapping relation) {
         if (joins == null) {
-            joins = new HashMap<String, QueryEntityInfo>();
+            joins = new HashMap<String, QueryMapping>();
         }
 
         joins.put(name, relation);
@@ -75,11 +75,11 @@ public class QueryEntityInfo {
         fetches.put(join.getPropertyName(), join);
     }
 
-    QueryEntityInfo getJoin(String propertyName) {
+    QueryMapping getJoin(String propertyName) {
         return hasJoins() ? joins.get(propertyName) : null;
     }
 
-    Map<String, QueryEntityInfo> getJoins() {
+    Map<String, QueryMapping> getJoins() {
         return joins;
     }
 
@@ -141,11 +141,11 @@ public class QueryEntityInfo {
         return getAlias() + "." + fm.getColumn();
     }
 
-    public static class RootQueryEntityInfo extends QueryEntityInfo {
+    public static class QueryRootMapping extends QueryMapping {
 
         public static final String ROOT_ALIAS = "t0";
 
-        RootQueryEntityInfo(IEntityType entityType) {
+        QueryRootMapping(IEntityType entityType) {
             super(null, entityType, null, null);
         }
 
