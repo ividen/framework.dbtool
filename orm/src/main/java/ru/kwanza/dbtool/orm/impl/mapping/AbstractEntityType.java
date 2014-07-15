@@ -103,7 +103,7 @@ public abstract class AbstractEntityType implements IEntityType {
         }
 
         fieldsByColumnName.put(field.getColumn(), field);
-        field.setId(getFieldsCount());
+        field.setOrderNum(getFieldsCount());
     }
 
     public void addRelation(IRelationMapping relation) {

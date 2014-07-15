@@ -47,7 +47,7 @@ public class UnionEntityType extends AbstractEntityType {
         StringBuilder commonFields = new StringBuilder("");
 
         for (IFieldMapping fieldMapping : getFields()) {
-            if (!(fieldMapping instanceof SubEntityFieldMapping) && !fieldMapping.getColumn().equals(CLAZZ_)) {
+            if (!(fieldMapping instanceof UnionEntityFieldMapping) && !fieldMapping.getColumn().equals(CLAZZ_)) {
                 commonFields.append(fieldMapping.getColumn()).append(',');
             }
         }
@@ -60,13 +60,13 @@ public class UnionEntityType extends AbstractEntityType {
 
             for (SubUnionEntityType type : subUnionEntityTypes) {
                 if (type == entityType) {
-                    final Collection<SubEntityFieldMapping> fieldMappings = entityType.getSubFields();
+                    final Collection<SubEntityFieldMapping> fieldMappings = entityType.getCusomFields();
                     for (SubEntityFieldMapping field : fieldMappings) {
                         sql.append(field.getOriginalColumn()).append(' ').append(field.getColumn()).append(',');
 
                     }
                 } else {
-                    final Collection<SubEntityFieldMapping> fieldMappings = type.getSubFields();
+                    final Collection<SubEntityFieldMapping> fieldMappings = type.getCusomFields();
                     for (SubEntityFieldMapping field : fieldMappings) {
                         sql.append("null ").append(field.getColumn()).append(',');
 

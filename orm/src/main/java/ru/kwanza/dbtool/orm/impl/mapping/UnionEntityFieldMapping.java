@@ -7,23 +7,15 @@ import ru.kwanza.toolbox.fieldhelper.Property;
 /**
  * @author Alexander Guzanov
  */
-public class SubEntityFieldMapping extends AbstractFieldMapping {
+public class UnionEntityFieldMapping extends AbstractFieldMapping {
     private final String name;
-    private final int newOrderNum;
     private final IFieldMapping originalField;
     private final String column;
 
 
-    public SubEntityFieldMapping(int orderNum,IFieldMapping originalField, String alias) {
-        this.newOrderNum = orderNum;
+    public UnionEntityFieldMapping(IFieldMapping originalField, String alias) {
         this.originalField = originalField;
         this.name = this.column = alias;
-    }
-
-
-    @Override
-    public Integer getOrderNum() {
-        return newOrderNum;
     }
 
     public String getColumn() {

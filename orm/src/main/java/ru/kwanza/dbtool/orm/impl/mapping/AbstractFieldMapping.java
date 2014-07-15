@@ -6,17 +6,17 @@ import ru.kwanza.dbtool.orm.api.internal.IFieldMapping;
  * @author Alexander Guzanov
  */
 public abstract class AbstractFieldMapping implements IFieldMapping {
-    private Integer id;
+    private Integer orderNum;
 
-    public Integer getId() {
-        return id;
+    public Integer getOrderNum() {
+        return orderNum;
     }
 
-    void setId(int id) {
-        if (this.id != null) {
+    void setOrderNum(int orderNum) {
+        if (this.orderNum != null) {
             throw new IllegalStateException("Field  name=" + this.getName()
                     + ", column=" + this.getName() + " already belongs to other entity!");
         }
-        this.id = id;
+        this.orderNum = orderNum;
     }
 }

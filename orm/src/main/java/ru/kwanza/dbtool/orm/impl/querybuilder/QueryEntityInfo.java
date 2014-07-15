@@ -4,11 +4,8 @@ import ru.kwanza.dbtool.orm.api.Join;
 import ru.kwanza.dbtool.orm.api.internal.IEntityType;
 import ru.kwanza.dbtool.orm.api.internal.IFieldMapping;
 import ru.kwanza.dbtool.orm.api.internal.IRelationMapping;
-import ru.kwanza.dbtool.orm.impl.mapping.AbstractEntityType;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -21,12 +18,21 @@ public class QueryEntityInfo {
     private IRelationMapping relationMapping;
     private Map<String, QueryEntityInfo> joins;
     private Map<String, Join> fetches;
+    private int fieldStartIndex;
 
     QueryEntityInfo(Join join, IEntityType entityType, String alias, IRelationMapping relationMapping) {
         this.join = join;
         this.alias = alias;
         this.entityType = entityType;
         this.relationMapping = relationMapping;
+    }
+
+    public int getFieldStartIndex() {
+        return fieldStartIndex;
+    }
+
+    void setFieldStartIndex(int fieldStartIndex) {
+        this.fieldStartIndex = fieldStartIndex;
     }
 
     IEntityType getEntityType() {
@@ -120,7 +126,11 @@ public class QueryEntityInfo {
     }
 
     public String getColumnAlias(IFieldMapping fieldMapping) {
-        return getAlias() + "_" + fieldMapping.getId();
+        return getAlias() + "_" + fieldMapping.getOrderNum();
+    }
+
+    public int getColumnIndex(IFieldMapping fieldMapping) {
+        return fieldStartIndex + fieldMapping.getOrderNum();
     }
 
     public String getColumnWithAlias(IFieldMapping fieldMapping) {
@@ -146,11 +156,11 @@ public class QueryEntityInfo {
 
         @Override
         public String getColumnAlias(IFieldMapping fieldMapping) {
-            return hasJoins() ? (ROOT_ALIAS + "_" + fieldMapping.getId()) : fieldMapping.getColumn();
+            return hasJoins() ? (ROOT_ALIAS + "_" + fieldMapping.getOrderNum()) : fieldMapping.getColumn();
         }
 
         public String getColumnWithAlias(IFieldMapping fieldMapping) {
-            return hasJoins() ? (getColumnName(fieldMapping) + " " + ROOT_ALIAS + "_" + fieldMapping.getId()) : fieldMapping.getColumn();
+            return hasJoins() ? (getColumnName(fieldMapping) + " " + ROOT_ALIAS + "_" + fieldMapping.getOrderNum()) : fieldMapping.getColumn();
         }
 
         @Override

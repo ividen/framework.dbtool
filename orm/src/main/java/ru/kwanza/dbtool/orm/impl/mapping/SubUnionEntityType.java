@@ -6,7 +6,7 @@ import ru.kwanza.dbtool.orm.api.internal.IRelationMapping;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -16,20 +16,37 @@ public class SubUnionEntityType extends AbstractEntityType {
     private static final String FIELD_PREFIX = "f_";
 
     private IEntityType original;
-    private Map<String, SubEntityFieldMapping> fields = new HashMap<String, SubEntityFieldMapping>();
+    private Map<String, SubEntityFieldMapping> fields = new LinkedHashMap<String, SubEntityFieldMapping>();
 
     public SubUnionEntityType(IEntityType original, UnionEntityType unionEntityType) {
+//        this.original = original;
+//        final Collection<AbstractFieldMapping> fields1 = original.getFields();
+//        for (AbstractFieldMapping field : fields1) {
+//            if (unionEntityType.getCommonField(field.getName()) == null) {
+//                String alias = FIELD_PREFIX + unionEntityType.nextFieldAlias();
+//                SubEntityFieldMapping subEntityField = new SubEntityFieldMapping(0, field, alias);
+//                SubEntityFieldMapping unionField = new SubEntityFieldMapping(0, field, alias);
+//
+//                fields.put(field.getName(), subEntityField);
+//                addField(subEntityField);
+//                unionEntityType.addField(unionField);
+//            } else {
+//                addField(new CommondFieldMapping(field));
+//            }
+//        }
+
+//
         this.original = original;
-        final Collection<AbstractFieldMapping> fields1 = original.getFields();
-        for (AbstractFieldMapping field : fields1) {
+        final Collection<AbstractFieldMapping> items = original.getFields();
+        for (AbstractFieldMapping field : items) {
             if (unionEntityType.getCommonField(field.getName()) == null) {
                 String alias = FIELD_PREFIX + unionEntityType.nextFieldAlias();
-                SubEntityFieldMapping subEntityField = new SubEntityFieldMapping(original, field, alias);
-                SubEntityFieldMapping unionField = new SubEntityFieldMapping(original, field, alias);
+                UnionEntityFieldMapping unionField = new UnionEntityFieldMapping(field, alias);
+                unionEntityType.addField(unionField);
 
+                SubEntityFieldMapping subEntityField = new SubEntityFieldMapping(unionField.getOrderNum(), field, alias);
                 fields.put(field.getName(), subEntityField);
                 addField(subEntityField);
-                unionEntityType.addField(unionField);
             } else {
                 addField(new CommondFieldMapping(field));
             }
@@ -68,11 +85,11 @@ public class SubUnionEntityType extends AbstractEntityType {
         return original.getVersionField();
     }
 
-    public Collection<SubEntityFieldMapping> getSubFields() {
+    public Collection<SubEntityFieldMapping> getCusomFields() {
         return Collections.<SubEntityFieldMapping>unmodifiableCollection(fields.values());
     }
 
-    public SubEntityFieldMapping getSubField(String name) {
+    public SubEntityFieldMapping getCustomField(String name) {
         return fields.get(name);
     }
 

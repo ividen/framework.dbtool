@@ -325,14 +325,14 @@ public abstract class StatementImpl<T> implements IStatement<T> {
             if (entityType instanceof UnionEntityType) {
 
                 final UnionEntityType unionEntityType = (UnionEntityType) entityType;
-                entityType = unionEntityType.getEntity(rs.getInt(queryEntityInfo.getColumnAlias(unionEntityType.getClazzField())));
+                entityType = unionEntityType.getEntity(rs.getInt(queryEntityInfo.getColumnIndex(unionEntityType.getClazzField())));
             }
             return entityType;
         }
 
         private boolean hasIdValue(QueryEntityInfo queryEntityInfo, ResultSet rs, Class entityClass) throws SQLException {
             IFieldMapping idField = config.getEntityManager().getRegistry().getEntityType(entityClass).getIdField();
-            if (FieldValueExtractor.getValue(rs, queryEntityInfo.getColumnAlias(idField), idField.getProperty().getType()) == null) {
+            if (FieldValueExtractor.getValue(rs, queryEntityInfo.getColumnIndex(idField), idField.getProperty().getType()) == null) {
                 return false;
             }
             return true;
@@ -340,7 +340,7 @@ public abstract class StatementImpl<T> implements IStatement<T> {
 
         private void readAndFill(ResultSet rs, Collection<IFieldMapping> fields, QueryEntityInfo queryEntityInfo, Object obj) throws SQLException {
             for (IFieldMapping idf : fields) {
-                Object value = FieldValueExtractor.getValue(rs, queryEntityInfo.getColumnAlias(idf), idf.getProperty().getType());
+                Object value = FieldValueExtractor.getValue(rs, queryEntityInfo.getColumnIndex(idf), idf.getProperty().getType());
                 idf.getProperty().set(obj, value);
             }
         }

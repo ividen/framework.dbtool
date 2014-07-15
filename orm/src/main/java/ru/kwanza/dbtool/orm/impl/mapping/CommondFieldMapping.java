@@ -6,7 +6,7 @@ import ru.kwanza.toolbox.fieldhelper.Property;
 /**
  * @author Alexander Guzanov
  */
-public class CommondFieldMapping  extends AbstractFieldMapping{
+public class CommondFieldMapping extends AbstractFieldMapping {
     private IFieldMapping original;
 
     public CommondFieldMapping(IFieldMapping original) {

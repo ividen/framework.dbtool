@@ -17,27 +17,28 @@ class FieldFragmentHelper {
 
     String createFieldsFragment() {
         StringBuilder result = new StringBuilder();
-        processFields(builder.getEntityInfoFactory().getRoot(), result);
+        processFields(0, builder.getEntityInfoFactory().getRoot(), result);
         result.deleteCharAt(result.length() - 1);
         return result.toString();
     }
 
-    private void processFields(QueryEntityInfo root, StringBuilder result) {
-        Collection<IFieldMapping> fields = root.getRelationMapping() == null
-                ? builder.getRegistry().getEntityType(builder.getEntityClass()).getFields()
-                : builder.getRegistry().getEntityType(root.getRelationMapping().getRelationClass()).getFields();
-        if (fields != null) {
-            for (IFieldMapping fm : fields) {
-                result.append(root.getColumnWithAlias(fm)).append(",");
-            }
-
+    private int processFields(int fieldStartIndex, QueryEntityInfo root, StringBuilder result) {
+        root.setFieldStartIndex(fieldStartIndex);
+        Collection<IFieldMapping> fields = root.getEntityType().getFields();
+        for (IFieldMapping fm : fields) {
+            result.append(root.getColumnWithAlias(fm)).append(",");
         }
-        if (root != null && root.getJoins() != null) {
+
+        fieldStartIndex += fields.size();
+
+        if (root.getJoins() != null) {
             for (QueryEntityInfo queryEntityInfo : root.getJoins().values()) {
                 if (queryEntityInfo.getJoinType() != Join.Type.FETCH) {
-                    processFields(queryEntityInfo, result);
+                    fieldStartIndex = processFields(fieldStartIndex, queryEntityInfo, result);
                 }
             }
         }
+
+        return fieldStartIndex;
     }
 }

@@ -1,6 +1,5 @@
 package ru.kwanza.dbtool.orm.impl.mapping;
 
-import ru.kwanza.dbtool.orm.api.internal.IFieldMapping;
 import ru.kwanza.toolbox.fieldhelper.FieldHelper;
 import ru.kwanza.toolbox.fieldhelper.Property;
 
@@ -77,7 +76,7 @@ class FieldMapping extends AbstractFieldMapping {
     public String toString() {
         final StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("FieldMapping{");
-        stringBuilder.append("id='").append(getId()).append('\'');
+        stringBuilder.append("id='").append(getOrderNum()).append('\'');
         stringBuilder.append(", name='").append(name).append('\'');
         stringBuilder.append(", column='").append(column).append('\'');
         stringBuilder.append(", type=").append(type);
