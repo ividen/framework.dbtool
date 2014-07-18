@@ -30,7 +30,7 @@ public class TestUpdateException extends TestCase {
             assertEquals(e.getMessage(),"Error!");
             assertEquals(e.getConstrainted(),list);
             assertEquals(e.getOptimistic(),list2);
-            assertEquals(e.getUpdated(),list2);
+            assertEquals(e.getUpdated(),list3);
         }
     }
 }
