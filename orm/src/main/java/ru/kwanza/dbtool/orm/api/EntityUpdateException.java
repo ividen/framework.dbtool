@@ -38,16 +38,28 @@ public class EntityUpdateException extends Exception {
     }
 
     /**
+     * Список успешно созданных объектов указанного типа
+     *
+     * @param entityClass
+     * @param <T>
+     * @return
+     */
+    public <T> List<T> getCreateSuccessed(Class entityClass) {
+        return createExceptionMap.get(entityClass).getUpdated();
+    }
+
+    /**
      * Количество созданных объектов определенного типа
      *
      * @param entityClass
      */
     public long getCreateUpdateCount(Class entityClass) {
-        return createExceptionMap.get(entityClass).getUpdateCount();
+        return createExceptionMap.get(entityClass).getUpdated().size();
     }
 
     /**
      * Список объектов определенного типа, которые не удалось обновить в базе данных по причине constraints violation
+     *
      * @param entityClass тип сущности
      */
     public <T> List<T> getUpdateConstrained(Class entityClass) {
@@ -55,7 +67,17 @@ public class EntityUpdateException extends Exception {
     }
 
     /**
+     * Список объектов определенного типа, которые  удалось обновить в базе данных по причине constraints violation
+     *
+     * @param entityClass тип сущности
+     */
+    public <T> List<T> getUpdateSuccessed(Class entityClass) {
+        return updateExceptionMap.get(entityClass).getConstrainted();
+    }
+
+    /**
      * Список объектов определенного типа, которые не удалось обновить в базе данных по причине optimistic violation
+     *
      * @param entityClass тип сущности
      */
     public <T> List<T> getUpdateOptimistic(Class entityClass) {
@@ -64,10 +86,11 @@ public class EntityUpdateException extends Exception {
 
     /**
      * Количество измененных объектов опреденного типа
+     *
      * @param entityClass тип сущности
      */
     public long getUpdateUpdateCount(Class entityClass) {
-        return updateExceptionMap.get(entityClass).getUpdateCount();
+        return updateExceptionMap.get(entityClass).getUpdated().size();
     }
 
     /**
@@ -80,12 +103,22 @@ public class EntityUpdateException extends Exception {
     }
 
     /**
+     * Список объектов, которые не удалось удалить по причине optimistic violation
+     *
+     * @param entityClass тип сущности
+     */
+    public <T> List<T> getDeleteSuccessed(Class entityClass) {
+        return deleteByObjectExceptionMap.get(entityClass).getUpdated();
+    }
+
+    /**
      * Количество объектов опреденного типа, которые были удалены
+     *
      * @param entityClass
      * @return
      */
     public long getDeleteByObjectUpdateCount(Class entityClass) {
-        return deleteByObjectExceptionMap.get(entityClass).getUpdateCount();
+        return deleteByObjectExceptionMap.get(entityClass).getUpdated().size();
     }
 
 
@@ -94,6 +127,6 @@ public class EntityUpdateException extends Exception {
     }
 
     public long getDeleteByKeyUpdateCount(Class entityClass) {
-        return deleteByKeyExceptionMap.get(entityClass).getUpdateCount();
+        return deleteByKeyExceptionMap.get(entityClass).getUpdated().size();
     }
 }

@@ -55,6 +55,12 @@ public abstract class TestUpdateUtil extends AbstractTestUpdateUtil {
         } catch (UpdateException e) {
             assertEquals("Wrong size ", 1, e.<TestEntity>getConstrainted().size());
             assertEquals("Wrong key ", 0, e.<TestEntity>getConstrainted().get(0).getKey());
+
+            assertEquals("Wrong update size ", 10, e.<TestEntity>getUpdated().size());
+            int i = 1;
+            for (TestEntity o : e.<TestEntity>getUpdated()) {
+                assertEquals("Wrog key of update entity",o.getKey(),i++);
+            }
         }
 
         assertEquals(getActualDataSet(), getResourceSet("../data/testUpdateConstrained_1.xml"));
@@ -78,6 +84,12 @@ public abstract class TestUpdateUtil extends AbstractTestUpdateUtil {
         } catch (UpdateException e) {
             assertEquals("Wrong size ", 1, e.<TestEntity>getConstrainted().size());
             assertEquals("Wrong key ", 10, e.<TestEntity>getConstrainted().get(0).getKey());
+
+            assertEquals("Wrong update size ", 10, e.<TestEntity>getUpdated().size());
+            int i = 0;
+            for (TestEntity o : e.<TestEntity>getUpdated()) {
+                assertEquals("Wrog key of update entity",o.getKey(),i++);
+            }
         }
 
         assertEquals(getActualDataSet(), getResourceSet("../data/testUpdateConstrained_2.xml"));
@@ -103,6 +115,8 @@ public abstract class TestUpdateUtil extends AbstractTestUpdateUtil {
             assertEquals("Wrong size ", 2, e.<TestEntity>getConstrainted().size());
             assertEquals("Wrong key ", 0, e.<TestEntity>getConstrainted().get(0).getKey());
             assertEquals("Wrong key ", 10, e.<TestEntity>getConstrainted().get(1).getKey());
+
+            assertEquals("Wrong update size ", 9, e.<TestEntity>getUpdated().size());
         }
         assertEquals(getActualDataSet(), getResourceSet("../data/testUpdateConstrained_3.xml"));
     }
@@ -125,6 +139,8 @@ public abstract class TestUpdateUtil extends AbstractTestUpdateUtil {
         } catch (UpdateException e) {
             assertEquals("Wrong size ", 1, e.<TestEntity>getConstrainted().size());
             assertEquals("Wrong key ", 5, e.<TestEntity>getConstrainted().get(0).getKey());
+
+            assertEquals("Wrong update size ", 10, e.<TestEntity>getUpdated().size());
         }
         assertEquals(getActualDataSet(), getResourceSet("../data/testUpdateConstrained_4.xml"));
     }
@@ -151,6 +167,8 @@ public abstract class TestUpdateUtil extends AbstractTestUpdateUtil {
             assertEquals("Wrong key ", 0, e.<TestEntity>getConstrainted().get(0).getKey());
             assertEquals("Wrong key ", 5, e.<TestEntity>getConstrainted().get(1).getKey());
             assertEquals("Wrong key ", 10, e.<TestEntity>getConstrainted().get(2).getKey());
+
+            assertEquals("Wrong update size ", 8, e.<TestEntity>getUpdated().size());
         }
         assertEquals(getActualDataSet(), getResourceSet("../data/testUpdateConstrained_5.xml"));
     }
@@ -175,6 +193,8 @@ public abstract class TestUpdateUtil extends AbstractTestUpdateUtil {
             for (int i = 0; i < list.size(); i++) {
                 assertEquals(i, list.get(i).getKey());
             }
+
+            assertEquals("Wrong update size ", 0, e.<TestEntity>getUpdated().size());
         }
         assertEquals(getActualDataSet(), getResourceSet("../data/testUpdateConstrained_6.xml"));
     }
@@ -215,6 +235,8 @@ public abstract class TestUpdateUtil extends AbstractTestUpdateUtil {
         } catch (UpdateException e) {
             assertEquals("Wrong size ", 1, e.<TestEntity>getConstrainted().size());
             assertEquals("Wrong key ", 11, e.<TestEntity>getConstrainted().get(0).getKey());
+
+            assertEquals("Wrong update size ", 9, e.<TestEntity>getUpdated().size());
         }
         assertEquals(getActualDataSet(), getResourceSet("../data/testInsertConstrained_1.xml"));
     }
@@ -238,6 +260,8 @@ public abstract class TestUpdateUtil extends AbstractTestUpdateUtil {
         } catch (UpdateException e) {
             assertEquals("Wrong size ", 1, e.<TestEntity>getConstrainted().size());
             assertEquals("Wrong key ", 20, e.<TestEntity>getConstrainted().get(0).getKey());
+
+            assertEquals("Wrong update size ", 9, e.<TestEntity>getUpdated().size());
         }
         assertEquals(getActualDataSet(), getResourceSet("../data/testInsertConstrained_2.xml"));
     }
@@ -261,6 +285,8 @@ public abstract class TestUpdateUtil extends AbstractTestUpdateUtil {
         } catch (UpdateException e) {
             assertEquals("Wrong size ", 1, e.<TestEntity>getConstrainted().size());
             assertEquals("Wrong key ", 15, e.<TestEntity>getConstrainted().get(0).getKey());
+
+            assertEquals("Wrong update size ", 9, e.<TestEntity>getUpdated().size());
         }
         assertEquals(getActualDataSet(), getResourceSet("../data/testInsertConstrained_3.xml"));
     }
@@ -286,6 +312,7 @@ public abstract class TestUpdateUtil extends AbstractTestUpdateUtil {
             assertEquals("Wrong size ", 2, e.<TestEntity>getConstrainted().size());
             assertEquals("Wrong key ", 11, e.<TestEntity>getConstrainted().get(0).getKey());
             assertEquals("Wrong key ", 20, e.<TestEntity>getConstrainted().get(1).getKey());
+            assertEquals("Wrong update size ", 8, e.<TestEntity>getUpdated().size());
         }
 
         assertEquals(getActualDataSet(), getResourceSet("../data/testInsertConstrained_5.xml"));
@@ -314,6 +341,8 @@ public abstract class TestUpdateUtil extends AbstractTestUpdateUtil {
             assertEquals("Wrong key ", 11, e.<TestEntity>getConstrainted().get(0).getKey());
             assertEquals("Wrong key ", 15, e.<TestEntity>getConstrainted().get(1).getKey());
             assertEquals("Wrong key ", 20, e.<TestEntity>getConstrainted().get(2).getKey());
+
+            assertEquals("Wrong update size ", 7, e.<TestEntity>getUpdated().size());
         }
 
         assertEquals(getActualDataSet(), getResourceSet("../data/testInsertConstrained_6.xml"));
@@ -342,6 +371,8 @@ public abstract class TestUpdateUtil extends AbstractTestUpdateUtil {
         } catch (UpdateException e) {
             assertEquals("Must be empty",0,e.getOptimistic().size());
             assertEquals("Must not empty",3,e.getConstrainted().size());
+
+            assertEquals("Wrong update size ", 20, e.<TestEntity>getUpdated().size());
         }
     }
 
@@ -371,6 +402,8 @@ public abstract class TestUpdateUtil extends AbstractTestUpdateUtil {
         } catch (UpdateException e) {
             assertEquals("Wrong size ", 1, e.<TestEntity>getConstrainted().size());
             assertEquals("Wrong key ", 11, e.<TestEntity>getConstrainted().get(0).getKey());
+
+            assertEquals("Wrong update size ", 9, e.<TestEntity>getUpdated().size());
         }
         assertEquals(getActualDataSet(), getResourceSet("../data/testInsertConstrained_ByNullable.xml"));
     }
@@ -403,6 +436,8 @@ public abstract class TestUpdateUtil extends AbstractTestUpdateUtil {
             List<TestEntity> list = e.<TestEntity>getConstrainted();
             assertEquals("Wrong size ", 1, list.size());
             assertEquals("Wrong size ", 0, list.get(0).getKey());
+
+            assertEquals("Wrong update size ", 10, e.<TestEntity>getUpdated().size());
         }
 
         assertEquals(getActualDataSet(), getResourceSet("../data/testUpdateConstrained_ByNulableConstrained.xml"));
@@ -616,6 +651,8 @@ public abstract class TestUpdateUtil extends AbstractTestUpdateUtil {
         } catch (UpdateException e) {
             assertEquals("Wrong size ", 1, e.<TestEntity>getConstrainted().size());
             assertEquals("Wrong key ", 11, e.<TestEntity>getConstrainted().get(0).getKey());
+
+            assertEquals("Wrong update size ", 8, e.<TestEntity>getUpdated().size());
         }
         assertEquals(getActualDataSet(), getResourceSet("../data/testInsertConstrained_Skip_1.xml"));
     }
@@ -656,6 +693,8 @@ public abstract class TestUpdateUtil extends AbstractTestUpdateUtil {
         } catch (UpdateException e) {
             assertEquals("Wrong size ", 1, e.<TestEntity>getConstrainted().size());
             assertEquals("Wrong key ", 16, e.<TestEntity>getConstrainted().get(0).getKey());
+
+            assertEquals("Wrong update size ", 7, e.<TestEntity>getUpdated().size());
         }
 
         assertEquals(getActualDataSet(), getResourceSet("../data/testInsertConstrained_Skip_3.xml"));
@@ -680,6 +719,8 @@ public abstract class TestUpdateUtil extends AbstractTestUpdateUtil {
         } catch (UpdateException e) {
             assertEquals("Wrong size ", 1, e.<TestEntity>getConstrainted().size());
             assertEquals("Wrong key ", 12, e.<TestEntity>getConstrainted().get(0).getKey());
+
+            assertEquals("Wrong update size ", 8, e.<TestEntity>getUpdated().size());
         }
 
         assertEquals(getActualDataSet(), getResourceSet("../data/testInsertConstrained_Skip_4.xml"));

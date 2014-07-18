@@ -1,15 +1,14 @@
 package ru.kwanza.dbtool.core.util;
 
-import org.postgresql.jdbc2.AbstractJdbc2Statement;
 import org.springframework.dao.DataAccessException;
-import org.springframework.dao.DuplicateKeyException;
-import org.springframework.jdbc.core.PreparedStatementCallback;
-import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.support.SQLExceptionTranslator;
 import ru.kwanza.dbtool.core.DBTool;
 import ru.kwanza.dbtool.core.UpdateSetter;
 
-import java.sql.*;
+import java.sql.BatchUpdateException;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -22,7 +21,7 @@ public class BatchPreparedStatementCallable<T> extends AbstractBatchPreparedStat
     private final SQLExceptionTranslator exeptionTranslator;
     private final Collection<T> objects;
     private ArrayList<T> constrained = new ArrayList<T>();
-    private long result = 0;
+    private ArrayList<T> updated;
     private long skippedCount = 0;
 
     public BatchPreparedStatementCallable(String sql, final Collection<T> objects, UpdateSetter<T> setter,
@@ -31,6 +30,7 @@ public class BatchPreparedStatementCallable<T> extends AbstractBatchPreparedStat
         this.setter = setter;
         this.exeptionTranslator = exceptionTranslator;
         this.objects = objects;
+        this.updated = new ArrayList<T>(objects.size());
     }
 
     public Object doInPreparedStatement0(PreparedStatement ps, Iterator iterator) throws SQLException, DataAccessException {
@@ -91,7 +91,7 @@ public class BatchPreparedStatementCallable<T> extends AbstractBatchPreparedStat
                     } else if (code == Skip.SKIPPED) {
                         skippedCount++;
                     } else {
-                        result++;
+                        updated.add(obj);
                     }
                 }
                 i++;
@@ -100,16 +100,15 @@ public class BatchPreparedStatementCallable<T> extends AbstractBatchPreparedStat
             from += updateCodes.length + 1;
             currentItr = baseItr;
         }
-
-        return result;
+        return updated;
     }
 
     public ArrayList<T> getConstrained() {
         return constrained;
     }
 
-    public long getResult() {
-        return result;
+    public ArrayList<T> getUpdated() {
+        return updated;
     }
 
     public long getSkippedCount() {

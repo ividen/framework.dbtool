@@ -1,15 +1,14 @@
 package ru.kwanza.dbtool.core.util;
 
 import org.springframework.dao.DataAccessException;
-import org.springframework.dao.DuplicateKeyException;
-import org.springframework.jdbc.core.PreparedStatementCallback;
-import org.springframework.jdbc.core.PreparedStatementCreator;
-import org.springframework.jdbc.support.SQLExceptionTranslator;
 import ru.kwanza.dbtool.core.DBTool;
 import ru.kwanza.dbtool.core.UpdateSetterWithVersion;
 import ru.kwanza.toolbox.fieldhelper.FieldHelper;
 
-import java.sql.*;
+import java.sql.BatchUpdateException;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.*;
 
 /**
@@ -23,21 +22,21 @@ public class BatchPreparedStatementCallableWithVersion<T, K, V> extends Abstract
 
     private ArrayList<T> constrained = new ArrayList<T>();
     private ArrayList<T> optimistic = new ArrayList<T>();
+    private ArrayList<T> updated;
     private List<T> checkList = new ArrayList<T>();
     private long result = 0;
     private long skippedCount = 0;
     private Map<Object, VersionPair> versions = new HashMap<Object, VersionPair>();
-    private SQLExceptionTranslator exeptionTranslator;
 
     public BatchPreparedStatementCallableWithVersion(String sql, final Collection<T> objects, UpdateSetterWithVersion<T, V> setter,
                                                      FieldHelper.Field<T, K> keyField, FieldHelper.VersionField<T, V> versionField,
-                                                     SQLExceptionTranslator exceptionTranslator, DBTool.DBType dbType) {
+                                                     DBTool.DBType dbType) {
         super(sql, dbType);
         this.objects = objects;
+        this.updated = new ArrayList<T>(objects.size());
         this.setter = setter;
         this.versionField = versionField;
         this.keyField = keyField;
-        this.exeptionTranslator = exceptionTranslator;
     }
 
     public Object doInPreparedStatement0(PreparedStatement ps, Iterator<T> iterator) throws SQLException, DataAccessException {
@@ -120,6 +119,7 @@ public class BatchPreparedStatementCallableWithVersion<T, K, V> extends Abstract
                         V currVersion = (V) versions.get(key).newValue;
                         versionField.setValue(obj, currVersion);
                         result += code;
+                        updated.add(obj);
                     }
                 }
                 i++;
@@ -151,6 +151,10 @@ public class BatchPreparedStatementCallableWithVersion<T, K, V> extends Abstract
 
     public List<T> getCheckList() {
         return checkList;
+    }
+
+    public ArrayList<T> getUpdated() {
+        return updated;
     }
 
     public Map<Object, VersionPair> getVersions() {

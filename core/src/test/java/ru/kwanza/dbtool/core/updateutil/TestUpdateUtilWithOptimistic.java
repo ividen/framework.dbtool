@@ -54,6 +54,8 @@ public abstract class TestUpdateUtilWithOptimistic extends AbstractTestUpdateUti
         } catch (UpdateException e) {
             assertEquals("Wrong size ", 1, e.<TestEntity>getConstrainted().size());
             assertEquals("Wrong key ", 0, e.<TestEntity>getConstrainted().get(0).getKey());
+
+            assertEquals("Wrong update size ", 10, e.<TestEntity>getUpdated().size());
         }
 
         for (TestEntity t : testEntities) {
@@ -86,6 +88,8 @@ public abstract class TestUpdateUtilWithOptimistic extends AbstractTestUpdateUti
         } catch (UpdateException e) {
             assertEquals("Wrong size ", 1, e.<TestEntity>getConstrainted().size());
             assertEquals("Wrong key ", 10, e.<TestEntity>getConstrainted().get(0).getKey());
+
+            assertEquals("Wrong update size ", 10, e.<TestEntity>getUpdated().size());
         }
 
         for (TestEntity t : testEntities) {
@@ -120,6 +124,8 @@ public abstract class TestUpdateUtilWithOptimistic extends AbstractTestUpdateUti
             assertEquals("Wrong size ", 2, e.<TestEntity>getConstrainted().size());
             assertEquals("Wrong key ", 0, e.<TestEntity>getConstrainted().get(0).getKey());
             assertEquals("Wrong key ", 10, e.<TestEntity>getConstrainted().get(1).getKey());
+
+            assertEquals("Wrong update size ", 9, e.<TestEntity>getUpdated().size());
         }
 
         for (TestEntity t : testEntities) {
@@ -152,6 +158,8 @@ public abstract class TestUpdateUtilWithOptimistic extends AbstractTestUpdateUti
         } catch (UpdateException e) {
             assertEquals("Wrong size ", 1, e.<TestEntity>getConstrainted().size());
             assertEquals("Wrong key ", 5, e.<TestEntity>getConstrainted().get(0).getKey());
+
+            assertEquals("Wrong update size ", 10, e.<TestEntity>getUpdated().size());
         }
         for (TestEntity t : testEntities) {
             if (t == testEntities.get(5)) {
@@ -185,6 +193,8 @@ public abstract class TestUpdateUtilWithOptimistic extends AbstractTestUpdateUti
             assertEquals("Wrong key ", 0, e.<TestEntity>getConstrainted().get(0).getKey());
             assertEquals("Wrong key ", 5, e.<TestEntity>getConstrainted().get(1).getKey());
             assertEquals("Wrong key ", 10, e.<TestEntity>getConstrainted().get(2).getKey());
+
+            assertEquals("Wrong update size ", 8, e.<TestEntity>getUpdated().size());
         }
         for (TestEntity t : testEntities) {
             if (t == testEntities.get(0) || t == testEntities.get(10) || t == testEntities.get(5)) {
@@ -218,6 +228,8 @@ public abstract class TestUpdateUtilWithOptimistic extends AbstractTestUpdateUti
             for (int i = 0; i < list.size(); i++) {
                 assertEquals(i, list.get(i).getKey());
             }
+
+            assertEquals("Wrong update size ", 0, e.<TestEntity>getUpdated().size());
         }
 
         for (TestEntity t : testEntities) {
@@ -468,6 +480,8 @@ public abstract class TestUpdateUtilWithOptimistic extends AbstractTestUpdateUti
             assertEquals("Wrong size ", 0, e.<TestEntity>getConstrainted().size());
             assertEquals("Wrong size ", 1, e.<TestEntity>getOptimistic().size());
             assertEquals("Wrong key ", 0, e.<TestEntity>getOptimistic().get(0).getKey());
+
+            assertEquals("Wrong update size ", 10, e.<TestEntity>getUpdated().size());
         }
 
         for (TestEntity t : testEntities) {
@@ -503,6 +517,8 @@ public abstract class TestUpdateUtilWithOptimistic extends AbstractTestUpdateUti
             assertEquals("Wrong size ", 0, e.<TestEntity>getConstrainted().size());
             assertEquals("Wrong size ", 1, e.<TestEntity>getOptimistic().size());
             assertEquals("Wrong key ", 10, e.<TestEntity>getOptimistic().get(0).getKey());
+
+            assertEquals("Wrong update size ", 10, e.<TestEntity>getUpdated().size());
         }
         for (TestEntity t : testEntities) {
             if (t == testEntities.get(10)) {
@@ -537,6 +553,8 @@ public abstract class TestUpdateUtilWithOptimistic extends AbstractTestUpdateUti
             assertEquals("Wrong size ", 0, e.<TestEntity>getConstrainted().size());
             assertEquals("Wrong size ", 1, e.<TestEntity>getOptimistic().size());
             assertEquals("Wrong key ", 4, e.<TestEntity>getOptimistic().get(0).getKey());
+
+            assertEquals("Wrong update size ", 10, e.<TestEntity>getUpdated().size());
         }
         for (TestEntity t : testEntities) {
             if (t == testEntities.get(4)) {
@@ -581,6 +599,8 @@ public abstract class TestUpdateUtilWithOptimistic extends AbstractTestUpdateUti
             assertEquals("Wrong key ", 0, e.<TestEntity>getOptimistic().get(0).getKey());
             assertEquals("Wrong key ", 4, e.<TestEntity>getOptimistic().get(1).getKey());
             assertEquals("Wrong key ", 10, e.<TestEntity>getOptimistic().get(2).getKey());
+
+            assertEquals("Wrong update size ", 8, e.<TestEntity>getUpdated().size());
         }
         for (TestEntity t : testEntities) {
             if (t == testEntities.get(0) || t == testEntities.get(10) || t == testEntities.get(4)) {
@@ -631,6 +651,8 @@ public abstract class TestUpdateUtilWithOptimistic extends AbstractTestUpdateUti
             assertEquals("Wrong key ", 0, e.<TestEntity>getOptimistic().get(0).getKey());
             assertEquals("Wrong key ", 4, e.<TestEntity>getOptimistic().get(1).getKey());
             assertEquals("Wrong key ", 10, e.<TestEntity>getOptimistic().get(2).getKey());
+
+            assertEquals("Wrong update size ", 7, e.<TestEntity>getUpdated().size());
         }
         for (TestEntity t : testEntities) {
             if (t == testEntities.get(0) || t == testEntities.get(10) || t == testEntities.get(5) || t == testEntities.get(4)) {
@@ -680,6 +702,8 @@ public abstract class TestUpdateUtilWithOptimistic extends AbstractTestUpdateUti
             assertEquals("Wrong key ", 0, e.<TestEntity>getOptimistic().get(0).getKey());
             assertEquals("Wrong key ", 4, e.<TestEntity>getOptimistic().get(1).getKey());
             assertEquals("Wrong key ", 10, e.<TestEntity>getOptimistic().get(2).getKey());
+
+            assertEquals("Wrong update size ", 7, e.<TestEntity>getUpdated().size());
         }
 
         Assertion.assertEquals(getActualDataSet(), getResourceSet("../data/testUpdateOptimisticAndContrainted_2.xml"));
@@ -718,6 +742,8 @@ public abstract class TestUpdateUtilWithOptimistic extends AbstractTestUpdateUti
             assertEquals("Wrong key ", 0, e.<TestEntity>getConstrainted().get(0).getKey());
             assertEquals("Wrong key ", 5, e.<TestEntity>getConstrainted().get(1).getKey());
             assertEquals("Wrong key ", 10, e.<TestEntity>getConstrainted().get(2).getKey());
+
+            assertEquals("Wrong update size ", 7, e.<TestEntity>getUpdated().size());
         }
 
         Assertion.assertEquals(getActualDataSet(), getResourceSet("../data/testUpdateOptimisticAndContrainted_3.xml"));

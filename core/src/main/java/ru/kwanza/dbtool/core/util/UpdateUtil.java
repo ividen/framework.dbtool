@@ -24,16 +24,16 @@ public class UpdateUtil {
 
         if (logger.isTraceEnabled()) {
             logger.trace("Executed sql {}, updateCount={}, constrainedCount={}, skipedCount={}",
-                    new Object[]{updateSQL, action.getResult(), action.getConstrained().size(), action.getSkippedCount()});
+                    new Object[]{updateSQL, action.getUpdated().size(), action.getConstrained().size(), action.getSkippedCount()});
         }
 
         if (!action.getConstrained().isEmpty()) {
             throw new UpdateException("Has some constrained violation!",
-                    action.getConstrained(), null, action.getResult());
+                    action.getConstrained(), null, action.getUpdated());
 
         }
 
-        return action.getResult();
+        return action.getUpdated().size();
     }
 
     public static <T, K extends Comparable, V> long batchUpdate(final JdbcTemplate template, String updateSQL, final Collection<T> objects,
@@ -45,8 +45,8 @@ public class UpdateUtil {
 
         List<T> sortedObjects = getSortedList(objects, keyField);
         BatchPreparedStatementCallableWithVersion<T, K, V> action =
-                new BatchPreparedStatementCallableWithVersion<T, K, V>(updateSQL, sortedObjects, updateSetter, keyField, versionField,
-                        template.getExceptionTranslator(), dbType);
+                new BatchPreparedStatementCallableWithVersion<T, K, V>(updateSQL, sortedObjects, updateSetter,
+                        keyField, versionField, dbType);
         Long result = (Long) template.execute(action, action);
 
         if (!action.getCheckList().isEmpty()) {
@@ -60,7 +60,7 @@ public class UpdateUtil {
                     action.getOptimistic().add(obj);
                 } else {
                     versionField.setValue(obj, currVersion);
-                    result++;
+                    action.getUpdated().add(obj);
                 }
             }
         }
@@ -73,10 +73,10 @@ public class UpdateUtil {
 
         if (!action.getConstrained().isEmpty() || !action.getOptimistic().isEmpty()) {
             throw new UpdateException("Has some constrained violation!",
-                    action.getConstrained(), action.getOptimistic(), action.getResult());
+                    action.getConstrained(), action.getOptimistic(), action.getUpdated());
         }
 
-        return result;
+        return action.getUpdated().size();
 
     }
 
