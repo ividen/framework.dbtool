@@ -46,14 +46,11 @@ public class IncVersionLockOperation<T> implements ILockOperation<T> {
                             versionField, em.getDbTool().getDbType());
         } catch (UpdateException e) {
             ArrayList<T> unlocked = new ArrayList<T>(e.getConstrainted().size() + e.getOptimistic().size());
-            ArrayList<T> locked = new ArrayList<T>((int) e.getUpdateCount());
 
             unlocked.addAll(e.<T>getConstrainted());
             unlocked.addAll(e.<T>getOptimistic());
 
-            locked.addAll(items);
-            locked.removeAll(unlocked);
-            return new LockResult<T>(locked, unlocked);
+            return new LockResult<T>(e.<T>getUpdated(), unlocked);
         }
 
         return new LockResult<T>(items, Collections.<T>emptyList());
