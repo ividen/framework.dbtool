@@ -1,6 +1,7 @@
 package ru.kwanza.dbtool.orm.impl.lockoperation;
 
 import ru.kwanza.dbtool.core.DBTool;
+import ru.kwanza.dbtool.core.VersionGenerator;
 import ru.kwanza.dbtool.orm.api.LockType;
 import ru.kwanza.dbtool.orm.impl.EntityManagerImpl;
 import ru.kwanza.dbtool.orm.impl.lockoperation.db.h2.H2NoWaitLockOperation;
@@ -19,6 +20,7 @@ import ru.kwanza.dbtool.orm.impl.lockoperation.db.posgresql.PostgreSQLNoWaitLock
 import ru.kwanza.dbtool.orm.impl.lockoperation.db.posgresql.PostgreSQLSkipLockOperation;
 import ru.kwanza.dbtool.orm.impl.lockoperation.db.posgresql.PostgreSQLWaitLockOperation;
 
+import javax.annotation.Resource;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -29,6 +31,13 @@ import static ru.kwanza.dbtool.orm.api.LockType.*;
  * @author Alexander Guzanov
  */
 public class LockOperationFactory {
+
+    @Resource(name = "dbtool.IEntityManager")
+    private EntityManagerImpl em;
+    @Resource(name = "dbtool.DBTool")
+    private DBTool dbTool;
+    @Resource(name = "dbtool.VersionGenerator")
+    private VersionGenerator versionGenerator;
 
     private ConcurrentMap<EntryKey, ILockOperation> cache = new ConcurrentHashMap<EntryKey, ILockOperation>();
 
@@ -50,11 +59,14 @@ public class LockOperationFactory {
         }
     }
 
-    public <T> ILockOperation<T> createOperation(EntityManagerImpl em, LockType type, Class<T> entityClass) {
+    public <T> ILockOperation<T> createOperation(LockType type, Class<T> entityClass) {
         EntryKey key = new EntryKey(entityClass, type);
         ILockOperation result = cache.get(key);
         if (result == null) {
-            if (em.getDbTool().getDbType() == ORACLE) {
+
+            if (type == INC_VERSION) {
+                result = new IncVersionLockOperation(em, versionGenerator, entityClass);
+            } else if (dbTool.getDbType() == ORACLE) {
                 if (type == WAIT) {
                     result = new OracleWaitLockOperation<T>(em, entityClass);
                 } else if (type == NOWAIT) {
@@ -62,7 +74,7 @@ public class LockOperationFactory {
                 } else if (type == SKIP_LOCKED) {
                     result = new OracleSkipLockOperation<T>(em, entityClass);
                 }
-            } else if (em.getDbTool().getDbType() == MSSQL) {
+            } else if (dbTool.getDbType() == MSSQL) {
                 if (type == WAIT) {
                     result = new MSSQLWaitLockOperation<T>(em, entityClass);
                 } else if (type == NOWAIT) {
@@ -70,7 +82,7 @@ public class LockOperationFactory {
                 } else if (type == SKIP_LOCKED) {
                     result = new MSSQLSkipLockOperation<T>(em, entityClass);
                 }
-            } else if (em.getDbTool().getDbType() == MYSQL) {
+            } else if (dbTool.getDbType() == MYSQL) {
                 if (type == WAIT) {
                     result = new MySQLWaitLockOperation<T>(em, entityClass);
                 } else if (type == NOWAIT) {
@@ -78,7 +90,7 @@ public class LockOperationFactory {
                 } else if (type == SKIP_LOCKED) {
                     result = new MySQLSkipLockOperation<T>(em, entityClass);
                 }
-            } else if (em.getDbTool().getDbType() == POSTGRESQL) {
+            } else if (dbTool.getDbType() == POSTGRESQL) {
                 if (type == WAIT) {
                     result = new PostgreSQLWaitLockOperation<T>(em, entityClass);
                 } else if (type == NOWAIT) {
@@ -86,7 +98,7 @@ public class LockOperationFactory {
                 } else if (type == SKIP_LOCKED) {
                     result = new PostgreSQLSkipLockOperation<T>(em, entityClass);
                 }
-            }  else if (em.getDbTool().getDbType() == H2) {
+            } else if (dbTool.getDbType() == H2) {
                 if (type == WAIT) {
                     result = new H2WaitLockOperation<T>(em, entityClass);
                 } else if (type == NOWAIT) {
@@ -95,7 +107,7 @@ public class LockOperationFactory {
                     result = new H2SkipLockOperation<T>(em, entityClass);
                 }
             } else {
-                throw new UnsupportedOperationException("Lock operation is not supported for database " + em.getDbTool().getDbType());
+                throw new UnsupportedOperationException("Lock operation is not supported for database " + dbTool.getDbType());
             }
 
             cache.putIfAbsent(key, result);

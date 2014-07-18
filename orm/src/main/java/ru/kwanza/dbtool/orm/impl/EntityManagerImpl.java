@@ -160,7 +160,7 @@ public class EntityManagerImpl extends SpringSerializable implements IEntityMana
     }
 
     public <T> LockResult<T> lock(LockType type, Class<T> entityClass, Collection<T> items) {
-        return lockOperationFactory.createOperation(this, type, entityClass).lock(items);
+        return lockOperationFactory.createOperation(type, entityClass).lock(items);
     }
 
     public <T> LockResult<T> lock(LockType type, T item) {
