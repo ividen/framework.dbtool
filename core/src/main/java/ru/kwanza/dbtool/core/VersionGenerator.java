@@ -21,9 +21,10 @@ public class VersionGenerator {
         }
     }
 
-    public long generate(String entityName, long oldVersion) {
-        long value = oldVersion;
-        while (value == oldVersion) {
+    public long generate(String entityName, Long oldVersion) {
+        final long currVersion = oldVersion == null ? 0 : oldVersion;
+        long value = currVersion;
+        while (value == currVersion) {
             value = getCounter(entityName).incrementAndGet();
             value = value * 100 + nodeId;
         }
