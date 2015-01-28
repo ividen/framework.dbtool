@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <name>Database Tool</name>
     <url>http://jira.kwanza-systems.ru/browse/DBTOOL</url>
@@ -47,6 +48,13 @@
 
     </properties>
 
+    <organization>
+        <name>Kwanza</name>
+        <url>http://www.kwanza-systems.ru/</url>
+    </organization>
+    <inceptionYear>2015</inceptionYear>
+
+
     <build>
         <plugins>
             <plugin>
@@ -78,6 +86,35 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+                <version>1.8</version>
+                <configuration>
+                    <licenseName>apache_v2</licenseName>
+                    <failOnMissingHeader>true</failOnMissingHeader>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>license-before-deploy</id>
+                        <goals>
+                            <!-- <goal>update-file-header</goal> -->
+                            <goal>check-file-header</goal>
+                        </goals>
+                        <phase>deploy</phase>
+                        <!--  <phase>process-sources</phase> -->
+                    </execution>
+                    <execution>
+                        <id>license-before-package</id>
+                        <goals>
+                            <goal>update-project-license</goal>
+                        </goals>
+                        <phase>process-sources</phase>
+                    </execution>
+
+                </executions>
+            </plugin>
+
         </plugins>
     </build>
 
@@ -386,21 +423,21 @@
         </dependencies>
     </dependencyManagement>
     <scm>
-      <connection>scm:git:https://fisheye.kwanza-systems.ru/git/framework.dbtool.git</connection>
-      <tag>HEAD</tag>
-   </scm>
+        <connection>scm:git:https://fisheye.kwanza-systems.ru/git/framework.dbtool.git</connection>
+        <tag>HEAD</tag>
+    </scm>
 
-   <distributionManagement>
+    <distributionManagement>
         <repository>
-           <id>kwanza-releases</id>
-           <name>libs-release</name>
-           <url>http://artifactory.kwanza-systems.ru/libs-release-local</url>
+            <id>kwanza-releases</id>
+            <name>libs-release</name>
+            <url>http://artifactory.kwanza-systems.ru/libs-release-public</url>
         </repository>
 
         <snapshotRepository>
             <id>kwanza-snapshots</id>
             <name>snapshots</name>
-             <url>http://artifactory.kwanza-systems.ru/libs-snapshot-local</url>
+            <url>http://artifactory.kwanza-systems.ru/libs-snapshot-public</url>
         </snapshotRepository>
     </distributionManagement>
 

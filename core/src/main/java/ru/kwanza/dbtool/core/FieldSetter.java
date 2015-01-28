@@ -1,5 +1,25 @@
 package ru.kwanza.dbtool.core;
 
+/*
+ * #%L
+ * dbtool-core
+ * %%
+ * Copyright (C) 2015 Kwanza
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
 import java.math.BigDecimal;
 import java.sql.*;
 
@@ -63,6 +83,7 @@ public class FieldSetter {
             pst.setByte(index, value);
         }
     }
+
     /**
      * @see ru.kwanza.dbtool.core.FieldGetter
      */
@@ -73,6 +94,7 @@ public class FieldSetter {
             pst.setShort(index, value);
         }
     }
+
     /**
      * @see ru.kwanza.dbtool.core.FieldGetter
      */
@@ -83,6 +105,7 @@ public class FieldSetter {
             pst.setInt(index, value);
         }
     }
+
     /**
      * @see ru.kwanza.dbtool.core.FieldGetter
      */
@@ -93,6 +116,7 @@ public class FieldSetter {
             pst.setLong(index, value);
         }
     }
+
     /**
      * @see ru.kwanza.dbtool.core.FieldGetter
      */
@@ -103,6 +127,7 @@ public class FieldSetter {
             pst.setFloat(index, value);
         }
     }
+
     /**
      * @see ru.kwanza.dbtool.core.FieldGetter
      */
@@ -113,6 +138,7 @@ public class FieldSetter {
             pst.setDouble(index, value);
         }
     }
+
     /**
      * @see ru.kwanza.dbtool.core.FieldGetter
      */
@@ -123,6 +149,7 @@ public class FieldSetter {
             pst.setString(index, value);
         }
     }
+
     /**
      * @see ru.kwanza.dbtool.core.FieldGetter
      */
@@ -133,6 +160,7 @@ public class FieldSetter {
             pst.setBoolean(index, value);
         }
     }
+
     /**
      * @see ru.kwanza.dbtool.core.FieldGetter
      */
@@ -143,6 +171,7 @@ public class FieldSetter {
             pst.setTimestamp(index, value);
         }
     }
+
     /**
      * @see ru.kwanza.dbtool.core.FieldGetter
      */
@@ -153,6 +182,7 @@ public class FieldSetter {
             pst.setTimestamp(index, new Timestamp(value.getTime()));
         }
     }
+
     /**
      * @see ru.kwanza.dbtool.core.FieldGetter
      */
@@ -163,6 +193,7 @@ public class FieldSetter {
             pst.setBytes(index, value);
         }
     }
+
     /**
      * @see ru.kwanza.dbtool.core.FieldGetter
      */
@@ -173,6 +204,7 @@ public class FieldSetter {
             pst.setBlob(index, value);
         }
     }
+
     /**
      * @see ru.kwanza.dbtool.core.FieldGetter
      */
@@ -183,6 +215,7 @@ public class FieldSetter {
             pst.setClob(index, value);
         }
     }
+
     /**
      * @see ru.kwanza.dbtool.core.FieldGetter
      */
